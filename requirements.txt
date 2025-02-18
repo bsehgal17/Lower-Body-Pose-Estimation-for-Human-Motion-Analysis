@@ -1,0 +1,12 @@
+Cython==3.0.11
+cython_bbox==0.1.5
+mmcv==2.1.0
+mmdet==3.2.0
+mmengine==0.10.6
+#mmpose==1.3.2
+pycocotools==2.0.8
+xtcocotools==1.14.3
+mmcv-full==1.7.2
+numpy==1.26.3
+
+#python -m pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu121
