@@ -1,7 +1,10 @@
 import mmcv
 import os
+import cv2
 from mmpose.registry import VISUALIZERS
 from config import OUTPUT_DIR
+from tqdm import tqdm
+
 
 def init_visualizer(pose_estimator):
     """Initialize visualizer."""
@@ -12,8 +15,29 @@ def init_visualizer(pose_estimator):
     return visualizer
 
 
-def visualize_pose(frame, data_samples, visualizer, frame_idx):
-    """Visualizes pose estimation results and saves output images."""
+def create_video_from_frames(frames, video_output_path, fps=30):
+    """Creates a video from the given frames."""
+    if len(frames) == 0:
+        print("No frames to create video.")
+        return
+
+    # Get the frame size (width, height) from the first frame
+    height, width, _ = frames[0].shape
+    # You can change this to 'XVID' or other formats
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video_writer = cv2.VideoWriter(
+        video_output_path, fourcc, fps, (width, height))
+
+    # Write all frames to the video file
+    for frame in frames:
+        video_writer.write(frame)
+
+    video_writer.release()
+    print(f"Video saved to {video_output_path}")
+
+
+def visualize_pose(frame, data_samples, visualizer, frame_idx, frames_list):
+    """Visualizes pose estimation results, adds them to frames list, and later saves as video."""
     visualizer.add_datasample(
         "result",
         frame,
@@ -26,8 +50,8 @@ def visualize_pose(frame, data_samples, visualizer, frame_idx):
         out_file=None,
         kpt_thr=0.3,
     )
-    
+
     vis_result = visualizer.get_image()
-    output_image_file = os.path.join(OUTPUT_DIR, f"frame_{frame_idx:04d}.png")
-    mmcv.imwrite(vis_result, output_image_file)
-    print(f"Saved visualization of frame {frame_idx} to {output_image_file}")
+
+    # Append the visualized frame to the list of frames
+    frames_list.append(vis_result)

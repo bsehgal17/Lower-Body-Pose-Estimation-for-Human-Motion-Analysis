@@ -1,10 +1,9 @@
 
 # Paths for models and input data
-# Folder containing videos
 VIDEO_FOLDER = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva_walking/"
-OUTPUT_DIR = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/output_results"
+OUTPUT_DIR = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results"
 
-# Valid video extensions
+# video extensions
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv")
 
 # Model configurations
@@ -18,3 +17,7 @@ DEVICE = "cuda:0"
 NMS_THRESHOLD = 0.3
 DETECTION_THRESHOLD = 0.3
 KPT_THRESHOLD = 0.3
+
+# Paths to the MAT(ground truth) and JSON files
+MAT_FILE = r"/storage/Projects/Gaitly/bsehgal/dataset/Gait_analysis/HumanEva_walking/S1/Mocap_Data/Walking_1.mat"
+JSON_FILE = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/output_results/Combo_2/Combo_2.json"

@@ -3,9 +3,15 @@ import cv2
 import json
 from config import VIDEO_EXTENSIONS
 
+
 def get_video_files(video_folder):
-    """Returns a list of all video file paths in the given folder."""
-    return [os.path.join(video_folder, f) for f in os.listdir(video_folder) if f.lower().endswith(VIDEO_EXTENSIONS)]
+    """Returns a list of all video file paths in the given folder and its subfolders."""
+    video_files = []
+    for dirpath, _, filenames in os.walk(video_folder):
+        for f in filenames:
+            if f.lower().endswith(VIDEO_EXTENSIONS):
+                video_files.append(os.path.join(dirpath, f))
+    return video_files
 
 
 def frame_generator(video_path):
@@ -24,20 +30,34 @@ def frame_generator(video_path):
     video_capture.release()
 
 
-def save_keypoints_to_json(pose_results, frame_idx, output_dir, video_name):
-    """Saves keypoints as JSON per frame in a folder named after the video."""
-    video_output_dir = os.path.join(output_dir, os.path.splitext(video_name)[0])
+def combine_keypoints(pose_results, frame_idx, video_data):
+    """Appends keypoints and predictions for each frame to the video_data list."""
+    frame_data = {
+        "frame_idx": frame_idx,
+        "keypoints": [
+            {
+                "keypoints": person.pred_instances.keypoints.tolist(),
+                "scores": person.pred_instances.keypoint_scores.tolist()
+            }
+            for person in pose_results
+        ]
+    }
+    video_data.append(frame_data)
+
+
+def save_keypoints_to_json(video_data, output_dir, video_name):
+    """Saves all keypoints and predictions for the entire video in a single JSON file."""
+    video_output_dir = os.path.join(
+        output_dir, os.path.splitext(video_name)[0])
     os.makedirs(video_output_dir, exist_ok=True)
 
-    output_file = os.path.join(video_output_dir, f"frame_{frame_idx:04d}.json")
-    keypoint_data = [
-        {
-            "keypoints": person.pred_instances.keypoints.tolist(),
-            "scores": person.pred_instances.keypoint_scores.tolist()
-        }
-        for person in pose_results
-    ]
-    with open(output_file, "w") as f:
-        json.dump(keypoint_data, f, indent=4)
+    # Create a final output file for the entire video
+    output_file = os.path.join(
+        video_output_dir, f"{os.path.splitext(video_name)[0]}.json")
 
-    print(f"Saved keypoints of frame {frame_idx} to {output_file}")
+    # Save the collected data into a single JSON file
+    with open(output_file, "w") as f:
+        json.dump(video_data, f, indent=4)
+
+    print(
+        f"Saved keypoints and predictions for the entire video to {output_file}")
