@@ -38,12 +38,12 @@ video_data = []
 frames_list = []
 
 for video_path in video_files:
+    parent_folder = video_path.split("HumanEva_walking/")[-1].split("/")[0]
     video_name = os.path.basename(video_path)
     save_dir = os.path.join(
-        OUTPUT_DIR, os.path.splitext(video_name)[0])
+        OUTPUT_DIR, parent_folder, os.path.splitext(video_name)[0])
     os.makedirs(save_dir, exist_ok=True)
-    output_video_file = os.path.join(os.path.join(
-        OUTPUT_DIR, os.path.splitext(video_name)[0]), video_name)
+    output_video_file = os.path.join(save_dir, video_name)
     print(f"\nProcessing Video: {video_name}")
 
     for frame_idx, frame in enumerate(frame_generator(video_path)):
@@ -62,6 +62,6 @@ for video_path in video_files:
         visualize_pose(frame, data_samples, visualizer, frame_idx, frames_list)
 
     # After processing all frames, save the entire video data
-    save_keypoints_to_json(video_data, OUTPUT_DIR, video_name)
+    save_keypoints_to_json(video_data, save_dir, video_name)
     create_video_from_frames(frames_list, output_video_file)
     print("Processing complete. All results are saved in the output directory.")

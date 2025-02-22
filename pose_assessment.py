@@ -13,16 +13,33 @@ Dependencies:
 - compute_metrics: Module for computing and displaying evaluation metrics.
 - config: Configuration file containing paths to the MAT and JSON files."""
 
-from extract_ground_truth import extract_ground_truth
-from extract_predictions import extract_predictions
+import os
+from get_gt_keypoint import extract_ground_truth
+from extract_predicted_points import extract_predictions
 from compute_metrics import compute_metrics
+from video_info import extract_video_info
 import config
 
-# Extract ground truth keypoints
-gt_keypoints = extract_ground_truth(config.MAT_FILE)
+# Define base path
+base_path = config.VIDEO_FOLDER
 
-# Extract predicted keypoints
-pred_keypoints = extract_predictions(config.JSON_FILE)
+# Walk through all video files in the base directory
+for root, dirs, files in os.walk(base_path):
+    for file in files:
+        video_info = extract_video_info(file, root)
+        if video_info:
+            subject, action_group, camera = video_info
 
-# Compute and display metrics
-compute_metrics(gt_keypoints, pred_keypoints)
+            print(
+                f"Processing: Subject={subject}, Action={action_group}, Camera={camera + 1}")
+
+            # Extract ground truth keypoints
+            gt_keypoints = extract_ground_truth(
+                config.CSV_FILE, subject, action_group, camera)
+
+            # Extract predicted keypoints
+            pred_keypoints = extract_predictions(
+                config.JSON_FILE, subject, action_group, camera)
+
+            # Compute and display metrics
+            compute_metrics(gt_keypoints, pred_keypoints)

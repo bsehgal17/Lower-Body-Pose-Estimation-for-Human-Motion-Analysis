@@ -19,5 +19,5 @@ DETECTION_THRESHOLD = 0.3
 KPT_THRESHOLD = 0.3
 
 # Paths to the MAT(ground truth) and JSON files
-MAT_FILE = r"/storage/Projects/Gaitly/bsehgal/dataset/Gait_analysis/HumanEva_walking/S1/Mocap_Data/Walking_1.mat"
-JSON_FILE = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/output_results/Combo_2/Combo_2.json"
+CSV_FILE = r"/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/humaneva_sorted_by_subject.csv"
+JSON_FILE = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/S3/Walking_1_(BW4)/Walking_1_(BW4)/Walking_1_(BW4).json"
