@@ -27,8 +27,6 @@ base_path = config.VIDEO_FOLDER
 # Walk through all video files in the base directory
 for root, dirs, files in os.walk(base_path):
     for file in files:
-        root = r"C:\Users\BhavyaSehgal\Downloads\humaneva\HumanEva\S1\Image_Data"
-        file = "Jog_1_(C1).avi"
         video_info = extract_video_info(file, root)
         if video_info:
 
@@ -45,16 +43,14 @@ for root, dirs, files in os.walk(base_path):
             gt_keypoints = extract_ground_truth(
                 config.CSV_FILE, subject, action, camera)
 
-            frame = config.SYNC_DATA.get(subject, {}).get(
-                action_group, (0, 0, 0))[camera]
-            frame_range = [frame, (frame+len(gt_keypoints))]
-
             sync_frame = config.SYNC_DATA.get(
                 subject, {}).get(action, None)[camera]
             frame_range = (sync_frame, (sync_frame+len(gt_keypoints)))
             # Extract predicted keypoints
-            pred_keypoints = extract_predictions(
-                config.JSON_FILE, subject, action_group, camera)
+            pred_keypoints = extract_predictions(json_path, frame_range)
+
+            process_video(root, file, gt_keypoints, pred_keypoints,
+                          frame_range[0], frame_range[1])
 
             # Compute and display metrics
             compute_metrics(gt_keypoints, pred_keypoints)
