@@ -19,13 +19,15 @@ from extract_predicted_points import extract_predictions
 from compute_metrics import compute_metrics
 from video_info import extract_video_info
 import config
-
+from visualize_gt_pred import plot_gt_pred
 # Define base path
 base_path = config.VIDEO_FOLDER
 
 # Walk through all video files in the base directory
 for root, dirs, files in os.walk(base_path):
     for file in files:
+        root = r"C:\Users\BhavyaSehgal\Downloads\humaneva\HumanEva\S1\Image_Data"
+        file = "Jog_1_(C1).avi"
         video_info = extract_video_info(file, root)
         if video_info:
             subject, action_group, camera = video_info
@@ -36,10 +38,15 @@ for root, dirs, files in os.walk(base_path):
             # Extract ground truth keypoints
             gt_keypoints = extract_ground_truth(
                 config.CSV_FILE, subject, action_group, camera)
+            
+            frame = config.SYNC_DATA.get(subject, {}).get(action_group, (0, 0, 0))[camera]
+            frame_range = [frame, (frame+len(gt_keypoints))]
 
             # Extract predicted keypoints
             pred_keypoints = extract_predictions(
-                config.JSON_FILE, subject, action_group, camera)
+                config.JSON_FILE,frame_range)
+            
+            plot_gt_pred(gt_keypoints, pred_keypoints, root, file, [frame, (frame+len(pred_keypoints))])
 
             # Compute and display metrics
             compute_metrics(gt_keypoints, pred_keypoints)
