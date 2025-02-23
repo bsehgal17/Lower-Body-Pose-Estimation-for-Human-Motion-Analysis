@@ -1,6 +1,6 @@
 
 # Paths for models and input data
-VIDEO_FOLDER = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva_walking/"
+VIDEO_FOLDER = r"C:\Users\BhavyaSehgal\Downloads\humaneva\HumanEva\S1\Image_Data"
 OUTPUT_DIR = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results"
 
 # video extensions
@@ -19,5 +19,24 @@ DETECTION_THRESHOLD = 0.3
 KPT_THRESHOLD = 0.3
 
 # Paths to the MAT(ground truth) and JSON files
-CSV_FILE = r"/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/humaneva_sorted_by_subject.csv"
-JSON_FILE = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/S3/Walking_1_(BW4)/Walking_1_(BW4)/Walking_1_(BW4).json"
+CSV_FILE = r"C:\Users\BhavyaSehgal\Downloads\humaneva\humaneva_sorted_by_subject.csv"
+JSON_FILE = r"C:\Users\BhavyaSehgal\Downloads\humaneva\S1_walking1_C1.json"
+
+SYNC_DATA = {
+    'S1': {
+        'Walking 1': (667, 667, 667),
+        'Jog 1': (51, 51, 50),
+
+    },
+    'S2': {
+        'Walking 1': (547, 547, 546),
+        'Jog 1': (493, 491, 502),
+
+    },
+    'S3': {
+        'Walking 1': (524, 524, 524),
+        'Jog 1': (464, 462, 462),
+
+    },
+
+}

@@ -2,28 +2,25 @@ import numpy as np
 import json
 
 
-def extract_predictions(json_file):
+def extract_predictions(json_file, frame_range):
     print("Loading JSON file (Predictions)...")
     with open(json_file, "r") as f:
         json_data = json.load(f)
     print(f"Loaded JSON file with {len(json_data)} frames")
 
-    halpe_joint_indices = {11: "left_hip", 12: "right_hip", 13: "left_knee", 14: "right_knee",
-                           15: "left_ankle", 16: "right_ankle", 20: "left_big_toe", 21: "right_big_toe",
-                           24: "left_heel", 25: "right_heel"}
-    halpe_joint_name_to_index = {
-        name: index for index, name in halpe_joint_indices.items()}
+    coco_joints = {'left_hip': 12, 'right_hip': 13, 'left_knee': 13, 'right_knee': 15, 'left_ankle': 16, 'right_ankle': 17}
 
-    frames = len(json_data)
+    
     pred_keypoints = []
 
-    for i in range(frames):
+    frame_end = frame_range[1] if len(json_data)>frame_range[1] else len(json_data)
+    for i in range(frame_range[0],frame_end):
         pred_frame = []
         json_kpts = np.array(
-            json_data[i]["keypoints"]).reshape(-1, 3)[:, :2]  # Only X, Y
+            json_data[i]["keypoints"][0]["keypoints"][0]) 
 
-        for halpe_joint, halpe_index in halpe_joint_name_to_index.items():
-            pred_point = json_kpts[halpe_index]
+        for joint,index in coco_joints.items():
+            pred_point = json_kpts[index]
             pred_frame.append(pred_point)
 
         pred_keypoints.append(np.array(pred_frame))
