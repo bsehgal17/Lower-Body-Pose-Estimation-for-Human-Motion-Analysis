@@ -19,6 +19,7 @@ from extract_predicted_points import extract_predictions
 from compute_metrics import compute_metrics
 from video_info import extract_video_info
 import config
+from show_gt_pred import process_video
 
 # Define base path
 base_path = config.VIDEO_FOLDER
@@ -28,18 +29,28 @@ for root, dirs, files in os.walk(base_path):
     for file in files:
         video_info = extract_video_info(file, root)
         if video_info:
-            subject, action_group, camera = video_info
+
+            subject, action, camera = video_info
+            action_group = action.replace(
+                ' ', '_')  # Replaces space with underscore
+            json_path = os.path.join("/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results", subject,
+                                     f"{action_group}_({'C' + str(camera + 1)})", f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(' ', '') + ".json")
 
             print(
                 f"Processing: Subject={subject}, Action={action_group}, Camera={camera + 1}")
 
             # Extract ground truth keypoints
             gt_keypoints = extract_ground_truth(
-                config.CSV_FILE, subject, action_group, camera)
+                config.CSV_FILE, subject, action, camera)
 
+            sync_frame = config.SYNC_DATA.get(
+                subject, {}).get(action, None)[camera]
+            frame_range = (sync_frame, (sync_frame+len(gt_keypoints)))
             # Extract predicted keypoints
-            pred_keypoints = extract_predictions(
-                config.JSON_FILE, subject, action_group, camera)
+            pred_keypoints = extract_predictions(json_path, frame_range)
+
+            process_video(root, file, gt_keypoints, pred_keypoints,
+                          frame_range[0], frame_range[1])
 
             # Compute and display metrics
             compute_metrics(gt_keypoints, pred_keypoints)

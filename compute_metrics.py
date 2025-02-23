@@ -15,14 +15,13 @@ def compute_pck(gt, pred, threshold=0.05):
     - PCK value (percentage)
     """
     # Define lower-body joint indices
-    hip_idx, knee_idx, ankle_idx, heel_idx, toe_idx = 0, 1, 2, 3, 4
+    hip_idx, knee_idx, ankle_idx = 0, 1, 2
 
     # Compute lower body length (thigh + shin + foot including heel & toes)
     thigh_length = np.linalg.norm(gt[:, knee_idx] - gt[:, hip_idx], axis=-1)
     shin_length = np.linalg.norm(gt[:, ankle_idx] - gt[:, knee_idx], axis=-1)
-    foot_length = np.linalg.norm(
-        gt[:, toe_idx] - gt[:, heel_idx], axis=-1)  # Heel-to-toe distance
-    lower_body_length = thigh_length + shin_length + foot_length
+
+    lower_body_length = thigh_length + shin_length
 
     # Compute correctness based on lower body length threshold
     correct = np.linalg.norm(
