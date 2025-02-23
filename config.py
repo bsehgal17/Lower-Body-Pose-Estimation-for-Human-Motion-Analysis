@@ -20,12 +20,12 @@ KPT_THRESHOLD = 0.3
 
 # Paths to the MAT(ground truth) and JSON files
 CSV_FILE = r"C:\Users\BhavyaSehgal\Downloads\humaneva\humaneva_sorted_by_subject.csv"
-JSON_FILE = r"C:\Users\BhavyaSehgal\Downloads\humaneva\S1_walking1_C1.json"
+JSON_FILE = r"C:\Users\BhavyaSehgal\Downloads\humaneva\Jog_1_(C1).json"
 
 SYNC_DATA = {
     'S1': {
         'Walking 1': (667, 667, 667),
-        'Jog 1': (51, 51, 50),
+        'Jog 1': (49,50,51),
 
     },
     'S2': {
