@@ -33,7 +33,7 @@ for root, dirs, files in os.walk(base_path):
             subject, action, camera = video_info
             action_group = action.replace(
                 ' ', '_')  # Replaces space with underscore
-            json_path = os.path.join("/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results", subject,
+            json_path = os.path.join(r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results", subject,
                                      f"{action_group}_({'C' + str(camera + 1)})", f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(' ', '') + ".json")
 
             print(
@@ -46,7 +46,7 @@ for root, dirs, files in os.walk(base_path):
             sync_frame = config.SYNC_DATA.get(
                 subject, {}).get(action, None)[camera]
             frame_range = (sync_frame, (sync_frame+len(gt_keypoints)))
-            json_path = config.JSON_FILE
+           
             # Extract predicted keypoints
             pred_keypoints = extract_predictions(json_path, frame_range)
 
