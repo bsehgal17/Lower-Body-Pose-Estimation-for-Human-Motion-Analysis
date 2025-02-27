@@ -19,7 +19,7 @@ from extract_predicted_points import extract_predictions
 from compute_metrics import compute_metrics
 from video_info import extract_video_info
 import config
-from show_gt_pred import process_video
+from visualize_gt_pred import plot_gt_pred
 
 # Define base path
 base_path = config.VIDEO_FOLDER
@@ -46,11 +46,11 @@ for root, dirs, files in os.walk(base_path):
             sync_frame = config.SYNC_DATA.get(
                 subject, {}).get(action, None)[camera]
             frame_range = (sync_frame, (sync_frame+len(gt_keypoints)))
+            json_path = config.JSON_FILE
             # Extract predicted keypoints
             pred_keypoints = extract_predictions(json_path, frame_range)
 
-            process_video(root, file, gt_keypoints, pred_keypoints,
-                          frame_range[0], frame_range[1])
+            plot_gt_pred(gt_keypoints,pred_keypoints,root,file,[frame_range[0],frame_range[1]])
 
             # Compute and display metrics
             compute_metrics(gt_keypoints, pred_keypoints)
