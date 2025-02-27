@@ -1,6 +1,6 @@
 
 # Paths for models and input data
-VIDEO_FOLDER = r"C:\Users\BhavyaSehgal\Downloads\humaneva\HumanEva\S1\Image_Data"
+VIDEO_FOLDER = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva_walking/"
 OUTPUT_DIR = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results"
 
 # video extensions
@@ -19,7 +19,7 @@ DETECTION_THRESHOLD = 0.3
 KPT_THRESHOLD = 0.3
 
 # Paths to the MAT(ground truth) and JSON files
-CSV_FILE = r"C:\Users\BhavyaSehgal\Downloads\humaneva\humaneva_sorted_by_subject.csv"
+CSV_FILE = r"/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/humaneva_sorted_by_subject.csv"
 JSON_FILE = r"C:\Users\BhavyaSehgal\Downloads\humaneva\S1_walking1_C1.json"
 
 SYNC_DATA = {
