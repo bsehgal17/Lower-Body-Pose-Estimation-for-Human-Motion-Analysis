@@ -15,7 +15,7 @@ def init_visualizer(pose_estimator):
     return visualizer
 
 
-def create_video_from_frames(frames, video_output_path, fps=30):
+def create_video_from_frames(frames, video_output_path, fps=60):
     """Creates a video from the given frames."""
     if len(frames) == 0:
         print("No frames to create video.")

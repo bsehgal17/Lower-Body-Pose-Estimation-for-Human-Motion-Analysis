@@ -34,10 +34,11 @@ video_files = get_video_files(VIDEO_FOLDER)
 if not video_files:
     print("No video files found in the folder!")
     exit()
-video_data = []
-frames_list = []
+
 
 for video_path in video_files:
+    video_data = []
+    frames_list = []
     parent_folder = video_path.split("HumanEva_walking/")[-1].split("/")[0]
     video_name = os.path.basename(video_path)
     save_dir = os.path.join(
