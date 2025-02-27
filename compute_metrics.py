@@ -1,6 +1,6 @@
 import numpy as np
 
-def compute_pck(gt, pred, threshold=0.05):
+def compute_pck(gt, pred, threshold=0.5):
     """
     Compute the Percentage of Correct Keypoints (PCK) for lower-body pose estimation,
     considering hip, knee, ankle, heel, and toe joints.
@@ -77,53 +77,81 @@ def compute_mpjpe(gt: np.ndarray, pred: np.ndarray) -> float:
     print("Computing MPJPE for lower body...")
     return np.mean(np.linalg.norm(gt - pred, axis=-1))
 
-
-def calculate_ap(predicted_keypoints, ground_truth_keypoints, threshold=0.05):
+def calculate_ap_per_joint(predicted_keypoints, ground_truth_keypoints, threshold=50):
     """
-    Calculate Average Precision (AP) for lower body pose estimation.
+    Calculate AP for each joint in lower body pose estimation.
 
     Parameters:
-        predicted_keypoints (np.array): Predicted keypoints (Nx3: x, y, confidence).
-        ground_truth_keypoints (np.array): Ground truth keypoints (Nx3: x, y, visibility).
-        threshold (float): The distance threshold to consider a keypoint match.
+        predicted_keypoints (np.array): Predicted keypoints (Nx6x2: x, y).
+        ground_truth_keypoints (np.array): Ground truth keypoints (Nx6x2: x, y).
+        threshold (float): Distance threshold to consider a keypoint as correct.
 
     Returns:
-        float: The Average Precision (AP) value.
+        dict: AP values for each joint.
     """
-    correct_keypoints = 0
-    total_keypoints = len(predicted_keypoints)
+    # Convert to NumPy arrays in case input is a list
+    predicted_keypoints = np.array(predicted_keypoints)
+    ground_truth_keypoints = np.array(ground_truth_keypoints)
 
-    for pred, gt in zip(predicted_keypoints, ground_truth_keypoints):
-        # Ensure pred and gt are arrays with at least 3 elements
-        if len(pred) == 3 and len(gt) == 3:
-            pred_x, pred_y, pred_conf = pred  # Unpack predicted keypoints
-            gt_x, gt_y, gt_vis = gt          # Unpack ground truth keypoints
-        else:
-            continue  # Skip if there aren't exactly 3 elements
+    # COCO keypoint mapping (6 joints)
+    coco_joints = ['left_hip', 'right_hip', 'left_knee', 'right_knee', 'left_ankle', 'right_ankle']
+    
+    ap_per_joint = {joint: 0 for joint in coco_joints}  # Store AP per joint
+    total_keypoints_per_joint = len(predicted_keypoints)  # Number of frames
 
-        # Handle missing keypoints (pred or gt) by checking visibility and confidence
-        if gt_vis <= 0 or pred_conf <= 0:  # If visibility or confidence is <= 0, skip
-            continue
+    for joint_idx, joint_name in enumerate(coco_joints):
+        correct_keypoints = 0
 
-        # Calculate Euclidean distance between predicted and ground truth keypoint
-        distance = np.sqrt((pred_x - gt_x)**2 + (pred_y - gt_y)**2)
+        for pred_frame, gt_frame in zip(predicted_keypoints, ground_truth_keypoints):
+            pred_x, pred_y = pred_frame[joint_idx]
+            gt_x, gt_y = gt_frame[joint_idx]
 
-        # If the distance is less than the threshold and the ground truth keypoint is visible, it's correct
-        if distance < threshold:
-            correct_keypoints += 1
+            # Compute Euclidean distance
+            distance = np.linalg.norm([pred_x - gt_x, pred_y - gt_y])
 
-    # Calculate Average Precision
-    ap = correct_keypoints / total_keypoints if total_keypoints > 0 else 0
-    return ap
+            # Check if keypoint is within threshold
+            if distance < threshold:
+                correct_keypoints += 1
+
+        # Compute AP for this joint
+        ap_per_joint[joint_name] = correct_keypoints / total_keypoints_per_joint if total_keypoints_per_joint > 0 else 0
+
+    return ap_per_joint
+
+def calculate_map(predicted_keypoints, ground_truth_keypoints, threshold=50):
+    """
+    Calculate Mean Average Precision (mAP) for lower body keypoints.
+
+    Parameters:
+        predicted_keypoints (np.array): Predicted keypoints (Nx6x2: x, y).
+        ground_truth_keypoints (np.array): Ground truth keypoints (Nx6x2: x, y).
+        threshold (float): Distance threshold to consider a keypoint as correct.
+
+    Returns:
+        float: Mean Average Precision (mAP).
+    """
+    ap_per_joint = calculate_ap_per_joint(predicted_keypoints, ground_truth_keypoints, threshold)
+    
+    # Compute mean AP (mAP)
+    map_value = np.mean(list(ap_per_joint.values()))
+    return map_value
+
 
 
 
 def compute_metrics(gt_keypoints, pred_keypoints):
     pck = compute_pck(gt_keypoints, pred_keypoints)
     mpjpe = compute_mpjpe(gt_keypoints, pred_keypoints)
-    ap = calculate_ap(gt_keypoints, pred_keypoints)
+    ap = calculate_ap_per_joint(gt_keypoints, pred_keypoints)
+    map_value = calculate_map(pred_keypoints,gt_keypoints)
 
     print("--- Results ---")
     print(f"PCK: {pck:.2f}%")
     print(f"MPJPE: {mpjpe:.2f} pixels")
-    print(f"Average Precision (AP): {ap * 100:.2f}%")
+    # Assuming ap is a dictionary with AP values for each joint
+    for joint, ap_value in ap.items():
+        print(f"Average Precision (AP) for {joint}: {ap_value:.4f} ({ap_value * 100:.2f}%)")
+
+    # Assuming map_value is a single number (the mAP value)
+    print(f"Mean Average Precision (mAP): {map_value:.4f} ({map_value * 100:.2f}%)")
+
