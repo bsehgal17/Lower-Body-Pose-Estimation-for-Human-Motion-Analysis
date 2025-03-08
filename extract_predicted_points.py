@@ -8,7 +8,7 @@ def extract_predictions(json_file, frame_range):
         json_data = json.load(f)
     print(f"Loaded JSON file with {len(json_data)} frames")
 
-    coco_joints = {'left_hip': 12, 'right_hip': 13, 'left_knee': 13, 'right_knee': 15, 'left_ankle': 16, 'right_ankle': 17}
+    coco_joints = {'left_hip': 11, 'right_hip': 12, 'left_knee': 13, 'right_knee': 14, 'left_ankle': 15, 'right_ankle': 16}
 
     
     pred_keypoints = []

@@ -19,8 +19,8 @@ DETECTION_THRESHOLD = 0.3
 KPT_THRESHOLD = 0.3
 
 # Paths to the MAT(ground truth) and JSON files
-CSV_FILE = r"/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/humaneva_sorted_by_subject.csv"
-JSON_FILE = r"C:\Users\BhavyaSehgal\Downloads\humaneva\S1_walking1_C1.json"
+CSV_FILE = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\humaneva_sorted_by_subject.csv"
+JSON_FILE = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\Jog_1_(C1).json"
 
 SYNC_DATA = {
     'S1': {
