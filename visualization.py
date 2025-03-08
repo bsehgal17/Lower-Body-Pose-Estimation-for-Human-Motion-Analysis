@@ -55,3 +55,54 @@ def visualize_pose(frame, data_samples, visualizer, frame_idx, frames_list):
 
     # Append the visualized frame to the list of frames
     frames_list.append(vis_result)
+
+
+def visualize_lower_points(frame, data_samples, frame_idx, frames_list, joints_to_visualize):
+    """
+    Visualizes specific pose estimation results based on given joint indices,
+    adds them to the frames list, and later saves as video.
+
+    :param frame: The current frame to visualize.
+    :param data_samples: The pose estimation result for the current frame (single PoseDataSample object).
+    :param frame_idx: The current frame index.
+    :param frames_list: List to store the frames with visualized poses.
+    :param joints_to_visualize: A list of joint indices to visualize (e.g., [0, 1, 2] for hip, knee, ankle).
+    :param threshold: Minimum confidence to consider keypoints (0 to 1).
+    """
+    # Extract keypoints from data_samples
+    # Assuming this is an array of shape (1, num_joints, 3)
+    keypoints = data_samples.pred_instances.keypoints
+
+    # Prepare the frame copy to draw keypoints on
+    frame_copy = frame.copy()
+
+    # Iterate over the joints to visualize
+    for joint_idx in joints_to_visualize:
+        if joint_idx < len(keypoints[0]):
+            # Extract (x, y, confidence) for each keypoint
+            x, y = keypoints[0][joint_idx]
+
+            cv2.circle(frame_copy, (int(x), int(y)), 2,
+                       (0, 255, 0), -1)  # Green color
+
+    # Optionally, you can draw skeleton by connecting joints (example for a couple of joints)
+    # Connect joints using lines (e.g., hip -> knee -> ankle)
+    skeleton_connections = [
+        (11, 12),
+        (11, 13),
+        (13, 15),
+        (12, 14),
+        (14, 16)
+    ]
+
+    for start_idx, end_idx in skeleton_connections:
+        if start_idx < len(keypoints[0]) and end_idx < len(keypoints[0]):
+            x_start, y_start = keypoints[0][start_idx]
+            x_end, y_end, = keypoints[0][end_idx]
+
+            # Draw lines between joints if both have sufficient confidence
+            cv2.line(frame_copy, (int(x_start), int(y_start)),
+                     (int(x_end), int(y_end)), (0, 255, 0), 1)  # Green line
+
+    # Add the frame with keypoints to the frames list
+    frames_list.append(frame_copy)

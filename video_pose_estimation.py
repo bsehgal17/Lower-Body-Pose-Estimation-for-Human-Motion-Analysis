@@ -22,7 +22,7 @@ from config import VIDEO_FOLDER, OUTPUT_DIR
 from utils import get_video_files, frame_generator, save_keypoints_to_json, combine_keypoints
 from detector import init_object_detector, detect_humans
 from pose_estimator import init_pose_estimator, estimate_pose
-from visualization import init_visualizer, visualize_pose, create_video_from_frames
+from visualization import init_visualizer, visualize_lower_points, create_video_from_frames
 
 # Initialize models
 detector = init_object_detector()
@@ -60,7 +60,8 @@ for video_path in video_files:
         visualizer = init_visualizer(pose_estimator)
 
         combine_keypoints(pose_results, frame_idx, video_data)
-        visualize_pose(frame, data_samples, visualizer, frame_idx, frames_list)
+        visualize_lower_points(frame=frame, data_samples=data_samples, frame_idx=frame_idx,
+                               frames_list=frames_list, joints_to_visualize=[11, 12, 13, 14, 15, 16])
 
     # After processing all frames, save the entire video data
     save_keypoints_to_json(video_data, save_dir, video_name)
