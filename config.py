@@ -1,6 +1,6 @@
 
 # Paths for models and input data
-VIDEO_FOLDER = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\S1\Image_Data"
+VIDEO_FOLDER = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\HumanEva"
 OUTPUT_DIR = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results"
 
 # video extensions
