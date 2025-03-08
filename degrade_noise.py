@@ -6,7 +6,7 @@ input_folder = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEv
 output_folder = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\dergarded_videos"
 os.makedirs(output_folder, exist_ok=True)
 
-def process_video(input_path, output_path, width=640, height=360, brightness_factor=-50):
+def process_video(input_path, output_path, width=640, height=360, brightness_factor=-40):
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
         print(f"Error opening video: {input_path}")
