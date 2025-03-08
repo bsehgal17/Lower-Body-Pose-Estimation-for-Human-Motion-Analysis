@@ -50,7 +50,8 @@ for root, dirs, files in os.walk(base_path):
             # Extract predicted keypoints
             pred_keypoints = extract_predictions(json_path, frame_range)
 
-            plot_gt_pred(gt_keypoints,pred_keypoints,root,file,[frame_range[0],frame_range[1]])
+            plot_gt_pred(gt_keypoints, pred_keypoints, root,
+                         file, [frame_range[0], frame_range[1]])
 
             # Compute and display metrics
             compute_metrics(gt_keypoints, pred_keypoints)
