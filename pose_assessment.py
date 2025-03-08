@@ -19,10 +19,13 @@ from extract_predicted_points import extract_predictions
 from compute_metrics import compute_metrics
 from video_info import extract_video_info
 import config
+import pandas as pd
 from visualize_gt_pred import plot_gt_pred
 
 # Define base path
 base_path = config.VIDEO_FOLDER
+
+results = []
 
 # Walk through all video files in the base directory
 for root, dirs, files in os.walk(base_path):
@@ -33,7 +36,7 @@ for root, dirs, files in os.walk(base_path):
             subject, action, camera = video_info
             action_group = action.replace(
                 ' ', '_')  # Replaces space with underscore
-            json_path = os.path.join(r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results", subject,
+            json_path = os.path.join(r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmpose_l", subject,
                                      f"{action_group}_({'C' + str(camera + 1)})", f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(' ', '') + ".json")
 
             print(
@@ -61,4 +64,16 @@ for root, dirs, files in os.walk(base_path):
             # plot_gt_pred(gt_keypoints, pred_keypoints, root, file, [frame_range[0], frame_range[1]])
 
             # Compute and display metrics
-            compute_metrics(gt_keypoints, pred_keypoints)
+            pck_01, pck_02, pck_05 = compute_metrics(gt_keypoints, pred_keypoints)
+
+            # Append results
+            results.append([subject, action_group, camera + 1, pck_01, pck_02, pck_05])
+
+# Convert results to a DataFrame
+df = pd.DataFrame(results, columns=["Subject", "Action", "Camera", "PCK@0.1", "PCK@0.2", "PCK@0.5"])
+
+# Save to Excel
+excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels/rtmpose_l.xlsx"
+df.to_excel(excel_path, index=False)
+print(f"Metrics saved to {excel_path}")
+        
