@@ -1,6 +1,7 @@
 import numpy as np
 
-def compute_pck(gt, pred, threshold=0.2):
+
+def compute_pck(gt, pred, threshold=0.05):
     """
     Compute the Percentage of Correct Keypoints (PCK) for lower-body pose estimation,
     considering hip, knee, ankle, heel, and toe joints.
@@ -19,19 +20,24 @@ def compute_pck(gt, pred, threshold=0.2):
 
     # Check if the arrays are of the correct shape
     if gt.ndim != 3 or pred.ndim != 3:
-        raise ValueError("gt and pred should have shape (N, J, 2) or (N, J, 3)")
+        raise ValueError(
+            "gt and pred should have shape (N, J, 2) or (N, J, 3)")
 
     # Define lower-body joint indices for left and right side
     left_hip_idx, left_knee_idx, left_ankle_idx = 0, 1, 2
     right_hip_idx, right_knee_idx, right_ankle_idx = 3, 4, 5
 
     # Compute thigh and shin lengths for left side (thigh + shin)
-    left_thigh_length = np.linalg.norm(gt[:, left_knee_idx] - gt[:, left_hip_idx], axis=-1)
-    left_shin_length = np.linalg.norm(gt[:, left_ankle_idx] - gt[:, left_knee_idx], axis=-1)
-    
+    left_thigh_length = np.linalg.norm(
+        gt[:, left_knee_idx] - gt[:, left_hip_idx], axis=-1)
+    left_shin_length = np.linalg.norm(
+        gt[:, left_ankle_idx] - gt[:, left_knee_idx], axis=-1)
+
     # Compute thigh and shin lengths for right side (thigh + shin)
-    right_thigh_length = np.linalg.norm(gt[:, right_knee_idx] - gt[:, right_hip_idx], axis=-1)
-    right_shin_length = np.linalg.norm(gt[:, right_ankle_idx] - gt[:, right_knee_idx], axis=-1)
+    right_thigh_length = np.linalg.norm(
+        gt[:, right_knee_idx] - gt[:, right_hip_idx], axis=-1)
+    right_shin_length = np.linalg.norm(
+        gt[:, right_ankle_idx] - gt[:, right_knee_idx], axis=-1)
 
     # Ensure that all lengths are valid (not NaN or inf)
     if np.any(np.isnan(left_thigh_length)) or np.any(np.isnan(left_shin_length)) or \
@@ -41,17 +47,23 @@ def compute_pck(gt, pred, threshold=0.2):
     # Compute lower body lengths (thigh + shin for left and right sides)
     left_lower_body_length = left_thigh_length + left_shin_length
     right_lower_body_length = right_thigh_length + right_shin_length
-    
+
     # Compute correctness based on threshold
     # For left side: Compare ground truth and predicted keypoints
-    left_correct = np.linalg.norm(gt[:, left_hip_idx] - pred[:, left_hip_idx], axis=-1) < threshold * left_lower_body_length
-    left_correct += np.linalg.norm(gt[:, left_knee_idx] - pred[:, left_knee_idx], axis=-1) < threshold * left_lower_body_length
-    left_correct += np.linalg.norm(gt[:, left_ankle_idx] - pred[:, left_ankle_idx], axis=-1) < threshold * left_lower_body_length
+    left_correct = np.linalg.norm(
+        gt[:, left_hip_idx] - pred[:, left_hip_idx], axis=-1) < threshold * left_lower_body_length
+    left_correct += np.linalg.norm(gt[:, left_knee_idx] - pred[:,
+                                   left_knee_idx], axis=-1) < threshold * left_lower_body_length
+    left_correct += np.linalg.norm(gt[:, left_ankle_idx] - pred[:,
+                                   left_ankle_idx], axis=-1) < threshold * left_lower_body_length
 
     # For right side: Compare ground truth and predicted keypoints
-    right_correct = np.linalg.norm(gt[:, right_hip_idx] - pred[:, right_hip_idx], axis=-1) < threshold * right_lower_body_length
-    right_correct += np.linalg.norm(gt[:, right_knee_idx] - pred[:, right_knee_idx], axis=-1) < threshold * right_lower_body_length
-    right_correct += np.linalg.norm(gt[:, right_ankle_idx] - pred[:, right_ankle_idx], axis=-1) < threshold * right_lower_body_length
+    right_correct = np.linalg.norm(
+        gt[:, right_hip_idx] - pred[:, right_hip_idx], axis=-1) < threshold * right_lower_body_length
+    right_correct += np.linalg.norm(gt[:, right_knee_idx] - pred[:,
+                                    right_knee_idx], axis=-1) < threshold * right_lower_body_length
+    right_correct += np.linalg.norm(gt[:, right_ankle_idx] - pred[:,
+                                    right_ankle_idx], axis=-1) < threshold * right_lower_body_length
 
     # Combine correctness for both sides
     correct = np.concatenate([left_correct, right_correct], axis=0)
@@ -135,8 +147,6 @@ def compute_pck(gt, pred, threshold=0.2):
 #     # Compute mean AP (mAP)
 #     map_value = np.mean(list(ap_per_joint.values()))
 #     return map_value
-
-
 
 
 def compute_metrics(gt_keypoints, pred_keypoints):

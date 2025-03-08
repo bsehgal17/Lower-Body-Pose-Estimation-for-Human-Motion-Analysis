@@ -49,7 +49,7 @@ for root, dirs, files in os.walk(base_path):
             sync_frame = config.SYNC_DATA.get(
                 subject, {}).get(action, None)[camera]
             frame_range = (sync_frame, (sync_frame+len(gt_keypoints)))
-           
+
             # Extract predicted keypoints
             pred_keypoints = extract_predictions(json_path, frame_range)
 
