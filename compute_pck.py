@@ -17,16 +17,14 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
     """
     # Convert to numpy and check shape
     gt, pred = np.array(gt, dtype=np.float64), np.array(pred, dtype=np.float64)
-    if gt.shape != pred.shape or gt.ndim != 3:
+    if gt.shape[0] != pred.shape[0] or gt.ndim != 3:
         raise ValueError("Shapes of gt and pred must be (N, J, 2) or (N, J, 3)")
 
     if joints_to_evaluate is None:
         # Full-body evaluation
         joints_to_evaluate = [joint.name for joint in GTJoints]
         pelvis = gt[:, GTJoints.PELVIS.value]
-        head = (
-            gt[:, GTJoints.HEAD.value[0]] + gt[:, GTJoints.HEAD.value[1]]
-        ) / 2  # Head midpoint
+        head = (gt[:, GTJoints.HEAD.value]) / 2  # Head midpoint
         norm_length = np.linalg.norm(pelvis - head, axis=-1)  # Pelvis to head
     else:
         # Lower-body evaluation
@@ -34,21 +32,18 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
         ankle = gt[:, GTJoints.RIGHT_ANKLE.value]
         norm_length = np.linalg.norm(pelvis - ankle, axis=-1)  # Pelvis to ankle
 
-    gt_indices = []
     pred_indices = []
-    gt_points = []
+    gt_indices = []
 
     for joint in joints_to_evaluate:
         if joint in PredJoints.__members__:  # Check if joint exists in PredJoints
             gt_joint = GTJoints[joint].value
             pred_joint = PredJoints[joint].value
 
-            if isinstance(
-                gt_joint[0], tuple
-            ):  # If joint has two points, compute midpoint
-                gt_points.append((gt[:, gt_joint[0][0]] + gt[:, gt_joint[1][0]]) / 2)
+            if isinstance(gt_joint, tuple):  # If joint has two points, compute midpoint
+                gt_indices.append((gt[:, gt_joint[0]] + gt[:, gt_joint[0]]) / 2)
             else:
-                gt_points.append(gt[:, gt_joint])
+                gt_indices.append(gt[:, gt_joint])
 
             if isinstance(
                 pred_joint, tuple
@@ -59,10 +54,10 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
             else:
                 pred_indices.append(pred[:, pred_joint])
 
-    if not gt_points or not pred_indices:
+    if not gt_indices or not pred_indices:
         raise ValueError("No valid joints found for evaluation.")
 
-    gt_points = np.stack(gt_points, axis=1)  # Ensure shape consistency
+    gt_points = np.stack(gt_indices, axis=1)  # Ensure shape consistency
     pred_points = np.stack(pred_indices, axis=1)
 
     # Compute distances and correctness

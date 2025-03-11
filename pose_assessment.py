@@ -80,15 +80,15 @@ for root, dirs, files in os.walk(base_path):
             pred_keypoints = pred_keypoints[:min_length]
 
             # Plot ground truth and predicted keypoints
-            plot_gt_pred(
-                csv_path=config.CSV_FILE,
-                subject=subject,
-                action=action,
-                camera=camera,
-                root=root,
-                video_name=file,
-                frame_ranges=[frame_range[0], frame_range[1]],
-            )
+            # plot_gt_pred(
+            #     csv_path=config.CSV_FILE,
+            #     subject=subject,
+            #     action=action,
+            #     camera=camera,
+            #     root=root,
+            #     video_name=file,
+            #     frame_ranges=[frame_range[0], frame_range[1]],
+            # )
 
             pck2 = compute_pck(
                 gt_keypoints,
