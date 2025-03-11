@@ -21,7 +21,7 @@ class GTJoints(Enum):
 
 
 class PredJoints(Enum):
-    HEAD = (1, 2)  # Two head points from COCO WholeBody
+    HEAD = (2, 3)  # Two head points from COCO WholeBody
     LEFT_SHOULDER = 5
     RIGHT_SHOULDER = 6
     LEFT_ELBOW = 7

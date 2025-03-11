@@ -21,6 +21,7 @@ from video_info import extract_video_info
 import config
 import pandas as pd
 from visualize_gt_pred import plot_gt_pred
+from visualize_pred_points import visualize_predictions
 
 # Define base path
 base_path = config.VIDEO_FOLDER
@@ -42,7 +43,7 @@ for root, dirs, files in os.walk(base_path):
             subject, action, camera = video_info
             action_group = action.replace(" ", "_")  # Replaces space with underscore
             json_path = os.path.join(
-                r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmpose_l",
+                r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results",
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
                 f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(
@@ -89,7 +90,10 @@ for root, dirs, files in os.walk(base_path):
             #     video_name=file,
             #     frame_ranges=[frame_range[0], frame_range[1]],
             # )
-
+            # video_path = os.path.join(root, file)
+            # visualize_predictions(
+            #     video_path=video_path, json_file=json_path, frame_range=frame_range
+            # )
             pck2 = compute_pck(
                 gt_keypoints,
                 pred_keypoints,
@@ -123,6 +127,6 @@ df = pd.DataFrame(
 )
 
 # Save to Excel
-excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels/rtmpose_t.xlsx"
+excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels/rtw_x.xlsx"
 df.to_excel(excel_path, index=False)
 print(f"Metrics saved to {excel_path}")
