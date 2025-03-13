@@ -23,14 +23,25 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
     if joints_to_evaluate is None:
         # Full-body evaluation
         joints_to_evaluate = [joint.name for joint in GTJoints]
-        pelvis = gt[:, GTJoints.PELVIS.value]
-        head = (gt[:, GTJoints.HEAD.value]) / 2  # Head midpoint
-        norm_length = np.linalg.norm(pelvis - head, axis=-1)  # Pelvis to head
+        left_shoulder = gt[:, GTJoints.LEFT_SHOULDER.value]
+        right_shoulder = gt[:, GTJoints.RIGHT_SHOULDER.value]
+        left_hip = gt[:, GTJoints.LEFT_HIP.value]
+        right_hip = gt[:, GTJoints.RIGHT_HIP.value]
+        norm_length = (
+            np.linalg.norm(left_shoulder - left_hip, axis=-1)
+            + np.linalg.norm(right_shoulder - right_hip, axis=-1)
+        ) / 2
+
     else:
-        # Lower-body evaluation
-        pelvis = gt[:, GTJoints.PELVIS.value]
-        ankle = gt[:, GTJoints.RIGHT_ANKLE.value]
-        norm_length = np.linalg.norm(pelvis - ankle, axis=-1)  # Pelvis to ankle
+        left_hip = gt[:, GTJoints.LEFT_HIP.value]
+        right_hip = gt[:, GTJoints.RIGHT_HIP.value]
+        left_knee = gt[:, GTJoints.LEFT_KNEE.value]
+        right_knee = gt[:, GTJoints.RIGHT_KNEE.value]
+
+        norm_length = (
+            np.linalg.norm(left_hip - left_knee, axis=-1)
+            + np.linalg.norm(right_hip - right_knee, axis=-1)
+        ) / 2
 
     pred_indices = []
     gt_indices = []
@@ -41,7 +52,7 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
             pred_joint = PredJoints[joint].value
 
             if isinstance(gt_joint, tuple):  # If joint has two points, compute midpoint
-                gt_indices.append((gt[:, gt_joint[0]] + gt[:, gt_joint[0]]) / 2)
+                gt_indices.append((gt[:, gt_joint[0]] + gt[:, gt_joint[1]]) / 2)
             else:
                 gt_indices.append(gt[:, gt_joint])
 
@@ -62,7 +73,7 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
 
     # Compute distances and correctness
     distances = np.linalg.norm(gt_points - pred_points, axis=-1)
-    correct = distances < threshold * norm_length[:, np.newaxis]
+    correct = distances < (threshold * norm_length[:, np.newaxis])
 
     # Compute final PCK
     return np.mean(correct) * 100

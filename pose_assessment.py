@@ -43,7 +43,7 @@ for root, dirs, files in os.walk(base_path):
             subject, action, camera = video_info
             action_group = action.replace(" ", "_")  # Replaces space with underscore
             json_path = os.path.join(
-                r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results",
+                r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmpose_t",
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
                 f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(
@@ -97,36 +97,36 @@ for root, dirs, files in os.walk(base_path):
             pck2 = compute_pck(
                 gt_keypoints,
                 pred_keypoints,
-                threshold=0.2,
+                threshold=0.02,
                 joints_to_evaluate=lower_body_joints,
             )
             pck1 = compute_pck(
                 gt_keypoints,
                 pred_keypoints,
-                threshold=0.1,
+                threshold=0.01,
                 joints_to_evaluate=lower_body_joints,
             )
             pck5 = compute_pck(
                 gt_keypoints,
                 pred_keypoints,
-                threshold=0.5,
+                threshold=0.05,
                 joints_to_evaluate=lower_body_joints,
             )
 
             print("--- Results ---")
             print(f"PCK@0.2: {pck2:.2f}%")
             print(f"PCK@0.1: {pck1:.2f}%")
-            print(f"PCK@0.5: {pck5:.2f}%")
+            print(f"PCK@0.05: {pck5:.2f}%")
 
             # Append results
             results.append([subject, action_group, camera + 1, pck1, pck2, pck5])
 
 # Convert results to a DataFrame
 df = pd.DataFrame(
-    results, columns=["Subject", "Action", "Camera", "PCK@0.1", "PCK@0.2", "PCK@0.5"]
+    results, columns=["Subject", "Action", "Camera", "PCK@0.01", "PCK@0.02", "PCK@0.05"]
 )
 
 # Save to Excel
-excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels/rtw_x.xlsx"
+excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels/rtmpose_t_lower.xlsx"
 df.to_excel(excel_path, index=False)
 print(f"Metrics saved to {excel_path}")
