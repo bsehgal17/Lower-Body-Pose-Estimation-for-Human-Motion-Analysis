@@ -43,7 +43,7 @@ for root, dirs, files in os.walk(base_path):
             subject, action, camera = video_info
             action_group = action.replace(" ", "_")  # Replaces space with underscore
             json_path = os.path.join(
-                r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmpose_t",
+                r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtw_l",
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
                 f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(
@@ -98,19 +98,19 @@ for root, dirs, files in os.walk(base_path):
                 gt_keypoints,
                 pred_keypoints,
                 threshold=0.02,
-                joints_to_evaluate=lower_body_joints,
+                # joints_to_evaluate=lower_body_joints,
             )
             pck1 = compute_pck(
                 gt_keypoints,
                 pred_keypoints,
                 threshold=0.01,
-                joints_to_evaluate=lower_body_joints,
+                # joints_to_evaluate=lower_body_joints,
             )
             pck5 = compute_pck(
                 gt_keypoints,
                 pred_keypoints,
                 threshold=0.05,
-                joints_to_evaluate=lower_body_joints,
+                # joints_to_evaluate=lower_body_joints,
             )
 
             print("--- Results ---")
@@ -127,6 +127,6 @@ df = pd.DataFrame(
 )
 
 # Save to Excel
-excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels/rtmpose_t_lower.xlsx"
+excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels/rtmw_l_whole.xlsx"
 df.to_excel(excel_path, index=False)
 print(f"Metrics saved to {excel_path}")

@@ -2,6 +2,14 @@ import numpy as np
 from joint_enum import GTJoints, PredJoints
 
 
+def average_if_tuple(value):
+    """Check if value is shaped (N, 2, 2) and return the average if true."""
+    value = np.array(value)
+    if value.shape == (2, 2):  # Ensures correct averaging for 2D points (x, y)
+        return np.mean(value, axis=0)
+    return value
+
+
 def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
     """
     Compute Percentage of Correct Keypoints (PCK) for pose estimation.
@@ -23,20 +31,35 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
     if joints_to_evaluate is None:
         # Full-body evaluation
         joints_to_evaluate = [joint.name for joint in GTJoints]
-        left_shoulder = gt[:, GTJoints.LEFT_SHOULDER.value]
-        right_shoulder = gt[:, GTJoints.RIGHT_SHOULDER.value]
-        left_hip = gt[:, GTJoints.LEFT_HIP.value]
-        right_hip = gt[:, GTJoints.RIGHT_HIP.value]
+        left_shoulder = np.array(
+            [average_if_tuple(x) for x in gt[:, GTJoints.LEFT_SHOULDER.value]]
+        )
+        right_shoulder = np.array(
+            [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_SHOULDER.value]]
+        )
+        left_hip = np.array(
+            [average_if_tuple(x) for x in gt[:, GTJoints.LEFT_HIP.value]]
+        )
+        right_hip = np.array(
+            [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_HIP.value]]
+        )
         norm_length = (
             np.linalg.norm(left_shoulder - left_hip, axis=-1)
             + np.linalg.norm(right_shoulder - right_hip, axis=-1)
         ) / 2
-
     else:
-        left_hip = gt[:, GTJoints.LEFT_HIP.value]
-        right_hip = gt[:, GTJoints.RIGHT_HIP.value]
-        left_knee = gt[:, GTJoints.LEFT_KNEE.value]
-        right_knee = gt[:, GTJoints.RIGHT_KNEE.value]
+        left_hip = np.array(
+            [average_if_tuple(x) for x in gt[:, GTJoints.LEFT_HIP.value]]
+        )
+        right_hip = np.array(
+            [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_HIP.value]]
+        )
+        left_knee = np.array(
+            [average_if_tuple(x) for x in gt[:, GTJoints.LEFT_KNEE.value]]
+        )
+        right_knee = np.array(
+            [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_KNEE.value]]
+        )
 
         norm_length = (
             np.linalg.norm(left_hip - left_knee, axis=-1)
