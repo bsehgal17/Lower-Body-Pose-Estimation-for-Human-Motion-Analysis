@@ -59,7 +59,7 @@ for video_path in video_files:
 
         visualizer = init_visualizer(pose_estimator)
 
-        combine_keypoints(pose_results, frame_idx, video_data)
+        combine_keypoints(pose_results, frame_idx, video_data, bboxes)
         visualize_lower_points(frame=frame, data_samples=data_samples, frame_idx=frame_idx,
                                frames_list=frames_list, joints_to_visualize=[11, 12, 13, 14, 15, 16])
 

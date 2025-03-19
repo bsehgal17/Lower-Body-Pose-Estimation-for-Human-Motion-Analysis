@@ -30,14 +30,15 @@ def frame_generator(video_path):
     video_capture.release()
 
 
-def combine_keypoints(pose_results, frame_idx, video_data):
+def combine_keypoints(pose_results, frame_idx, video_data, bboxes):
     """Appends keypoints and predictions for each frame to the video_data list."""
     frame_data = {
         "frame_idx": frame_idx,
         "keypoints": [
             {
                 "keypoints": person.pred_instances.keypoints.tolist(),
-                "scores": person.pred_instances.keypoint_scores.tolist()
+                "scores": person.pred_instances.keypoint_scores.tolist(),
+                "bboxes": bboxes.tolist()
             }
             for person in pose_results
         ]
