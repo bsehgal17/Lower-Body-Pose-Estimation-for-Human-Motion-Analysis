@@ -13,7 +13,7 @@ os.makedirs(output_folder, exist_ok=True)
 
 
 def process_video(
-    input_path, output_path, brightness_factor=30
+    input_path, output_path, brightness_factor=40
 ):  # Positive factor to darken
     # Open video file to get properties
     cap = cv2.VideoCapture(input_path)
@@ -28,17 +28,18 @@ def process_video(
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # Codec
     fps = int(cap.get(cv2.CAP_PROP_FPS))  # Get original FPS
     cap.release()  # Release since we are using the generator
-    downscale_width = int(width / 2)
-    downscale_height = int(height / 2)
 
-    # Initialize VideoWriter with the correct properties
-    out = cv2.VideoWriter(output_path, fourcc, fps, (downscale_width, downscale_height))
+    # Set target resolution to 720p
+    target_width, target_height = 1280, 720
+
+    # Initialize VideoWriter with 720p resolution
+    out = cv2.VideoWriter(output_path, fourcc, fps, (target_width, target_height))
 
     # Process frames using the generator
     for frame in frame_generator(input_path):
-        # Resize frame
+        # Resize frame to 720p
         frame = cv2.resize(
-            frame, (downscale_width, downscale_height), interpolation=cv2.INTER_LINEAR
+            frame, (target_width, target_height), interpolation=cv2.INTER_LINEAR
         )  # Bilinear interpolation
 
         # Convert to HSV
