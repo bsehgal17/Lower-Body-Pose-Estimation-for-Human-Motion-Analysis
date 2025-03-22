@@ -2,26 +2,30 @@ import numpy as np
 import json
 
 
-def extract_predictions(json_file, frame_range):
+def extract_predictions(json_file, frame_range=None):
     """
-    Extracts keypoint predictions from a JSON file within a specified frame range.
-    Allows selecting specific keypoints, or extracts all if none are specified.
+    Extracts keypoint predictions from a JSON file.
+    If frame_range is provided, extracts keypoints within the specified range.
+    If frame_range is None, extracts keypoints for all frames.
 
     Parameters:
     - json_file: Path to the JSON file containing keypoint predictions.
     - frame_range: Tuple (start_frame, end_frame) specifying the range of frames to extract.
-    - keypoint_indices: Dictionary mapping keypoint names to indices (e.g., {'left_hip': 11, 'right_hip': 12}).
-                        If None, extracts all available keypoints.
+                   If None, extracts all frames.
 
     Returns:
-    - pred_keypoints: A NumPy array of extracted keypoints within the given frame range.
+    - pred_keypoints: A NumPy array of extracted keypoints.
     """
     print("Loading JSON file (Predictions)...")
     with open(json_file, "r") as f:
         json_data = json.load(f)
     print(f"Loaded JSON file with {len(json_data)} frames")
 
-    # If no specific keypoints are provided, extract all available keypoints
+    # Determine frame range
+    if frame_range is None:
+        frame_range = (0, len(json_data))
+
+    # Extract all available keypoints
     keypoint_indices = {
         f"keypoint_{i}": i
         for i in range(len(json_data[0]["keypoints"][0]["keypoints"][0]))
