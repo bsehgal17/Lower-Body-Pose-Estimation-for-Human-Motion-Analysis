@@ -7,9 +7,13 @@ from joint_enum import PredJoints
 
 
 # Function to save filtered keypoints to a new JSON file
-def save_filtered_keypoints(original_json_path, filtered_keypoints):
-    filtered_json_path = original_json_path.replace(
-        ".json", "_butterworth_filtered.json"
+def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):
+    os.makedirs(output_folder, exist_ok=True)  # Ensure the output folder exists
+    filtered_json_path = os.path.join(
+        output_folder,
+        os.path.basename(original_json_path).replace(
+            ".json", "_butterworth_filtered.json"
+        ),
     )
     with open(filtered_json_path, "w") as f:
         json.dump(filtered_keypoints, f, indent=4)
@@ -30,6 +34,10 @@ lower_body_joints = [
 order = 4  # Filter order
 cutoff = 0.1  # Cutoff frequency, this can be adjusted depending on the frequency of noise in the data
 
+output_base = (
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\butterworth"
+)
+
 # Walk through all video files in the base directory
 for root, dirs, files in os.walk(base_path):
     for file in files:
@@ -47,6 +55,10 @@ for root, dirs, files in os.walk(base_path):
                 + ".json",
             )
 
+            if not os.path.exists(json_path):
+                print(f"File not found: {json_path}")
+                continue
+
             # Read JSON directly
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
@@ -56,35 +68,32 @@ for root, dirs, files in os.walk(base_path):
                 order, cutoff, btype="low", fs=30
             )  # fs=30 assumes 30 fps
 
-            for frame_data in pred_keypoints:
-                for keypoint_group in frame_data["keypoints"]:
-                    for keypoint_set in keypoint_group["keypoints"]:
-                        for joint_idx in lower_body_joints:
-                            joint_x_series = [
-                                frame_data["keypoints"][0]["keypoints"][0][joint_idx][0]
-                                for frame_data in pred_keypoints
-                            ]
-                            joint_y_series = [
-                                frame_data["keypoints"][0]["keypoints"][0][joint_idx][1]
-                                for frame_data in pred_keypoints
-                            ]
+            num_frames = len(pred_keypoints)
+            smoothed_keypoints = [frame.copy() for frame in pred_keypoints]
 
-                            # Apply Butterworth filter
-                            smoothed_x = scipy.signal.filtfilt(
-                                b, a, joint_x_series, padlen=4
-                            )
-                            smoothed_y = scipy.signal.filtfilt(
-                                b, a, joint_y_series, padlen=4
-                            )
+            for joint_idx in lower_body_joints:
+                joint_x_series = [
+                    frame["keypoints"][0]["keypoints"][0][joint_idx][0]
+                    for frame in pred_keypoints
+                ]
+                joint_y_series = [
+                    frame["keypoints"][0]["keypoints"][0][joint_idx][1]
+                    for frame in pred_keypoints
+                ]
 
-                            # Update keypoints with filtered values
-                            for i, frame in enumerate(pred_keypoints):
-                                frame[joint_idx] = [
-                                    float(smoothed_x[i]),
-                                    float(smoothed_y[i]),
-                                ]
+                # Apply Butterworth filter
+                smoothed_x = scipy.signal.filtfilt(b, a, joint_x_series, padlen=4)
+                smoothed_y = scipy.signal.filtfilt(b, a, joint_y_series, padlen=4)
 
-            # Save the filtered keypoints in a new JSON file
-            save_filtered_keypoints(json_path, pred_keypoints)
+                # Update keypoints with filtered values
+                for i in range(num_frames):
+                    smoothed_keypoints[i]["keypoints"][0]["keypoints"][0][joint_idx] = [
+                        float(smoothed_x[i]),
+                        float(smoothed_y[i]),
+                    ]
+
+            # Define output folder structure
+            output_folder = os.path.join(output_base, subject)
+            save_filtered_keypoints(output_folder, json_path, smoothed_keypoints)
 
 print("Processing complete.")

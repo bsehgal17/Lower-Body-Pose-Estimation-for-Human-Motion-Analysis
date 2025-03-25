@@ -6,15 +6,21 @@ import config
 from joint_enum import PredJoints
 
 
-def save_filtered_keypoints(original_json_path, filtered_keypoints):
-    filtered_json_path = original_json_path.replace(".json", "_gaussian_filtered.json")
+def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):
+    os.makedirs(output_folder, exist_ok=True)  # Ensure the output folder exists
+    filtered_json_path = os.path.join(
+        output_folder,
+        os.path.basename(original_json_path).replace(
+            ".json", "_gaussian_filtered.json"
+        ),
+    )
     with open(filtered_json_path, "w") as f:
         json.dump(filtered_keypoints, f, indent=4)
     print(f"Filtered keypoints saved to: {filtered_json_path}")
 
 
 base_path = config.VIDEO_FOLDER
-sigma = 1
+sigma = 0.4
 lower_body_joints = [
     PredJoints.LEFT_ANKLE.value,
     PredJoints.RIGHT_ANKLE.value,
@@ -23,6 +29,10 @@ lower_body_joints = [
     PredJoints.LEFT_KNEE.value,
     PredJoints.RIGHT_KNEE.value,
 ]
+
+output_base = (
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\gaussian"
+)
 
 for root, dirs, files in os.walk(base_path):
     for file in files:
@@ -39,6 +49,10 @@ for root, dirs, files in os.walk(base_path):
                 )
                 + ".json",
             )
+
+            if not os.path.exists(json_path):
+                print(f"File not found: {json_path}")
+                continue
 
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
@@ -73,6 +87,7 @@ for root, dirs, files in os.walk(base_path):
                                 float(smoothed_y[len(smoothed_y) // 2]),
                             ]
 
-            save_filtered_keypoints(json_path, pred_keypoints)
+            output_folder = os.path.join(output_base, subject)
+            save_filtered_keypoints(output_folder, json_path, pred_keypoints)
 
 print("Processing complete.")

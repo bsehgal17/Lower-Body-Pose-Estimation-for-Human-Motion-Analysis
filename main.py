@@ -7,9 +7,9 @@ from joint_enum import PredJoints
 
 def main():
     # Set paths for the video and JSON files
-    video_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\degraded_videos\S3\Image_Data\Jog_1_(C2).avi"
-    json_file = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\rtmw_x_degraded\S3\Jog_1_(C2)\Jog_1_(C2)\Jog_1_(C2)_butterworth_filtered.json"
-    output_video = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\rtmw_x_degraded\S3\filtered\Jog_1_(C2)\Jog_1_(C2)_butterworth.avi"
+    video_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\degraded_videos\S3\Image_Data\Walking_1_(C2).avi"
+    json_file = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\rtmw_x_degraded\S3\Walking_1_(C2)\Walking_1_(C2)\Walking_1_(C2)_gaussian_filtered.json"
+    output_video = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\rtmw_x_degraded\S3\filtered\Walking_1_(C2)\Walking_1_(C2)_gaussian_3.avi"
     # Set frame range (if you want to process specific frames)
     frame_range = None  # None will process all frames
 
