@@ -7,9 +7,7 @@ from utils import frame_generator  # Make sure this exists and works correctly
 input_folder = (
     r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\HumanEva"
 )
-output_folder = (
-    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\degraded_videos"
-)
+output_folder = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\degraded_videos_20"
 os.makedirs(output_folder, exist_ok=True)
 
 # --- Modern Noise Simulation Functions ---
