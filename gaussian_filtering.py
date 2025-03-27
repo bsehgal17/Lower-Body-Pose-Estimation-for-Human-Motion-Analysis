@@ -20,7 +20,7 @@ def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoint
 
 
 base_path = config.VIDEO_FOLDER
-sigma = 0.4
+sigma = 1.5  # You can adjust this to tune smoothing
 lower_body_joints = [
     PredJoints.LEFT_ANKLE.value,
     PredJoints.RIGHT_ANKLE.value,
@@ -31,7 +31,7 @@ lower_body_joints = [
 ]
 
 output_base = (
-    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\gaussian"
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
 )
 
 for root, dirs, files in os.walk(base_path):
@@ -41,7 +41,7 @@ for root, dirs, files in os.walk(base_path):
             subject, action, camera = video_info
             action_group = action.replace(" ", "_")
             json_path = os.path.join(
-                r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\rtmw_x_degraded",
+                output_base,
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
                 f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(
@@ -57,37 +57,41 @@ for root, dirs, files in os.walk(base_path):
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
 
-            for frame_data in pred_keypoints:
-                for keypoint_group in frame_data["keypoints"]:
-                    for keypoint_set in keypoint_group["keypoints"]:
-                        for joint_idx in lower_body_joints:
-                            joint_x_series = [
-                                keypoint_set[i][0]
-                                for i in range(
-                                    max(0, joint_idx - 3),
-                                    min(len(keypoint_set), joint_idx + 4),
-                                )
-                            ]
-                            joint_y_series = [
-                                keypoint_set[i][1]
-                                for i in range(
-                                    max(0, joint_idx - 3),
-                                    min(len(keypoint_set), joint_idx + 4),
-                                )
-                            ]
-                            smoothed_x = scipy.ndimage.gaussian_filter1d(
-                                joint_x_series, sigma=sigma
-                            )
-                            smoothed_y = scipy.ndimage.gaussian_filter1d(
-                                joint_y_series, sigma=sigma
-                            )
+                # Temporal smoothing of each joint's x and y coordinates
+                for keypoint_set_idx in range(
+                    len(pred_keypoints[0]["keypoints"][0]["keypoints"])
+                ):
+                    for joint_idx in lower_body_joints:
+                        x_series = []
+                        y_series = []
+                        for frame_data in pred_keypoints:
+                            kp = frame_data["keypoints"][0]["keypoints"][
+                                keypoint_set_idx
+                            ][joint_idx]
+                            x_series.append(kp[0])
+                            y_series.append(kp[1])
 
-                            keypoint_set[joint_idx] = [
-                                float(smoothed_x[len(smoothed_x) // 2]),
-                                float(smoothed_y[len(smoothed_y) // 2]),
-                            ]
+                        smoothed_x = scipy.ndimage.gaussian_filter1d(
+                            x_series, sigma=sigma
+                        )
+                        smoothed_y = scipy.ndimage.gaussian_filter1d(
+                            y_series, sigma=sigma
+                        )
 
-            output_folder = os.path.join(output_base, subject)
+                        for i, frame_data in enumerate(pred_keypoints):
+                            frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
+                                joint_idx
+                            ][0] = float(smoothed_x[i])
+                            frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
+                                joint_idx
+                            ][1] = float(smoothed_y[i])
+
+            output_folder = os.path.join(
+                output_base,
+                subject,
+                f"{action_group}_({'C' + str(camera + 1)})",
+                "gaussian",
+            )
             save_filtered_keypoints(output_folder, json_path, pred_keypoints)
 
 print("Processing complete.")
