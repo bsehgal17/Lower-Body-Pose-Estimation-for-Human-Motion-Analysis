@@ -7,12 +7,11 @@ from utils import frame_generator  # Make sure this exists and works correctly
 input_folder = (
     r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\HumanEva"
 )
-output_folder = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\degraded_videos_20"
+output_folder = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\degraded_videos_80"
 os.makedirs(output_folder, exist_ok=True)
 
+
 # --- Modern Noise Simulation Functions ---
-
-
 def add_realistic_noise(image):
     # 1. Poisson noise (shot noise)
     noisy = np.random.poisson(image.astype(np.float32)).clip(0, 255).astype(np.uint8)
@@ -37,7 +36,7 @@ def apply_motion_blur(image, kernel_size=5):
 
 
 def process_video(
-    input_path, output_path, brightness_factor=20, target_res=(1280, 720)
+    input_path, output_path, brightness_factor=80, target_res=(1280, 720)
 ):
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():

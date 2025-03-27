@@ -12,10 +12,18 @@ original_video_base = (
     r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\HumanEva"
 )
 degraded_video_base = (
-    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_80"
 )
 
 results = []
+lower_body_joints = [
+    "LEFT_HIP",
+    "RIGHT_HIP",
+    "LEFT_KNEE",
+    "RIGHT_KNEE",
+    "LEFT_ANKLE",
+    "RIGHT_ANKLE",
+]
 
 for root, _, files in os.walk(degraded_video_base):
     for file in files:
@@ -38,10 +46,16 @@ for root, _, files in os.walk(degraded_video_base):
             )
 
             # JSON prediction file (same name as .avi but .json)
+            # json_path = os.path.join(
+            #     root,
+            #     "gaussian",
+            #     os.path.splitext(file)[0] + "_gaussian_filtered.json",
+            # )
             json_path = os.path.join(
-                root, os.path.splitext(file)[0], os.path.splitext(file)[0] + ".json"
+                root,
+                os.path.splitext(file)[0],
+                os.path.splitext(file)[0] + ".json",
             )
-
             # Extract ground truth keypoints
             gt_keypoints = extract_ground_truth(
                 config.CSV_FILE, subject, action, camera
@@ -71,9 +85,24 @@ for root, _, files in os.walk(degraded_video_base):
             pred_keypoints = pred_keypoints[:min_len]
 
             # Compute PCK metrics
-            pck2 = compute_pck(gt_keypoints, pred_keypoints, threshold=0.02)
-            pck1 = compute_pck(gt_keypoints, pred_keypoints, threshold=0.01)
-            pck5 = compute_pck(gt_keypoints, pred_keypoints, threshold=0.05)
+            pck2 = compute_pck(
+                gt_keypoints,
+                pred_keypoints,
+                threshold=0.02,
+                joints_to_evaluate=lower_body_joints,
+            )
+            pck1 = compute_pck(
+                gt_keypoints,
+                pred_keypoints,
+                threshold=0.01,
+                joints_to_evaluate=lower_body_joints,
+            )
+            pck5 = compute_pck(
+                gt_keypoints,
+                pred_keypoints,
+                threshold=0.05,
+                joints_to_evaluate=lower_body_joints,
+            )
 
             print("--- Results ---")
             print(f"PCK@0.2: {pck2:.2f}%")
@@ -86,6 +115,6 @@ for root, _, files in os.walk(degraded_video_base):
 df = pd.DataFrame(
     results, columns=["Subject", "Action", "Camera", "PCK@0.01", "PCK@0.02", "PCK@0.05"]
 )
-excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels\rtmw_x_40.xlsx"
+excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels\rtmw_x_80.xlsx"
 df.to_excel(excel_path, index=False)
 print(f"Metrics saved to {excel_path}")
