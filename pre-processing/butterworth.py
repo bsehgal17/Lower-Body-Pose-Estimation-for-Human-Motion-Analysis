@@ -1,23 +1,28 @@
 import json
 import os
-import scipy.signal
+import numpy as np
+from scipy.signal import butter, filtfilt
 from video_info import extract_video_info
 import config
 from joint_enum import PredJoints
 
 
-# Function to save filtered keypoints to a new JSON file
 def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):
-    os.makedirs(output_folder, exist_ok=True)  # Ensure the output folder exists
+    os.makedirs(output_folder, exist_ok=True)
     filtered_json_path = os.path.join(
         output_folder,
-        os.path.basename(original_json_path).replace(
-            ".json", "_butterworth_filtered.json"
-        ),
+        os.path.basename(original_json_path).replace(".json", "_butter_filtered.json"),
     )
     with open(filtered_json_path, "w") as f:
         json.dump(filtered_keypoints, f, indent=4)
     print(f"Filtered keypoints saved to: {filtered_json_path}")
+
+
+def butterworth_filter(data, cutoff=5, fs=60.0, order=3):
+    if len(data) <= order:
+        return data  # Not enough data to apply filter
+    b, a = butter(order, cutoff / (0.5 * fs), btype="low", analog=False)
+    return filtfilt(b, a, data)
 
 
 base_path = config.VIDEO_FOLDER
@@ -30,23 +35,18 @@ lower_body_joints = [
     PredJoints.RIGHT_KNEE.value,
 ]
 
-# Define the Butterworth filter parameters
-order = 4  # Filter order
-cutoff = 0.1  # Cutoff frequency, this can be adjusted depending on the frequency of noise in the data
-
 output_base = (
-    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\butterworth"
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
 )
 
-# Walk through all video files in the base directory
 for root, dirs, files in os.walk(base_path):
     for file in files:
         video_info = extract_video_info(file, root)
         if video_info:
             subject, action, camera = video_info
-            action_group = action.replace(" ", "_")  # Replaces space with underscore
+            action_group = action.replace(" ", "_")
             json_path = os.path.join(
-                r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\rtmw_x_degraded",
+                output_base,
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
                 f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(
@@ -59,41 +59,46 @@ for root, dirs, files in os.walk(base_path):
                 print(f"File not found: {json_path}")
                 continue
 
-            # Read JSON directly
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
 
-            # Create the Butterworth filter (low-pass filter)
-            b, a = scipy.signal.butter(
-                order, cutoff, btype="low", fs=30
-            )  # fs=30 assumes 30 fps
+            for keypoint_set_idx in range(
+                len(pred_keypoints[0]["keypoints"][0]["keypoints"])
+            ):
+                for joint_idx in lower_body_joints:
+                    x_series = []
+                    y_series = []
 
-            num_frames = len(pred_keypoints)
-            smoothed_keypoints = [frame.copy() for frame in pred_keypoints]
+                    for frame_data in pred_keypoints:
+                        kp = frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
+                            joint_idx
+                        ]
+                        x_series.append(kp[0])
+                        y_series.append(kp[1])
 
-            for joint_idx in lower_body_joints:
-                joint_x_series = [
-                    frame["keypoints"][0]["keypoints"][0][joint_idx][0]
-                    for frame in pred_keypoints
-                ]
-                joint_y_series = [
-                    frame["keypoints"][0]["keypoints"][0][joint_idx][1]
-                    for frame in pred_keypoints
-                ]
+                    try:
+                        x_filtered = butterworth_filter(np.array(x_series))
+                        y_filtered = butterworth_filter(np.array(y_series))
+                    except ValueError as e:
+                        print(
+                            f"Skipping joint {joint_idx} in {subject}, {action_group}, cam {camera + 1}: {e}"
+                        )
+                        continue
 
-                # Apply Butterworth filter
-                smoothed_x = scipy.signal.filtfilt(b, a, joint_x_series, padlen=4)
-                smoothed_y = scipy.signal.filtfilt(b, a, joint_y_series, padlen=4)
+                    for i, frame_data in enumerate(pred_keypoints):
+                        frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
+                            joint_idx
+                        ][0] = float(x_filtered[i])
+                        frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
+                            joint_idx
+                        ][1] = float(y_filtered[i])
 
-                # Update keypoints with filtered values
-                for i in range(num_frames):
-                    smoothed_keypoints[i]["keypoints"][0]["keypoints"][0][joint_idx] = [
-                        float(smoothed_x[i]),
-                        float(smoothed_y[i]),
-                    ]
+            output_folder = os.path.join(
+                output_base,
+                subject,
+                f"{action_group}_({'C' + str(camera + 1)})",
+                "butterworth",
+            )
+            save_filtered_keypoints(output_folder, json_path, pred_keypoints)
 
-            # Define output folder structure
-            output_folder = os.path.join(output_base, subject)
-            save_filtered_keypoints(output_folder, json_path, smoothed_keypoints)
-
-print("Processing complete.")
+print("Butterworth filtering complete.")

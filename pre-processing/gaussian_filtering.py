@@ -20,7 +20,7 @@ def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoint
 
 
 base_path = config.VIDEO_FOLDER
-sigma = 1.5  # You can adjust this to tune smoothing
+sigma = 1  # You can adjust this to tune smoothing
 lower_body_joints = [
     PredJoints.LEFT_ANKLE.value,
     PredJoints.RIGHT_ANKLE.value,

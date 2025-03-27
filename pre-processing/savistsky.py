@@ -1,14 +1,14 @@
 import json
 import os
-import scipy.signal
+import numpy as np
+from scipy.signal import savgol_filter
 from video_info import extract_video_info
 import config
 from joint_enum import PredJoints
 
 
-# Function to save filtered keypoints to a new JSON file
 def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):
-    os.makedirs(output_folder, exist_ok=True)  # Ensure the output folder exists
+    os.makedirs(output_folder, exist_ok=True)
     filtered_json_path = os.path.join(
         output_folder,
         os.path.basename(original_json_path).replace(".json", "_savgol_filtered.json"),
@@ -18,9 +18,15 @@ def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoint
     print(f"Filtered keypoints saved to: {filtered_json_path}")
 
 
+def savgol_smooth(data, window_length=11, polyorder=3):
+    if len(data) < window_length:
+        window_length = len(data) if len(data) % 2 == 1 else len(data) - 1
+    if window_length < 3:
+        return data  # Not enough data to apply smoothing
+    return savgol_filter(data, window_length=window_length, polyorder=polyorder)
+
+
 base_path = config.VIDEO_FOLDER
-window_size = 5  # Set an odd window size for the Savitzky-Golay filter
-polyorder = 2  # Set polynomial order for the filter
 lower_body_joints = [
     PredJoints.LEFT_ANKLE.value,
     PredJoints.RIGHT_ANKLE.value,
@@ -30,17 +36,18 @@ lower_body_joints = [
     PredJoints.RIGHT_KNEE.value,
 ]
 
-output_base = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\savgol"
+output_base = (
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
+)
 
-# Walk through all video files in the base directory
 for root, dirs, files in os.walk(base_path):
     for file in files:
         video_info = extract_video_info(file, root)
         if video_info:
             subject, action, camera = video_info
-            action_group = action.replace(" ", "_")  # Replaces space with underscore
+            action_group = action.replace(" ", "_")
             json_path = os.path.join(
-                r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\rtmw_x_degraded",
+                output_base,
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
                 f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(
@@ -53,40 +60,42 @@ for root, dirs, files in os.walk(base_path):
                 print(f"File not found: {json_path}")
                 continue
 
-            # Read JSON directly
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
 
             num_frames = len(pred_keypoints)
-            smoothed_keypoints = [frame.copy() for frame in pred_keypoints]
 
-            for joint_idx in lower_body_joints:
-                joint_x_series = [
-                    frame["keypoints"][0]["keypoints"][0][joint_idx][0]
-                    for frame in pred_keypoints
-                ]
-                joint_y_series = [
-                    frame["keypoints"][0]["keypoints"][0][joint_idx][1]
-                    for frame in pred_keypoints
-                ]
+            for keypoint_set_idx in range(
+                len(pred_keypoints[0]["keypoints"][0]["keypoints"])
+            ):
+                for joint_idx in lower_body_joints:
+                    x_series = []
+                    y_series = []
 
-                # Apply Savitzky-Golay filter
-                smoothed_x = scipy.signal.savgol_filter(
-                    joint_x_series, window_size, polyorder
-                )
-                smoothed_y = scipy.signal.savgol_filter(
-                    joint_y_series, window_size, polyorder
-                )
+                    for frame_data in pred_keypoints:
+                        kp = frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
+                            joint_idx
+                        ]
+                        x_series.append(kp[0])
+                        y_series.append(kp[1])
 
-                # Update keypoints with filtered values
-                for i in range(num_frames):
-                    smoothed_keypoints[i]["keypoints"][0]["keypoints"][0][joint_idx] = [
-                        float(smoothed_x[i]),
-                        float(smoothed_y[i]),
-                    ]
+                    smoothed_x = savgol_smooth(x_series)
+                    smoothed_y = savgol_smooth(y_series)
 
-            # Define output folder structure
-            output_folder = os.path.join(output_base, subject)
-            save_filtered_keypoints(output_folder, json_path, smoothed_keypoints)
+                    for i, frame_data in enumerate(pred_keypoints):
+                        frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
+                            joint_idx
+                        ][0] = float(smoothed_x[i])
+                        frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
+                            joint_idx
+                        ][1] = float(smoothed_y[i])
 
-print("Processing complete.")
+            output_folder = os.path.join(
+                output_base,
+                subject,
+                f"{action_group}_({'C' + str(camera + 1)})",
+                "savitzky",
+            )
+            save_filtered_keypoints(output_folder, json_path, pred_keypoints)
+
+print("Savitzky–Golay temporal filtering complete.")
