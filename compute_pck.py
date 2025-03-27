@@ -60,7 +60,12 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
         right_knee = np.array(
             [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_KNEE.value]]
         )
-
+        # left_knee = np.array(
+        #     [average_if_tuple(x) for x in gt[:, GTJoints.LEFT_ANKLE.value]]
+        # )
+        # right_knee = np.array(
+        #     [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_ANKLE.value]]
+        # )
         norm_length = (
             np.linalg.norm(left_hip - left_knee, axis=-1)
             + np.linalg.norm(right_hip - right_knee, axis=-1)

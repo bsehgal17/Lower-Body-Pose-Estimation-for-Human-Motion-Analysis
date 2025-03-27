@@ -12,7 +12,7 @@ original_video_base = (
     r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\HumanEva"
 )
 degraded_video_base = (
-    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_80"
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
 )
 
 results = []
@@ -46,16 +46,16 @@ for root, _, files in os.walk(degraded_video_base):
             )
 
             # JSON prediction file (same name as .avi but .json)
-            # json_path = os.path.join(
-            #     root,
-            #     "gaussian",
-            #     os.path.splitext(file)[0] + "_gaussian_filtered.json",
-            # )
             json_path = os.path.join(
                 root,
-                os.path.splitext(file)[0],
-                os.path.splitext(file)[0] + ".json",
+                "butterworth",
+                os.path.splitext(file)[0] + "_butter_filtered.json",
             )
+            # json_path = os.path.join(
+            #     root,
+            #     os.path.splitext(file)[0],
+            #     os.path.splitext(file)[0] + ".json",
+            # )
             # Extract ground truth keypoints
             gt_keypoints = extract_ground_truth(
                 config.CSV_FILE, subject, action, camera
@@ -103,18 +103,32 @@ for root, _, files in os.walk(degraded_video_base):
                 threshold=0.05,
                 joints_to_evaluate=lower_body_joints,
             )
-
+            pck05 = compute_pck(
+                gt_keypoints,
+                pred_keypoints,
+                threshold=0.005,
+                joints_to_evaluate=lower_body_joints,
+            )
             print("--- Results ---")
             print(f"PCK@0.2: {pck2:.2f}%")
             print(f"PCK@0.1: {pck1:.2f}%")
             print(f"PCK@0.05: {pck5:.2f}%")
 
-            results.append([subject, action_group, camera + 1, pck1, pck2, pck5])
+            results.append([subject, action_group, camera + 1, pck1, pck2, pck5, pck05])
 
 # Save all results
 df = pd.DataFrame(
-    results, columns=["Subject", "Action", "Camera", "PCK@0.01", "PCK@0.02", "PCK@0.05"]
+    results,
+    columns=[
+        "Subject",
+        "Action",
+        "Camera",
+        "PCK@0.01",
+        "PCK@0.02",
+        "PCK@0.05",
+        "PCK@0.005",
+    ],
 )
-excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels\rtmw_x_80.xlsx"
+excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels\rtmw_x_40_butter_knee.xlsx"
 df.to_excel(excel_path, index=False)
 print(f"Metrics saved to {excel_path}")
