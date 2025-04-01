@@ -9,6 +9,7 @@ from pre_process_utils import (
     remove_outliers_iqr,
     interpolate_missing_values,
 )
+from utils import plot_filtering_effect
 
 
 def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):
@@ -90,14 +91,46 @@ for root, dirs, files in os.walk(base_path):
 
                     # Step 2: Interpolation
                     x_interpolated = interpolate_missing_values(
-                        x_series, kind=interpolation_kind
+                        x_cleaned, kind=interpolation_kind
                     )
                     y_interpolated = interpolate_missing_values(
-                        y_series, kind=interpolation_kind
+                        y_cleaned, kind=interpolation_kind
                     )
 
-                    smoothed_x = savgol_smooth(x_series)
-                    smoothed_y = savgol_smooth(y_series)
+                    smoothed_x = savgol_smooth(x_interpolated)
+                    smoothed_y = savgol_smooth(y_interpolated)
+
+                    if (
+                        joint_idx == PredJoints.LEFT_ANKLE.value
+                        and keypoint_set_idx == 0
+                    ):
+                        plot_dir = os.path.join(
+                            output_base,
+                            subject,
+                            f"{action_group}_({'C' + str(camera + 1)})",
+                            "plots",
+                        )
+                        os.makedirs(plot_dir, exist_ok=True)
+
+                        # Plot X coordinates
+                        plot_filtering_effect(
+                            original=x_series,
+                            filtered=smoothed_x,
+                            title=f"X-Coordinate: {subject} {action} (Joint {joint_idx})",
+                            save_path=os.path.join(
+                                plot_dir, f"x_coord_joint_{joint_idx}.png"
+                            ),
+                        )
+
+                        # Plot Y coordinates
+                        plot_filtering_effect(
+                            original=y_series,
+                            filtered=smoothed_y,
+                            title=f"Y-Coordinate: {subject} {action} (Joint {joint_idx})",
+                            save_path=os.path.join(
+                                plot_dir, f"y_coord_joint_{joint_idx}.png"
+                            ),
+                        )
 
                     for i, frame_data in enumerate(pred_keypoints):
                         frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][

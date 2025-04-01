@@ -5,6 +5,11 @@ from scipy.signal import butter, filtfilt
 from video_info import extract_video_info
 import config
 from joint_enum import PredJoints
+from utils import plot_filtering_effect
+from pre_process_utils import (
+    remove_outliers_iqr,
+    interpolate_missing_values,
+)
 
 
 def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):
@@ -38,7 +43,8 @@ lower_body_joints = [
 output_base = (
     r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
 )
-
+iqr_multiplier = 1.5
+interpolation_kind = "linear"
 for root, dirs, files in os.walk(base_path):
     for file in files:
         video_info = extract_video_info(file, root)
@@ -76,14 +82,57 @@ for root, dirs, files in os.walk(base_path):
                         x_series.append(kp[0])
                         y_series.append(kp[1])
 
+                        # Step 1: Outlier removal
+                        x_cleaned = remove_outliers_iqr(x_series, iqr_multiplier)
+                        y_cleaned = remove_outliers_iqr(y_series, iqr_multiplier)
+
+                        # Step 2: Interpolation
+                        x_interpolated = interpolate_missing_values(
+                            x_cleaned, kind=interpolation_kind
+                        )
+                        y_interpolated = interpolate_missing_values(
+                            y_cleaned, kind=interpolation_kind
+                        )
+
                     try:
-                        x_filtered = butterworth_filter(np.array(x_series))
-                        y_filtered = butterworth_filter(np.array(y_series))
+                        x_filtered = butterworth_filter(np.array(x_interpolated))
+                        y_filtered = butterworth_filter(np.array(y_interpolated))
                     except ValueError as e:
                         print(
                             f"Skipping joint {joint_idx} in {subject}, {action_group}, cam {camera + 1}: {e}"
                         )
                         continue
+                    if (
+                        joint_idx == PredJoints.LEFT_ANKLE.value
+                        and keypoint_set_idx == 0
+                    ):
+                        plot_dir = os.path.join(
+                            output_base,
+                            subject,
+                            f"{action_group}_({'C' + str(camera + 1)})",
+                            "plots",
+                        )
+                        os.makedirs(plot_dir, exist_ok=True)
+
+                        # Plot X coordinates
+                        plot_filtering_effect(
+                            original=x_series,
+                            filtered=x_filtered,
+                            title=f"X-Coordinate: {subject} {action} (Joint {joint_idx})",
+                            save_path=os.path.join(
+                                plot_dir, f"x_coord_joint_{joint_idx}_butterworth.png"
+                            ),
+                        )
+
+                        # Plot Y coordinates
+                        plot_filtering_effect(
+                            original=y_series,
+                            filtered=x_filtered,
+                            title=f"Y-Coordinate: {subject} {action} (Joint {joint_idx})",
+                            save_path=os.path.join(
+                                plot_dir, f"y_coord_joint_{joint_idx}_butterworth.png"
+                            ),
+                        )
 
                     for i, frame_data in enumerate(pred_keypoints):
                         frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
