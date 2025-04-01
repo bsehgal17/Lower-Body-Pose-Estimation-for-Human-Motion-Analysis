@@ -1,43 +1,36 @@
 import json
 import os
 import numpy as np
+from scipy.signal import savgol_filter
 from video_info import extract_video_info
 import config
 from joint_enum import PredJoints
-
-
-def moving_average_filter(data, window_size=5):
-    """Applies a moving average filter for temporal smoothing."""
-    num_frames = len(data)
-    if num_frames < window_size:
-        return data  # Not enough data for filtering
-
-    half_window = window_size // 2
-    smoothed_data = np.copy(data)
-
-    for i in range(num_frames):
-        start_idx = max(0, i - half_window)
-        end_idx = min(num_frames, i + half_window + 1)
-        smoothed_data[i] = np.mean(data[start_idx:end_idx], axis=0)
-
-    return smoothed_data
+from pre_process_utils import (
+    remove_outliers_iqr,
+    interpolate_missing_values,
+)
 
 
 def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):
     os.makedirs(output_folder, exist_ok=True)
     filtered_json_path = os.path.join(
         output_folder,
-        os.path.basename(original_json_path).replace(
-            ".json", "_moving_avg_filtered.json"
-        ),
+        os.path.basename(original_json_path).replace(".json", "_savgol_filtered.json"),
     )
     with open(filtered_json_path, "w") as f:
         json.dump(filtered_keypoints, f, indent=4)
     print(f"Filtered keypoints saved to: {filtered_json_path}")
 
 
+def savgol_smooth(data, window_length=11, polyorder=3):
+    if len(data) < window_length:
+        window_length = len(data) if len(data) % 2 == 1 else len(data) - 1
+    if window_length < 3:
+        return data  # Not enough data to apply smoothing
+    return savgol_filter(data, window_length=window_length, polyorder=polyorder)
+
+
 base_path = config.VIDEO_FOLDER
-window_size = 5
 lower_body_joints = [
     PredJoints.LEFT_ANKLE.value,
     PredJoints.RIGHT_ANKLE.value,
@@ -50,7 +43,9 @@ lower_body_joints = [
 output_base = (
     r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
 )
-
+outlier_method = "iqr"  # Choose "iqr" or "zscore"
+iqr_multiplier = 1.5  # Only used if outlier_method="iqr"
+interpolation_kind = "linear"  # "linear", "cubic", etc.
 for root, dirs, files in os.walk(base_path):
     for file in files:
         video_info = extract_video_info(file, root)
@@ -74,6 +69,8 @@ for root, dirs, files in os.walk(base_path):
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
 
+            num_frames = len(pred_keypoints)
+
             for keypoint_set_idx in range(
                 len(pred_keypoints[0]["keypoints"][0]["keypoints"])
             ):
@@ -88,23 +85,35 @@ for root, dirs, files in os.walk(base_path):
                         x_series.append(kp[0])
                         y_series.append(kp[1])
 
-                    x_filtered = moving_average_filter(np.array(x_series), window_size)
-                    y_filtered = moving_average_filter(np.array(y_series), window_size)
+                    # Step 1: Outlier removal
+                    x_cleaned = remove_outliers_iqr(x_series, iqr_multiplier)
+                    y_cleaned = remove_outliers_iqr(y_series, iqr_multiplier)
+
+                    # Step 2: Interpolation
+                    x_interpolated = interpolate_missing_values(
+                        x_series, kind=interpolation_kind
+                    )
+                    y_interpolated = interpolate_missing_values(
+                        y_series, kind=interpolation_kind
+                    )
+
+                    smoothed_x = savgol_smooth(x_series)
+                    smoothed_y = savgol_smooth(y_series)
 
                     for i, frame_data in enumerate(pred_keypoints):
                         frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
                             joint_idx
-                        ][0] = float(x_filtered[i])
+                        ][0] = float(smoothed_x[i])
                         frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
                             joint_idx
-                        ][1] = float(y_filtered[i])
+                        ][1] = float(smoothed_y[i])
 
             output_folder = os.path.join(
                 output_base,
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
-                "moving_average",
+                "savitzky",
             )
             save_filtered_keypoints(output_folder, json_path, pred_keypoints)
 
-print("Moving average filtering complete.")
+print("Savitzky–Golay temporal filtering complete.")
