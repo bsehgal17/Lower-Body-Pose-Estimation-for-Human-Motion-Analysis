@@ -43,9 +43,8 @@ lower_body_joints = [
 output_base = (
     r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
 )
-outlier_method = "iqr"  # Choose "iqr" or "zscore"
-iqr_multiplier = 1.5  # Only used if outlier_method="iqr"
-interpolation_kind = "linear"  # "linear", "cubic", etc.
+iqr_multiplier = 1.5
+interpolation_kind = "linear"
 for root, dirs, files in os.walk(base_path):
     for file in files:
         video_info = extract_video_info(file, root)

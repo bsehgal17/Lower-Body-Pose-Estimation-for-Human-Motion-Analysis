@@ -1,7 +1,10 @@
-
 # Paths for models and input data
-VIDEO_FOLDER = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dergarded_videos/"
-OUTPUT_DIR = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/rtmpose_degraded_l"
+VIDEO_FOLDER = (
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\degraded_videos"
+)
+OUTPUT_DIR = (
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
+)
 
 # video extensions
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv")
@@ -20,23 +23,18 @@ KPT_THRESHOLD = 0.3
 
 # Paths to the MAT(ground truth) and JSON files
 CSV_FILE = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\humaneva_sorted_by_subject.csv"
-JSON_FILE = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\Jog_1_(C1).json"
 
 SYNC_DATA = {
-    'S1': {
-        'Walking 1': (667, 667, 667),
-        'Jog 1': (49, 50, 51),
-
+    "S1": {
+        "Walking 1": (667, 667, 667),
+        "Jog 1": (49, 50, 51),
     },
-    'S2': {
-        'Walking 1': (547, 547, 546),
-        'Jog 1': (493, 491, 502),
-
+    "S2": {
+        "Walking 1": (547, 547, 546),
+        "Jog 1": (493, 491, 502),
     },
-    'S3': {
-        'Walking 1': (524, 524, 524),
-        'Jog 1': (464, 462, 462),
-
+    "S3": {
+        "Walking 1": (524, 524, 524),
+        "Jog 1": (464, 462, 462),
     },
-
 }
