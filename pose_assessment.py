@@ -48,8 +48,8 @@ for root, _, files in os.walk(degraded_video_base):
             # JSON prediction file (same name as .avi but .json)
             json_path = os.path.join(
                 root,
-                "butterworth",
-                os.path.splitext(file)[0] + "_butter_filtered.json",
+                "savitzky",
+                os.path.splitext(file)[0] + "_savgol_filtered.json",
             )
             # json_path = os.path.join(
             #     root,
@@ -129,6 +129,6 @@ df = pd.DataFrame(
         "PCK@0.005",
     ],
 )
-excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels\rtmw_x_40_butter_knee.xlsx"
+excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels\rtmw_x_40_savgol.xlsx"
 df.to_excel(excel_path, index=False)
 print(f"Metrics saved to {excel_path}")
