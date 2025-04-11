@@ -5,6 +5,11 @@ from pykalman import KalmanFilter
 from video_info import extract_video_info
 import config
 from joint_enum import PredJoints
+from pre_process_utils import (
+    remove_outliers_iqr,
+    interpolate_missing_values,
+)
+from utils import plot_filtering_effect
 
 
 def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):
@@ -48,20 +53,24 @@ lower_body_joints = [
     PredJoints.LEFT_KNEE.value,
     PredJoints.RIGHT_KNEE.value,
 ]
-
+iqr_multiplier = 1.5
+interpolation_kind = "linear"
 for root, dirs, files in os.walk(base_path):
     for file in files:
         video_info = extract_video_info(file, root)
         if video_info:
             subject, action, camera = video_info
             action_group = action.replace(" ", "_")
+            subject, action, camera = video_info
+            action_group = action.replace(" ", "_")
             json_path = os.path.join(
                 output_base,
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
-                "gaussian",
-                f"{action_group}_({'C' + str(camera + 1)})".replace(" ", "")
-                + "_gaussian_filtered.json",
+                f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(
+                    " ", ""
+                )
+                + ".json",
             )
 
             if not os.path.exists(json_path):
@@ -75,6 +84,28 @@ for root, dirs, files in os.walk(base_path):
                     len(pred_keypoints[0]["keypoints"][0]["keypoints"])
                 ):
                     for joint_idx in lower_body_joints:
+                        x_series = []
+                        y_series = []
+
+                        for frame_data in pred_keypoints:
+                            kp = frame_data["keypoints"][0]["keypoints"][
+                                keypoint_set_idx
+                            ][joint_idx]
+                            x_series.append(kp[0])
+                            y_series.append(kp[1])
+
+                            # Step 1: Outlier removal
+                            x_cleaned = remove_outliers_iqr(x_series, iqr_multiplier)
+                            y_cleaned = remove_outliers_iqr(y_series, iqr_multiplier)
+
+                            # Step 2: Interpolation
+                            x_interpolated = interpolate_missing_values(
+                                x_cleaned, kind=interpolation_kind
+                            )
+                            y_interpolated = interpolate_missing_values(
+                                y_cleaned, kind=interpolation_kind
+                            )
+
                         # Extract x and y coordinates for the joint
                         measurements = np.array(
                             [
@@ -105,6 +136,39 @@ for root, dirs, files in os.walk(base_path):
                             measurements[:, 0]
                         )  # shape: (n_frames, 2)
                         smoothed_y, _ = kf_y.filter(measurements[:, 1])
+                        if (
+                            joint_idx == PredJoints.LEFT_ANKLE.value
+                            and keypoint_set_idx == 0
+                        ):
+                            plot_dir = os.path.join(
+                                output_base,
+                                subject,
+                                f"{action_group}_({'C' + str(camera + 1)})",
+                                "plots",
+                            )
+                            os.makedirs(plot_dir, exist_ok=True)
+
+                            # Plot X coordinates
+                            plot_filtering_effect(
+                                original=x_series,
+                                filtered=smoothed_x[:, 0],
+                                title=f"X-Coordinate: {subject} {action} (Joint {joint_idx})",
+                                save_path=os.path.join(
+                                    plot_dir,
+                                    f"x_coord_joint_{joint_idx}_kalman.png",
+                                ),
+                            )
+
+                            # Plot Y coordinates
+                            plot_filtering_effect(
+                                original=y_series,
+                                filtered=smoothed_y[:, 0],
+                                title=f"Y-Coordinate: {subject} {action} (Joint {joint_idx})",
+                                save_path=os.path.join(
+                                    plot_dir,
+                                    f"y_coord_joint_{joint_idx}_kalman.png",
+                                ),
+                            )
 
                         for i, frame_data in enumerate(pred_keypoints):
                             frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][

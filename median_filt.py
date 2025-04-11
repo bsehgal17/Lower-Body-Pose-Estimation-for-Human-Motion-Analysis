@@ -10,7 +10,9 @@ def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoint
     os.makedirs(output_folder, exist_ok=True)  # Ensure the output folder exists
     filtered_json_path = os.path.join(
         output_folder,
-        os.path.basename(original_json_path).replace(".json", "_median_filtered.json"),
+        os.path.basename(original_json_path).replace(
+            ".json", "_butter_median_filtered.json"
+        ),
     )
     with open(filtered_json_path, "w") as f:
         json.dump(filtered_keypoints, f, indent=4)
@@ -42,9 +44,9 @@ for root, dirs, files in os.walk(base_path):
                 output_base,
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
-                "gaussian",
+                "butterworth",
                 f"{action_group}_({'C' + str(camera + 1)})".replace(" ", "")
-                + "_gaussian_filtered.json",
+                + "_butter_filtered.json",
             )
 
             if not os.path.exists(json_path):

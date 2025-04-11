@@ -28,7 +28,7 @@ def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoint
     filtered_json_path = os.path.join(
         output_folder,
         os.path.basename(original_json_path).replace(
-            ".json", "_moving_avg_filtered.json"
+            ".json", "__butter_moving_avg_filtered.json"
         ),
     )
     with open(filtered_json_path, "w") as f:
@@ -61,9 +61,9 @@ for root, dirs, files in os.walk(base_path):
                 output_base,
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
-                "gaussian",
+                "butterworth",
                 f"{action_group}_({'C' + str(camera + 1)})".replace(" ", "")
-                + "_gaussian_filtered.json",
+                + "_butter_filtered.json",
             )
 
             if not os.path.exists(json_path):

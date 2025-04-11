@@ -78,7 +78,7 @@ def plot_filtering_effect(
     """
     plt.figure(figsize=(12, 6))
     plt.plot(original, "b-", label="Original", alpha=0.7)
-    plt.plot(filtered, "r-", label="Filtered", linewidth=2)
+    plt.plot(filtered, "r-", label="Filtered", linewidth=1)
     plt.title(title)
     plt.xlabel("Frame Number")
     plt.ylabel("Coordinate Value")

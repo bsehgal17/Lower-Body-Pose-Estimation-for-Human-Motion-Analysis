@@ -23,7 +23,7 @@ def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoint
     print(f"Filtered keypoints saved to: {filtered_json_path}")
 
 
-def butterworth_filter(data, cutoff=5, fs=60.0, order=3):
+def butterworth_filter(data, cutoff=5, fs=60.0, order=10):
     if len(data) <= order:
         return data  # Not enough data to apply filter
     b, a = butter(order, cutoff / (0.5 * fs), btype="low", analog=False)
