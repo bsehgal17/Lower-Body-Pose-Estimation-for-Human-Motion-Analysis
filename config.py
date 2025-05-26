@@ -22,7 +22,7 @@ DETECTION_THRESHOLD = 0.3
 KPT_THRESHOLD = 0.3
 
 # Paths to the MAT(ground truth) and JSON files
-CSV_FILE = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\humaneva_sorted_by_subject.csv"
+CSV_FILE = r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\Tested_dataset\humaneva_sorted_by_subject.csv"
 
 SYNC_DATA = {
     "S1": {

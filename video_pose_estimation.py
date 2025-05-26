@@ -19,10 +19,19 @@ Dependencies:
 import cv2
 import os
 from config import VIDEO_FOLDER, OUTPUT_DIR
-from utils import get_video_files, frame_generator, save_keypoints_to_json, combine_keypoints
+from utils import (
+    get_video_files,
+    frame_generator,
+    save_keypoints_to_json,
+    combine_keypoints,
+)
 from detector import init_object_detector, detect_humans
 from pose_estimator import init_pose_estimator, estimate_pose
-from visualization import init_visualizer, visualize_lower_points, create_video_from_frames
+from visualization import (
+    init_visualizer,
+    visualize_lower_points,
+    create_video_from_frames,
+)
 
 # Initialize models
 detector = init_object_detector()
@@ -39,10 +48,10 @@ if not video_files:
 for video_path in video_files:
     video_data = []
     frames_list = []
-    parent_folder = video_path.split("HumanEva_walking/")[-1].split("/")[0]
+    rel_path = os.path.relpath(video_path, VIDEO_FOLDER)
+    parent_folder = rel_path.split(os.sep)[0]
     video_name = os.path.basename(video_path)
-    save_dir = os.path.join(
-        OUTPUT_DIR, parent_folder, os.path.splitext(video_name)[0])
+    save_dir = os.path.join(OUTPUT_DIR, parent_folder, os.path.splitext(video_name)[0])
     os.makedirs(save_dir, exist_ok=True)
     output_video_file = os.path.join(save_dir, video_name)
     print(f"\nProcessing Video: {video_name}")
@@ -54,14 +63,18 @@ for video_path in video_files:
         bboxes = detect_humans(detector, frame_bgr)
 
         # Pose estimation
-        data_samples, pose_results = estimate_pose(
-            pose_estimator, frame, bboxes)
+        data_samples, pose_results = estimate_pose(pose_estimator, frame, bboxes)
 
         visualizer = init_visualizer(pose_estimator)
 
         combine_keypoints(pose_results, frame_idx, video_data, bboxes)
-        visualize_lower_points(frame=frame, data_samples=data_samples, frame_idx=frame_idx,
-                               frames_list=frames_list, joints_to_visualize=[11, 12, 13, 14, 15, 16])
+        visualize_lower_points(
+            frame=frame,
+            data_samples=data_samples,
+            frame_idx=frame_idx,
+            frames_list=frames_list,
+            joints_to_visualize=[11, 12, 13, 14, 15, 16],
+        )
 
     # After processing all frames, save the entire video data
     save_keypoints_to_json(video_data, save_dir, video_name)

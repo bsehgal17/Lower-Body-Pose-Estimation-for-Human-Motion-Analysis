@@ -8,11 +8,9 @@ import config
 from rescale_pred import get_video_resolution, rescale_keypoints
 
 # Define base paths
-original_video_base = (
-    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\HumanEva"
-)
+original_video_base = r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\dataset\HumanEva"
 degraded_video_base = (
-    r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
+    r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\test_dataset_results\degraded_videos"
 )
 
 results = []
@@ -48,8 +46,8 @@ for root, _, files in os.walk(degraded_video_base):
             # JSON prediction file (same name as .avi but .json)
             json_path = os.path.join(
                 root,
-                "median",
-                os.path.splitext(file)[0] + "_gaussian_filtered_median_filtered.json",
+                os.path.splitext(file)[0],
+                os.path.splitext(file)[0] + ".json",
             )
             # json_path = os.path.join(
             #     root,
@@ -89,25 +87,21 @@ for root, _, files in os.walk(degraded_video_base):
                 gt_keypoints,
                 pred_keypoints,
                 threshold=0.02,
-                joints_to_evaluate=lower_body_joints,
             )
             pck1 = compute_pck(
                 gt_keypoints,
                 pred_keypoints,
                 threshold=0.01,
-                joints_to_evaluate=lower_body_joints,
             )
             pck5 = compute_pck(
                 gt_keypoints,
                 pred_keypoints,
                 threshold=0.05,
-                joints_to_evaluate=lower_body_joints,
             )
             pck05 = compute_pck(
                 gt_keypoints,
                 pred_keypoints,
                 threshold=0.005,
-                joints_to_evaluate=lower_body_joints,
             )
             print("--- Results ---")
             print(f"PCK@0.2: {pck2:.2f}%")
@@ -129,6 +123,6 @@ df = pd.DataFrame(
         "PCK@0.005",
     ],
 )
-excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_results\comparsion_excels\rtmw_x_40_median_gaussian.xlsx"
+excel_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\comparison_excels\combined_dgradation.xlsx"
 df.to_excel(excel_path, index=False)
 print(f"Metrics saved to {excel_path}")
