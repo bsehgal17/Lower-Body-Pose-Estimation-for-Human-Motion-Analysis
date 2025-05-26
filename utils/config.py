@@ -1,11 +1,6 @@
-
 # Paths for models and input data
-VIDEO_FOLDER = (
-    r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/test_videos/"
-)
-OUTPUT_DIR = (
-    r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/test_videos_results"
-)
+VIDEO_FOLDER = r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\dataset\HumanEva_walk"
+OUTPUT_DIR = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/test_videos_results"
 
 # video extensions
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv")

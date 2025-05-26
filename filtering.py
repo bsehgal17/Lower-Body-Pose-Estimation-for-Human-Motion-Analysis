@@ -1,7 +1,16 @@
 import json
 import os
 from post_processing.clean_data import interpolate_series
-from post_processing.filters import butterworth_filter, gaussian_filter
+from post_processing.filters import (
+    butterworth_filter,
+    gaussian_filter,
+    median_filter_1d,
+    kalman_filter,
+    kalman_rts_filter,
+    moving_average_filter,
+    savitzky_golay_filter,
+    wiener_filter_1d,
+)
 from utils.video_info import extract_video_info
 from utils import config
 from utils.joint_enum import PredJoints
@@ -25,9 +34,7 @@ def save_filtered_keypoints(
 
 def run_filter(filter_name, filter_kwargs):
     base_path = config.VIDEO_FOLDER
-    output_base = (
-        r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
-    )
+    output_base = r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\test_dataset_results\degraded_videos"
     iqr_multiplier = 1.5
     interpolation_kind = "linear"
     joints = [
@@ -38,6 +45,23 @@ def run_filter(filter_name, filter_kwargs):
         PredJoints.LEFT_KNEE.value,
         PredJoints.RIGHT_KNEE.value,
     ]
+
+    # Dispatch map for filter function
+    filter_fn_map = {
+        "gaussian": gaussian_filter,
+        "butterworth": butterworth_filter,
+        "median": median_filter_1d,
+        "kalman": kalman_filter,
+        "kalman_rts": kalman_rts_filter,
+        "moving_average": moving_average_filter,
+        "savitzky": savitzky_golay_filter,
+        "wiener": wiener_filter_1d,
+    }
+
+    if filter_name not in filter_fn_map:
+        raise ValueError(f"Unknown filter: {filter_name}")
+
+    filter_fn = filter_fn_map[filter_name]
 
     for root, dirs, files in os.walk(base_path):
         for file in files:
@@ -80,14 +104,9 @@ def run_filter(filter_name, filter_kwargs):
                             y_series, iqr_multiplier, interpolation_kind
                         )
 
-                        if filter_name == "gaussian":
-                            x_filtered = gaussian_filter(x_interp, **filter_kwargs)
-                            y_filtered = gaussian_filter(y_interp, **filter_kwargs)
-                        elif filter_name == "butterworth":
-                            x_filtered = butterworth_filter(x_interp, **filter_kwargs)
-                            y_filtered = butterworth_filter(y_interp, **filter_kwargs)
-                        else:
-                            raise ValueError(f"Unknown filter: {filter_name}")
+                        x_filtered = filter_fn(x_interp, **filter_kwargs)
+                        y_filtered = filter_fn(y_interp, **filter_kwargs)
+
                     except Exception as e:
                         print(f"Error filtering joint {joint}: {e}")
                         continue
@@ -137,5 +156,28 @@ def run_filter(filter_name, filter_kwargs):
             )
 
 
+# === Example Usage ===
 if __name__ == "__main__":
+    # Gaussian Filter
     run_filter("gaussian", {"sigma": 1})
+
+    # Butterworth Filter
+    # run_filter("butterworth", {"cutoff": 5, "fs": 60.0, "order": 10})
+
+    # Median Filter
+    # run_filter("median", {"window_size": 11})
+
+    # Kalman Filter
+    # run_filter("kalman", {"process_noise": 1.0, "measurement_noise": 1.0})
+
+    # Kalman RTS Filter
+    # run_filter("kalman_rts", {"process_noise": 1.0, "measurement_noise": 1.0})
+
+    # Moving Average Filter
+    # run_filter("moving_average", {"window_size": 5})
+
+    # Savitzky–Golay Filter
+    # run_filter("savitzky", {"window_length": 11, "polyorder": 3})
+
+    # Wiener Filter
+    # run_filter("wiener", {"window_size": 3})
