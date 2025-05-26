@@ -1,16 +1,19 @@
 import json
 import os
-import scipy.signal  # For Wiener filter
-from video_info import extract_video_info
+import scipy.ndimage
+from utils.video_info import extract_video_info
 import config
-from joint_enum import PredJoints
+from utils.joint_enum import PredJoints
 
 
 def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):
+    # Ensure the output folder exists
     os.makedirs(output_folder, exist_ok=True)
     filtered_json_path = os.path.join(
         output_folder,
-        os.path.basename(original_json_path).replace(".json", "_wiener_filtered.json"),
+        os.path.basename(original_json_path).replace(
+            ".json", "_butter_median_filtered.json"
+        ),
     )
     with open(filtered_json_path, "w") as f:
         json.dump(filtered_keypoints, f, indent=4)
@@ -18,7 +21,7 @@ def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoint
 
 
 base_path = config.VIDEO_FOLDER
-window_size = 3  # Wiener filter window size (must be odd)
+window_size = 11  # You can adjust this to tune smoothing (must be odd integer)
 lower_body_joints = [
     PredJoints.LEFT_ANKLE.value,
     PredJoints.RIGHT_ANKLE.value,
@@ -42,10 +45,9 @@ for root, dirs, files in os.walk(base_path):
                 output_base,
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
-                f"{action_group}_({'C' + str(camera + 1)})/{action_group}_({'C' + str(camera + 1)})".replace(
-                    " ", ""
-                )
-                + ".json",
+                "butterworth",
+                f"{action_group}_({'C' + str(camera + 1)})".replace(" ", "")
+                + "_butter_filtered.json",
             )
 
             if not os.path.exists(json_path):
@@ -55,6 +57,7 @@ for root, dirs, files in os.walk(base_path):
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
 
+                # Temporal smoothing of each joint's x and y coordinates
                 for keypoint_set_idx in range(
                     len(pred_keypoints[0]["keypoints"][0]["keypoints"])
                 ):
@@ -68,17 +71,13 @@ for root, dirs, files in os.walk(base_path):
                             x_series.append(kp[0])
                             y_series.append(kp[1])
 
-                        # Wiener filter requires odd window size
-                        if len(x_series) >= window_size:
-                            smoothed_x = scipy.signal.wiener(
-                                x_series, mysize=window_size
-                            )
-                            smoothed_y = scipy.signal.wiener(
-                                y_series, mysize=window_size
-                            )
-                        else:
-                            smoothed_x = x_series  # Skip filtering if too short
-                            smoothed_y = y_series
+                        # Apply median filtering
+                        smoothed_x = scipy.ndimage.median_filter(
+                            x_series, size=window_size
+                        )
+                        smoothed_y = scipy.ndimage.median_filter(
+                            y_series, size=window_size
+                        )
 
                         for i, frame_data in enumerate(pred_keypoints):
                             frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][
@@ -92,8 +91,8 @@ for root, dirs, files in os.walk(base_path):
                 output_base,
                 subject,
                 f"{action_group}_({'C' + str(camera + 1)})",
-                "wiener",
+                "median",  # Changed folder name to reflect median filtering
             )
             save_filtered_keypoints(output_folder, json_path, pred_keypoints)
 
-print("Wiener filtering complete.")
+print("Processing complete.")

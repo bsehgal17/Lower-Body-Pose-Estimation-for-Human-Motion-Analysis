@@ -1,8 +1,8 @@
 import os
 import cv2
 import numpy as np
-from get_gt_keypoint import extract_ground_truth
-from video_info import extract_video_info
+from Compute_metrics.get_gt_keypoint import extract_ground_truth
+from utils.video_info import extract_video_info
 import config
 
 sync_data = {

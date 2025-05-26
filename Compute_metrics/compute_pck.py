@@ -1,5 +1,5 @@
 import numpy as np
-from joint_enum import GTJoints, PredJoints
+from utils.joint_enum import GTJoints, PredJoints
 
 
 def average_if_tuple(value):
@@ -26,7 +26,8 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
     # Convert to numpy and check shape
     gt, pred = np.array(gt, dtype=np.float64), np.array(pred, dtype=np.float64)
     if gt.shape[0] != pred.shape[0] or gt.ndim != 3:
-        raise ValueError("Shapes of gt and pred must be (N, J, 2) or (N, J, 3)")
+        raise ValueError(
+            "Shapes of gt and pred must be (N, J, 2) or (N, J, 3)")
 
     if joints_to_evaluate is None:
         # Full-body evaluation
@@ -80,7 +81,8 @@ def compute_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
             pred_joint = PredJoints[joint].value
 
             if isinstance(gt_joint, tuple):  # If joint has two points, compute midpoint
-                gt_indices.append((gt[:, gt_joint[0]] + gt[:, gt_joint[1]]) / 2)
+                gt_indices.append(
+                    (gt[:, gt_joint[0]] + gt[:, gt_joint[1]]) / 2)
             else:
                 gt_indices.append(gt[:, gt_joint])
 

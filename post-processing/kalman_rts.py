@@ -2,9 +2,10 @@ import json
 import os
 import numpy as np
 from pykalman import KalmanFilter
-from video_info import extract_video_info
-import config
-from joint_enum import PredJoints
+from utils.video_info import extract_video_info
+from utils import config
+
+from utils.joint_enum import PredJoints
 
 
 def save_filtered_keypoints(output_folder, original_json_path, filtered_keypoints):

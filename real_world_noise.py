@@ -1,7 +1,8 @@
 import cv2
 import os
 import numpy as np
-from utils import frame_generator  # Make sure this exists and works correctly
+# Make sure this exists and works correctly
+from utils.utils import frame_generator
 
 # Input and Output directories
 input_folder = (

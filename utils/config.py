@@ -1,3 +1,4 @@
+
 # Paths for models and input data
 VIDEO_FOLDER = (
     r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/test_videos/"

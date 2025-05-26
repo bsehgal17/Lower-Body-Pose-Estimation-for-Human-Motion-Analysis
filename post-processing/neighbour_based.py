@@ -1,9 +1,9 @@
 import json
 import os
 import numpy as np
-from video_info import extract_video_info
-import config
-from joint_enum import PredJoints
+from utils.video_info import extract_video_info
+from utils import config
+from utils.joint_enum import PredJoints
 
 
 def euclidean_distance(point1, point2):
@@ -67,8 +67,10 @@ def correct_keypoints(keypoints, threshold):
 
                         if len(all_points) > 0:
                             # Calculate mean of all available points
-                            avg_x = sum(p[0] for p in all_points) / len(all_points)
-                            avg_y = sum(p[1] for p in all_points) / len(all_points)
+                            avg_x = sum(p[0]
+                                        for p in all_points) / len(all_points)
+                            avg_y = sum(p[1]
+                                        for p in all_points) / len(all_points)
                             corrected_keypoints[frame_idx]["keypoints"][0]["keypoints"][
                                 keypoint_set_idx
                             ][joint_idx] = [float(avg_x), float(avg_y)]
@@ -77,7 +79,8 @@ def correct_keypoints(keypoints, threshold):
 
 
 def save_corrected_keypoints(output_folder, original_json_path, corrected_keypoints):
-    os.makedirs(output_folder, exist_ok=True)  # Ensure the output folder exists
+    # Ensure the output folder exists
+    os.makedirs(output_folder, exist_ok=True)
     corrected_json_path = os.path.join(
         output_folder,
         os.path.basename(original_json_path).replace(
@@ -134,6 +137,7 @@ for root, dirs, files in os.walk(base_path):
                 f"{action_group}_({'C' + str(camera + 1)})",
                 "neighbor_corrected",
             )
-            save_corrected_keypoints(output_folder, json_path, corrected_keypoints)
+            save_corrected_keypoints(
+                output_folder, json_path, corrected_keypoints)
 
 print("Processing complete.")

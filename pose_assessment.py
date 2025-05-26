@@ -1,11 +1,12 @@
 import os
 import pandas as pd
-from get_gt_keypoint import extract_ground_truth
-from extract_predicted_points import extract_predictions
-from compute_pck import compute_pck
-from video_info import extract_video_info
-import config
-from rescale_pred import get_video_resolution, rescale_keypoints
+from Compute_metrics.get_gt_keypoint import extract_ground_truth
+from Compute_metrics.extract_predicted_points import extract_predictions
+from Compute_metrics.compute_pck import compute_pck
+from utils.video_info import extract_video_info
+from utils import config
+
+from add_noise.rescale_pred import get_video_resolution, rescale_keypoints
 
 # Define base paths
 original_video_base = r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\dataset\HumanEva"
@@ -58,7 +59,8 @@ for root, _, files in os.walk(degraded_video_base):
             gt_keypoints = extract_ground_truth(
                 config.CSV_FILE, subject, action, camera
             )
-            sync_frame = config.SYNC_DATA.get(subject, {}).get(action, None)[camera]
+            sync_frame = config.SYNC_DATA.get(
+                subject, {}).get(action, None)[camera]
             frame_range = (sync_frame, sync_frame + len(gt_keypoints))
 
             # Extract predicted keypoints
@@ -67,12 +69,14 @@ for root, _, files in os.walk(degraded_video_base):
             # Rescale predicted keypoints to match original resolution
             try:
                 orig_w, orig_h = get_video_resolution(original_video_path)
-                degraded_w, degraded_h = get_video_resolution(os.path.join(root, file))
+                degraded_w, degraded_h = get_video_resolution(
+                    os.path.join(root, file))
 
                 scale_x = orig_w / degraded_w
                 scale_y = orig_h / degraded_h
 
-                pred_keypoints = rescale_keypoints(pred_keypoints_org, scale_x, scale_y)
+                pred_keypoints = rescale_keypoints(
+                    pred_keypoints_org, scale_x, scale_y)
             except Exception as e:
                 print(f"⚠️ Skipping rescaling due to error: {e}")
                 continue
@@ -108,7 +112,8 @@ for root, _, files in os.walk(degraded_video_base):
             print(f"PCK@0.1: {pck1:.2f}%")
             print(f"PCK@0.05: {pck5:.2f}%")
 
-            results.append([subject, action_group, camera + 1, pck1, pck2, pck5, pck05])
+            results.append([subject, action_group, camera +
+                           1, pck1, pck2, pck5, pck05])
 
 # Save all results
 df = pd.DataFrame(

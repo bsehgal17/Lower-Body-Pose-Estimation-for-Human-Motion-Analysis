@@ -2,7 +2,7 @@ import mmcv
 import os
 import cv2
 from mmpose.registry import VISUALIZERS
-from config import OUTPUT_DIR
+from utils.config import OUTPUT_DIR
 from tqdm import tqdm
 
 

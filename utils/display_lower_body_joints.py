@@ -1,11 +1,11 @@
 import os
-from visualize_pred_points import (
+from utils.visualize_pred_points import (
     visualize_predictions,
 )  # Import the function from your visualization script
-from joint_enum import PredJoints
+from utils.joint_enum import PredJoints
 
 
-def main():
+def display_lower_body_joints():
     # Set paths for the video and JSON files
     video_path = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\HumanEva\degraded_videos\S3\Image_Data\Walking_1_(C2).avi"
     json_file = r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40\S3\Walking_1_(C2)\savitzky\Walking_1_(C2)_savgol_filtered.json"
@@ -40,4 +40,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    display_lower_body_joints()

@@ -1,9 +1,10 @@
 import json
 import os
 import numpy as np
-from video_info import extract_video_info
-import config
-from joint_enum import PredJoints
+from utils.video_info import extract_video_info
+from utils import config
+
+from utils.joint_enum import PredJoints
 
 
 def moving_average_filter(data, window_size=5):
@@ -87,8 +88,10 @@ for root, dirs, files in os.walk(base_path):
                         x_series.append(kp[0])
                         y_series.append(kp[1])
 
-                    x_filtered = moving_average_filter(np.array(x_series), window_size)
-                    y_filtered = moving_average_filter(np.array(y_series), window_size)
+                    x_filtered = moving_average_filter(
+                        np.array(x_series), window_size)
+                    y_filtered = moving_average_filter(
+                        np.array(y_series), window_size)
 
                     for i, frame_data in enumerate(pred_keypoints):
                         frame_data["keypoints"][0]["keypoints"][keypoint_set_idx][

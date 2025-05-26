@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from joint_enum import GTJoints, PredJoints
+from utils.joint_enum import GTJoints, PredJoints
 
 
 def compute_jointwise_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
@@ -14,17 +14,20 @@ def compute_jointwise_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
     # Convert to numpy and check shape
     gt, pred = np.array(gt, dtype=np.float64), np.array(pred, dtype=np.float64)
     if gt.shape[0] != pred.shape[0] or gt.ndim != 3:
-        raise ValueError("Shapes of gt and pred must be (N, J, 2) or (N, J, 3)")
+        raise ValueError(
+            "Shapes of gt and pred must be (N, J, 2) or (N, J, 3)")
 
     if joints_to_evaluate is None:
-        joints_to_evaluate = [joint.name for joint in GTJoints]  # Full-body evaluation
+        # Full-body evaluation
+        joints_to_evaluate = [joint.name for joint in GTJoints]
         right_hip = gt[:, GTJoints.RIGHT_HIP.value]
         left_shoulder = gt[:, GTJoints.LEFT_SHOULDER.value]
         norm_length = np.linalg.norm(left_shoulder - right_hip, axis=-1)
     else:
         left_hip = gt[:, GTJoints.LEFT_HIP.value]
         right_hip = gt[:, GTJoints.RIGHT_HIP.value]
-        norm_length = np.linalg.norm(right_hip - left_hip, axis=-1)  # Pelvis width
+        norm_length = np.linalg.norm(
+            right_hip - left_hip, axis=-1)  # Pelvis width
 
     pred_indices = []
     gt_indices = []
@@ -36,7 +39,8 @@ def compute_jointwise_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
             pred_joint = PredJoints[joint].value
 
             if isinstance(gt_joint, tuple):
-                gt_indices.append((gt[:, gt_joint[0]] + gt[:, gt_joint[1]]) / 2)
+                gt_indices.append(
+                    (gt[:, gt_joint[0]] + gt[:, gt_joint[1]]) / 2)
             else:
                 gt_indices.append(gt[:, gt_joint])
 
@@ -57,7 +61,8 @@ def compute_jointwise_pck(gt, pred, threshold=0.05, joints_to_evaluate=None):
 
     # Compute distances and correctness per joint, per frame
     distances = (
-        np.linalg.norm(gt_points - pred_points, axis=-1) / norm_length[:, np.newaxis]
+        np.linalg.norm(gt_points - pred_points, axis=-1) /
+        norm_length[:, np.newaxis]
     )
     jointwise_pck = (distances < threshold).astype(int) * 100  # Shape: (N, J)
 

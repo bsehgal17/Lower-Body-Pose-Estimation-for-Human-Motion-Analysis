@@ -3,7 +3,7 @@ from mmdet.apis import inference_detector, init_detector
 from mmdet.utils.setup_env import register_all_modules
 
 import numpy as np
-from config import DET_CONFIG, DET_CHECKPOINT, DEVICE, DETECTION_THRESHOLD, NMS_THRESHOLD
+from utils.config import DET_CONFIG, DET_CHECKPOINT, DEVICE, DETECTION_THRESHOLD, NMS_THRESHOLD
 
 
 def init_object_detector():
