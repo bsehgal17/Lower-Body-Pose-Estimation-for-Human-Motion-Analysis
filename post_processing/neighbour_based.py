@@ -1,16 +1,40 @@
 import json
 import os
 import numpy as np
+from typing import List, Dict, Any
 from utils.video_info import extract_video_info
 from utils import config
 from utils.joint_enum import PredJoints
 
 
-def euclidean_distance(point1, point2):
+def euclidean_distance(point1: List[float], point2: List[float]) -> float:
+    """
+    Computes the Euclidean distance between two 2D points.
+
+    Args:
+        point1: [x, y] coordinates of the first point.
+        point2: [x, y] coordinates of the second point.
+
+    Returns:
+        Euclidean distance as a float.
+    """
     return np.linalg.norm(np.array(point1) - np.array(point2))
 
 
-def correct_keypoints(keypoints, threshold):
+def correct_keypoints(
+    keypoints: List[Dict[str, Any]], threshold: float
+) -> List[Dict[str, Any]]:
+    """
+    Corrects outlier keypoints in a sequence of frames by replacing them with
+    the average of spatial neighbors if their distances from adjacent frames are too large.
+
+    Args:
+        keypoints: List of frame-wise keypoint dictionaries (typically parsed from JSON).
+        threshold: Distance threshold beyond which a keypoint is considered an outlier.
+
+    Returns:
+        A corrected version of the keypoints with smoothed replacements where necessary.
+    """
     num_frames = len(keypoints)
     corrected_keypoints = keypoints.copy()
 
@@ -41,12 +65,11 @@ def correct_keypoints(keypoints, threshold):
                     dist_prev = euclidean_distance(current_point, prev_point)
                     dist_next = euclidean_distance(current_point, next_point)
 
+                    # Replace if both distances exceed threshold
                     if dist_prev > threshold and dist_next > threshold:
-                        # Collect points from previous 3 frames and next 3 frames
-                        prev_points = []
-                        next_points = []
+                        prev_points: List[List[float]] = []
+                        next_points: List[List[float]] = []
 
-                        # Get previous frames (up to 3)
                         for i in range(1, 4):
                             if frame_idx - i >= 0:
                                 prev_point = keypoints[frame_idx - i]["keypoints"][0][
@@ -54,7 +77,6 @@ def correct_keypoints(keypoints, threshold):
                                 ][keypoint_set_idx][joint_idx]
                                 prev_points.append(prev_point)
 
-                        # Get next frames (up to 3)
                         for i in range(1, 4):
                             if frame_idx + i < num_frames:
                                 next_point = keypoints[frame_idx + i]["keypoints"][0][
@@ -62,15 +84,11 @@ def correct_keypoints(keypoints, threshold):
                                 ][keypoint_set_idx][joint_idx]
                                 next_points.append(next_point)
 
-                        # Combine all points (prev + next)
                         all_points = prev_points + next_points
 
                         if len(all_points) > 0:
-                            # Calculate mean of all available points
-                            avg_x = sum(p[0]
-                                        for p in all_points) / len(all_points)
-                            avg_y = sum(p[1]
-                                        for p in all_points) / len(all_points)
+                            avg_x = sum(p[0] for p in all_points) / len(all_points)
+                            avg_y = sum(p[1] for p in all_points) / len(all_points)
                             corrected_keypoints[frame_idx]["keypoints"][0]["keypoints"][
                                 keypoint_set_idx
                             ][joint_idx] = [float(avg_x), float(avg_y)]
@@ -78,8 +96,19 @@ def correct_keypoints(keypoints, threshold):
     return corrected_keypoints
 
 
-def save_corrected_keypoints(output_folder, original_json_path, corrected_keypoints):
-    # Ensure the output folder exists
+def save_corrected_keypoints(
+    output_folder: str,
+    original_json_path: str,
+    corrected_keypoints: List[Dict[str, Any]],
+) -> None:
+    """
+    Saves the corrected keypoints to disk as a new JSON file.
+
+    Args:
+        output_folder: Directory where the corrected file will be saved.
+        original_json_path: Path to the original JSON file (used to derive filename).
+        corrected_keypoints: List of updated keypoints to save.
+    """
     os.makedirs(output_folder, exist_ok=True)
     corrected_json_path = os.path.join(
         output_folder,
@@ -92,9 +121,11 @@ def save_corrected_keypoints(output_folder, original_json_path, corrected_keypoi
     print(f"Corrected keypoints saved to: {corrected_json_path}")
 
 
-base_path = config.VIDEO_FOLDER
-threshold = 5  # Set the threshold distance for correction
-lower_body_joints = [
+# === Main Execution ===
+base_path: str = config.VIDEO_FOLDER
+threshold: float = 5.0
+
+lower_body_joints: List[int] = [
     PredJoints.LEFT_ANKLE.value,
     PredJoints.RIGHT_ANKLE.value,
     PredJoints.LEFT_HIP.value,
@@ -103,7 +134,7 @@ lower_body_joints = [
     PredJoints.RIGHT_KNEE.value,
 ]
 
-output_base = (
+output_base: str = (
     r"C:\Users\BhavyaSehgal\Downloads\bhavya_1st_sem\humaneva\rtmw_x_degraded_40"
 )
 
@@ -127,7 +158,7 @@ for root, dirs, files in os.walk(base_path):
                 continue
 
             with open(json_path, "r") as f:
-                pred_keypoints = json.load(f)
+                pred_keypoints: List[Dict[str, Any]] = json.load(f)
 
             corrected_keypoints = correct_keypoints(pred_keypoints, threshold)
 
@@ -137,7 +168,6 @@ for root, dirs, files in os.walk(base_path):
                 f"{action_group}_({'C' + str(camera + 1)})",
                 "neighbor_corrected",
             )
-            save_corrected_keypoints(
-                output_folder, json_path, corrected_keypoints)
+            save_corrected_keypoints(output_folder, json_path, corrected_keypoints)
 
 print("Processing complete.")
