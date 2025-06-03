@@ -1,7 +1,7 @@
 class PathsConfig:
     def __init__(
         self,
-        video_folder=r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\dataset\HumanEva_walk",
+        video_folder=r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva_walking/",
         output_dir=r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/test_videos_results",
         csv_file=r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\Tested_dataset\humaneva_sorted_by_subject.csv",
     ):

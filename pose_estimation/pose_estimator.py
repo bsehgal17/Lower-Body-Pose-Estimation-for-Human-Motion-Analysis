@@ -13,6 +13,9 @@ class PoseEstimator:
             device=self.config.processing.DEVICE,
             cfg_options=cfg_options,
         )
+        # Expose cfg and dataset_meta for visualization
+        self.cfg = self.pose_estimator.cfg
+        self.dataset_meta = getattr(self.pose_estimator, "dataset_meta", None)
 
     def estimate_pose(self, frame, bboxes):
         """Runs pose estimation and returns keypoint results."""
