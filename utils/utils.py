@@ -1,16 +1,19 @@
 import os
 import cv2
 import json
-from utils.config import VIDEO_EXTENSIONS
+from utils.config import Config
 import matplotlib.pyplot as plt
 
 
-def get_video_files(video_folder):
+def get_video_files(video_folder, config=None):
     """Returns a list of all video file paths in the given folder and its subfolders."""
+    if config is None:
+        config = Config()
+    video_extensions = config.video.EXTENSIONS
     video_files = []
     for dirpath, _, filenames in os.walk(video_folder):
         for f in filenames:
-            if f.lower().endswith(VIDEO_EXTENSIONS):
+            if f.lower().endswith(video_extensions):
                 video_files.append(os.path.join(dirpath, f))
     return video_files
 
@@ -49,8 +52,7 @@ def combine_keypoints(pose_results, frame_idx, video_data, bboxes):
 
 def save_keypoints_to_json(video_data, output_dir, video_name):
     """Saves all keypoints and predictions for the entire video in a single JSON file."""
-    video_output_dir = os.path.join(
-        output_dir, os.path.splitext(video_name)[0])
+    video_output_dir = os.path.join(output_dir, os.path.splitext(video_name)[0])
     os.makedirs(video_output_dir, exist_ok=True)
 
     # Create a final output file for the entire video
@@ -62,8 +64,7 @@ def save_keypoints_to_json(video_data, output_dir, video_name):
     with open(output_file, "w") as f:
         json.dump(video_data, f, indent=4)
 
-    print(
-        f"Saved keypoints and predictions for the entire video to {output_file}")
+    print(f"Saved keypoints and predictions for the entire video to {output_file}")
 
 
 def plot_filtering_effect(

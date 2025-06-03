@@ -1,10 +1,12 @@
 import argparse
 import sys
-from utils.config import Config, PathsConfig, ProcessingConfig
+from utils.config import Config
 
 
 def run_detect_and_visualize(config):
-    import detect_and_visualize_pose
+    from detect_and_visualize_pose import detect_and_visualize_pose
+
+    detect_and_visualize_pose(config)
 
 
 def run_real_world_noise(input_folder, output_folder):
@@ -25,7 +27,7 @@ def run_filtering(filter_name, filter_kwargs):
     filtering.run_filter(filter_name, filter_kwargs)
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description="Lower Body Pose Estimation Pipeline")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -65,13 +67,13 @@ def main():
         help="Filter parameters as key=value pairs (e.g. sigma=1 window_size=5)",
     )
 
-    args = parser.parse_args()
+    # Use argv if provided (for debugging), else sys.argv
+    args = parser.parse_args(argv)
 
     # Load default config
     config = Config()
 
     if args.command == "detect":
-        # Override config if provided
         if args.video_folder:
             config.paths.VIDEO_FOLDER = args.video_folder
         if args.output_dir:
@@ -107,4 +109,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Set DEBUG_ARGS to a list like you would use in the terminal, e.g.:
+    # DEBUG_ARGS = ["detect", "--video_folder", "your/path", "--output_dir", "your/output"]
+    DEBUG_ARGS = ["detect"]
+    main(DEBUG_ARGS)
