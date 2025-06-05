@@ -3,7 +3,7 @@ import cv2
 import logging
 from typing import Optional
 from config.base import GlobalConfig
-from utils.utils import get_video_files
+from utils.video_io import get_video_files
 from .types import add_realistic_noise, apply_motion_blur
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,8 @@ class NoiseSimulator:
             input_path (str): Path to original video.
             output_path (str): Path where noisy video will be saved.
         """
-        logger.info(f"Processing video for noise: {input_path} -> {output_path}")
+        logger.info(
+            f"Processing video for noise: {input_path} -> {output_path}")
         cap = cv2.VideoCapture(input_path)
 
         if not cap.isOpened():
@@ -50,7 +51,8 @@ class NoiseSimulator:
         orig_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         orig_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        target_res = self.noise_params.target_resolution or (orig_width, orig_height)
+        target_res = self.noise_params.target_resolution or (
+            orig_width, orig_height)
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
@@ -92,7 +94,8 @@ class NoiseSimulator:
             output_folder (str): Folder to write output videos (same structure).
         """
         logger.info(f"Starting noise simulation for videos in: {input_folder}")
-        video_files = get_video_files(input_folder, self.config.video.extensions)
+        video_files = get_video_files(
+            input_folder, self.config.video.extensions)
 
         if not video_files:
             logger.warning("No video files found to process.")
