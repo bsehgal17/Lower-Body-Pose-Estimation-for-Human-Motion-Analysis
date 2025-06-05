@@ -34,6 +34,6 @@ def main(argv: Optional[List[str]] = None):
 
 if __name__ == "__main__":
     DEBUG_ARGS: Optional[List[str]] = (
-        None  # Example: ["detect", "--video_folder", "./videos"]
+        ["detect"]
     )
     main(DEBUG_ARGS)
