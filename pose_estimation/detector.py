@@ -2,12 +2,12 @@ from mmengine.registry import init_default_scope
 from mmdet.apis import inference_detector, init_detector
 from mmdet.utils.setup_env import register_all_modules
 import numpy as np
-from config.base import Config
+from config.base import GlobalConfig
 
 
 class Detector:
-    def __init__(self, config: Config = None):
-        self.config = config or Config()
+    def __init__(self, config: GlobalConfig = None):
+        self.config = config or GlobalConfig()
         self.detector = init_detector(
             self.config.models.DET_CONFIG,
             self.config.models.DET_CHECKPOINT,
