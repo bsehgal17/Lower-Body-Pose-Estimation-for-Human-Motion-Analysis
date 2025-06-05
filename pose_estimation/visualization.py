@@ -3,7 +3,7 @@ import os
 import cv2
 from mmpose.registry import VISUALIZERS
 from tqdm import tqdm
-from utils.config import Config
+from config.base import Config
 
 
 class PoseVisualizer:
@@ -29,8 +29,7 @@ class PoseVisualizer:
             out_file=None,
             kpt_thr=self.config.processing.KPT_THRESHOLD,
         )
-        vis_result = self.visualizer.get_image()
-        frames_list.append(vis_result)
+        return self.visualizer.get_image()
 
     def visualize_lower_points(
         self, frame, data_samples, frame_idx, frames_list, joints_to_visualize
@@ -42,8 +41,7 @@ class PoseVisualizer:
             if joint_idx < len(keypoints[0]):
                 x, y = keypoints[0][joint_idx]
                 cv2.circle(frame_copy, (int(x), int(y)), 2, (0, 255, 0), -1)
-        skeleton_connections = [
-            (11, 12), (11, 13), (13, 15), (12, 14), (14, 16)]
+        skeleton_connections = [(11, 12), (11, 13), (13, 15), (12, 14), (14, 16)]
         for start_idx, end_idx in skeleton_connections:
             if start_idx < len(keypoints[0]) and end_idx < len(keypoints[0]):
                 x_start, y_start = keypoints[0][start_idx]
@@ -56,18 +54,4 @@ class PoseVisualizer:
                     1,
                 )
         frames_list.append(frame_copy)
-
-    @staticmethod
-    def create_video_from_frames(frames, video_output_path, fps=60):
-        """Creates a video from the given frames."""
-        if len(frames) == 0:
-            print("No frames to create video.")
-            return
-        height, width, _ = frames[0].shape
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        video_writer = cv2.VideoWriter(
-            video_output_path, fourcc, fps, (width, height))
-        for frame in frames:
-            video_writer.write(frame)
-        video_writer.release()
-        print(f"Video saved to {video_output_path}")
+        return frames_list
