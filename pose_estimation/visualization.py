@@ -15,7 +15,7 @@ class PoseVisualizer:
         self.visualizer = VISUALIZERS.build(pose_estimator.cfg.visualizer)
         self.visualizer.set_dataset_meta(pose_estimator.dataset_meta)
 
-    def visualize_pose(self, frame, data_samples, frame_idx, frames_list):
+    def visualize_pose(self, frame, data_samples):
         """Visualizes pose estimation results, adds them to frames list."""
         self.visualizer.add_datasample(
             "result",
@@ -27,7 +27,7 @@ class PoseVisualizer:
             show=False,
             wait_time=0,
             out_file=None,
-            kpt_thr=self.config.processing.KPT_THRESHOLD,
+            kpt_thr=self.config.processing.kpt_threshold,
         )
         return self.visualizer.get_image()
 

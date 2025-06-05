@@ -9,9 +9,9 @@ class Detector:
     def __init__(self, config: GlobalConfig = None):
         self.config = config or GlobalConfig()
         self.detector = init_detector(
-            self.config.models.DET_CONFIG,
-            self.config.models.DET_CHECKPOINT,
-            device=self.config.processing.DEVICE,
+            self.config.models.det_config,
+            self.config.models.det_checkpoint,
+            device=self.config.processing.device,
         )
         scope = self.detector.cfg.get("default_scope", "mmdet")
         if scope is not None:
@@ -29,10 +29,10 @@ class Detector:
         )
         bboxes = bboxes[
             (pred_instance.labels == 0)
-            & (pred_instance.scores > self.config.processing.DETECTION_THRESHOLD)
+            & (pred_instance.scores > self.config.processing.detection_threshold)
         ]
 
         # Apply Non-Maximum Suppression (NMS)
         from mmpose.evaluation.functional import nms
 
-        return bboxes[nms(bboxes, self.config.processing.NMS_THRESHOLD)][:, :4]
+        return bboxes[nms(bboxes, self.config.processing.nms_threshold)][:, :4]

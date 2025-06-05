@@ -5,9 +5,9 @@ from config.base import get_config
 
 def get_video_files(video_folder, config=None):
     """Returns a list of all video file paths in the given folder and its subfolders."""
-    if config is None:
+    if config is None or isinstance(config, list):
         config = get_config()
-    video_extensions = config.video.extensions
+    video_extensions = tuple(config.video.extensions)
     video_files = []
     for dirpath, _, filenames in os.walk(video_folder):
         for f in filenames:
