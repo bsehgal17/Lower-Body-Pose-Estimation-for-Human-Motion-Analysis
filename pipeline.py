@@ -1,7 +1,8 @@
 import os
 import logging
 from config.base import GlobalConfig
-from utils.utils import get_video_files, save_keypoints_to_json
+from utils.video_io import get_video_files
+from utils.json_io import save_keypoints_to_json
 from pose_estimation.detector import Detector
 from pose_estimation.estimator import PoseEstimator
 from pose_estimation.visualizer import PoseVisualizer

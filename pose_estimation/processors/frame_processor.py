@@ -1,5 +1,5 @@
 import cv2
-from utils.utils import combine_keypoints
+from utils.json_io import combine_keypoints
 
 
 class FrameProcessor:
