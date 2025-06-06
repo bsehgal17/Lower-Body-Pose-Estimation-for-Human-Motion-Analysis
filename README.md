@@ -217,10 +217,15 @@ pipelines:
       - command: noise
         config_file: "configs/noise_config.yaml"
 
-  - name: rerun_on_noisy
+pipelines:
+  - name: detect_then_noise
     steps:
       - command: detect
-        config_file: "configs/detect_on_noisy.yaml"
+        config_file: "configs/detect_config.yaml"
+
+      - command: noise
+        config_file: "configs/noise_config.yaml"
+
 ```
 
 ### Run all steps
