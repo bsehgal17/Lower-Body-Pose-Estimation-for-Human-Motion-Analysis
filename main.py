@@ -1,39 +1,34 @@
-# run.py
-import os
-import sys
+# orchestrator.py
+import yaml
+import subprocess
 import logging
-from typing import List, Optional
-from cli import parse_main_args
-from config.base import get_config
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
-def main(argv: Optional[List[str]] = None):
-    args = parse_main_args(argv)
+def run_pipeline(pipelines_yaml_path: str = "pipelines.yaml"):
+    with open(pipelines_yaml_path, "r") as f:
+        pipelines = yaml.safe_load(f).get("pipelines", [])
 
-    try:
-        config_path = os.path.join(os.path.dirname(__file__), args.config_file)
-        config = get_config(config_path)
-    except Exception as e:
-        logger.critical(f"Error loading config: {e}")
-        sys.exit(1)
+    for pipeline in pipelines:
+        logging.info(f"\n--- Running Pipeline: {pipeline['name']} ---")
+        for step in pipeline.get("steps", []):
+            command = step["command"]
+            config_file = step["config_file"]
 
-    try:
-        args.func(args, config)
-    except Exception as e:
-        logger.critical(f"Error during '{args.command}': {e}")
-        logger.exception("Traceback:")
-        sys.exit(1)
+            logging.info(f"Running step: {command} with config {config_file}")
+            result = subprocess.run(
+                ["python", "pipeline_runner.py", command, "--config_file", config_file],
+                capture_output=True,
+                text=True,
+            )
 
-    logger.info("Pipeline completed successfully.")
+            if result.returncode != 0:
+                logging.error(f"Step '{command}' failed:\n{result.stderr}")
+                break
+            else:
+                logging.info(result.stdout)
 
 
 if __name__ == "__main__":
-    DEBUG_ARGS: Optional[List[str]] = (
-        ["detect"]
-    )
-    main(DEBUG_ARGS)
+    run_pipeline()

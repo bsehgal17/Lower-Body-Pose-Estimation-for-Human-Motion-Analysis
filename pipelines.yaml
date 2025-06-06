@@ -1,0 +1,16 @@
+orchestrator:
+  log_dir: "./logs"
+  default_device: "cuda:0"
+
+pipelines:
+  - name: run_pose_estimation
+    command: detect
+    config_file: "configs/detect_config.yaml"
+
+  - name: simulate_noise
+    command: noise
+    config_file: "configs/noise_config.yaml"
+
+  - name: run_pose_estimation_on_noisy
+    command: detect
+    config_file: "configs/detect_on_noisy.yaml"
