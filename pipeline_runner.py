@@ -12,7 +12,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def main(argv: Optional[List[str]] = None):
+def run_pipeline_from_args(argv: Optional[List[str]] = None):
     args = parse_main_args(argv)
 
     try:
@@ -33,7 +33,4 @@ def main(argv: Optional[List[str]] = None):
 
 
 if __name__ == "__main__":
-    DEBUG_ARGS: Optional[List[str]] = (
-        ["detect"]
-    )
-    main(DEBUG_ARGS)
+    run_pipeline_from_args()
