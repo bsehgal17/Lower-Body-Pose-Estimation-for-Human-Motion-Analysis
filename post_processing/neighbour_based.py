@@ -3,7 +3,7 @@ import os
 import numpy as np
 from typing import List, Dict, Any
 from utils.video_info import extract_video_info
-from utils import config
+from config import base
 from utils.joint_enum import PredJoints
 
 
@@ -122,7 +122,7 @@ def save_corrected_keypoints(
 
 
 # === Main Execution ===
-base_path: str = config.VIDEO_FOLDER
+base_path: str = base.VIDEO_FOLDER
 threshold: float = 5.0
 
 lower_body_joints: List[int] = [

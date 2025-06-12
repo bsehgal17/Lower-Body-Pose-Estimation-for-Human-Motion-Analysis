@@ -1,4 +1,3 @@
-# main_handlers.py
 import logging
 from config.base import GlobalConfig
 
@@ -7,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 def _handle_detect_command(args, config: GlobalConfig):
-    from pipeline import run_detection_pipeline
+    from pose_estimation import run_detection_pipeline
 
     if args.video_folder:
         config.paths.video_folder = args.video_folder
