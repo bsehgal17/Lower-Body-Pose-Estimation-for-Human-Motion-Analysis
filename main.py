@@ -1,4 +1,3 @@
-# orchestrator.py
 import yaml
 import subprocess
 import logging
@@ -18,8 +17,8 @@ def run_pipeline(pipelines_yaml_path: str = "pipelines.yaml"):
 
             logging.info(f"Running step: {command} with config {config_file}")
             result = subprocess.run(
-                ["python", "pipeline_runner.py", command, "--config_file", config_file],
-                capture_output=True,
+                ["python", "pipeline_runner.py", "--config_file",
+                    step["config_file"], step["command"]],
                 text=True,
             )
 
