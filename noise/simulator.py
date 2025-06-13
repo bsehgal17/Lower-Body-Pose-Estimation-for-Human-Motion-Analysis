@@ -19,10 +19,7 @@ class NoiseSimulator:
         self.noise_params = config.noise
 
     def _apply_brightness_reduction(self, frame):
-        """
-        Reduces brightness of the frame by subtracting from the V channel in HSV space.
-        """
-        if not self.noise_params.apply_brightness_reduction:
+        if not getattr(self.noise_params, "apply_brightness_reduction", False):
             return frame
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -31,14 +28,25 @@ class NoiseSimulator:
         hsv_modified = cv2.merge((h, s, v))
         return cv2.cvtColor(hsv_modified, cv2.COLOR_HSV2BGR)
 
-    def process_single_video(self, input_path: str, output_path: str):
-        """
-        Processes a single video file and writes a noisy version to output.
+    def _apply_noise(self, frame):
+        if getattr(self.noise_params, "apply_poisson_noise", True) or getattr(self.noise_params, "apply_gaussian_noise", True):
+            frame = add_realistic_noise(
+                frame,
+                poisson_scale=self.noise_params.poisson_scale if getattr(
+                    self.noise_params, "apply_poisson_noise", True) else 0,
+                gaussian_std=self.noise_params.gaussian_std if getattr(
+                    self.noise_params, "apply_gaussian_noise", True) else 0,
+            )
+        return frame
 
-        Args:
-            input_path (str): Path to original video.
-            output_path (str): Path where noisy video will be saved.
-        """
+    def _apply_motion_blur(self, frame):
+        if getattr(self.noise_params, "apply_motion_blur", True):
+            return apply_motion_blur(
+                frame, kernel_size=self.noise_params.motion_blur_kernel_size
+            )
+        return frame
+
+    def process_single_video(self, input_path: str, output_path: str):
         logger.info(
             f"Processing video for noise: {input_path} -> {output_path}")
         cap = cv2.VideoCapture(input_path)
@@ -51,6 +59,7 @@ class NoiseSimulator:
         orig_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         orig_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+        # Default to original resolution if not specified
         target_res = self.noise_params.target_resolution or (
             orig_width, orig_height)
 
@@ -68,14 +77,8 @@ class NoiseSimulator:
                 frame = cv2.resize(frame, target_res)
 
             frame = self._apply_brightness_reduction(frame)
-            frame = add_realistic_noise(
-                frame,
-                poisson_scale=self.noise_params.poisson_scale,
-                gaussian_std=self.noise_params.gaussian_std,
-            )
-            frame = apply_motion_blur(
-                frame, kernel_size=self.noise_params.motion_blur_kernel_size
-            )
+            frame = self._apply_noise(frame)
+            frame = self._apply_motion_blur(frame)
 
             out.write(frame)
             frame_idx += 1
@@ -86,13 +89,6 @@ class NoiseSimulator:
         logger.info(f"Finished writing noisy video to {output_path}")
 
     def process_all_videos(self, input_folder: str, output_folder: str):
-        """
-        Processes all video files in the input folder and writes noisy versions.
-
-        Args:
-            input_folder (str): Folder containing input videos.
-            output_folder (str): Folder to write output videos (same structure).
-        """
         logger.info(f"Starting noise simulation for videos in: {input_folder}")
         video_files = get_video_files(
             input_folder, self.config.video.extensions)

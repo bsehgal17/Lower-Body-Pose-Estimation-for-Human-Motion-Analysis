@@ -23,15 +23,15 @@ processing:
   kpt_threshold: 0.3
 
 noise:
-  apply_brightness_reduction: true         # Enables V-channel darkening in HSV space
-  brightness_factor: 70                    # Value to subtract from brightness (0–255)
-
-  poisson_scale: 1.0                       # Scaling factor for Poisson noise
-  gaussian_std: 10.0                       # Standard deviation for Gaussian noise
-
-  motion_blur_kernel_size: 9              # Kernel size for motion blur (must be odd, e.g., 5, 7, 9)
-
-  target_resolution: [480, 360]           # Resize resolution (W, H) or leave empty/null to preserve original
+  apply_poisson_noise: true
+  apply_gaussian_noise: true
+  apply_motion_blur: true
+  apply_brightness_reduction: true
+  brightness_factor: 30
+  poisson_scale: 1.0
+  gaussian_std: 2.0
+  motion_blur_kernel_size: 5
+  target_resolution: null  # or [640, 480]
 
 
 filter:
