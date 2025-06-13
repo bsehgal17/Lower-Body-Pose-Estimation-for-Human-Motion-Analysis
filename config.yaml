@@ -1,4 +1,3 @@
-# config.yaml
 paths:
   video_folder: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva_walking/
   output_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/test_videos_results_from_yaml
@@ -10,8 +9,6 @@ video:
     - .avi
     - .mov
     - .mkv
-  # target_fps: 30
-  # resize_dim: [640, 480]
 
 models:
   det_config: /storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/mmpose/demo/mmdetection_cfg/faster_rcnn_r50_fpn_coco.py
@@ -21,13 +18,45 @@ models:
 
 processing:
   device: cuda:0
-  nms_threshold: 0.3
+  nms_threshold: 0.5
   detection_threshold: 0.3
   kpt_threshold: 0.3
-  # filter_type: moving_average
-  # filter_window_size: 7
-  # noise_type: gaussian
-  # noise_intensity: 0.05
+
+noise:
+  apply_brightness_reduction: true         # Enables V-channel darkening in HSV space
+  brightness_factor: 70                    # Value to subtract from brightness (0–255)
+
+  poisson_scale: 1.0                       # Scaling factor for Poisson noise
+  gaussian_std: 10.0                       # Standard deviation for Gaussian noise
+
+  motion_blur_kernel_size: 9              # Kernel size for motion blur (must be odd, e.g., 5, 7, 9)
+
+  target_resolution: [480, 360]           # Resize resolution (W, H) or leave empty/null to preserve original
+
+
+filter:
+  name: "gaussian"  # e.g. "butterworth", "kalman", "savitzky", etc.
+  params:
+    sigma: 0.5      # this depends on the filter
+
+  enable_iqr: true
+  enable_interpolation: true
+  iqr_multiplier: 1.5
+  interpolation_kind: "linear"
+  enable_filter_plots: true
+  joints_to_filter:
+    - LEFT_ANKLE
+    - RIGHT_ANKLE
+    - LEFT_KNEE
+    - RIGHT_KNEE
+    - LEFT_HIP
+    - RIGHT_HIP
+
+
+analysis:
+  # PCK thresholds for assessment (change or add more if needed)
+  pck_thresholds: [0.01, 0.02, 0.05, 0.1]
+  excel_output_filename: combined_assessment_results.xlsx
 
 sync_data:
   data:

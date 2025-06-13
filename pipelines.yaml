@@ -3,17 +3,31 @@ orchestrator:
   default_device: "cuda:0"
 
 pipelines:
-  # - name: run_pose_estimation
-  #   steps:
-  #     - command: detect
-  #       config_file: "config.yaml"
 
-  - name: simulate_noise
-    steps:
-      - command: noise
-        config_file: "config.yaml"
+#   - name: run_pose_estimation
+#     steps:
+#       - command: detect
+#         config_file: "config.yaml"
+
+  # - name: simulate_noise
+  #   steps:
+  #     - command: noise
+  #       config_file: "config.yaml"
 
   # - name: run_pose_estimation_on_noisy
   #   steps:
   #     - command: detect
-  #       config_file: "configs/detect_on_noisy.yaml"
+  #       config_file: "configs/detect.yaml"
+        # -command: noise
+        #   config_file:"config.yaml"
+
+  - name: run_filter_and_assess
+    steps:
+      - command: filter
+        config_file: "config.yaml"
+
+
+  # - name: evaluate_pose_accuracy
+  #   steps:
+  #     - command: assess
+  #       config_file: "config.yaml"
