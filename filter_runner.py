@@ -24,10 +24,15 @@ class KeypointFilterProcessor:
         self.filter_name = filter_name
         self.filter_kwargs = filter_kwargs
 
-        self.enable_iqr = getattr(config.filter, "enable_iqr", False)
+        self.enable_outlier_removal = getattr(
+            config.filter.outlier_removal, "enable", False)
+        self.outlier_method = getattr(
+            config.filter.outlier_removal, "method", "iqr")
+        self.outlier_params = getattr(
+            config.filter.outlier_removal, "params", {})
+
         self.enable_interp = getattr(
             config.filter, "enable_interpolation", True)
-        self.iqr_multiplier = getattr(config.filter, "iqr_multiplier", 1.5)
         self.interpolation_kind = getattr(
             config.filter, "interpolation_kind", "linear")
         self.joints_to_filter = self._get_joints_to_filter()
@@ -132,14 +137,14 @@ class KeypointFilterProcessor:
 
                 try:
                     preprocessor = TimeSeriesPreprocessor(
-                        method="iqr" if self.enable_iqr else None,
+                        method=self.outlier_method if self.enable_outlier_removal else None,
                         interpolation=self.interpolation_kind if self.enable_interp else None
                     )
 
                     x_proc = preprocessor.clean(
-                        x_series, iqr_multiplier=self.iqr_multiplier)
+                        x_series, **self.outlier_params)
                     y_proc = preprocessor.clean(
-                        y_series, iqr_multiplier=self.iqr_multiplier)
+                        y_series, **self.outlier_params)
 
                     x_filt = self.filter_fn(x_proc, **self.filter_kwargs)
                     y_filt = self.filter_fn(y_proc, **self.filter_kwargs)
