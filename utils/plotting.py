@@ -13,9 +13,16 @@ def plot_filtering_effect(
         title (str): Plot title.
         save_path (str): If provided, saves plot to this path.
     """
-    plt.figure(figsize=(12, 6))
-    plt.plot(original, "b-", label="Original", alpha=0.7)
-    plt.plot(filtered, "r-", label="Filtered", linewidth=1)
+    plt.figure()
+    if len(original) == 1:
+        plt.plot(original, label="Original", linestyle="None", marker='o')
+    else:
+        plt.plot(original, label="Original", linestyle="--")
+
+    if len(filtered) == 1:
+        plt.plot(filtered, label="Filtered", linestyle="None", marker='x')
+    else:
+        plt.plot(filtered, label="Filtered", linewidth=2)
     plt.title(title)
     plt.xlabel("Frame Number")
     plt.ylabel("Coordinate Value")

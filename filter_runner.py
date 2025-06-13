@@ -9,7 +9,9 @@ from config.base import GlobalConfig
 from utils.video_info import extract_video_info
 from utils.joint_enum import PredJoints
 from utils.plotting import plot_filtering_effect
-from post_processing.filter_library import FILTER_FN_MAP
+from post_processing.filter_registry import FILTER_FN_MAP
+from post_processing.preprocessing_utils import TimeSeriesPreprocessor
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,15 +24,17 @@ class KeypointFilterProcessor:
         self.filter_name = filter_name
         self.filter_kwargs = filter_kwargs
 
-        self.enable_iqr = config.processing.get("enable_iqr", False)
-        self.enable_interp = config.processing.get("enable_interpolation", True)
-        self.iqr_multiplier = config.processing.get("iqr_multiplier", 1.5)
-        self.interpolation_kind = config.processing.get("interpolation_kind", "linear")
+        self.enable_iqr = getattr(config.filter, "enable_iqr", False)
+        self.enable_interp = getattr(
+            config.filter, "enable_interpolation", True)
+        self.iqr_multiplier = getattr(config.filter, "iqr_multiplier", 1.5)
+        self.interpolation_kind = getattr(
+            config.filter, "interpolation_kind", "linear")
         self.joints_to_filter = self._get_joints_to_filter()
         self.filter_fn = self._get_filter_function()
 
     def _get_joints_to_filter(self) -> List[int]:
-        configured_joints = self.config.processing.get("joints_to_filter", [])
+        configured_joints = getattr(self.config.filter, "joints_to_filter", [])
         if configured_joints:
             try:
                 return [
@@ -39,7 +43,8 @@ class KeypointFilterProcessor:
                     if j in PredJoints.__members__
                 ]
             except Exception as e:
-                logger.warning(f"Error parsing joints_to_filter from config: {e}")
+                logger.warning(
+                    f"Error parsing joints_to_filter from config: {e}")
         return [
             PredJoints.LEFT_ANKLE.value,
             PredJoints.RIGHT_ANKLE.value,
@@ -58,19 +63,20 @@ class KeypointFilterProcessor:
 
     def process_directory(self):
         input_dir = self.config.paths.output_dir
-
         for root, _, files in os.walk(input_dir):
             for file in files:
-                if file.endswith(".json") and not file.endswith("_filtered.json"):
+                if file.endswith(".json"):
                     json_path = os.path.join(root, file)
                     self._process_file(json_path, root)
-
         logger.info("Keypoint filtering pipeline finished.")
 
     def _process_file(self, json_path: str, root: str):
-        video_info = extract_video_info(os.path.basename(json_path), root)
+        basename = os.path.splitext(os.path.basename(json_path))[0] + ".avi"
+        video_info = extract_video_info(basename, root)
+
         if not video_info:
-            logger.warning(f"Could not extract video info from {json_path}. Skipping.")
+            logger.warning(
+                f"Could not extract video info from {json_path}. Skipping.")
             return
 
         subject, action, camera_idx = video_info
@@ -83,7 +89,6 @@ class KeypointFilterProcessor:
             filtered_keypoints = self._apply_filter_to_data(
                 pred_keypoints, subject, action, root
             )
-
             output_folder = os.path.join(root, self.filter_name)
             self._save_filtered(json_path, filtered_keypoints, output_folder)
             self._save_as_pickle(json_path, filtered_keypoints, output_folder)
@@ -91,98 +96,86 @@ class KeypointFilterProcessor:
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
 
-    def _apply_filter_to_data(
-        self, keypoints_data, subject, action, root
-    ) -> List[Dict]:
+    def _apply_filter_to_data(self, keypoints_data, subject, action, root) -> List[Dict]:
         data = json.loads(json.dumps(keypoints_data))
 
-        for frame_idx, frame_data in enumerate(data):
-            for person_idx, person_data in enumerate(frame_data.get("keypoints", [])):
-                kp_series = {jid: {"x": [], "y": []} for jid in self.joints_to_filter}
+        # assume consistent person count across frames
+        num_persons = len(data[0]["keypoints"])
 
-                for joint_id in self.joints_to_filter:
-                    kp = person_data.get("keypoints", {}).get(joint_id)
-                    if kp:
-                        kp_series[joint_id]["x"].append(kp[0])
-                        kp_series[joint_id]["y"].append(kp[1])
-                    else:
-                        kp_series[joint_id]["x"].append(float("nan"))
-                        kp_series[joint_id]["y"].append(float("nan"))
+        for person_idx in range(num_persons):
+            for joint_id in self.joints_to_filter:
+                x_series = []
+                y_series = []
 
-                for joint_id in self.joints_to_filter:
-                    x_series = np.array(kp_series[joint_id]["x"], dtype=np.float64)
-                    y_series = np.array(kp_series[joint_id]["y"], dtype=np.float64)
-
-                    if np.all(np.isnan(x_series)) or np.all(np.isnan(y_series)):
+                for frame in data:
+                    if person_idx >= len(frame["keypoints"]):
+                        # Person not present in this frame
+                        x_series.append(np.nan)
+                        y_series.append(np.nan)
                         continue
 
+                    person_data = frame["keypoints"][person_idx]
+
                     try:
-                        x_proc, y_proc = x_series, y_series
+                        kp = person_data["keypoints"][0][joint_id]
+                        x_series.append(kp[0])
+                        y_series.append(kp[1])
+                    except (IndexError, KeyError, TypeError):
+                        x_series.append(np.nan)
+                        y_series.append(np.nan)
 
-                        if self.enable_iqr:
-                            from post_processing.preprocessing_utils import (
-                                remove_outliers_iqr,
-                            )
+                x_series = np.array(x_series, dtype=np.float64)
+                y_series = np.array(y_series, dtype=np.float64)
 
-                            x_proc = remove_outliers_iqr(x_proc, self.iqr_multiplier)
-                            y_proc = remove_outliers_iqr(y_proc, self.iqr_multiplier)
+                if np.all(np.isnan(x_series)) or np.all(np.isnan(y_series)):
+                    continue
 
-                        if self.enable_interp:
-                            from post_processing.preprocessing_utils import (
-                                interpolate_missing_values,
-                            )
+                try:
+                    preprocessor = TimeSeriesPreprocessor(
+                        method="iqr" if self.enable_iqr else None,
+                        interpolation=self.interpolation_kind if self.enable_interp else None
+                    )
 
-                            x_proc = interpolate_missing_values(
-                                x_proc, kind=self.interpolation_kind
-                            )
-                            y_proc = interpolate_missing_values(
-                                y_proc, kind=self.interpolation_kind
-                            )
+                    x_proc = preprocessor.clean(
+                        x_series, iqr_multiplier=self.iqr_multiplier)
+                    y_proc = preprocessor.clean(
+                        y_series, iqr_multiplier=self.iqr_multiplier)
 
-                        x_filt = self.filter_fn(x_proc, **self.filter_kwargs)
-                        y_filt = self.filter_fn(y_proc, **self.filter_kwargs)
+                    x_filt = self.filter_fn(x_proc, **self.filter_kwargs)
+                    y_filt = self.filter_fn(y_proc, **self.filter_kwargs)
 
-                        for i, frame in enumerate(data):
-                            if (
-                                frame["keypoints"]
-                                and joint_id
-                                in frame["keypoints"][person_idx]["keypoints"]
-                            ):
-                                frame["keypoints"][person_idx]["keypoints"][joint_id][
-                                    0
-                                ] = float(x_filt[i])
-                                frame["keypoints"][person_idx]["keypoints"][joint_id][
-                                    1
-                                ] = float(y_filt[i])
+                    for i, frame in enumerate(data):
+                        person_kpts = frame["keypoints"][person_idx]["keypoints"]
 
-                        if (
-                            joint_id == PredJoints.LEFT_ANKLE.value
-                            and person_idx == 0
-                            and self.config.processing.get("enable_filter_plots", False)
-                        ):
-                            plot_dir = os.path.join(root, "plots", self.filter_name)
-                            os.makedirs(plot_dir, exist_ok=True)
-                            plot_filtering_effect(
-                                original=x_series,
-                                filtered=x_filt,
-                                title=f"X - {subject} {action} Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(
-                                    plot_dir, f"x_{joint_id}_{self.filter_name}.png"
-                                ),
-                            )
-                            plot_filtering_effect(
-                                original=y_series,
-                                filtered=y_filt,
-                                title=f"Y - {subject} {action} Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(
-                                    plot_dir, f"y_{joint_id}_{self.filter_name}.png"
-                                ),
-                            )
+                        person_kpts[0][joint_id][0] = float(x_filt[i])
+                        person_kpts[0][joint_id][1] = float(y_filt[i])
 
-                    except Exception as e:
-                        logger.warning(
-                            f"Filter error on joint {joint_id} for person {person_idx}: {e}"
+                    if (
+                        joint_id == PredJoints.LEFT_ANKLE.value
+                        and person_idx == 0
+                        and getattr(self.config.filter, "enable_filter_plots", False)
+                    ):
+                        plot_dir = os.path.join(
+                            root, "plots", self.filter_name)
+                        os.makedirs(plot_dir, exist_ok=True)
+                        plot_filtering_effect(
+                            original=x_series,
+                            filtered=x_filt,
+                            title=f"X - {subject} {action} Joint {joint_id} ({self.filter_name})",
+                            save_path=os.path.join(
+                                plot_dir, f"x_{joint_id}_{self.filter_name}.png"),
                         )
+                        plot_filtering_effect(
+                            original=y_series,
+                            filtered=y_filt,
+                            title=f"Y - {subject} {action} Joint {joint_id} ({self.filter_name})",
+                            save_path=os.path.join(
+                                plot_dir, f"y_{joint_id}_{self.filter_name}.png"),
+                        )
+
+                except Exception as e:
+                    logger.warning(
+                        f"Filter error on joint {joint_id} for person {person_idx}: {e}")
 
         return data
 
@@ -208,3 +201,10 @@ class KeypointFilterProcessor:
         with open(pkl_path, "wb") as f:
             pickle.dump(data, f)
         logger.info(f"Filtered keypoints (pickle) saved to: {pkl_path}")
+
+
+def run_keypoint_filtering_from_config(config: GlobalConfig):
+    filter_name = config.filter.name
+    filter_kwargs = config.filter.params or {}
+    processor = KeypointFilterProcessor(config, filter_name, filter_kwargs)
+    processor.process_directory()

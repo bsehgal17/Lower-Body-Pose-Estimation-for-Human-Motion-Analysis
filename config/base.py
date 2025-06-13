@@ -32,7 +32,8 @@ class GlobalConfig:
     sync_data: SyncDataConfig = field(default_factory=SyncDataConfig)
     filter: Optional[FilterConfig] = field(default_factory=FilterConfig)
     noise: Optional[NoiseConfig] = field(default_factory=NoiseConfig)
-    assessment: Optional[AssessmentConfig] = field(default_factory=AssessmentConfig)
+    assessment: Optional[AssessmentConfig] = field(
+        default_factory=AssessmentConfig)
 
     @classmethod
     def from_yaml(cls, yaml_path: str) -> "GlobalConfig":
@@ -47,10 +48,16 @@ class GlobalConfig:
         paths_config = PathsConfig(**raw_config.get("paths", {}))
         video_config = VideoConfig(**raw_config.get("video", {}))
         models_config = ModelsConfig(**raw_config.get("models", {}))
-        processing_config = ProcessingConfig(**raw_config.get("processing", {}))
+        processing_config = ProcessingConfig(
+            **raw_config.get("processing", {}))
         sync_data_config = SyncDataConfig(
             data=raw_config.get("sync_data", {}).get("data")
-        )  # Handle nested dict for sync_data
+        )
+
+        filter_config = FilterConfig(**raw_config.get("filter", {}))
+        noise_config = NoiseConfig(**raw_config.get("noise", {}))
+        assessment_config = AssessmentConfig(
+            **raw_config.get("assessment", {}))
 
         return cls(
             paths=paths_config,
@@ -58,18 +65,21 @@ class GlobalConfig:
             models=models_config,
             processing=processing_config,
             sync_data=sync_data_config,
+            filter=filter_config,
+            noise=noise_config,
+            assessment=assessment_config,
         )
 
     def to_yaml(self, yaml_path: str):
-        """Saves the current configuration to a YAML file."""
         config_dict = {
             "paths": self.paths.__dict__,
             "video": self.video.__dict__,
             "models": self.models.__dict__,
             "processing": self.processing.__dict__,
-            "sync_data": {
-                "data": self.sync_data.data
-            },  # Special handling for nested dict
+            "sync_data": {"data": self.sync_data.data},
+            "noise": self.noise.__dict__,
+            "filter": self.filter.__dict__,
+            "assessment": self.assessment.__dict__,
         }
         with open(yaml_path, "w") as f:
             yaml.dump(config_dict, f, indent=4)
@@ -79,7 +89,6 @@ class GlobalConfig:
 
 # You can create a singleton instance or a function to get the config
 # This prevents multiple initializations and ensures a single source of truth.
-
 _global_config: Optional[GlobalConfig] = None
 
 
@@ -94,6 +103,7 @@ def get_config(config_file_path: Optional[str] = None) -> GlobalConfig:
             logger.info(f"Loading configuration from {config_file_path}")
             _global_config = GlobalConfig.from_yaml(config_file_path)
         else:
-            logger.info("No config file specified, using default configurations.")
+            logger.info(
+                "No config file specified, using default configurations.")
             _global_config = GlobalConfig()
     return _global_config

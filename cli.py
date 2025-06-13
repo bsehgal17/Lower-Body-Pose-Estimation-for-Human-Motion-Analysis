@@ -18,10 +18,12 @@ def parse_main_args(argv: Optional[List[str]] = None):
         "--config_file", type=str, default="config.yaml", help="Path to config YAML"
     )
 
-    subparsers = parser.add_subparsers(dest="command", required=True, help="Commands")
+    subparsers = parser.add_subparsers(
+        dest="command", required=True, help="Commands")
 
     # Subcommand: detect
-    parser_detect = subparsers.add_parser("detect", help="Run detection pipeline")
+    parser_detect = subparsers.add_parser(
+        "detect", help="Run detection pipeline")
     parser_detect.add_argument("--video_folder", type=str)
     parser_detect.add_argument("--output_dir", type=str)
     parser_detect.set_defaults(func=_handle_detect_command)
@@ -37,11 +39,8 @@ def parse_main_args(argv: Optional[List[str]] = None):
     parser_assess.set_defaults(func=_handle_assess_command)
 
     # Subcommand: filter
-    parser_filter = subparsers.add_parser("filter", help="Filter keypoints")
-    parser_filter.add_argument("filter_name", type=str)
-    parser_filter.add_argument(
-        "--params", nargs="*", default=[], help="Filter parameters as key=value"
-    )
+    parser_filter = subparsers.add_parser(
+        "filter", help="Apply keypoint filtering (config-based)")
     parser_filter.set_defaults(func=_handle_filter_command)
 
     return parser.parse_args(argv)

@@ -1,12 +1,11 @@
 import logging
 from config.base import GlobalConfig
 
-
 logger = logging.getLogger(__name__)
 
 
 def _handle_detect_command(args, config: GlobalConfig):
-    from pose_estimation import run_detection_pipeline
+    from detect_pose import run_detection_pipeline
 
     if args.video_folder:
         config.paths.video_folder = args.video_folder
@@ -33,18 +32,5 @@ def _handle_assess_command(args, config: GlobalConfig):
 
 
 def _handle_filter_command(args, config: GlobalConfig):
-    from filter_runner import run_keypoint_filtering
-
-    params = {}
-    for param in args.params:
-        if "=" not in param:
-            logger.warning(f"Invalid param: {param}")
-            continue
-        key, value = param.split("=", 1)
-        try:
-            params[key] = eval(
-                value
-            )  # Use eval only if trusted; else use type conversion
-        except Exception:
-            params[key] = value
-    run_keypoint_filtering(config, args.filter_name, params)
+    from filter_runner import run_keypoint_filtering_from_config
+    run_keypoint_filtering_from_config(config)
