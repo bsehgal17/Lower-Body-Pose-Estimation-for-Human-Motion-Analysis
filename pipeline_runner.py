@@ -4,6 +4,8 @@ import logging
 from typing import List, Optional
 from cli import parse_main_args
 from config.base import get_config
+from utils.run_utils import make_run_dir
+
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -15,7 +17,7 @@ def run_pipeline_from_args(argv: Optional[List[str]] = None):
     args = parse_main_args(argv)
 
     try:
-        config_path = os.path.join(os.path.dirname(__file__), args.config_file)
+        config_path = args.config  # changed here
         config = get_config(config_path)
     except Exception as e:
         logger.critical(f"Error loading config: {e}")
