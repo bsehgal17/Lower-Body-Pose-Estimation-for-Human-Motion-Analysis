@@ -71,4 +71,16 @@ def run_detection_pipeline(pipeline_config: PipelineConfig, global_config: Globa
             f"Keypoints saved to {output_json_file} and {output_pkl_file}")
         logger.info(f"Output video saved to {output_video_file}")
 
-    logger.info("All video processing complete.")
+        # Save configs
+        pipeline_cfg_json = os.path.join(
+            current_save_dir, "pipeline_config.json")
+        global_cfg_json = os.path.join(current_save_dir, "global_config.json")
+
+        with open(pipeline_cfg_json, "w") as f:
+            f.write(pipeline_config.model_dump_json(indent=2))
+
+        with open(global_cfg_json, "w") as f:
+            f.write(global_config.model_dump_json(indent=2))
+
+        logger.info(f"Saved pipeline config to {pipeline_cfg_json}")
+        logger.info(f"Saved global config to {global_cfg_json}")
