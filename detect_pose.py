@@ -1,6 +1,8 @@
 import os
 import logging
 import pickle
+import json
+from dataclasses import asdict
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from utils.video_io import get_video_files
@@ -62,25 +64,24 @@ def run_detection_pipeline(pipeline_config: PipelineConfig, global_config: Globa
 
         video_io.release()
 
+        # or use a nested subset like `pipeline_config.models.detector`
+        detector_config_dict = asdict(pipeline_config.processing)
+
         # Save results
-        save_keypoints_to_json(video_data, current_save_dir, video_name)
+        save_keypoints_to_json(
+            video_data,
+            current_save_dir,
+            video_name,
+            detector_config=detector_config_dict
+        )
+        bundle = {
+            "keypoints": video_data,
+            "detection_config": detector_config_dict
+        }
+
         with open(output_pkl_file, "wb") as f:
-            pickle.dump(video_data, f)
+            pickle.dump(bundle, f)
 
         logger.info(
             f"Keypoints saved to {output_json_file} and {output_pkl_file}")
         logger.info(f"Output video saved to {output_video_file}")
-
-        # Save configs
-        pipeline_cfg_json = os.path.join(
-            current_save_dir, "pipeline_config.json")
-        global_cfg_json = os.path.join(current_save_dir, "global_config.json")
-
-        with open(pipeline_cfg_json, "w") as f:
-            f.write(pipeline_config.model_dump_json(indent=2))
-
-        with open(global_cfg_json, "w") as f:
-            f.write(global_config.model_dump_json(indent=2))
-
-        logger.info(f"Saved pipeline config to {pipeline_cfg_json}")
-        logger.info(f"Saved global config to {global_cfg_json}")
