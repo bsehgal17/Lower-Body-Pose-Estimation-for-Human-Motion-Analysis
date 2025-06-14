@@ -2,7 +2,7 @@ from mmengine.registry import init_default_scope
 from mmdet.apis import inference_detector, init_detector
 from mmdet.utils.setup_env import register_all_modules
 import numpy as np
-from config.base import GlobalConfig
+from config.pipeline_config import GlobalConfig
 
 
 class Detector:

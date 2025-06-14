@@ -3,7 +3,7 @@ import os
 import cv2
 from mmpose.registry import VISUALIZERS
 from tqdm import tqdm
-from config.base import GlobalConfig
+from config.pipeline_config import GlobalConfig
 
 
 class PoseVisualizer:

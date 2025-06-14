@@ -2,7 +2,8 @@ import os
 import cv2
 import logging
 from typing import Optional
-from config.base import GlobalConfig
+from config.pipeline_config import PipelineConfig
+from config.global_config import GlobalConfig
 from utils.video_io import get_video_files
 from .types import add_realistic_noise, apply_motion_blur
 
@@ -14,9 +15,11 @@ class NoiseSimulator:
     Class to simulate realistic noise on videos by applying Poisson, Gaussian, and motion blur.
     """
 
-    def __init__(self, config: GlobalConfig):
-        self.config = config
-        self.noise_params = config.noise
+    def __init__(self, pipeline_config: PipelineConfig, global_config: GlobalConfig):
+        self.pipeline_config = pipeline_config
+        self.global_config = global_config
+        self.noise_params = pipeline_config.noise
+        self.video_exts = global_config.video.extensions
 
     def _apply_brightness_reduction(self, frame):
         if not getattr(self.noise_params, "apply_brightness_reduction", False):
@@ -59,7 +62,6 @@ class NoiseSimulator:
         orig_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         orig_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # Default to original resolution if not specified
         target_res = self.noise_params.target_resolution or (
             orig_width, orig_height)
 
@@ -90,8 +92,7 @@ class NoiseSimulator:
 
     def process_all_videos(self, input_folder: str, output_folder: str):
         logger.info(f"Starting noise simulation for videos in: {input_folder}")
-        video_files = get_video_files(
-            input_folder, self.config.video.extensions)
+        video_files = get_video_files(input_folder, self.video_exts)
 
         if not video_files:
             logger.warning("No video files found to process.")

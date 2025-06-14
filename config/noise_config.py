@@ -1,19 +1,19 @@
-from typing import Dict, Any, List, Tuple, Optional
-from dataclasses import dataclass, field
+from typing import Tuple, Optional
+from dataclasses import dataclass
 
 
 @dataclass
 class NoiseConfig:
-    apply_poisson_noise: bool = True
-    poisson_scale: float = 1.0
+    apply_poisson_noise: bool
+    poisson_scale: float
 
-    apply_gaussian_noise: bool = True
-    gaussian_std: float = 5.0
+    apply_gaussian_noise: bool
+    gaussian_std: float
 
-    apply_motion_blur: bool = True
-    motion_blur_kernel_size: int = 5
+    apply_motion_blur: bool
+    motion_blur_kernel_size: int
 
-    apply_brightness_reduction: bool = False
-    brightness_factor: int = 40
+    apply_brightness_reduction: bool
+    brightness_factor: int
 
-    target_resolution: Optional[Tuple[int, int]] = None
+    target_resolution: Optional[Tuple[int, int]]

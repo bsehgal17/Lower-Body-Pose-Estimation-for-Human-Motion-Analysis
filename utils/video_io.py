@@ -1,17 +1,20 @@
 import os
 import cv2
-from config.base import get_config
+import logging
+from typing import List
+
+logger = logging.getLogger(__name__)
 
 
-def get_video_files(video_folder, config=None):
-    """Returns a list of all video file paths in the given folder and its subfolders."""
-    if config is None or isinstance(config, list):
-        config = get_config()
-    video_extensions = tuple(config.video.extensions)
+def get_video_files(video_folder: str, video_exts: List[str]) -> List[str]:
+    """
+    Returns a list of all video file paths in the given folder and its subfolders
+    matching the provided video extensions.
+    """
     video_files = []
     for dirpath, _, filenames in os.walk(video_folder):
         for f in filenames:
-            if f.lower().endswith(video_extensions):
+            if any(f.lower().endswith(ext) for ext in video_exts):
                 video_files.append(os.path.join(dirpath, f))
     return video_files
 

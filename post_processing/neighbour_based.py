@@ -3,7 +3,7 @@ import os
 import numpy as np
 from typing import List, Dict, Any
 from utils.video_info import extract_video_info
-from config import base
+from config import pipeline_config
 from utils.joint_enum import PredJoints
 
 
@@ -87,8 +87,10 @@ def correct_keypoints(
                         all_points = prev_points + next_points
 
                         if len(all_points) > 0:
-                            avg_x = sum(p[0] for p in all_points) / len(all_points)
-                            avg_y = sum(p[1] for p in all_points) / len(all_points)
+                            avg_x = sum(p[0]
+                                        for p in all_points) / len(all_points)
+                            avg_y = sum(p[1]
+                                        for p in all_points) / len(all_points)
                             corrected_keypoints[frame_idx]["keypoints"][0]["keypoints"][
                                 keypoint_set_idx
                             ][joint_idx] = [float(avg_x), float(avg_y)]
@@ -122,7 +124,7 @@ def save_corrected_keypoints(
 
 
 # === Main Execution ===
-base_path: str = base.VIDEO_FOLDER
+base_path: str = pipeline_config.VIDEO_FOLDER
 threshold: float = 5.0
 
 lower_body_joints: List[int] = [
@@ -168,6 +170,7 @@ for root, dirs, files in os.walk(base_path):
                 f"{action_group}_({'C' + str(camera + 1)})",
                 "neighbor_corrected",
             )
-            save_corrected_keypoints(output_folder, json_path, corrected_keypoints)
+            save_corrected_keypoints(
+                output_folder, json_path, corrected_keypoints)
 
 print("Processing complete.")

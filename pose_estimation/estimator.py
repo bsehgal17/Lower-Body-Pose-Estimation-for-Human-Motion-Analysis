@@ -1,6 +1,6 @@
 from mmpose.apis import inference_topdown, init_model
 from mmpose.structures import merge_data_samples
-from config.base import GlobalConfig
+from config.pipeline_config import GlobalConfig
 
 
 class PoseEstimator:

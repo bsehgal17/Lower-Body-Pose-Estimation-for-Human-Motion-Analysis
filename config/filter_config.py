@@ -1,35 +1,25 @@
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, field
+from typing import Dict, Any, List
+from dataclasses import dataclass
 
 
 @dataclass
 class OutlierRemovalConfig:
-    enable: bool = False
-    method: str = "iqr"  # Options: "iqr", "zscore"
-    params: Dict[str, Any] = field(default_factory=lambda: {
-        "iqr_multiplier": 1.5,
-        # for zscore, use "z_threshold": 3.0
-    })
+    enable: bool
+    method: str  # Options: "iqr", "zscore"
+    params: Dict[str, Any]
 
 
 @dataclass
 class FilterConfig:
-    name: str = "butterworth"
-    params: Optional[Dict[str, Any]] = field(default_factory=dict)
-
-    outlier_removal: OutlierRemovalConfig = field(
-        default_factory=OutlierRemovalConfig)
-
-    enable_interpolation: bool = True
-    interpolation_kind: str = "linear"
-
-    enable_filter_plots: bool = False
-
-    joints_to_filter: List[str] = field(default_factory=lambda: [
-        "LEFT_ANKLE", "RIGHT_ANKLE", "LEFT_KNEE", "RIGHT_KNEE", "LEFT_HIP", "RIGHT_HIP"
-    ])
+    name: str
+    params: Dict[str, Any]
+    outlier_removal: OutlierRemovalConfig
+    enable_interpolation: bool
+    interpolation_kind: str
+    enable_filter_plots: bool
+    joints_to_filter: List[str]
 
     def __post_init__(self):
-        # Convert dict to OutlierRemovalConfig if needed
+        # Convert dict to OutlierRemovalConfig if needed (for YAML loading)
         if isinstance(self.outlier_removal, dict):
             self.outlier_removal = OutlierRemovalConfig(**self.outlier_removal)

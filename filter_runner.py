@@ -5,7 +5,7 @@ import pickle
 from typing import Dict, Any, List
 import numpy as np
 
-from config.base import GlobalConfig
+from config.pipeline_config import GlobalConfig
 from utils.video_info import extract_video_info
 from utils.joint_enum import PredJoints
 from utils.plotting import plot_filtering_effect
@@ -69,6 +69,8 @@ class KeypointFilterProcessor:
     def process_directory(self):
         input_dir = self.config.paths.output_dir
         for root, _, files in os.walk(input_dir):
+            if "filtered_outputs" in root:
+                continue  # skip subfolders with filtered files
             for file in files:
                 if file.endswith(".json"):
                     json_path = os.path.join(root, file)
@@ -94,7 +96,8 @@ class KeypointFilterProcessor:
             filtered_keypoints = self._apply_filter_to_data(
                 pred_keypoints, subject, action, root
             )
-            output_folder = os.path.join(root, self.filter_name)
+            output_folder = os.path.join(
+                root, "filtered_outputs", self.filter_name)
             self._save_filtered(json_path, filtered_keypoints, output_folder)
             self._save_as_pickle(json_path, filtered_keypoints, output_folder)
 
@@ -185,7 +188,9 @@ class KeypointFilterProcessor:
         return data
 
     def _save_filtered(self, original_path: str, data: List[Dict], output_dir: str):
+
         os.makedirs(output_dir, exist_ok=True)
+
         out_path = os.path.join(
             output_dir,
             os.path.basename(original_path).replace(

@@ -2,12 +2,13 @@ import os
 import logging
 import pandas as pd
 import re
-from config.base import GlobalConfig
+from config.pipeline_config import GlobalConfig
 from evaluation.overall_pck import OverallPCKCalculator
 from evaluation.pck_evaluator import PCKEvaluator
 from evaluation.get_gt_keypoint import GroundTruthLoader
 from evaluation.extract_predicted_points import PredictionExtractor
-from utils.video_info import extract_video_info  # Optional, fallback to manual parsing
+# Optional, fallback to manual parsing
+from utils.video_info import extract_video_info
 from utils.rescale_pred import get_video_resolution, rescale_keypoints
 
 logger = logging.getLogger(__name__)
@@ -28,7 +29,8 @@ def assess_single_sample(
             subject, action, camera_idx, chunk="chunk0"
         )
 
-        sync_frame_tuple = config.sync_data.data.get(subject, {}).get(action, None)
+        sync_frame_tuple = config.sync_data.data.get(
+            subject, {}).get(action, None)
         if not sync_frame_tuple:
             logger.warning(f"Missing sync data for {subject}, {action}.")
             return None
@@ -36,7 +38,8 @@ def assess_single_sample(
         frame_range = (sync_frame, sync_frame + len(gt_keypoints))
 
         pred_loader = PredictionExtractor(json_path, file_format="json")
-        pred_keypoints_org = pred_loader.get_keypoint_array(frame_range=frame_range)
+        pred_keypoints_org = pred_loader.get_keypoint_array(
+            frame_range=frame_range)
 
         testing_video_path = os.path.join(
             os.path.dirname(json_path),
@@ -49,7 +52,8 @@ def assess_single_sample(
             testing_w, testing_h = get_video_resolution(testing_video_path)
             if (testing_w, testing_h) != (orig_w, orig_h):
                 scale_x, scale_y = orig_w / testing_w, orig_h / testing_h
-                pred_keypoints = rescale_keypoints(pred_keypoints_org, scale_x, scale_y)
+                pred_keypoints = rescale_keypoints(
+                    pred_keypoints_org, scale_x, scale_y)
             else:
                 pred_keypoints = pred_keypoints_org
         else:
@@ -78,7 +82,8 @@ def run_pose_assessment_pipeline(config: GlobalConfig):
     original_video_base = config.paths.video_folder
     tested_data_base = config.paths.output_dir
     csv_file_path = config.paths.csv_file
-    pck_thresholds = config.analysis.get("pck_thresholds", [0.005, 0.01, 0.02, 0.05])
+    pck_thresholds = config.analysis.get(
+        "pck_thresholds", [0.005, 0.01, 0.02, 0.05])
     excel_filename = config.analysis.get(
         "excel_output_filename", "combined_assessment_results.xlsx"
     )

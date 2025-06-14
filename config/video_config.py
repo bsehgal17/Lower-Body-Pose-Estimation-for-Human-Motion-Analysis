@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 class VideoConfig:
     """Configuration for video processing."""
 
-    extensions: Tuple[str, ...] = (".mp4", ".avi", ".mov", ".mkv")
+    extensions: Tuple[str, ...]
     # Add more video specific settings here, e.g.,
     # target_fps: Optional[int] = None
     # resize_dim: Optional[Tuple[int, int]] = None

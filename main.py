@@ -2,31 +2,52 @@ import yaml
 import subprocess
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,  # or DEBUG if you want more verbosity
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 def run_pipeline(pipelines_yaml_path: str = "pipelines.yaml"):
     with open(pipelines_yaml_path, "r") as f:
-        pipelines = yaml.safe_load(f).get("pipelines", [])
+        config = yaml.safe_load(f)
+
+    pipelines = config.get("pipelines", [])
+    default_global_config = config.get(
+        "global_config_file", "global_config.yaml")
 
     for pipeline in pipelines:
-        logging.info(f"\n--- Running Pipeline: {pipeline['name']} ---")
+        pipeline_name = pipeline.get("name", "unnamed_pipeline")
+        global_config_file = pipeline.get(
+            "global_config_file", default_global_config)
+
+        logger.info(f"\n--- Running Pipeline: {pipeline_name} ---")
+        logger.info(f"Using Global Config: {global_config_file}")
+
         for step in pipeline.get("steps", []):
             command = step["command"]
-            config_file = step["config_file"]
+            pipeline_config_file = step["config_file"]
 
-            logging.info(f"Running step: {command} with config {config_file}")
+            logger.info(
+                f"Running step: {command} with pipeline config {pipeline_config_file}")
+
             result = subprocess.run(
-                ["python", "pipeline_runner.py", "--config_file",
-                    step["config_file"], step["command"]],
+                [
+                    "python", "pipeline_runner.py",
+                    command,
+                    "--pipeline_config", pipeline_config_file,
+                    "--global_config", global_config_file,
+                    "--pipeline_name", pipeline_name
+                ],
                 text=True,
             )
 
             if result.returncode != 0:
-                logging.error(f"Step '{command}' failed:\n{result.stderr}")
+                logger.error(f"Step '{command}' failed:\n{result.stderr}")
                 break
             else:
-                logging.info(result.stdout)
+                logger.info(result.stdout)
 
 
 if __name__ == "__main__":
