@@ -1,10 +1,10 @@
+from config.pipeline_config import PipelineConfig
 from mmpose.apis import inference_topdown, init_model
 from mmpose.structures import merge_data_samples
-from config.pipeline_config import GlobalConfig
 
 
 class PoseEstimator:
-    def __init__(self, config: GlobalConfig):
+    def __init__(self, config: PipelineConfig):
         self.config = config
         self.pose_estimator = init_model(
             config.models.pose_config,

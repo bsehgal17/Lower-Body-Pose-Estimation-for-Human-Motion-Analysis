@@ -2,17 +2,19 @@ from mmengine.registry import init_default_scope
 from mmdet.apis import inference_detector, init_detector
 from mmdet.utils.setup_env import register_all_modules
 import numpy as np
-from config.pipeline_config import GlobalConfig
+from config.pipeline_config import PipelineConfig
 
 
 class Detector:
-    def __init__(self, config: GlobalConfig = None):
-        self.config = config or GlobalConfig()
+    def __init__(self, config: PipelineConfig):
+        self.config = config
+
         self.detector = init_detector(
-            self.config.models.det_config,
-            self.config.models.det_checkpoint,
-            device=self.config.processing.device,
+            config.models.det_config,
+            config.models.det_checkpoint,
+            device=config.processing.device,
         )
+
         scope = self.detector.cfg.get("default_scope", "mmdet")
         if scope is not None:
             init_default_scope(scope)
@@ -34,5 +36,4 @@ class Detector:
 
         # Apply Non-Maximum Suppression (NMS)
         from mmpose.evaluation.functional import nms
-
         return bboxes[nms(bboxes, self.config.processing.nms_threshold)][:, :4]
