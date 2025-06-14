@@ -42,7 +42,7 @@ def _handle_detect_command(
 def _handle_noise_command(
     args, pipeline_config: PipelineConfig, global_config: GlobalConfig
 ):
-    from noise.simulator import NoiseSimulator
+    from noise_simulator import NoiseSimulator
 
     input_dir, base_pipeline_out = get_pipeline_io_paths(
         global_config.paths, pipeline_config.paths.dataset

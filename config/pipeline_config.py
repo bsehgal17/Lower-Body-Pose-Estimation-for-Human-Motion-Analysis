@@ -26,7 +26,6 @@ class PipelineConfig:
     paths: PipelinePathsConfig
     models: ModelsConfig
     processing: ProcessingConfig
-    sync_data: SyncDataConfig
     filter: Optional[FilterConfig] = None
     noise: Optional[NoiseConfig] = None
     evaluation: Optional[EvaluationConfig] = None
@@ -45,7 +44,6 @@ class PipelineConfig:
             paths=PipelinePathsConfig(**raw_config.get("paths", {})),
             models=ModelsConfig(**raw_config.get("models", {})),
             processing=ProcessingConfig(**raw_config.get("processing", {})),
-            sync_data=SyncDataConfig(data=raw_config.get("sync_data", {}).get("data")),
             filter=FilterConfig(**raw_config["filter"])
             if "filter" in raw_config
             else None,
@@ -61,7 +59,6 @@ class PipelineConfig:
             "paths": self.paths.__dict__,
             "models": self.models.__dict__,
             "processing": self.processing.__dict__,
-            "sync_data": {"data": self.sync_data.data},
         }
         if self.filter:
             cfg_dict["filter"] = self.filter.__dict__

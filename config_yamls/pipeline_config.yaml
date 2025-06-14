@@ -1,5 +1,5 @@
 paths:
-  dataset: HumanEva_walking
+  dataset: HumanEva
   ground_truth_file: C:\\Users\\BhavyaSehgal\\Downloads\\bhavya_phd\\Tested_dataset\\humaneva_sorted_by_subject.csv
 
 

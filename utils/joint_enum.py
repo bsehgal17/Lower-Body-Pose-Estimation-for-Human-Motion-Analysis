@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class GTJoints(Enum):
+class GTJointsHumanEVa(Enum):
     PELVIS = 0
     SHOULDER_CENTER = (1, 2)
     LEFT_HIP = 11
@@ -20,7 +20,7 @@ class GTJoints(Enum):
     MID_SHOULDER = (3, 7)  # Midpoint of both shoulders
 
 
-class PredJoints(Enum):
+class PredJointsCOCOWholebody(Enum):
     HEAD = (2, 3)  # Two head points from COCO WholeBody
     LEFT_SHOULDER = 5
     RIGHT_SHOULDER = 6

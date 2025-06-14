@@ -1,32 +1,24 @@
 import os
 import pandas as pd
 import pickle
+from typing import Dict, List
 
 
 class ResultAggregator:
-    def __init__(self, output_path, save_as_pickle=False):
+    def __init__(self, output_path: str, save_as_pickle: bool = False):
         self.output_path = output_path
-        self.results = []
+        self.results: List[Dict] = []
         self.save_as_pickle = save_as_pickle
 
-    def add_overall_result(self, subject, action, camera, pck_value, threshold):
-        self.results.append(
-            {
-                "Subject": subject,
-                "Action": action,
-                "Camera": camera,
-                f"PCK@{threshold}": pck_value,
-            }
-        )
+    def add_overall_result(self, metadata: Dict, pck_value: float, threshold: float):
+        self.results.append({**metadata, f"PCK@{threshold}": pck_value})
 
     def add_jointwise_result(
-        self, subject, action, camera, joint_names, jointwise_pck, threshold
+        self, metadata: Dict, joint_names: List[str], jointwise_pck, threshold: float
     ):
         self.results.append(
             {
-                "Subject": subject,
-                "Action": action,
-                "Camera": camera,
+                **metadata,
                 **{
                     f"{j}_PCK@{threshold}": jointwise_pck[:, i].mean()
                     for i, j in enumerate(joint_names)

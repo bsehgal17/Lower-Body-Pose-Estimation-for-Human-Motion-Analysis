@@ -2,16 +2,13 @@ import os
 import json
 import logging
 import pickle
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import numpy as np
-from config.global_config import GlobalConfig
-from typing import Optional
-
 
 from config.pipeline_config import PipelineConfig
-from utils.video_info import extract_video_info
+from config.global_config import GlobalConfig
 from utils.joint_enum import PredJoints
-from utils.plotting import plot_filtering_effect
+from utils.plot import plot_filtering_effect
 from filtering_and_data_cleaning.filter_registry import FILTER_FN_MAP
 from filtering_and_data_cleaning.preprocessing_utils import TimeSeriesPreprocessor
 
@@ -66,8 +63,7 @@ class KeypointFilterProcessor:
         return FILTER_FN_MAP[self.filter_name]
 
     def process_directory(self):
-        input_dir = self.input_dir
-        for root, _, files in os.walk(input_dir):
+        for root, _, files in os.walk(self.input_dir):
             for file in files:
                 if file.endswith(".json"):
                     json_path = os.path.join(root, file)
@@ -75,23 +71,12 @@ class KeypointFilterProcessor:
         logger.info("Keypoint filtering pipeline finished.")
 
     def _process_file(self, json_path: str, root: str):
-        basename = os.path.splitext(os.path.basename(json_path))[0] + ".avi"
-        video_info = extract_video_info(basename, root)
-
-        if not video_info:
-            logger.warning(f"Could not extract video info from {json_path}. Skipping.")
-            return
-
-        subject, action, camera_idx = video_info
-        action_group = action.replace(" ", "_")
-        logger.info(f"Applying filter to {json_path}")
-
+        logger.info(f"Applying filter to: {json_path}")
         try:
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
-            filtered_keypoints = self._apply_filter_to_data(
-                pred_keypoints, subject, action, root
-            )
+
+            filtered_keypoints = self._apply_filter_to_data(pred_keypoints, root)
             output_folder = self.custom_output_dir
 
             self._save_filtered(json_path, filtered_keypoints, output_folder)
@@ -100,11 +85,8 @@ class KeypointFilterProcessor:
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
 
-    def _apply_filter_to_data(
-        self, keypoints_data, subject, action, root
-    ) -> List[Dict]:
-        data = json.loads(json.dumps(keypoints_data))
-
+    def _apply_filter_to_data(self, keypoints_data, root) -> List[Dict]:
+        data = json.loads(json.dumps(keypoints_data))  # deep copy
         num_persons = len(data[0]["keypoints"])
 
         for person_idx in range(num_persons):
@@ -154,6 +136,7 @@ class KeypointFilterProcessor:
                         person_kpts[0][joint_id][0] = float(x_filt[i])
                         person_kpts[0][joint_id][1] = float(y_filt[i])
 
+                    # Optional plots
                     if (
                         joint_id == PredJoints.LEFT_ANKLE.value
                         and person_idx == 0
@@ -164,7 +147,7 @@ class KeypointFilterProcessor:
                         plot_filtering_effect(
                             original=x_series,
                             filtered=x_filt,
-                            title=f"X - {subject} {action} Joint {joint_id} ({self.filter_name})",
+                            title=f"X - Joint {joint_id} ({self.filter_name})",
                             save_path=os.path.join(
                                 plot_dir, f"x_{joint_id}_{self.filter_name}.png"
                             ),
@@ -172,7 +155,7 @@ class KeypointFilterProcessor:
                         plot_filtering_effect(
                             original=y_series,
                             filtered=y_filt,
-                            title=f"Y - {subject} {action} Joint {joint_id} ({self.filter_name})",
+                            title=f"Y - Joint {joint_id} ({self.filter_name})",
                             save_path=os.path.join(
                                 plot_dir, f"y_{joint_id}_{self.filter_name}.png"
                             ),
@@ -227,7 +210,6 @@ def run_keypoint_filtering_from_config(
         else pipeline_config.detect.output_dir
     )
 
-    # Use output_dir passed from main_handlers (e.g., run_dir / "filter")
     if output_dir:
         processor.custom_output_dir = output_dir
 
