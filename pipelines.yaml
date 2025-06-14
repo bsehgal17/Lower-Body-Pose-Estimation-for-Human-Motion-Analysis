@@ -4,10 +4,10 @@ orchestrator:
 
 pipelines:
 
-  # - name: run_pose_estimation
-  #   steps:
-  #     - command: detect
-  #       config_file: "pipeline_config.yaml"
+  - name: run_pose_estimation
+    steps:
+      - command: detect
+        config_file: "pipeline_config.yaml"
 
   # - name: simulate_noise
   #   steps:
@@ -21,10 +21,10 @@ pipelines:
         # -command: noise
         #   config_file:"config.yaml"
 
-  - name: run_filter_and_assess
-    steps:
-      - command: filter
-        config_file: "pipeline_config.yaml"
+  # - name: run_filter_and_assess
+  #   steps:
+  #     - command: filter
+  #       config_file: "pipeline_config.yaml"
 
 
   # - name: evaluate_pose_accuracy

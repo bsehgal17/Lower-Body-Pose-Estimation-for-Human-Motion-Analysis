@@ -12,8 +12,8 @@ from config.pipeline_config import PipelineConfig
 from utils.video_info import extract_video_info
 from utils.joint_enum import PredJoints
 from utils.plotting import plot_filtering_effect
-from post_processing.filter_registry import FILTER_FN_MAP
-from post_processing.preprocessing_utils import TimeSeriesPreprocessor
+from filtering_and_data_cleaning.filter_registry import FILTER_FN_MAP
+from filtering_and_data_cleaning.preprocessing_utils import TimeSeriesPreprocessor
 
 logger = logging.getLogger(__name__)
 
