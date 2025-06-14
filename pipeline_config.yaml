@@ -1,14 +1,7 @@
 paths:
-  video_folder: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva_walking/
-  output_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/test_videos_results_from_yaml
-  csv_file: C:\Users\BhavyaSehgal\Downloads\bhavya_phd\Tested_dataset\humaneva_sorted_by_subject.csv
+  dataset: HumanEva_walking
+  ground_truth_file: C:\\Users\\BhavyaSehgal\\Downloads\\bhavya_phd\\Tested_dataset\\humaneva_sorted_by_subject.csv
 
-video:
-  extensions:
-    - .mp4
-    - .avi
-    - .mov
-    - .mkv
 
 models:
   det_config: /storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/mmpose/demo/mmdetection_cfg/faster_rcnn_r50_fpn_coco.py
@@ -60,10 +53,10 @@ filter:
 
 
 
-analysis:
-  # PCK thresholds for assessment (change or add more if needed)
-  pck_thresholds: [0.01, 0.02, 0.05, 0.1]
-  excel_output_filename: combined_assessment_results.xlsx
+assessment:
+  enabled: true
+  metric: "pck"  # or another metric you support
+
 
 sync_data:
   data:
