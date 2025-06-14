@@ -118,3 +118,7 @@ Pipfile.lock
 
 # Node / frontend stuff if applicable
 node_modules/
+
+# VS Code workspace settings
+.vscode/
+*.code-workspace
