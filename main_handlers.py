@@ -1,5 +1,5 @@
 import logging
-from pathlib import Path
+import os
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from utils.run_utils import make_run_dir, get_pipeline_io_paths
@@ -63,8 +63,10 @@ def _handle_noise_command(args, pipeline_config: PipelineConfig, global_config: 
 def _handle_filter_command(args, pipeline_config: PipelineConfig, global_config: GlobalConfig):
     from filter_runner import run_keypoint_filtering_from_config
 
-    _, base_pipeline_out = get_pipeline_io_paths(
-        global_config.paths, pipeline_config.paths.dataset)
+    input_dir, base_pipeline_out = get_pipeline_io_paths(
+        global_config.paths, pipeline_config.paths.dataset
+    )
+
     run_dir = make_run_dir(
         base_out=base_pipeline_out,
         pipeline_name=args.pipeline_name,
@@ -74,11 +76,21 @@ def _handle_filter_command(args, pipeline_config: PipelineConfig, global_config:
         pipeline_config_obj=pipeline_config,
     )
 
-    step_out = run_dir
+    step_out = run_dir / "filter"
     step_out.mkdir(parents=True, exist_ok=True)
 
+    # Set output_dir as per convention
+    pipeline_config.paths.output_dir = str(step_out)
+
+    # Resolve input dir from pipeline_config.filter.input_dir or fallback
+    if not pipeline_config.filter.input_dir:
+        pipeline_config.filter.input_dir = os.path.join(
+            base_pipeline_out, args.pipeline_name, "detect"
+        )
+
     run_keypoint_filtering_from_config(
-        pipeline_config, global_config, output_dir=step_out)
+        pipeline_config, global_config, output_dir=step_out
+    )
 
 
 def _handle_assess_command(args, pipeline_config: PipelineConfig, global_config: GlobalConfig):

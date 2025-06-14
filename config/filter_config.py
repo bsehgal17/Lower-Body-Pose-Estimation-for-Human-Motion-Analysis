@@ -1,5 +1,6 @@
 from typing import Dict, Any, List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional
 
 
 @dataclass
@@ -12,12 +13,14 @@ class OutlierRemovalConfig:
 @dataclass
 class FilterConfig:
     name: str
-    params: Dict[str, Any]
-    outlier_removal: OutlierRemovalConfig
-    enable_interpolation: bool
-    interpolation_kind: str
-    enable_filter_plots: bool
-    joints_to_filter: List[str]
+    params: Optional[dict] = field(default_factory=dict)
+    input_dir: Optional[str] = None  # <-- ADD THIS
+    enable_interpolation: bool = True
+    interpolation_kind: str = "linear"
+    enable_filter_plots: bool = False
+    joints_to_filter: Optional[List[str]] = field(default_factory=list)
+    outlier_removal: Optional[OutlierRemovalConfig] = field(
+        default_factory=OutlierRemovalConfig)
 
     def __post_init__(self):
         # Convert dict to OutlierRemovalConfig if needed (for YAML loading)

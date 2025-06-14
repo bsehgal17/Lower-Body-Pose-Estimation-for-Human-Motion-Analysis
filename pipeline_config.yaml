@@ -28,15 +28,17 @@ noise:
 
 
 filter:
-  name: "gaussian"  # e.g. "butterworth", "kalman", "savitzky", etc.
+  name: "gaussian"
   params:
-    sigma: 0.5      # filter-specific parameter
+    sigma: 0.5
+
+  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/rtmpose_l_whole/S1/Jog_1_(C1)/"  # <-- ADD THIS
 
   outlier_removal:
     enable: True
-    method: "iqr"   # or "zscore"
+    method: "iqr"
     params:
-      iqr_multiplier: 1.5   # or z_threshold for zscore
+      iqr_multiplier: 1.5
 
   enable_interpolation: true
   interpolation_kind: "linear"
@@ -50,6 +52,7 @@ filter:
     - RIGHT_KNEE
     - LEFT_HIP
     - RIGHT_HIP
+
 
 
 

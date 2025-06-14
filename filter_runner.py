@@ -4,25 +4,28 @@ import logging
 import pickle
 from typing import Dict, Any, List
 import numpy as np
+from config.global_config import GlobalConfig
+from typing import Optional
 
-from config.pipeline_config import GlobalConfig
+
+from config.pipeline_config import PipelineConfig
 from utils.video_info import extract_video_info
 from utils.joint_enum import PredJoints
 from utils.plotting import plot_filtering_effect
 from post_processing.filter_registry import FILTER_FN_MAP
 from post_processing.preprocessing_utils import TimeSeriesPreprocessor
 
-
 logger = logging.getLogger(__name__)
 
 
 class KeypointFilterProcessor:
     def __init__(
-        self, config: GlobalConfig, filter_name: str, filter_kwargs: Dict[str, Any]
+        self, config: PipelineConfig, filter_name: str, filter_kwargs: Dict[str, Any]
     ):
         self.config = config
         self.filter_name = filter_name
         self.filter_kwargs = filter_kwargs
+        self.input_dir = self.config.filter.input_dir
 
         self.enable_outlier_removal = getattr(
             config.filter.outlier_removal, "enable", False)
@@ -67,10 +70,9 @@ class KeypointFilterProcessor:
         return FILTER_FN_MAP[self.filter_name]
 
     def process_directory(self):
-        input_dir = self.config.paths.output_dir
+        input_dir = self.input_dir
         for root, _, files in os.walk(input_dir):
-            if "filtered_outputs" in root:
-                continue  # skip subfolders with filtered files
+
             for file in files:
                 if file.endswith(".json"):
                     json_path = os.path.join(root, file)
@@ -96,8 +98,8 @@ class KeypointFilterProcessor:
             filtered_keypoints = self._apply_filter_to_data(
                 pred_keypoints, subject, action, root
             )
-            output_folder = os.path.join(
-                root, "filtered_outputs", self.filter_name)
+            output_folder = self.custom_output_dir
+
             self._save_filtered(json_path, filtered_keypoints, output_folder)
             self._save_as_pickle(json_path, filtered_keypoints, output_folder)
 
@@ -107,7 +109,6 @@ class KeypointFilterProcessor:
     def _apply_filter_to_data(self, keypoints_data, subject, action, root) -> List[Dict]:
         data = json.loads(json.dumps(keypoints_data))
 
-        # assume consistent person count across frames
         num_persons = len(data[0]["keypoints"])
 
         for person_idx in range(num_persons):
@@ -117,13 +118,11 @@ class KeypointFilterProcessor:
 
                 for frame in data:
                     if person_idx >= len(frame["keypoints"]):
-                        # Person not present in this frame
                         x_series.append(np.nan)
                         y_series.append(np.nan)
                         continue
 
                     person_data = frame["keypoints"][person_idx]
-
                     try:
                         kp = person_data["keypoints"][0][joint_id]
                         x_series.append(kp[0])
@@ -154,7 +153,6 @@ class KeypointFilterProcessor:
 
                     for i, frame in enumerate(data):
                         person_kpts = frame["keypoints"][person_idx]["keypoints"]
-
                         person_kpts[0][joint_id][0] = float(x_filt[i])
                         person_kpts[0][joint_id][1] = float(y_filt[i])
 
@@ -188,9 +186,7 @@ class KeypointFilterProcessor:
         return data
 
     def _save_filtered(self, original_path: str, data: List[Dict], output_dir: str):
-
         os.makedirs(output_dir, exist_ok=True)
-
         out_path = os.path.join(
             output_dir,
             os.path.basename(original_path).replace(
@@ -213,8 +209,25 @@ class KeypointFilterProcessor:
         logger.info(f"Filtered keypoints (pickle) saved to: {pkl_path}")
 
 
-def run_keypoint_filtering_from_config(config: GlobalConfig):
-    filter_name = config.filter.name
-    filter_kwargs = config.filter.params or {}
-    processor = KeypointFilterProcessor(config, filter_name, filter_kwargs)
+def run_keypoint_filtering_from_config(
+    pipeline_config: PipelineConfig,
+    global_config: GlobalConfig,
+    output_dir: Optional[str] = None
+):
+    filter_name = pipeline_config.filter.name
+    filter_kwargs = pipeline_config.filter.params or {}
+
+    processor = KeypointFilterProcessor(
+        config=pipeline_config,
+        filter_name=filter_name,
+        filter_kwargs=filter_kwargs
+    )
+
+    # Use input_dir from pipeline_config.paths.output_dir (e.g., from detect step)
+    processor.config.paths.output_dir = pipeline_config.filter.input_dir
+
+    # Use output_dir passed from main_handlers (e.g., run_dir / "filter")
+    if output_dir:
+        processor.custom_output_dir = output_dir
+
     processor.process_directory()
