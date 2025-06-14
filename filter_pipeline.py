@@ -28,16 +28,13 @@ class KeypointFilterProcessor:
         self.input_dir = self.config.filter.input_dir
 
         self.enable_outlier_removal = getattr(
-            config.filter.outlier_removal, "enable", False)
-        self.outlier_method = getattr(
-            config.filter.outlier_removal, "method", "iqr")
-        self.outlier_params = getattr(
-            config.filter.outlier_removal, "params", {})
+            config.filter.outlier_removal, "enable", False
+        )
+        self.outlier_method = getattr(config.filter.outlier_removal, "method", "iqr")
+        self.outlier_params = getattr(config.filter.outlier_removal, "params", {})
 
-        self.enable_interp = getattr(
-            config.filter, "enable_interpolation", True)
-        self.interpolation_kind = getattr(
-            config.filter, "interpolation_kind", "linear")
+        self.enable_interp = getattr(config.filter, "enable_interpolation", True)
+        self.interpolation_kind = getattr(config.filter, "interpolation_kind", "linear")
         self.joints_to_filter = self._get_joints_to_filter()
         self.filter_fn = self._get_filter_function()
 
@@ -51,8 +48,7 @@ class KeypointFilterProcessor:
                     if j in PredJoints.__members__
                 ]
             except Exception as e:
-                logger.warning(
-                    f"Error parsing joints_to_filter from config: {e}")
+                logger.warning(f"Error parsing joints_to_filter from config: {e}")
         return [
             PredJoints.LEFT_ANKLE.value,
             PredJoints.RIGHT_ANKLE.value,
@@ -72,7 +68,6 @@ class KeypointFilterProcessor:
     def process_directory(self):
         input_dir = self.input_dir
         for root, _, files in os.walk(input_dir):
-
             for file in files:
                 if file.endswith(".json"):
                     json_path = os.path.join(root, file)
@@ -84,8 +79,7 @@ class KeypointFilterProcessor:
         video_info = extract_video_info(basename, root)
 
         if not video_info:
-            logger.warning(
-                f"Could not extract video info from {json_path}. Skipping.")
+            logger.warning(f"Could not extract video info from {json_path}. Skipping.")
             return
 
         subject, action, camera_idx = video_info
@@ -106,7 +100,9 @@ class KeypointFilterProcessor:
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
 
-    def _apply_filter_to_data(self, keypoints_data, subject, action, root) -> List[Dict]:
+    def _apply_filter_to_data(
+        self, keypoints_data, subject, action, root
+    ) -> List[Dict]:
         data = json.loads(json.dumps(keypoints_data))
 
         num_persons = len(data[0]["keypoints"])
@@ -139,14 +135,16 @@ class KeypointFilterProcessor:
 
                 try:
                     preprocessor = TimeSeriesPreprocessor(
-                        method=self.outlier_method if self.enable_outlier_removal else None,
-                        interpolation=self.interpolation_kind if self.enable_interp else None
+                        method=self.outlier_method
+                        if self.enable_outlier_removal
+                        else None,
+                        interpolation=self.interpolation_kind
+                        if self.enable_interp
+                        else None,
                     )
 
-                    x_proc = preprocessor.clean(
-                        x_series, **self.outlier_params)
-                    y_proc = preprocessor.clean(
-                        y_series, **self.outlier_params)
+                    x_proc = preprocessor.clean(x_series, **self.outlier_params)
+                    y_proc = preprocessor.clean(y_series, **self.outlier_params)
 
                     x_filt = self.filter_fn(x_proc, **self.filter_kwargs)
                     y_filt = self.filter_fn(y_proc, **self.filter_kwargs)
@@ -161,27 +159,29 @@ class KeypointFilterProcessor:
                         and person_idx == 0
                         and getattr(self.config.filter, "enable_filter_plots", False)
                     ):
-                        plot_dir = os.path.join(
-                            root, "plots", self.filter_name)
+                        plot_dir = os.path.join(root, "plots", self.filter_name)
                         os.makedirs(plot_dir, exist_ok=True)
                         plot_filtering_effect(
                             original=x_series,
                             filtered=x_filt,
                             title=f"X - {subject} {action} Joint {joint_id} ({self.filter_name})",
                             save_path=os.path.join(
-                                plot_dir, f"x_{joint_id}_{self.filter_name}.png"),
+                                plot_dir, f"x_{joint_id}_{self.filter_name}.png"
+                            ),
                         )
                         plot_filtering_effect(
                             original=y_series,
                             filtered=y_filt,
                             title=f"Y - {subject} {action} Joint {joint_id} ({self.filter_name})",
                             save_path=os.path.join(
-                                plot_dir, f"y_{joint_id}_{self.filter_name}.png"),
+                                plot_dir, f"y_{joint_id}_{self.filter_name}.png"
+                            ),
                         )
 
                 except Exception as e:
                     logger.warning(
-                        f"Filter error on joint {joint_id} for person {person_idx}: {e}")
+                        f"Filter error on joint {joint_id} for person {person_idx}: {e}"
+                    )
 
         return data
 
@@ -212,19 +212,20 @@ class KeypointFilterProcessor:
 def run_keypoint_filtering_from_config(
     pipeline_config: PipelineConfig,
     global_config: GlobalConfig,
-    output_dir: Optional[str] = None
+    output_dir: Optional[str] = None,
 ):
     filter_name = pipeline_config.filter.name
     filter_kwargs = pipeline_config.filter.params or {}
 
     processor = KeypointFilterProcessor(
-        config=pipeline_config,
-        filter_name=filter_name,
-        filter_kwargs=filter_kwargs
+        config=pipeline_config, filter_name=filter_name, filter_kwargs=filter_kwargs
     )
 
-    # Use input_dir from pipeline_config.paths.output_dir (e.g., from detect step)
-    processor.config.paths.output_dir = pipeline_config.filter.input_dir
+    processor.config.paths.input_dir = (
+        pipeline_config.filter.input_dir
+        if pipeline_config.filter.input_dir
+        else pipeline_config.detect.output_dir
+    )
 
     # Use output_dir passed from main_handlers (e.g., run_dir / "filter")
     if output_dir:

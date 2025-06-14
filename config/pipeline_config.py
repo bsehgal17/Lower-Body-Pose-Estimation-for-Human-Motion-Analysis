@@ -11,10 +11,11 @@ from .processing_config import ProcessingConfig
 from .sync_data_config import SyncDataConfig
 from .filter_config import FilterConfig
 from .noise_config import NoiseConfig
-from .assessment_config import AssessmentConfig
+from .evaluation_config import EvaluationConfig
 
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +29,7 @@ class PipelineConfig:
     sync_data: SyncDataConfig
     filter: Optional[FilterConfig] = None
     noise: Optional[NoiseConfig] = None
-    assessment: Optional[AssessmentConfig] = None
+    evaluation: Optional[EvaluationConfig] = None
 
     # ------------------------------------------------------------------
     # YAML (de)serialization helpers
@@ -36,8 +37,7 @@ class PipelineConfig:
     @classmethod
     def from_yaml(cls, yaml_path: str) -> "PipelineConfig":
         if not os.path.exists(yaml_path):
-            raise FileNotFoundError(
-                f"Pipeline config file not found: {yaml_path}")
+            raise FileNotFoundError(f"Pipeline config file not found: {yaml_path}")
         with open(yaml_path, "r", encoding="utf-8") as f:
             raw_config = yaml.safe_load(f)
 
@@ -45,14 +45,14 @@ class PipelineConfig:
             paths=PipelinePathsConfig(**raw_config.get("paths", {})),
             models=ModelsConfig(**raw_config.get("models", {})),
             processing=ProcessingConfig(**raw_config.get("processing", {})),
-            sync_data=SyncDataConfig(
-                data=raw_config.get("sync_data", {}).get("data")),
-            filter=FilterConfig(
-                **raw_config["filter"]) if "filter" in raw_config else None,
-            noise=NoiseConfig(
-                **raw_config["noise"]) if "noise" in raw_config else None,
-            assessment=AssessmentConfig(
-                **raw_config["assessment"]) if "assessment" in raw_config else None,
+            sync_data=SyncDataConfig(data=raw_config.get("sync_data", {}).get("data")),
+            filter=FilterConfig(**raw_config["filter"])
+            if "filter" in raw_config
+            else None,
+            noise=NoiseConfig(**raw_config["noise"]) if "noise" in raw_config else None,
+            evaluation=EvaluationConfig(**raw_config["evaluation"])
+            if "evaluation" in raw_config
+            else None,
         )
 
     def to_yaml(self, yaml_path: str):
@@ -67,8 +67,8 @@ class PipelineConfig:
             cfg_dict["filter"] = self.filter.__dict__
         if self.noise:
             cfg_dict["noise"] = self.noise.__dict__
-        if self.assessment:
-            cfg_dict["assessment"] = self.assessment.__dict__
+        if self.evaluation:
+            cfg_dict["evaluation"] = self.evaluation.__dict__
 
         with open(yaml_path, "w", encoding="utf-8") as f:
             yaml.dump(cfg_dict, f, indent=4)
@@ -88,5 +88,6 @@ def get_pipeline_config(config_file_path: Optional[str] = None) -> PipelineConfi
             _pipeline_config = PipelineConfig.from_yaml(config_file_path)
         else:
             raise ValueError(
-                "config_file_path must be provided for initial load of PipelineConfig.")
+                "config_file_path must be provided for initial load of PipelineConfig."
+            )
     return _pipeline_config

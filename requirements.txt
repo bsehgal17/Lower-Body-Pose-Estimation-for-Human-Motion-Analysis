@@ -8,5 +8,6 @@ pycocotools==2.0.8
 xtcocotools==1.14.3
 mmcv-full==1.7.2
 numpy==1.26.3
-
+pyyaml==6.0.2
+pandas==2.3.0
 #python3 -m pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu121

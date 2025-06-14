@@ -18,7 +18,7 @@ def _handle_detect_command(
     run_dir = make_run_dir(
         base_out=base_pipeline_out,
         pipeline_name=args.pipeline_name,
-        step_name="detect",
+        step_name=args.command,
         cfg_path=args.pipeline_config,
         global_config_obj=global_config,
         pipeline_config_obj=pipeline_config,
@@ -50,7 +50,7 @@ def _handle_noise_command(
     run_dir = make_run_dir(
         base_out=base_pipeline_out,
         pipeline_name=args.pipeline_name,
-        step_name="noise",
+        step_name=args.command,
         cfg_path=args.pipeline_config,
         global_config_obj=global_config,
         pipeline_config_obj=pipeline_config,
@@ -78,13 +78,13 @@ def _handle_filter_command(
     run_dir = make_run_dir(
         base_out=base_pipeline_out,
         pipeline_name=args.pipeline_name,
-        step_name="filter",
+        step_name=args.command,
         cfg_path=args.pipeline_config,
         global_config_obj=global_config,
         pipeline_config_obj=pipeline_config,
     )
 
-    step_out = run_dir / "filter"
+    step_out = run_dir / args.step_name
     step_out.mkdir(parents=True, exist_ok=True)
 
     # Set output_dir as per convention
@@ -112,7 +112,7 @@ def _handle_assess_command(
     run_dir = make_run_dir(
         base_out=base_pipeline_out,
         pipeline_name=args.pipeline_name,
-        step_name="assess",
+        step_name=args.command,
         cfg_path=args.pipeline_config,
         global_config_obj=global_config,
         pipeline_config_obj=pipeline_config,

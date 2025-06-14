@@ -56,9 +56,18 @@ filter:
 
 
 
-assessment:
-  enabled: true
-  metric: "pck"  # or another metric you support
+evaluation:
+  input_dir: C:\Users\BhavyaSehgal\Downloads\bhavya_phd\test_dataset_results\degraded_videos\S3\Walking_1_(C2) # NEW FIELD
+  metrics:
+    - name: overall_pck
+      params:
+        threshold: 0.01
+    # - name: jointwise_pck
+    #   params:
+    #     threshold: 0.05
+    # - name: gat_metric
+    #   params: {}
+
 
 
 sync_data:

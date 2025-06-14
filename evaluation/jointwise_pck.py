@@ -1,5 +1,5 @@
 from evaluation.base_calculators import BasePCKCalculator
-from evaluation.enums import GTJoints, PredJoints
+from utils.joint_enum import GTJoints, PredJoints
 import numpy as np
 
 

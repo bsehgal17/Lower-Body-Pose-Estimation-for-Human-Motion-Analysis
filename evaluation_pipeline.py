@@ -2,12 +2,11 @@ import os
 import logging
 import pandas as pd
 import re
-from config.pipeline_config import GlobalConfig
-from evaluation.overall_pck import OverallPCKCalculator
-from evaluation.pck_evaluator import PCKEvaluator
-from evaluation.get_gt_keypoint import GroundTruthLoader
-from evaluation.extract_predicted_points import PredictionExtractor
-# Optional, fallback to manual parsing
+from config.pipeline_config import PipelineConfig
+from config.global_config import GlobalConfig
+from evaluation.evaluation_registry import EVALUATION_METRICS
+from utils.get_gt_keypoint import GroundTruthLoader
+from utils.extract_predicted_points import PredictionExtractor
 from utils.video_info import extract_video_info
 from utils.rescale_pred import get_video_resolution, rescale_keypoints
 
@@ -15,9 +14,15 @@ logger = logging.getLogger(__name__)
 
 
 def assess_single_sample(
-    subject, action, camera_idx, json_path, config, csv_file_path, original_video_base
+    subject,
+    action,
+    camera_idx,
+    json_path,
+    pipeline_config,
+    global_config,
+    csv_file_path,
+    original_video_base,
 ):
-    """Run assessment for a single video sample."""
     try:
         cam_name = f"C{camera_idx + 1}"
         original_video_path = os.path.join(
@@ -29,8 +34,9 @@ def assess_single_sample(
             subject, action, camera_idx, chunk="chunk0"
         )
 
-        sync_frame_tuple = config.sync_data.data.get(
-            subject, {}).get(action, None)
+        sync_frame_tuple = pipeline_config.sync_data.data.get(subject, {}).get(
+            action, None
+        )
         if not sync_frame_tuple:
             logger.warning(f"Missing sync data for {subject}, {action}.")
             return None
@@ -38,8 +44,7 @@ def assess_single_sample(
         frame_range = (sync_frame, sync_frame + len(gt_keypoints))
 
         pred_loader = PredictionExtractor(json_path, file_format="json")
-        pred_keypoints_org = pred_loader.get_keypoint_array(
-            frame_range=frame_range)
+        pred_keypoints_org = pred_loader.get_keypoint_array(frame_range=frame_range)
 
         testing_video_path = os.path.join(
             os.path.dirname(json_path),
@@ -52,8 +57,7 @@ def assess_single_sample(
             testing_w, testing_h = get_video_resolution(testing_video_path)
             if (testing_w, testing_h) != (orig_w, orig_h):
                 scale_x, scale_y = orig_w / testing_w, orig_h / testing_h
-                pred_keypoints = rescale_keypoints(
-                    pred_keypoints_org, scale_x, scale_y)
+                pred_keypoints = rescale_keypoints(pred_keypoints_org, scale_x, scale_y)
             else:
                 pred_keypoints = pred_keypoints_org
         else:
@@ -76,29 +80,73 @@ def assess_single_sample(
     return None
 
 
-def run_pose_assessment_pipeline(config: GlobalConfig):
+class MetricsEvaluator:
+    def __init__(self, output_path):
+        self.results = []
+        self.output_path = output_path
+
+    def evaluate(
+        self, calculator, gt, pred, subject, action, camera, metric_name, params
+    ):
+        if hasattr(calculator, "compute"):
+            result = calculator.compute(gt, pred)
+        else:
+            raise ValueError(f"{metric_name} has no `compute()` method.")
+
+        if isinstance(result, tuple) and len(result) == 2:
+            joint_names, jointwise_scores = result
+            for joint, scores in zip(joint_names, jointwise_scores.T):
+                self.results.append(
+                    {
+                        "subject": subject,
+                        "action": action,
+                        "camera": camera,
+                        "metric": metric_name,
+                        "joint": joint,
+                        **params,
+                        "score": scores.mean(),
+                    }
+                )
+        else:
+            self.results.append(
+                {
+                    "subject": subject,
+                    "action": action,
+                    "camera": camera,
+                    "metric": metric_name,
+                    **params,
+                    "score": result,
+                }
+            )
+
+    def save(self):
+        df = pd.DataFrame(self.results)
+        df.to_excel(self.output_path, index=False)
+
+
+def run_pose_assessment_pipeline(
+    pipeline_config: PipelineConfig, global_config: GlobalConfig, output_dir: str
+):
     logger.info("Starting pose assessment pipeline...")
 
-    original_video_base = config.paths.video_folder
-    tested_data_base = config.paths.output_dir
-    csv_file_path = config.paths.csv_file
-    pck_thresholds = config.analysis.get(
-        "pck_thresholds", [0.005, 0.01, 0.02, 0.05])
-    excel_filename = config.analysis.get(
-        "excel_output_filename", "combined_assessment_results.xlsx"
+    # ---- Resolve Paths ----
+    original_video_base = global_config.paths.input_dir
+    tested_data_base = (
+        pipeline_config.evaluation.input_dir or pipeline_config.detect.output_dir
     )
-    excel_output_path = os.path.join(config.paths.output_dir, excel_filename)
-
-    evaluator = PCKEvaluator(excel_output_path)
+    csv_file_path = pipeline_config.paths.ground_truth_file
 
     for root, _, files in os.walk(tested_data_base):
         for file in files:
             if file.endswith(".json"):
                 json_path = os.path.join(root, file)
-
-                # Generalized extraction from folder path
                 path_parts = os.path.normpath(root).split(os.sep)
                 subject, action, camera_idx = None, None, None
+                base_name = os.path.splitext(file)[0]
+                excel_filename = f"{base_name}_assessment_results.xlsx"
+                excel_output_path = os.path.join(output_dir, excel_filename)
+
+                evaluator = MetricsEvaluator(excel_output_path)
 
                 if len(path_parts) >= 2:
                     subject = path_parts[-2]
@@ -124,7 +172,8 @@ def run_pose_assessment_pipeline(config: GlobalConfig):
                     action,
                     camera_idx,
                     json_path,
-                    config,
+                    pipeline_config,
+                    global_config,
                     csv_file_path,
                     original_video_base,
                 )
@@ -134,16 +183,40 @@ def run_pose_assessment_pipeline(config: GlobalConfig):
 
                 gt_keypoints, pred_keypoints = result
 
-                for threshold in pck_thresholds:
-                    calculator = OverallPCKCalculator(threshold=threshold)
-                    evaluator.evaluate_overall(
+                for metric_cfg in pipeline_config.assessment.metrics:
+                    metric_entry = next(
+                        (
+                            m
+                            for m in EVALUATION_METRICS
+                            if m["name"] == metric_cfg["name"]
+                        ),
+                        None,
+                    )
+                    if not metric_entry:
+                        raise ValueError(
+                            f"Metric '{metric_cfg['name']}' is not registered."
+                        )
+
+                    expected = set(metric_entry.get("param_spec", []))
+                    provided = set(metric_cfg.get("params", {}).keys())
+
+                    if expected != provided:
+                        raise ValueError(
+                            f"Parameters for metric '{metric_cfg['name']}' are invalid. "
+                            f"Expected: {expected}, Provided: {provided}"
+                        )
+
+                    calculator = metric_entry["class"](**metric_cfg["params"])
+                    evaluator.evaluate(
                         calculator,
                         gt_keypoints,
                         pred_keypoints,
                         subject,
                         action_group,
                         camera_idx + 1,
+                        metric_name=metric_cfg["name"],
+                        params=metric_cfg["params"],
                     )
 
-    evaluator.save()
+                evaluator.save()
     logger.info("Pose assessment pipeline finished.")

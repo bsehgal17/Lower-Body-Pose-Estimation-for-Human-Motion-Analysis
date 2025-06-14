@@ -16,19 +16,19 @@ def parse_main_args(argv: Optional[List[str]] = None):
         "--pipeline_config",
         type=str,
         required=True,
-        help="Path to the pipeline-specific YAML config file"
+        help="Path to the pipeline-specific YAML config file",
     )
     common_parser.add_argument(
         "--global_config",
         type=str,
         required=True,
-        help="Path to the global YAML config file"
+        help="Path to the global YAML config file",
     )
     common_parser.add_argument(
         "--pipeline_name",
         type=str,
         required=True,
-        help="Logical name of the full pipeline (used for organizing outputs)"
+        help="Logical name of the full pipeline (used for organizing outputs)",
     )
 
     # Top-level parser
@@ -46,9 +46,11 @@ def parse_main_args(argv: Optional[List[str]] = None):
         "detect", parents=[common_parser], help="Run detection pipeline"
     )
     parser_detect.add_argument(
-        "--video_folder", type=str, help="Override input video folder")
+        "--video_folder", type=str, help="Override input video folder"
+    )
     parser_detect.add_argument(
-        "--output_dir", type=str, help="Optional custom output dir")
+        "--output_dir", type=str, help="Optional custom output dir"
+    )
     parser_detect.set_defaults(func=_handle_detect_command)
 
     # Subcommand: noise
@@ -56,9 +58,11 @@ def parse_main_args(argv: Optional[List[str]] = None):
         "noise", parents=[common_parser], help="Simulate noise on input videos"
     )
     parser_noise.add_argument(
-        "--input_folder", type=str, help="Optional input override")
+        "--input_folder", type=str, help="Optional input override"
+    )
     parser_noise.add_argument(
-        "--output_folder", type=str, help="Optional output override")
+        "--output_folder", type=str, help="Optional output override"
+    )
     parser_noise.set_defaults(func=_handle_noise_command)
 
     # Subcommand: filter
@@ -69,7 +73,7 @@ def parse_main_args(argv: Optional[List[str]] = None):
 
     # Subcommand: assess
     parser_assess = subparsers.add_parser(
-        "assess", parents=[common_parser], help="Run pose accuracy evaluation"
+        "evaluation", parents=[common_parser], help="Run pose accuracy evaluation"
     )
     parser_assess.set_defaults(func=_handle_assess_command)
 
