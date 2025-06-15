@@ -126,11 +126,14 @@ class MetricsEvaluator:
 
     def save(self):
         df = pd.DataFrame(self.results)
-        df.to_csv(self.output_path, index=False)
+        df.to_excel(self.output_path, index=False)
 
 
 def run_humaneva_assessment(
-    pipeline_config: PipelineConfig, global_config: GlobalConfig, output_dir: str
+    pipeline_config: PipelineConfig,
+    global_config: GlobalConfig,
+    output_dir: str,
+    input_dir: str,
 ):
     gt_enum_class = import_class_from_string(pipeline_config.dataset.joint_enum_module)
     pred_enum_class = import_class_from_string(pipeline_config.dataset.keypoint_format)
@@ -141,7 +144,10 @@ def run_humaneva_assessment(
         pipeline_config.evaluation.input_dir or pipeline_config.detect.output_dir
     )
     csv_file_path = pipeline_config.paths.ground_truth_file
-    original_video_base = global_config.paths.input_dir
+    original_video_base = input_dir
+
+    # ✅ Create a global evaluator to collect all rows
+    global_results = []
 
     for root, _, files in os.walk(pred_root):
         for file in files:
@@ -154,16 +160,12 @@ def run_humaneva_assessment(
                 logger.warning(f"Could not parse HumanEva info from {json_path}")
                 continue
 
-            subject = result["subject"]  # 'S3'
-            action = result["action"]  # 'Walking 1'
-            camera_str = result["camera"]  # 'C1'
+            subject = result["subject"]
+            action = result["action"]
+            camera_str = result["camera"]
             camera_idx = int(camera_str[1:]) - 1
             logger.info(f"Evaluating: {subject} | {action} | C{camera_idx}")
             action_group = action.replace(" ", "_")
-
-            excel_name = f"{subject}_{action_group}_C{camera_idx + 1}_assessment.xlsx"
-            excel_path = os.path.join(output_dir, excel_name)
-            evaluator = MetricsEvaluator(excel_path)
 
             sample = assess_single_sample(
                 subject,
@@ -204,6 +206,8 @@ def run_humaneva_assessment(
                     pred_enum=pred_enum_class,
                 )
 
+                # ✅ Local evaluation to gather rows
+                evaluator = MetricsEvaluator(output_path=None)
                 evaluator.evaluate(
                     calculator,
                     gt,
@@ -211,11 +215,25 @@ def run_humaneva_assessment(
                     subject,
                     action_group,
                     camera_idx,
-                    metric_cfg["name"],
-                    metric_cfg.get("params", {}),
+                    metric_name,
+                    params,
                 )
+                global_results.extend(evaluator.results)
 
-            evaluator.save()
-            logger.info(f"Saved: {excel_path}")
+    # ✅ Save combined results at the end
+    if global_results:
+        df = pd.DataFrame(global_results)
+        parent_folder_name = os.path.basename(
+            os.path.dirname(os.path.normpath(pred_root))
+        )
+
+        for metric_cfg in pipeline_config.evaluation.metrics:
+            metric_name = metric_cfg["name"]
+            metric_df = df[df["metric"] == metric_name]
+            if not metric_df.empty:
+                combined_name = f"{parent_folder_name}_{metric_name}.xlsx"
+                combined_path = os.path.join(output_dir, combined_name)
+                metric_df.to_excel(combined_path, index=False)
+                logger.info(f"Combined result saved: {combined_path}")
 
     logger.info("HumanEva assessment completed.")

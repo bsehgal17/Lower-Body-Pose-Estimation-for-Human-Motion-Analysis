@@ -106,7 +106,7 @@ def _handle_assess_command(
 ):
     from evaluation_pipeline import run_pose_assessment_pipeline
 
-    _, base_pipeline_out = get_pipeline_io_paths(
+    input_dir, base_pipeline_out = get_pipeline_io_paths(
         global_config.paths, pipeline_config.paths.dataset
     )
     run_dir = make_run_dir(
@@ -122,4 +122,5 @@ def _handle_assess_command(
     step_out.mkdir(parents=True, exist_ok=True)
 
     run_pose_assessment_pipeline(
-        pipeline_config, global_config, output_dir=step_out)
+        pipeline_config, global_config, output_dir=step_out, input_dir=input_dir
+    )
