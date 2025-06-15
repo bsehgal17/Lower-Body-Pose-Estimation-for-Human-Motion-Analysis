@@ -35,44 +35,51 @@ This pipeline enables lower-body pose analysis from video files using:
 All logic is **fully configurable via YAML**, with clean separation of stages and built-in dataset support (e.g., HumanEva).
 
 ---
+Your README is already quite comprehensive and well-structured. Here are some suggestions to make it even clearer, more concise, and beginner-friendly:
+
+---
+
+# Lower-Body Pose Estimation Pipeline
+
+A **modular, extensible, and dataset-aware** pipeline for lower-body human pose estimation from videos. Designed for **reproducible research**, robust testing, and easy benchmarking.
+
+---
+
+## 🚀 Features
+
+- **Detection** (MMDetection) and **Pose Estimation** (MMPose)
+- **Noise Simulation** for robustness testing
+- **Filtering** and cleaning of keypoints
+- **Metric-based Evaluation** (e.g., PCK)
+- **YAML-based configuration** for all steps
+- **Dataset support** (e.g., HumanEva)
+- **CLI and Orchestrator** for single or multi-step workflows
+
+---
 
 ## Project Structure
 
+<details>
+<summary>Click to expand</summary>
+
 ```
 project_root/
-├── config/                  # Configuration dataclasses and loader
-│   ├── pipeline_config.py
-│   ├── global_config.py
-│   ├── dataset_config.py
-├── pose_estimation/        # Pose estimation logic
-│   ├── detector.py
-│   ├── estimator.py
-│   ├── visualizer.py
+├── config/                  # Config dataclasses and loader
+├── pose_estimation/         # Detection & pose estimation
 ├── filtering_and_data_cleaning/
-│   ├── filter_registry.py
-│   ├── preprocessing_utils.py
-├── evaluation/             # Evaluation metric logic
-│   ├── overall_pck.py
-│   ├── jointwise_pck.py
-│   ├── evaluation_registry.py
+├── evaluation/              # Metrics & evaluation
 ├── dataset_files/
 │   └── HumanEva/
-│       ├── humaneva_evaluation.py
-│       ├── get_gt_keypoint.py
-│       └── humaneva_metadata.py
 ├── noise/
-│   └── noise_simulator.py
 ├── utils/
-│   ├── video_io.py
-│   ├── extract_predicted_points.py
-│   ├── import_utils.py
-├── cli.py                  # CLI parser and subcommands
-├── main_handlers.py        # Subcommand logic dispatcher
-├── pipeline_runner.py      # Run a single processing step
-├── main.py                 # Runs a full multi-step pipeline
-├── pipelines.yaml          # Multi-step orchestrator YAML
-└── config_yamls/           # Sample YAML configurations
+├── cli.py                   # CLI parser
+├── main_handlers.py         # Subcommand dispatcher
+├── pipeline_runner.py       # Single-step runner
+├── main.py                  # Multi-step orchestrator
+├── pipelines.yaml           # Example orchestrator config
+└── config_yamls/            # Example YAML configs
 ```
+</details>
 
 ---
 
@@ -298,6 +305,7 @@ Containing metric-wise scores across all evaluated videos.
 
 * Enum class names (e.g. `GTJointsHumanEVa`) are dynamically imported from strings in the config.
 * The evaluation system supports multiple metrics and aggregates into a single Excel output.
+* Easily extensible for new datasets or custom metrics.
 
 ---
 
