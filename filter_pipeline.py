@@ -96,14 +96,15 @@ class KeypointFilterProcessor:
 
     def _apply_filter_to_data(self, keypoints_data, root) -> List[Dict]:
         data = json.loads(json.dumps(keypoints_data))  # deep copy
-        num_persons = len(data[0]["keypoints"])
+        frames = data["keypoints"]
+        num_persons = len(frames[0]["keypoints"])
 
         for person_idx in range(num_persons):
             for joint_id in self.joints_to_filter:
                 x_series = []
                 y_series = []
 
-                for frame in data:
+                for frame in frames:
                     if person_idx >= len(frame["keypoints"]):
                         x_series.append(np.nan)
                         y_series.append(np.nan)
