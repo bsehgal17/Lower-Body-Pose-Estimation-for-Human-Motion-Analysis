@@ -1,6 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from utils.joint_enum import GTJoints, PredJoints
+from utils.joint_enum import *
 
 
 def average_if_tuple(value):

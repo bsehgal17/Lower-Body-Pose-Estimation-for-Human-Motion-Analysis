@@ -30,4 +30,4 @@ pipelines:
   - name: evaluate_pose_accuracy
     steps:
       - command: evaluation
-        config_file: "pipeline_config.yaml"
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"

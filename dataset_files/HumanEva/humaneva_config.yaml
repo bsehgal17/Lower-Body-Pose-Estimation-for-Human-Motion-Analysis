@@ -1,6 +1,6 @@
 paths:
   dataset: HumanEva
-  ground_truth_file: C:\\Users\\BhavyaSehgal\\Downloads\\bhavya_phd\\Tested_dataset\\humaneva_sorted_by_subject.csv
+  ground_truth_file: C:\Users\BhavyaSehgal\Downloads\S1_C1_Jog 1.csv
 
 
 models:
@@ -69,15 +69,17 @@ evaluation:
     #   params: {}
 
 
-
-sync_data:
-  data:
-    S1:
-      Walking 1: [667, 667, 667]
-      Jog 1: [49, 50, 51]
-    S2:
-      Walking 1: [547, 547, 546]
-      Jog 1: [493, 491, 502]
-    S3:
-      Walking 1: [524, 524, 524]
-      Jog 1: [464, 462, 462]
+dataset:
+ joint_enum_module: utils.joint_enum.GTJointsHumanEVa
+ keypoint_format: utils.joint_enum.PredJointsCOCOWholebody 
+ sync_data:
+    data:
+      S1:
+        Walking 1: [667, 667, 667]
+        Jog 1: [49, 50, 51]
+      S2:
+        Walking 1: [547, 547, 546]
+        Jog 1: [493, 491, 502]
+      S3:
+        Walking 1: [524, 524, 524]
+        Jog 1: [464, 462, 462]

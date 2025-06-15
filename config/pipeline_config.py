@@ -8,10 +8,11 @@ import logging
 from .pipeline_path import PipelinePathsConfig
 from .models_config import ModelsConfig
 from .processing_config import ProcessingConfig
-from .sync_data_config import SyncDataConfig
 from .filter_config import FilterConfig
 from .noise_config import NoiseConfig
 from .evaluation_config import EvaluationConfig
+from .dataset_config import DatasetConfig  # <- new import
+
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -29,6 +30,7 @@ class PipelineConfig:
     filter: Optional[FilterConfig] = None
     noise: Optional[NoiseConfig] = None
     evaluation: Optional[EvaluationConfig] = None
+    dataset: Optional[DatasetConfig] = None  # <- added
 
     # ------------------------------------------------------------------
     # YAML (de)serialization helpers
@@ -51,6 +53,9 @@ class PipelineConfig:
             evaluation=EvaluationConfig(**raw_config["evaluation"])
             if "evaluation" in raw_config
             else None,
+            dataset=DatasetConfig(**raw_config["dataset"])
+            if "dataset" in raw_config
+            else None,
         )
 
     def to_yaml(self, yaml_path: str):
@@ -66,6 +71,8 @@ class PipelineConfig:
             cfg_dict["noise"] = self.noise.__dict__
         if self.evaluation:
             cfg_dict["evaluation"] = self.evaluation.__dict__
+        if self.dataset:
+            cfg_dict["dataset"] = self.dataset.__dict__
 
         with open(yaml_path, "w", encoding="utf-8") as f:
             yaml.dump(cfg_dict, f, indent=4)

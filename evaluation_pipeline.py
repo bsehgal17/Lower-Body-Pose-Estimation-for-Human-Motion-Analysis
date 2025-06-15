@@ -1,6 +1,6 @@
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
-from evaluation.dataset_evaluation_scripts.humaneva_evaluation import (
+from dataset_files.HumanEva.humaneva_evaluation import (
     run_humaneva_assessment,
 )
 

@@ -1,54 +1,53 @@
 from evaluation.base_calculators import BasePCKCalculator, average_if_tuple
-from utils.joint_enum import GTJoints, PredJoints
 import numpy as np
 
 
 class OverallPCKCalculator(BasePCKCalculator):
+    def __init__(
+        self,
+        threshold=0.2,
+        joints_to_evaluate=None,
+        gt_enum=None,
+        pred_enum=None,
+        norm_joints=("LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE"),
+    ):
+        super().__init__(threshold=threshold, joints_to_evaluate=joints_to_evaluate)
+
+        if gt_enum is None or pred_enum is None:
+            raise ValueError("Both gt_enum and pred_enum must be provided.")
+
+        self.gt_enum = gt_enum
+        self.pred_enum = pred_enum
+        self.norm_joints = norm_joints
+
     def compute(self, gt, pred):
         gt, pred = np.array(gt), np.array(pred)
         if gt.shape[0] != pred.shape[0] or gt.ndim != 3:
             raise ValueError("Input shape mismatch")
 
+        # Normalization length computation using 2 joint pairs
+        norm_parts = []
+        for i in range(0, len(self.norm_joints), 2):
+            j1 = getattr(self.gt_enum, self.norm_joints[i])
+            j2 = getattr(self.gt_enum, self.norm_joints[i + 1])
+
+            p1 = np.array([average_if_tuple(x) for x in gt[:, j1.value]])
+            p2 = np.array([average_if_tuple(x) for x in gt[:, j2.value]])
+            norm_parts.append(np.linalg.norm(p1 - p2, axis=-1))
+
+        norm_length = np.mean(norm_parts, axis=0)  # Shape: (N,)
+
+        # Evaluate all specified joints
         if self.joints_to_evaluate is None:
-            self.joints_to_evaluate = [j.name for j in GTJoints]
-            left_shoulder = np.array(
-                [average_if_tuple(x) for x in gt[:, GTJoints.LEFT_SHOULDER.value]]
-            )
-            right_shoulder = np.array(
-                [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_SHOULDER.value]]
-            )
-            left_hip = np.array(
-                [average_if_tuple(x) for x in gt[:, GTJoints.LEFT_HIP.value]]
-            )
-            right_hip = np.array(
-                [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_HIP.value]]
-            )
-            norm_length = (
-                np.linalg.norm(left_shoulder - left_hip, axis=-1)
-                + np.linalg.norm(right_shoulder - right_hip, axis=-1)
-            ) / 2
-        else:
-            left_hip = np.array(
-                [average_if_tuple(x) for x in gt[:, GTJoints.LEFT_HIP.value]]
-            )
-            right_hip = np.array(
-                [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_HIP.value]]
-            )
-            left_knee = np.array(
-                [average_if_tuple(x) for x in gt[:, GTJoints.LEFT_KNEE.value]]
-            )
-            right_knee = np.array(
-                [average_if_tuple(x) for x in gt[:, GTJoints.RIGHT_KNEE.value]]
-            )
-            norm_length = (
-                np.linalg.norm(left_hip - left_knee, axis=-1)
-                + np.linalg.norm(right_hip - right_knee, axis=-1)
-            ) / 2
+            self.joints_to_evaluate = [j.name for j in self.gt_enum]
 
         gt_pts, pred_pts = [], []
         for joint in self.joints_to_evaluate:
-            if joint in PredJoints.__members__:
-                g_idx, p_idx = GTJoints[joint].value, PredJoints[joint].value
+            if (
+                joint in self.pred_enum.__members__
+                and joint in self.gt_enum.__members__
+            ):
+                g_idx, p_idx = self.gt_enum[joint].value, self.pred_enum[joint].value
                 gt_pts.append(
                     (gt[:, g_idx[0]] + gt[:, g_idx[1]]) / 2
                     if isinstance(g_idx, tuple)

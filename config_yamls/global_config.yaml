@@ -1,6 +1,6 @@
 paths:
-  input_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est
-  output_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results
+  input_dir: C:\Users\BhavyaSehgal\Downloads\bhavya_phd\dataset\HumanEva_walk
+  output_dir: C:\Users\BhavyaSehgal\Downloads\bhavya_phd\
 
 video:
   extensions:

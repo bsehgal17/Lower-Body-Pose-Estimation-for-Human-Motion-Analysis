@@ -8,7 +8,9 @@ from evaluation.evaluation_registry import EVALUATION_METRICS
 from dataset_files.HumanEva.get_gt_keypoint import GroundTruthLoader
 from utils.extract_predicted_points import PredictionExtractor
 from utils.video_io import get_video_resolution, rescale_keypoints
-from dataset_files.HumanEva.humaneva_metadata import get_humaneva_metadata_from_path
+from dataset_files.HumanEva.humaneva_metadata import get_humaneva_metadata_from_video
+from utils.import_utils import import_class_from_string
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +27,12 @@ def assess_single_sample(
 ):
     try:
         cam_name = f"C{camera_idx + 1}"
+        safe_action_name = action.replace(" ", "_")
         original_video_path = os.path.join(
-            original_video_base, subject, "Image_Data", f"{action}_{cam_name}.avi"
+            original_video_base,
+            subject,
+            "Image_Data",
+            f"{safe_action_name}_({cam_name}).avi",
         )
 
         gt_loader = GroundTruthLoader(csv_file_path)
@@ -34,7 +40,12 @@ def assess_single_sample(
             subject, action, camera_idx, chunk="chunk0"
         )
 
-        sync_frame_tuple = pipeline_config.sync_data.data.get(subject, {}).get(action)
+        sync_frame_tuple = (
+            pipeline_config.dataset.sync_data.get("data", {})
+            .get(subject, {})
+            .get(action)
+        )
+
         if not sync_frame_tuple:
             logger.warning(f"Missing sync data for {subject}, {action}")
             return None
@@ -115,12 +126,15 @@ class MetricsEvaluator:
 
     def save(self):
         df = pd.DataFrame(self.results)
-        df.to_excel(self.output_path, index=False)
+        df.to_csv(self.output_path, index=False)
 
 
 def run_humaneva_assessment(
     pipeline_config: PipelineConfig, global_config: GlobalConfig, output_dir: str
 ):
+    gt_enum_class = import_class_from_string(pipeline_config.dataset.joint_enum_module)
+    pred_enum_class = import_class_from_string(pipeline_config.dataset.keypoint_format)
+
     logger.info("Running HumanEva assessment...")
 
     pred_root = (
@@ -135,13 +149,16 @@ def run_humaneva_assessment(
                 continue
 
             json_path = os.path.join(root, file)
-            result = get_humaneva_metadata_from_path(json_path)
+            result = get_humaneva_metadata_from_video(json_path)
             if not result:
                 logger.warning(f"Could not parse HumanEva info from {json_path}")
                 continue
 
-            subject, action, camera_idx = result
-            logger.info(f"Evaluating: {subject} | {action} | C{camera_idx + 1}")
+            subject = result["subject"]  # 'S3'
+            action = result["action"]  # 'Walking 1'
+            camera_str = result["camera"]  # 'C1'
+            camera_idx = int(camera_str[1:]) - 1
+            logger.info(f"Evaluating: {subject} | {action} | C{camera_idx}")
             action_group = action.replace(" ", "_")
 
             excel_name = f"{subject}_{action_group}_C{camera_idx + 1}_assessment.xlsx"
@@ -163,31 +180,39 @@ def run_humaneva_assessment(
 
             gt, pred = sample
             for metric_cfg in pipeline_config.evaluation.metrics:
+                metric_name = metric_cfg["name"]
+                params = metric_cfg.get("params", {})
+
                 metric_entry = next(
-                    (m for m in EVALUATION_METRICS if m["name"] == metric_cfg.name),
+                    (m for m in EVALUATION_METRICS if m["name"] == metric_name),
                     None,
                 )
                 if not metric_entry:
-                    logger.error(f"Metric '{metric_cfg.name}' not found.")
+                    logger.error(f"Metric '{metric_name}' not found.")
                     continue
 
                 expected = set(metric_entry.get("param_spec", []))
-                provided = set(metric_cfg.params.keys())
+                provided = set(params.keys())
                 if expected != provided:
                     raise ValueError(
-                        f"Params for '{metric_cfg.name}' do not match. Expected {expected}, got {provided}."
+                        f"Params for '{metric_name}' do not match. Expected {expected}, got {provided}."
                     )
 
-                calculator = metric_entry["class"](**metric_cfg.params)
+                calculator = metric_entry["class"](
+                    **params,
+                    gt_enum=gt_enum_class,
+                    pred_enum=pred_enum_class,
+                )
+
                 evaluator.evaluate(
                     calculator,
                     gt,
                     pred,
                     subject,
                     action_group,
-                    camera_idx + 1,
-                    metric_cfg.name,
-                    metric_cfg.params,
+                    camera_idx,
+                    metric_cfg["name"],
+                    metric_cfg.get("params", {}),
                 )
 
             evaluator.save()
