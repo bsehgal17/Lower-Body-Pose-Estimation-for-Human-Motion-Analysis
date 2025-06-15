@@ -32,7 +32,7 @@ filter:
   params:
     sigma: 0.5
 
-  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/rtmpose_l_whole/S1/Jog_1_(C1)/"  # <-- ADD THIS
+  # input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/rtmpose_l_whole/S1/Jog_1_(C1)/"  # <-- ADD THIS
 
   outlier_removal:
     enable: True
@@ -67,5 +67,6 @@ evaluation:
     #     threshold: 0.05
     # - name: gat_metric
     #   params: {}
+
 
 

@@ -52,9 +52,6 @@ def make_run_dir(base_out: str, pipeline_name: str, step_name: str, cfg_path: st
 
     run_dir.mkdir(parents=True)
 
-    # Copy original config file
-    shutil.copy2(cfg_path, run_dir / "pipeline_config.yaml")
-
     # Optionally save structured config objects if provided
     if global_config_obj and hasattr(global_config_obj, "to_yaml"):
         global_config_obj.to_yaml(run_dir / "global_config.yaml")

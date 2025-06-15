@@ -7,7 +7,7 @@ import numpy as np
 
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
-from utils.joint_enum import PredJoints
+from utils.import_utils import import_class_from_string
 from utils.plot import plot_filtering_effect
 from filtering_and_data_cleaning.filter_registry import FILTER_FN_MAP
 from filtering_and_data_cleaning.preprocessing_utils import TimeSeriesPreprocessor
@@ -23,15 +23,21 @@ class KeypointFilterProcessor:
         self.filter_name = filter_name
         self.filter_kwargs = filter_kwargs
         self.input_dir = self.config.filter.input_dir
+        self.pred_enum = import_class_from_string(
+            config.dataset.keypoint_format)
 
         self.enable_outlier_removal = getattr(
             config.filter.outlier_removal, "enable", False
         )
-        self.outlier_method = getattr(config.filter.outlier_removal, "method", "iqr")
-        self.outlier_params = getattr(config.filter.outlier_removal, "params", {})
+        self.outlier_method = getattr(
+            config.filter.outlier_removal, "method", "iqr")
+        self.outlier_params = getattr(
+            config.filter.outlier_removal, "params", {})
 
-        self.enable_interp = getattr(config.filter, "enable_interpolation", True)
-        self.interpolation_kind = getattr(config.filter, "interpolation_kind", "linear")
+        self.enable_interp = getattr(
+            config.filter, "enable_interpolation", True)
+        self.interpolation_kind = getattr(
+            config.filter, "interpolation_kind", "linear")
         self.joints_to_filter = self._get_joints_to_filter()
         self.filter_fn = self._get_filter_function()
 
@@ -40,19 +46,21 @@ class KeypointFilterProcessor:
         if configured_joints:
             try:
                 return [
-                    PredJoints[j].value
+                    self.pred_enum[j].value
                     for j in configured_joints
-                    if j in PredJoints.__members__
+                    if j in self.pred_enum.__members__
+
                 ]
             except Exception as e:
-                logger.warning(f"Error parsing joints_to_filter from config: {e}")
+                logger.warning(
+                    f"Error parsing joints_to_filter from config: {e}")
         return [
-            PredJoints.LEFT_ANKLE.value,
-            PredJoints.RIGHT_ANKLE.value,
-            PredJoints.LEFT_HIP.value,
-            PredJoints.RIGHT_HIP.value,
-            PredJoints.LEFT_KNEE.value,
-            PredJoints.RIGHT_KNEE.value,
+            self.pred_enum.LEFT_ANKLE.value,
+            self.pred_enum.RIGHT_ANKLE.value,
+            self.pred_enum.LEFT_HIP.value,
+            self.pred_enum.RIGHT_HIP.value,
+            self.pred_enum.LEFT_KNEE.value,
+            self.pred_enum.RIGHT_KNEE.value,
         ]
 
     def _get_filter_function(self):
@@ -76,7 +84,8 @@ class KeypointFilterProcessor:
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
 
-            filtered_keypoints = self._apply_filter_to_data(pred_keypoints, root)
+            filtered_keypoints = self._apply_filter_to_data(
+                pred_keypoints, root)
             output_folder = self.custom_output_dir
 
             self._save_filtered(json_path, filtered_keypoints, output_folder)
@@ -125,8 +134,10 @@ class KeypointFilterProcessor:
                         else None,
                     )
 
-                    x_proc = preprocessor.clean(x_series, **self.outlier_params)
-                    y_proc = preprocessor.clean(y_series, **self.outlier_params)
+                    x_proc = preprocessor.clean(
+                        x_series, **self.outlier_params)
+                    y_proc = preprocessor.clean(
+                        y_series, **self.outlier_params)
 
                     x_filt = self.filter_fn(x_proc, **self.filter_kwargs)
                     y_filt = self.filter_fn(y_proc, **self.filter_kwargs)
@@ -138,11 +149,12 @@ class KeypointFilterProcessor:
 
                     # Optional plots
                     if (
-                        joint_id == PredJoints.LEFT_ANKLE.value
+                        joint_id == self.pred_enum.LEFT_ANKLE.value
                         and person_idx == 0
                         and getattr(self.config.filter, "enable_filter_plots", False)
                     ):
-                        plot_dir = os.path.join(root, "plots", self.filter_name)
+                        plot_dir = os.path.join(
+                            root, "plots", self.filter_name)
                         os.makedirs(plot_dir, exist_ok=True)
                         plot_filtering_effect(
                             original=x_series,

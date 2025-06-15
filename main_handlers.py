@@ -84,7 +84,7 @@ def _handle_filter_command(
         pipeline_config_obj=pipeline_config,
     )
 
-    step_out = run_dir / args.step_name
+    step_out = run_dir / args.command
     step_out.mkdir(parents=True, exist_ok=True)
 
     # Set output_dir as per convention
@@ -121,4 +121,5 @@ def _handle_assess_command(
     step_out = run_dir
     step_out.mkdir(parents=True, exist_ok=True)
 
-    run_pose_assessment_pipeline(pipeline_config, global_config, output_dir=step_out)
+    run_pose_assessment_pipeline(
+        pipeline_config, global_config, output_dir=step_out)
