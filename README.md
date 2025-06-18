@@ -309,4 +309,3 @@ Containing metric-wise scores across all evaluated videos.
 
 ---
 
-This modular setup is ideal for research and benchmarking. Let us know if you'd like to extend support for new datasets or add custom metrics!
