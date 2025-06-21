@@ -1,63 +1,23 @@
 # Lower-Body Pose Estimation Pipeline
 
-This project provides a **modular, extensible, and dataset-aware** pipeline for performing lower-body human pose estimation from videos. It supports configurable detection, pose estimation, filtering, noise simulation, and quantitative assessment of accuracy using evaluation metrics. The system is designed for **reproducibility, research workflows**, and robust testing via simulation.
-
----
-
-## Table of Contents
-
-* [Overview](#overview)
-* [Project Structure](#project-structure)
-* [Installation](#installation)
-* [Configuration Guidelines](#configuration-guidelines)
-
-  * [1. Pose Estimation](#1-pose-estimation)
-  * [2. Noise Simulation](#2-noise-simulation)
-  * [3. Filtering](#3-filtering)
-  * [4. Evaluation](#4-evaluation)
-  * [5. Input/Output Paths](#5-inputoutput-paths)
-* [Pipeline Runner (Single Step)](#pipeline-runner-single-step)
-* [Main Orchestrator (Multi-Step)](#main-orchestrator-multi-step)
-* [Usage](#usage)
-
----
-
-## Overview
-
-This pipeline enables lower-body pose analysis from video files using:
-
-* **Detection** with MMDetection
-* **Pose Estimation** with MMPose
-* **Optional filtering** of noisy or raw keypoints
-* **Noise simulation** to degrade videos for robustness testing
-* **Metric-based evaluation** comparing predictions with ground truth
-
-All logic is **fully configurable via YAML**, with clean separation of stages and built-in dataset support (e.g., HumanEva).
-
----
-Your README is already quite comprehensive and well-structured. Here are some suggestions to make it even clearer, more concise, and beginner-friendly:
-
----
-
-# Lower-Body Pose Estimation Pipeline
-
 A **modular, extensible, and dataset-aware** pipeline for lower-body human pose estimation from videos. Designed for **reproducible research**, robust testing, and easy benchmarking.
 
 ---
 
 ## 🚀 Features
 
-- **Detection** (MMDetection) and **Pose Estimation** (MMPose)
-- **Noise Simulation** for robustness testing
-- **Filtering** and cleaning of keypoints
-- **Metric-based Evaluation** (e.g., PCK)
-- **YAML-based configuration** for all steps
-- **Dataset support** (e.g., HumanEva)
-- **CLI and Orchestrator** for single or multi-step workflows
+* **Detection** (MMDetection) and **Pose Estimation** (MMPose)
+* **Noise Simulation** for robustness testing
+* **Filtering** and cleaning of keypoints
+* **Metric-based Evaluation** (e.g., PCK)
+* **YAML-based configuration** for all steps
+* **Dataset support** (e.g., HumanEva)
+* **CLI and Orchestrator** for single or multi-step workflows
+* **Global vs Pipeline-specific config** for flexible setup
 
 ---
 
-## Project Structure
+## 🗂️ Project Structure
 
 <details>
 <summary>Click to expand</summary>
@@ -77,13 +37,16 @@ project_root/
 ├── pipeline_runner.py       # Single-step runner
 ├── main.py                  # Multi-step orchestrator
 ├── pipelines.yaml           # Example orchestrator config
-└── config_yamls/            # Example YAML configs
+├── config_yamls/
+│   ├── global_config.yaml   # Shared config across all pipelines
+│   └── <pipeline>.yaml      # Step-specific configs
 ```
+
 </details>
 
 ---
 
-## Installation
+## 📦 Installation
 
 1. Clone the repository:
 
@@ -107,9 +70,32 @@ Ensure they are added to your `PYTHONPATH` if necessary.
 
 ---
 
-## Configuration Guidelines
+## ⚙️ Configuration Guidelines
 
-Each step in the pipeline is driven by YAML files with typed dataclass validation. Below are example configs and expected fields.
+### 🔁 Config Files
+
+The system uses **two layers of configuration**:
+
+#### 1. Global Config (`global_config.yaml`)
+
+Shared settings applicable across all pipelines and datasets.
+
+```yaml
+paths:
+  dataset_root: "data/raw"                # Where all raw videos are stored
+  results_root: "results"                 # Where all result folders will be saved
+
+video:
+  extensions: [".mp4", ".avi"]
+```
+
+#### 2. Pipeline Config (`<pipeline>_config.yaml`)
+
+Specific to each pipeline step or orchestrated workflow.
+
+Includes dataset-aware logic and settings for detection, filtering, etc.
+
+---
 
 ### 1. Pose Estimation
 
@@ -127,6 +113,8 @@ processing:
   kpt_threshold: 0.3
 ```
 
+---
+
 ### 2. Noise Simulation
 
 ```yaml
@@ -138,6 +126,8 @@ noise:
   brightness_factor: 30
   target_resolution: [1280, 720]
 ```
+
+---
 
 ### 3. Filtering
 
@@ -158,6 +148,8 @@ filter:
   enable_filter_plots: true
 ```
 
+---
+
 ### 4. Evaluation
 
 ```yaml
@@ -172,10 +164,11 @@ evaluation:
         threshold: 0.05
 ```
 
-Also ensure:
+#### Dataset-Specific Parameters in Pipeline Config
 
 ```yaml
 dataset:
+  name: "HumanEva"
   joint_enum_module: utils.joint_enum.GTJointsHumanEVa
   keypoint_format: utils.joint_enum.PredJointsCOCOWholebody
   sync_data:
@@ -184,19 +177,22 @@ dataset:
         Walking 1: [667, 667, 667]
 ```
 
-### 5. Input/Output Paths
+---
+
+### 5. Input/Output Paths (via Global Config)
+
+Set once in `global_config.yaml` and used consistently across all pipelines:
 
 ```yaml
 paths:
-  dataset: "HumanEva"
-  ground_truth_file: "data/ground_truth.csv"
-  input_dir: "data/raw"
-  output_dir: "results"
+  dataset_root: "data/raw"
+  ground_truth_root: "data/ground_truth"
+  results_root: "results"
 ```
 
 ---
 
-## Pipeline Runner (Single Step)
+## 🛠️ Pipeline Runner (Single Step)
 
 To run a single processing step:
 
@@ -211,13 +207,13 @@ Supported commands:
 * `filter`: Apply time-series filters to keypoints
 * `assess`: Evaluate predictions using ground truth
 
-Each step stores output in a structured folder under `output_dir`.
+Each step stores output in a structured folder under `results_root`.
 
 ---
 
-## Main Orchestrator (Multi-Step)
+## 🔀 Main Orchestrator (Multi-Step)
 
-Run an entire pipeline (e.g., detect + filter + assess) from a single YAML:
+Run an entire pipeline from one orchestrator YAML:
 
 ```yaml
 orchestrator:
@@ -235,17 +231,15 @@ pipelines:
         config_file: "config_yamls/eval_config.yaml"
 ```
 
-Run it with:
+Then execute:
 
 ```bash
 python main.py
 ```
 
-Each step executes in isolation and stores intermediate outputs automatically.
-
 ---
 
-## Usage
+## 📌 Usage
 
 ### CLI (Single Step)
 
@@ -253,59 +247,42 @@ Each step executes in isolation and stores intermediate outputs automatically.
 python pipeline_runner.py [command] --config_file path/to/config.yaml
 ```
 
-#### `detect`
+Examples:
 
 ```bash
 python pipeline_runner.py detect --config_file config_yamls/detect_config.yaml
-```
-
-#### `noise`
-
-```bash
 python pipeline_runner.py noise --config_file config_yamls/noise_config.yaml
-```
-
-#### `filter`
-
-```bash
 python pipeline_runner.py filter --config_file config_yamls/filter_config.yaml
-```
-
-#### `assess`
-
-```bash
 python pipeline_runner.py assess --config_file config_yamls/eval_config.yaml
 ```
 
 ---
 
-## Output Structure
+## 📂 Output Structure
 
-Each pipeline stage writes its outputs to `output_dir/pipeline_name/step_name/`. For example:
+Each pipeline stage saves its outputs to:
 
 ```
 results/
-├── my_pipeline/
+├── <pipeline_name>/
 │   ├── detect/
 │   ├── filter/
 │   └── assess/
 ```
 
-Evaluation will create a combined Excel file like:
+Metrics are aggregated into a summary Excel file, e.g.:
 
-```bash
+```
 degraded_videos_overall_pck.xlsx
 ```
 
-Containing metric-wise scores across all evaluated videos.
-
 ---
 
-## Notes
+## 📝 Notes
 
-* Enum class names (e.g. `GTJointsHumanEVa`) are dynamically imported from strings in the config.
-* The evaluation system supports multiple metrics and aggregates into a single Excel output.
-* Easily extensible for new datasets or custom metrics.
+* Global vs Pipeline configs cleanly separate common settings from pipeline-specific ones.
+* Dataset-specific logic (joint enums, keypoint formats, sync info) should be passed via the pipeline config.
+* Evaluation metrics are fully modular and saved to a combined Excel file.
+* Easily extensible for new datasets, filters, metrics, or models.
 
 ---
-
