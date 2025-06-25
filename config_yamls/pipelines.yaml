@@ -22,19 +22,29 @@ pipelines:
   #       config_file: "config_yamls/pipeline_config.yaml"  
   #     - command: filter
   #       config_file: "config_yamls/detect_and_filter.yaml"
-  - name: run_pose_estimation_and_filter
-    steps:
-      - command: detect
-        config_file: "config_yamls/detect_and_filter.yaml" 
-      - command: filter
-        config_file: "config_yamls/detect_and_filter.yaml"
-
-
-
-  # - name: run_filter_and_assess
+  # - name: run_pose_estimation_and_filter
   #   steps:
+  #     - command: detect
+  #       config_file: "config_yamls/detect_and_filter.yaml" 
   #     - command: filter
   #       config_file: "config_yamls/detect_and_filter.yaml"
+
+
+
+  - name: run_filter_single_value
+    steps:
+      - command: filter
+        config_file: "config_yamls/testing_single_filter_value.yaml"
+
+  - name: run_filter_range_values
+    steps:
+      - command: filter
+        config_file: "config_yamls/testing_filter_range_vlaues.yaml"
+
+  - name: run_filter_array_values
+    steps:
+      - command: filter
+        config_file: "config_yamls/testing_filter_array_values.yaml"
 
 
   # - name: evaluate_pose_accuracy

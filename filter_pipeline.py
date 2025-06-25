@@ -2,7 +2,7 @@ import os
 import json
 import logging
 import pickle
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 from itertools import product
 
@@ -81,15 +81,35 @@ class KeypointFilterProcessor:
     def _process_file(self, json_path: str, root: str):
         logger.info(f"Applying filter to: {json_path}")
         try:
+            # Load the original JSON file
             with open(json_path, "r") as f:
-                pred_keypoints = json.load(f)
+                pred_data = json.load(f)
 
-            filtered_keypoints = self._apply_filter_to_data(
-                pred_keypoints, root)
-            output_folder = self.custom_output_dir
+            # Extract frames and detection config
+            frames = pred_data.get("keypoints", [])
+            if not frames:
+                logger.warning(f"No keypoints found in {json_path}")
+                return
 
-            self._save_filtered(json_path, filtered_keypoints, output_folder)
-            self._save_as_pickle(json_path, filtered_keypoints, output_folder)
+            self.original_detection_config = pred_data.get(
+                "detection_config", {})
+
+            # Apply filtering to frames only
+            filtered_variants = self._apply_filter_to_data(frames, root)
+
+            # Save each param variant result
+            for suffix, filtered_frames in filtered_variants:
+                filtered_keypoints = {
+                    "keypoints": filtered_frames,
+                    "detection_config": self.original_detection_config
+                }
+
+                output_folder = os.path.join(
+                    self.custom_output_dir, f"{self.filter_name}_{suffix}")
+                self._save_filtered(
+                    json_path, filtered_keypoints, output_folder)
+                self._save_as_pickle(
+                    json_path, filtered_keypoints, output_folder)
 
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
@@ -112,29 +132,28 @@ class KeypointFilterProcessor:
         values = [parse_value(self.filter_kwargs[k]) for k in keys]
         return [dict(zip(keys, v)) for v in product(*values)]
 
-    def _apply_filter_to_data(self, keypoints_data, root) -> List[Dict]:
+    def _apply_filter_to_data(self, keypoints_frames: List[Dict], root: str) -> List[Tuple[str, List[Dict]]]:
         param_variants = self._expand_filter_params()
+        results = []
 
         for param_set in param_variants:
-            # fresh deep copy per variant
-            data = json.loads(json.dumps(keypoints_data))
-            num_persons = len(data[0]["keypoints"])
+            frames = json.loads(json.dumps(keypoints_frames))  # deep copy
+            num_persons = len(frames[0]["keypoints"]
+                              ) if "keypoints" in frames[0] else 0
             label_suffix = "_".join(f"{k}{v}" for k, v in param_set.items())
 
             for person_idx in range(num_persons):
                 for joint_id in self.joints_to_filter:
                     x_series, y_series = [], []
 
-                    for frame in data:
+                    for frame in frames:
                         if person_idx >= len(frame["keypoints"]):
                             x_series.append(np.nan)
                             y_series.append(np.nan)
                             continue
 
                         try:
-                            kp = frame["keypoints"][person_idx]["keypoints"][0][
-                                joint_id
-                            ]
+                            kp = frame["keypoints"][person_idx]["keypoints"][0][joint_id]
                             x_series.append(kp[0])
                             y_series.append(kp[1])
                         except Exception:
@@ -149,12 +168,8 @@ class KeypointFilterProcessor:
 
                     try:
                         preprocessor = TimeSeriesPreprocessor(
-                            method=self.outlier_method
-                            if self.enable_outlier_removal
-                            else None,
-                            interpolation=self.interpolation_kind
-                            if self.enable_interp
-                            else None,
+                            method=self.outlier_method if self.enable_outlier_removal else None,
+                            interpolation=self.interpolation_kind if self.enable_interp else None,
                         )
                         x_proc = preprocessor.clean(
                             x_series, **self.outlier_params)
@@ -164,50 +179,34 @@ class KeypointFilterProcessor:
                         x_filt = self.filter_fn(x_proc, **param_set)
                         y_filt = self.filter_fn(y_proc, **param_set)
 
-                        for i, frame in enumerate(data):
-                            frame["keypoints"][person_idx]["keypoints"][0][joint_id][
-                                0
-                            ] = float(x_filt[i])
-                            frame["keypoints"][person_idx]["keypoints"][0][joint_id][
-                                1
-                            ] = float(y_filt[i])
+                        for i, frame in enumerate(frames):
+                            frame["keypoints"][person_idx]["keypoints"][0][joint_id][0] = float(
+                                x_filt[i])
+                            frame["keypoints"][person_idx]["keypoints"][0][joint_id][1] = float(
+                                y_filt[i])
 
                         if (
                             joint_id == self.pred_enum.LEFT_ANKLE.value
                             and person_idx == 0
-                            and getattr(
-                                self.config.filter, "enable_filter_plots", False
-                            )
+                            and getattr(self.config.filter, "enable_filter_plots", False)
                         ):
                             plot_dir = os.path.join(
-                                root, "plots", f"{self.filter_name}_{label_suffix}"
-                            )
+                                root, "plots", f"{self.filter_name}_{label_suffix}")
                             os.makedirs(plot_dir, exist_ok=True)
-                            plot_filtering_effect(
-                                original=x_series,
-                                filtered=x_filt,
-                                title=f"X - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(
-                                    plot_dir, f"x_{joint_id}.png"),
-                            )
-                            plot_filtering_effect(
-                                original=y_series,
-                                filtered=y_filt,
-                                title=f"Y - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(
-                                    plot_dir, f"y_{joint_id}.png"),
-                            )
+                            plot_filtering_effect(x_series, x_filt,
+                                                  title=f"X - Joint {joint_id} ({self.filter_name})",
+                                                  save_path=os.path.join(plot_dir, f"x_{joint_id}.png"))
+                            plot_filtering_effect(y_series, y_filt,
+                                                  title=f"Y - Joint {joint_id} ({self.filter_name})",
+                                                  save_path=os.path.join(plot_dir, f"y_{joint_id}.png"))
+
                     except Exception as e:
                         logger.warning(
-                            f"Filter error on joint {joint_id}, person {person_idx}: {e}"
-                        )
+                            f"Filter error on joint {joint_id}, person {person_idx}: {e}")
 
-            output_suffix = f"{self.filter_name}_{label_suffix}"
-            output_folder = os.path.join(self.custom_output_dir, output_suffix)
-            self._save_filtered(self.input_dir, data, output_folder)
-            self._save_as_pickle(self.input_dir, data, output_folder)
+            results.append((label_suffix, frames))
 
-        return keypoints_data  # can return the last one
+        return results  # list of (suffix, filtered_frames)
 
     def _save_filtered(self, original_path: str, data: List[Dict], output_dir: str):
         os.makedirs(output_dir, exist_ok=True)
