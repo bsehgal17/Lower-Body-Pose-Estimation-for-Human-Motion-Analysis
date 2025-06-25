@@ -1,74 +1,52 @@
 # Lower-Body Pose Estimation Pipeline
 
-This project provides a modular and extensible pipeline for performing lower-body human pose estimation from videos. It supports configurable detection, pose estimation, noise simulation, and is designed for reproducibility and research-grade workflows.
-
-The system supports:
-
-* Command-line interface (CLI) for single-step runs.
-* A YAML-driven orchestrator (`main.py`) for defining and running multi-step pipelines.
+A **modular, extensible, and dataset-aware** pipeline for lower-body human pose estimation from videos. Designed for **reproducible research**, robust testing, and easy benchmarking.
 
 ---
 
-## Table of Contents
+## 🚀 Features
 
-* [Overview](#overview)
-* [Project Structure](#project-structure)
-* [Installation](#installation)
-* [Configuration Guidelines](#configuration-guidelines)
-
-  * [1. Pose Estimation](#1-pose-estimation)
-  * [2. Noise Simulation](#2-noise-simulation)
-  * [3. Input/Output Paths](#3-inputoutput-paths)
-  * [4. Video Handling](#4-video-handling)
-* [Modules](#modules)
-* [Pipeline Runner (Single Step)](#pipeline-runner-single-step)
-* [Main Orchestrator (Multi-Step)](#main-orchestrator-multi-step)
-* [Usage](#usage)
+* **Detection** (MMDetection) and **Pose Estimation** (MMPose)
+* **Noise Simulation** for robustness testing
+* **Filtering** and cleaning of keypoints
+* **Metric-based Evaluation** (e.g., PCK)
+* **YAML-based configuration** for all steps
+* **Dataset support** (e.g., HumanEva)
+* **CLI and Orchestrator** for single or multi-step workflows
+* **Global vs Pipeline-specific config** for flexible setup
 
 ---
 
-## Overview
+## 🗂️ Project Structure
 
-This pipeline enables lower-body pose analysis on video data through:
-
-* Person detection (using MMDetection)
-* Pose keypoint estimation (using MMPose)
-* Output of annotated videos and JSON keypoint data
-* Optional simulation of degraded video quality for robustness testing
-
-Configuration is handled entirely through YAML files to ensure repeatability and clarity across experiments.
-
----
-
-## Project Structure
+<details>
+<summary>Click to expand</summary>
 
 ```
 project_root/
-├── config/                  # Configuration dataclasses and loader
-├── pose_estimation/        # Pose estimation logic
-│   ├── detector.py
-│   ├── estimator.py
-│   ├── visualizer.py
-│   ├── processors/
-│   │   ├── frame_processor.py
-│   │   └── video_loader.py
+├── config/                  # Config dataclasses and loader
+├── pose_estimation/         # Detection & pose estimation
+├── filtering_and_data_cleaning/
+├── evaluation/              # Metrics & evaluation
+├── dataset_files/
+│   └── HumanEva/
 ├── noise/
-│   └── noise_simulator.py  # Add camera noise, motion blur
 ├── utils/
-│   ├── video_io.py
-│   ├── json_io.py
-│   └── plotting.py
-├── cli.py                  # CLI parser and subcommands
-├── main_handlers.py        # Subcommand logic dispatcher
-├── pipeline_runner.py      # Run a single processing step
-├── main.py                 # Runs a full multi-step pipeline
-├── pipelines.yaml          # YAML defining pipeline steps
-└── configs_yaml/           # Sample config YAMLs
+├── cli.py                   # CLI parser
+├── main_handlers.py         # Subcommand dispatcher
+├── pipeline_runner.py       # Single-step runner
+├── main.py                  # Multi-step orchestrator
+├── pipelines.yaml           # Example orchestrator config
+├── config_yamls/
+│   ├── global_config.yaml   # Shared config across all pipelines
+│   └── <pipeline>.yaml      # Step-specific configs
 ```
+
+</details>
 
 ---
 
-## Installation
+## 📦 Installation
 
 1. Clone the repository:
 
@@ -83,23 +61,39 @@ cd lower-body-pose-estimation
 pip install -r requirements.txt
 ```
 
-3. Install MMPose and MMDetection following their respective documentation.
+3. Follow official installation guides to install:
+
+* [MMPose](https://github.com/open-mmlab/mmpose)
+* [MMDetection](https://github.com/open-mmlab/mmdetection)
+
+Ensure they are added to your `PYTHONPATH` if necessary.
 
 ---
 
-## Configuration Guidelines
+## ⚙️ Configuration Guidelines
 
-Each processing step is configured through a YAML file. This defines models, thresholds, noise parameters, and file paths.
+### 🔁 Config Files
 
-### CLI Overrides (Optional)
+The system uses **two layers of configuration**:
 
-While configuration is encouraged via YAML, the following flags can override certain values:
+#### 1. Global Config (`global_config.yaml`)
 
-| Command  | CLI Flag                                             | Overrides                    |
-| -------- | ---------------------------------------------------- | ---------------------------- |
-| `detect` | `--video_folder`, `--output_dir`, `--config_file`    | Paths for input/output       |
-| `noise`  | `--input_folder`, `--output_folder`, `--config_file` | Paths for noisy video        |
-| *All*    | `--config_file`                                      | Use specific YAML for config |
+Shared settings applicable across all pipelines and datasets.
+
+```yaml
+paths:
+  dataset_root: "data/raw"                # Where all raw videos are stored
+  results_root: "results"                 # Where all result folders will be saved
+
+video:
+  extensions: [".mp4", ".avi"]
+```
+
+#### 2. Pipeline Config (`<pipeline>_config.yaml`)
+
+Specific to each pipeline step or orchestrated workflow.
+
+Includes dataset-aware logic and settings for detection, filtering, etc.
 
 ---
 
@@ -119,6 +113,8 @@ processing:
   kpt_threshold: 0.3
 ```
 
+---
+
 ### 2. Noise Simulation
 
 ```yaml
@@ -131,75 +127,93 @@ noise:
   target_resolution: [1280, 720]
 ```
 
-### 3. Input/Output Paths
+---
+
+### 3. Filtering
+
+```yaml
+filter:
+  name: "butterworth"
+  params:
+    cutoff: 0.1
+    order: 3
+  enable_interpolation: true
+  interpolation_kind: "linear"
+  outlier_removal:
+    enable: true
+    method: "iqr"
+    params:
+      threshold: 1.5
+  joints_to_filter: ["LEFT_ANKLE", "RIGHT_ANKLE", "LEFT_HIP", "RIGHT_HIP"]
+  enable_filter_plots: true
+```
+
+---
+
+### 4. Evaluation
+
+```yaml
+evaluation:
+  input_dir: "results/detect_filtered"
+  metrics:
+    - name: overall_pck
+      params:
+        threshold: 0.05
+    - name: jointwise_pck
+      params:
+        threshold: 0.05
+```
+
+#### Dataset-Specific Parameters in Pipeline Config
+
+```yaml
+dataset:
+  name: "HumanEva"
+  joint_enum_module: utils.joint_enum.GTJointsHumanEVa
+  keypoint_format: utils.joint_enum.PredJointsCOCOWholebody
+  sync_data:
+    data:
+      S1:
+        Walking 1: [667, 667, 667]
+```
+
+---
+
+### 5. Input/Output Paths (via Global Config)
+
+Set once in `global_config.yaml` and used consistently across all pipelines:
 
 ```yaml
 paths:
-  video_folder: "./videos/input"
-  output_dir: "./videos/output"
-  csv_file: "./metadata.csv"  # Optional
-```
-
-### 4. Video Handling
-
-```yaml
-video:
-  extensions: [".mp4", ".avi", ".mov"]
+  dataset_root: "data/raw"
+  ground_truth_root: "data/ground_truth"
+  results_root: "results"
 ```
 
 ---
 
-## Modules
+## 🛠️ Pipeline Runner (Single Step)
 
-### Configuration (`config/`)
-
-* Typed dataclasses ensure safe loading of YAML values.
-* `get_config()` validates structure and paths.
-* Uses dataclasses for strongly typed config groups.
-* base.py contains get_config() to safely load and cache configs.
-* Each config component is modular: paths_config.py, models_config.py, etc.
-
-### Pose Estimation (`pose_estimation/`)
-
-* `detector.py`: Uses MMDetection for bounding box prediction.
-* `estimator.py`: Uses MMPose for keypoint estimation.
-* `visualizer.py`: Overlays pose on video frames.
-* `processors/`: Contains video loading and per-frame pipelines.
-
-### Utilities (`utils/`)
-
-* `video_io.py`: Load and iterate over video files.
-* `json_io.py`: Store and export keypoint JSONs.
-* `plotting.py`: Visualization utilities (for filtering/debugging).
-
-### Noise Simulation (`noise/`)
-
-* `noise_simulator.py`: Adds motion blur, Poisson/Gaussian noise, and brightness reduction.
-
----
-
-## Pipeline Runner (Single Step)
-
-Use `pipeline_runner.py` to run one processing stage using a config YAML.
+To run a single processing step:
 
 ```bash
-python pipeline_runner.py detect --config_file configs/detect_config.yaml
+python pipeline_runner.py detect --config_file config_yamls/detect_config.yaml
 ```
 
-Supported steps:
+Supported commands:
 
-* `detect`
-* `noise`
-* `filter` *(coming soon)*
-* `assess` *(coming soon)*
+* `detect`: Run detection + pose estimation
+* `noise`: Apply video degradation
+* `filter`: Apply time-series filters to keypoints
+* `assess`: Evaluate predictions using ground truth
+
+Each step stores output in a structured folder under `results_root`.
 
 ---
 
-## Main Orchestrator (Multi-Step)
+## 🔀 Main Orchestrator (Multi-Step)
 
-Use `main.py` to run a sequence of pipeline steps defined in a single YAML file (`pipelines.yaml`).
-
-### Example: `pipelines.yaml`
+Run an entire pipeline from one orchestrator YAML:
 
 ```yaml
 orchestrator:
@@ -207,46 +221,25 @@ orchestrator:
   default_device: "cuda:0"
 
 pipelines:
-  - name: run_pose_estimation
+  - name: full_pipeline
     steps:
       - command: detect
-        config_file: "configs/detect_config.yaml"
-
-  - name: simulate_noise
-    steps:
-      - command: noise
-        config_file: "configs/noise_config.yaml"
-
-pipelines:
-  - name: detect_then_noise
-    steps:
-      - command: detect
-        config_file: "configs/detect_config.yaml"
-
-      - command: noise
-        config_file: "configs/noise_config.yaml"
-
+        config_file: "config_yamls/detect_config.yaml"
+      - command: filter
+        config_file: "config_yamls/filter_config.yaml"
+      - command: assess
+        config_file: "config_yamls/eval_config.yaml"
 ```
 
-### Run all steps
+Then execute:
 
 ```bash
 python main.py
 ```
 
-This will internally execute:
-
-```bash
-python pipeline_runner.py detect --config_file configs/detect_config.yaml
-python pipeline_runner.py noise --config_file configs/noise_config.yaml
-python pipeline_runner.py detect --config_file configs/detect_on_noisy.yaml
-```
-
-Each step is run via subprocess with live logging.
-
 ---
 
-## Usage
+## 📌 Usage
 
 ### CLI (Single Step)
 
@@ -254,25 +247,42 @@ Each step is run via subprocess with live logging.
 python pipeline_runner.py [command] --config_file path/to/config.yaml
 ```
 
-#### `detect`
-
-Run detection + pose estimation + visualization:
+Examples:
 
 ```bash
-python pipeline_runner.py detect --config_file configs/detect_config.yaml
+python pipeline_runner.py detect --config_file config_yamls/detect_config.yaml
+python pipeline_runner.py noise --config_file config_yamls/noise_config.yaml
+python pipeline_runner.py filter --config_file config_yamls/filter_config.yaml
+python pipeline_runner.py assess --config_file config_yamls/eval_config.yaml
 ```
-
-#### `noise`
-
-Apply noise simulation to clean videos:
-
-```bash
-python pipeline_runner.py noise --config_file configs/noise_config.yaml
-```
-
-#### `filter` *(coming soon)*
-
-#### `assess` *(coming soon)*
 
 ---
 
+## 📂 Output Structure
+
+Each pipeline stage saves its outputs to:
+
+```
+results/
+├── <pipeline_name>/
+│   ├── detect/
+│   ├── filter/
+│   └── assess/
+```
+
+Metrics are aggregated into a summary Excel file, e.g.:
+
+```
+degraded_videos_overall_pck.xlsx
+```
+
+---
+
+## 📝 Notes
+
+* Global vs Pipeline configs cleanly separate common settings from pipeline-specific ones.
+* Dataset-specific logic (joint enums, keypoint formats, sync info) should be passed via the pipeline config.
+* Evaluation metrics are fully modular and saved to a combined Excel file.
+* Easily extensible for new datasets, filters, metrics, or models.
+
+---
