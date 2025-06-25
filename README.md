@@ -45,31 +45,31 @@ project_root/
 </details>
 
 ---
+---
 
 ## 📦 Installation
 
 1. Clone the repository:
 
-```bash
+bash
 git clone https://github.com/yourusername/lower-body-pose-estimation.git
 cd lower-body-pose-estimation
-```
+
 
 2. Install dependencies:
 
-```bash
+bash
 pip install -r requirements.txt
-```
+
 
 3. Follow official installation guides to install:
 
 * [MMPose](https://github.com/open-mmlab/mmpose)
 * [MMDetection](https://github.com/open-mmlab/mmdetection)
 
-Ensure they are added to your `PYTHONPATH` if necessary.
+Ensure they are added to your PYTHONPATH if necessary.
 
 ---
-
 ## ⚙️ Configuration Guidelines
 
 ### 🔁 Config Files
@@ -82,8 +82,9 @@ Shared settings applicable across all pipelines and datasets.
 
 ```yaml
 paths:
-  dataset_root: "data/raw"                # Where all raw videos are stored
-  results_root: "results"                 # Where all result folders will be saved
+  dataset_root: "data/raw"
+  ground_truth_root: "data/ground_truth"
+  results_root: "results"
 
 video:
   extensions: [".mp4", ".avi"]
@@ -91,6 +92,7 @@ video:
 
 #### 2. Pipeline Config (`<pipeline>_config.yaml`)
 
+Step-specific logic and hyperparameters (e.g., filtering, noise simulation, metric selection).
 Specific to each pipeline step or orchestrated workflow.
 
 Includes dataset-aware logic and settings for detection, filtering, etc.
@@ -99,7 +101,7 @@ Includes dataset-aware logic and settings for detection, filtering, etc.
 
 ### 1. Pose Estimation
 
-```yaml
+yaml
 models:
   det_config: "checkpoints/det_config.py"
   det_checkpoint: "checkpoints/detector.pth"
@@ -111,13 +113,13 @@ processing:
   detection_threshold: 0.3
   nms_threshold: 0.3
   kpt_threshold: 0.3
-```
+
 
 ---
 
 ### 2. Noise Simulation
 
-```yaml
+yaml
 noise:
   poisson_scale: 1.0
   gaussian_std: 5.0
@@ -125,13 +127,13 @@ noise:
   apply_brightness_reduction: true
   brightness_factor: 30
   target_resolution: [1280, 720]
-```
+
 
 ---
 
 ### 3. Filtering
 
-```yaml
+yaml
 filter:
   name: "butterworth"
   params:
@@ -146,13 +148,13 @@ filter:
       threshold: 1.5
   joints_to_filter: ["LEFT_ANKLE", "RIGHT_ANKLE", "LEFT_HIP", "RIGHT_HIP"]
   enable_filter_plots: true
-```
+
 
 ---
 
 ### 4. Evaluation
 
-```yaml
+yaml
 evaluation:
   input_dir: "results/detect_filtered"
   metrics:
@@ -162,11 +164,11 @@ evaluation:
     - name: jointwise_pck
       params:
         threshold: 0.05
-```
+
 
 #### Dataset-Specific Parameters in Pipeline Config
 
-```yaml
+yaml
 dataset:
   name: "HumanEva"
   joint_enum_module: utils.joint_enum.GTJointsHumanEVa
@@ -175,19 +177,77 @@ dataset:
     data:
       S1:
         Walking 1: [667, 667, 667]
+
+
+---
+---
+
+## 🔄 Input Directory Resolution for `noise` and `filter`
+
+For **multi-step pipelines**, the system resolves the `input_dir` automatically when not explicitly provided:
+
+### 📥 `noise` step:
+
+* Uses `noise.input_dir` if explicitly set.
+* Otherwise falls back to the **detection output folder**, e.g. `.../detect/`.
+
+### 🧼 `filter` step:
+
+* Uses `filter.input_dir` if explicitly set.
+* Otherwise:
+
+  * If a `noise` step has already run, it uses `noise.output_dir`.
+  * If not, it uses `detect.output_dir`.
+
+This behavior ensures that `noise → filter` pipelines require **minimal configuration** while remaining reproducible and extensible.
+
+---
+
+## 🧠 Filter Parameter Options
+
+The `filter.params` section supports multiple formats for flexible testing and hyperparameter sweeps:
+
+| Format               | Example                  | Behavior                   |
+| -------------------- | ------------------------ | -------------------------- |
+| **Single value**     | `sigma: 1.0`             | Runs once with that value  |
+| **List of values**   | `sigma: [0.5, 1.0, 1.5]` | Runs once per listed value |
+| **Range expression** | `sigma: "range(1, 4)"`   | Interpreted as \[1, 2, 3]  |
+
+Each unique parameter combination results in a **separate filtered output**, saved to a subfolder like:
+
+```
+.../filter/gaussian_sigma1.0/
+.../filter/gaussian_sigma1.5/
 ```
 
 ---
 
-### 5. Input/Output Paths (via Global Config)
-
-Set once in `global_config.yaml` and used consistently across all pipelines:
+### Example Filter Config
 
 ```yaml
-paths:
-  dataset_root: "data/raw"
-  ground_truth_root: "data/ground_truth"
-  results_root: "results"
+filter:
+  name: "gaussian"
+  params:
+    sigma: "range(1, 4)"  # expands to [1, 2, 3]
+
+  enable_interpolation: true
+  interpolation_kind: "linear"
+
+  outlier_removal:
+    enable: true
+    method: "iqr"
+    params:
+      iqr_multiplier: 1.5
+
+  joints_to_filter:
+    - LEFT_ANKLE
+    - RIGHT_ANKLE
+    - LEFT_KNEE
+    - RIGHT_KNEE
+    - LEFT_HIP
+    - RIGHT_HIP
+
+  enable_filter_plots: true
 ```
 
 ---
@@ -197,7 +257,7 @@ paths:
 To run a single processing step:
 
 ```bash
-python pipeline_runner.py detect --config_file config_yamls/detect_config.yaml
+python pipeline_runner.py filter --config_file config_yamls/filter_config.yaml
 ```
 
 Supported commands:
@@ -207,13 +267,11 @@ Supported commands:
 * `filter`: Apply time-series filters to keypoints
 * `assess`: Evaluate predictions using ground truth
 
-Each step stores output in a structured folder under `results_root`.
-
 ---
 
 ## 🔀 Main Orchestrator (Multi-Step)
 
-Run an entire pipeline from one orchestrator YAML:
+Define a full pipeline in `pipelines.yaml`:
 
 ```yaml
 orchestrator:
@@ -221,68 +279,67 @@ orchestrator:
   default_device: "cuda:0"
 
 pipelines:
-  - name: full_pipeline
+  - name: run_pose_estimation_and_filter
     steps:
       - command: detect
         config_file: "config_yamls/detect_config.yaml"
+      - command: noise
+        config_file: "config_yamls/noise_config.yaml"
       - command: filter
         config_file: "config_yamls/filter_config.yaml"
-      - command: assess
-        config_file: "config_yamls/eval_config.yaml"
 ```
 
-Then execute:
+Run it with:
 
 ```bash
 python main.py
 ```
-
 ---
 
 ## 📌 Usage
 
 ### CLI (Single Step)
 
-```bash
+bash
 python pipeline_runner.py [command] --config_file path/to/config.yaml
-```
+
 
 Examples:
 
-```bash
+bash
 python pipeline_runner.py detect --config_file config_yamls/detect_config.yaml
 python pipeline_runner.py noise --config_file config_yamls/noise_config.yaml
 python pipeline_runner.py filter --config_file config_yamls/filter_config.yaml
 python pipeline_runner.py assess --config_file config_yamls/eval_config.yaml
-```
+
+
+---
 
 ---
 
 ## 📂 Output Structure
 
-Each pipeline stage saves its outputs to:
+Each stage stores its results in:
 
 ```
 results/
-├── <pipeline_name>/
-│   ├── detect/
-│   ├── filter/
-│   └── assess/
-```
-
-Metrics are aggregated into a summary Excel file, e.g.:
-
-```
-degraded_videos_overall_pck.xlsx
+└── run_pose_estimation_and_filter/
+    ├── detect/
+    ├── noise/
+    └── filter/
+        ├── gaussian_sigma1/
+        └── butterworth_window5_order2/
 ```
 
 ---
 
 ## 📝 Notes
 
+* `noise` and `filter` automatically resolve their inputs unless overridden.
+* Parameters for filtering can be expanded via lists or range expressions.
+* Config structure supports modular extension for new datasets, models, or metrics.
+* Filtered keypoints are saved in both `.json` and `.pkl` formats.
 * Global vs Pipeline configs cleanly separate common settings from pipeline-specific ones.
 * Dataset-specific logic (joint enums, keypoint formats, sync info) should be passed via the pipeline config.
-* Evaluation metrics are fully modular and saved to a combined Excel file.
-* Easily extensible for new datasets, filters, metrics, or models.
-
+  
 ---
