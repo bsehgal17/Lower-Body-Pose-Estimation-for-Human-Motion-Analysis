@@ -24,16 +24,21 @@ class KeypointFilterProcessor:
         self.filter_name = filter_name
         self.filter_kwargs = filter_kwargs
         self.input_dir = self.config.filter.input_dir
-        self.pred_enum = import_class_from_string(config.dataset.keypoint_format)
+        self.pred_enum = import_class_from_string(
+            config.dataset.keypoint_format)
 
         self.enable_outlier_removal = getattr(
             config.filter.outlier_removal, "enable", False
         )
-        self.outlier_method = getattr(config.filter.outlier_removal, "method", "iqr")
-        self.outlier_params = getattr(config.filter.outlier_removal, "params", {})
+        self.outlier_method = getattr(
+            config.filter.outlier_removal, "method", "iqr")
+        self.outlier_params = getattr(
+            config.filter.outlier_removal, "params", {})
 
-        self.enable_interp = getattr(config.filter, "enable_interpolation", True)
-        self.interpolation_kind = getattr(config.filter, "interpolation_kind", "linear")
+        self.enable_interp = getattr(
+            config.filter, "enable_interpolation", True)
+        self.interpolation_kind = getattr(
+            config.filter, "interpolation_kind", "linear")
         self.joints_to_filter = self._get_joints_to_filter()
         self.filter_fn = self._get_filter_function()
 
@@ -47,7 +52,8 @@ class KeypointFilterProcessor:
                     if j in self.pred_enum.__members__
                 ]
             except Exception as e:
-                logger.warning(f"Error parsing joints_to_filter from config: {e}")
+                logger.warning(
+                    f"Error parsing joints_to_filter from config: {e}")
         return [
             self.pred_enum.LEFT_ANKLE.value,
             self.pred_enum.RIGHT_ANKLE.value,
@@ -78,7 +84,8 @@ class KeypointFilterProcessor:
             with open(json_path, "r") as f:
                 pred_keypoints = json.load(f)
 
-            filtered_keypoints = self._apply_filter_to_data(pred_keypoints, root)
+            filtered_keypoints = self._apply_filter_to_data(
+                pred_keypoints, root)
             output_folder = self.custom_output_dir
 
             self._save_filtered(json_path, filtered_keypoints, output_folder)
@@ -93,7 +100,8 @@ class KeypointFilterProcessor:
                 try:
                     return list(eval(val.strip()))
                 except Exception as e:
-                    logger.warning(f"Could not parse range expression '{val}': {e}")
+                    logger.warning(
+                        f"Could not parse range expression '{val}': {e}")
                     return [val]
             elif isinstance(val, list):
                 return val
@@ -108,7 +116,8 @@ class KeypointFilterProcessor:
         param_variants = self._expand_filter_params()
 
         for param_set in param_variants:
-            data = json.loads(json.dumps(keypoints_data))  # fresh deep copy per variant
+            # fresh deep copy per variant
+            data = json.loads(json.dumps(keypoints_data))
             num_persons = len(data[0]["keypoints"])
             label_suffix = "_".join(f"{k}{v}" for k, v in param_set.items())
 
@@ -147,8 +156,10 @@ class KeypointFilterProcessor:
                             if self.enable_interp
                             else None,
                         )
-                        x_proc = preprocessor.clean(x_series, **self.outlier_params)
-                        y_proc = preprocessor.clean(y_series, **self.outlier_params)
+                        x_proc = preprocessor.clean(
+                            x_series, **self.outlier_params)
+                        y_proc = preprocessor.clean(
+                            y_series, **self.outlier_params)
 
                         x_filt = self.filter_fn(x_proc, **param_set)
                         y_filt = self.filter_fn(y_proc, **param_set)
@@ -176,13 +187,15 @@ class KeypointFilterProcessor:
                                 original=x_series,
                                 filtered=x_filt,
                                 title=f"X - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(plot_dir, f"x_{joint_id}.png"),
+                                save_path=os.path.join(
+                                    plot_dir, f"x_{joint_id}.png"),
                             )
                             plot_filtering_effect(
                                 original=y_series,
                                 filtered=y_filt,
                                 title=f"Y - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(plot_dir, f"y_{joint_id}.png"),
+                                save_path=os.path.join(
+                                    plot_dir, f"y_{joint_id}.png"),
                             )
                     except Exception as e:
                         logger.warning(
@@ -232,15 +245,9 @@ def run_keypoint_filtering_from_config(
         config=pipeline_config, filter_name=filter_name, filter_kwargs=filter_kwargs
     )
 
-    if pipeline_config.filter.input_dir:
-        processor.config.paths.input_dir = pipeline_config.filter.input_dir
-    elif hasattr(pipeline_config, "noise") and getattr(
-        pipeline_config.noise, "output_dir", None
-    ):
-        processor.config.paths.input_dir = pipeline_config.noise.output_dir
-    else:
-        processor.config.paths.input_dir = pipeline_config.detect.output_dir
+    processor.config.paths.input_dir = pipeline_config.filter.input_dir
 
+    # Set output if passed
     if output_dir:
         processor.custom_output_dir = output_dir
 
