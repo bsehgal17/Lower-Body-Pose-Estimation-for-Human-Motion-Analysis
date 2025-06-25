@@ -45,23 +45,22 @@ project_root/
 </details>
 
 ---
----
 
 ## 📦 Installation
 
 1. Clone the repository:
-
+```
 bash
 git clone https://github.com/yourusername/lower-body-pose-estimation.git
 cd lower-body-pose-estimation
-
+```
 
 2. Install dependencies:
-
+```
 bash
 pip install -r requirements.txt
 
-
+```
 3. Follow official installation guides to install:
 
 * [MMPose](https://github.com/open-mmlab/mmpose)
@@ -83,7 +82,6 @@ Shared settings applicable across all pipelines and datasets.
 ```yaml
 paths:
   dataset_root: "data/raw"
-  ground_truth_root: "data/ground_truth"
   results_root: "results"
 
 video:
@@ -100,7 +98,7 @@ Includes dataset-aware logic and settings for detection, filtering, etc.
 ---
 
 ### 1. Pose Estimation
-
+```
 yaml
 models:
   det_config: "checkpoints/det_config.py"
@@ -113,12 +111,12 @@ processing:
   detection_threshold: 0.3
   nms_threshold: 0.3
   kpt_threshold: 0.3
-
+```
 
 ---
 
 ### 2. Noise Simulation
-
+```
 yaml
 noise:
   poisson_scale: 1.0
@@ -128,11 +126,11 @@ noise:
   brightness_factor: 30
   target_resolution: [1280, 720]
 
-
+```
 ---
 
 ### 3. Filtering
-
+```
 yaml
 filter:
   name: "butterworth"
@@ -149,11 +147,11 @@ filter:
   joints_to_filter: ["LEFT_ANKLE", "RIGHT_ANKLE", "LEFT_HIP", "RIGHT_HIP"]
   enable_filter_plots: true
 
-
+```
 ---
 
 ### 4. Evaluation
-
+```
 yaml
 evaluation:
   input_dir: "results/detect_filtered"
@@ -165,9 +163,9 @@ evaluation:
       params:
         threshold: 0.05
 
-
+```
 #### Dataset-Specific Parameters in Pipeline Config
-
+```
 yaml
 dataset:
   name: "HumanEva"
@@ -178,8 +176,7 @@ dataset:
       S1:
         Walking 1: [667, 667, 667]
 
-
----
+```
 ---
 
 ## 🔄 Input Directory Resolution for `noise` and `filter`
@@ -299,21 +296,20 @@ python main.py
 ## 📌 Usage
 
 ### CLI (Single Step)
-
+```
 bash
 python pipeline_runner.py [command] --config_file path/to/config.yaml
 
-
+```
 Examples:
-
+```
 bash
 python pipeline_runner.py detect --config_file config_yamls/detect_config.yaml
 python pipeline_runner.py noise --config_file config_yamls/noise_config.yaml
 python pipeline_runner.py filter --config_file config_yamls/filter_config.yaml
 python pipeline_runner.py assess --config_file config_yamls/eval_config.yaml
 
-
----
+```
 
 ---
 
