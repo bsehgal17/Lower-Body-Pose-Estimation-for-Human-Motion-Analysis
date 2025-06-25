@@ -15,6 +15,9 @@ from utils.import_utils import import_class_from_string
 logger = logging.getLogger(__name__)
 
 
+import pickle
+
+
 def assess_single_sample(
     subject,
     action,
@@ -24,6 +27,7 @@ def assess_single_sample(
     global_config,
     csv_file_path,
     original_video_base,
+    gt_output_dir=None,  # <--- NEW
 ):
     try:
         cam_name = f"C{camera_idx + 1}"
@@ -39,6 +43,15 @@ def assess_single_sample(
         gt_keypoints = gt_loader.get_keypoints(
             subject, action, camera_idx, chunk="chunk0"
         )
+
+        # NEW: Save ground truth to pkl
+        if gt_output_dir:
+            os.makedirs(gt_output_dir, exist_ok=True)
+            out_name = f"{subject}_{safe_action_name}_{cam_name}_gt.pkl"
+            out_path = os.path.join(gt_output_dir, out_name)
+            with open(out_path, "wb") as f:
+                pickle.dump(gt_keypoints, f)
+            logger.info(f"Saved ground truth to: {out_path}")
 
         sync_frame_tuple = (
             pipeline_config.dataset.sync_data.get("data", {})
