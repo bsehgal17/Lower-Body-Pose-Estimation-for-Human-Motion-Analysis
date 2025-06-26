@@ -1,96 +1,85 @@
 import os
 import logging
 import pandas as pd
-import re
+import pickle
+import numpy as np
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from evaluation.evaluation_registry import EVALUATION_METRICS
-from dataset_files.HumanEva.get_gt_keypoint import GroundTruthLoader
-from utils.extract_predicted_points import PredictionExtractor
 from utils.video_io import get_video_resolution, rescale_keypoints
 from dataset_files.HumanEva.humaneva_metadata import get_humaneva_metadata_from_video
+from dataset_files.HumanEva.get_gt_keypoint import GroundTruthLoader
 from utils.import_utils import import_class_from_string
 
-
 logger = logging.getLogger(__name__)
-
-
-import pickle
 
 
 def assess_single_sample(
     subject,
     action,
     camera_idx,
-    json_path,
-    pipeline_config,
-    global_config,
+    pred_pkl_path,
     csv_file_path,
     original_video_base,
-    gt_output_dir=None,  # <--- NEW
 ):
     try:
         cam_name = f"C{camera_idx + 1}"
         safe_action_name = action.replace(" ", "_")
+
         original_video_path = os.path.join(
             original_video_base,
-            subject,
-            "Image_Data",
             f"{safe_action_name}_({cam_name}).avi",
         )
 
-        gt_loader = GroundTruthLoader(csv_file_path)
-        gt_keypoints = gt_loader.get_keypoints(
-            subject, action, camera_idx, chunk="chunk0"
-        )
+        # Save/load GT from same folder as CSV
+        gt_dir = os.path.dirname(csv_file_path)
+        gt_pkl_name = f"{subject}_{safe_action_name}_{cam_name}_gt.pkl"
+        gt_pkl_path = os.path.join(gt_dir, gt_pkl_name)
 
-        # NEW: Save ground truth to pkl
-        if gt_output_dir:
-            os.makedirs(gt_output_dir, exist_ok=True)
-            out_name = f"{subject}_{safe_action_name}_{cam_name}_gt.pkl"
-            out_path = os.path.join(gt_output_dir, out_name)
-            with open(out_path, "wb") as f:
-                pickle.dump(gt_keypoints, f)
-            logger.info(f"Saved ground truth to: {out_path}")
+        if not os.path.exists(gt_pkl_path):
+            logger.info(f"Generating ground truth PKL: {gt_pkl_path}")
+            loader = GroundTruthLoader(csv_file_path)
+            keypoints = loader.get_keypoints(
+                subject, action, camera_idx, chunk="chunk0")
+            with open(gt_pkl_path, "wb") as f:
+                pickle.dump({"keypoints": keypoints}, f)
 
-        sync_frame_tuple = (
-            pipeline_config.dataset.sync_data.get("data", {})
-            .get(subject, {})
-            .get(action)
-        )
+        with open(gt_pkl_path, "rb") as f:
+            gt_data = pickle.load(f)
+        gt_keypoints = gt_data["keypoints"]  # shape (N, J, 2)
 
-        if not sync_frame_tuple:
-            logger.warning(f"Missing sync data for {subject}, {action}")
-            return None
+        # Load prediction from .pkl
+        with open(pred_pkl_path, "rb") as f:
+            pred_data = pickle.load(f)
 
-        sync_frame = sync_frame_tuple[camera_idx]
-        frame_range = (sync_frame, sync_frame + len(gt_keypoints))
+        pred_keypoints = []
+        for frame in pred_data["keypoints"]:
+            people = frame["keypoints"]
+            if len(people) == 0:
+                raise ValueError(f"No people in frame {frame['frame_idx']}")
+            keypoints_arr = np.array(people[0]["keypoints"])
+            if keypoints_arr.ndim == 3 and keypoints_arr.shape[0] == 1:
+                # unwrap singleton batch dimension
+                keypoints_arr = keypoints_arr[0]
+            pred_keypoints.append(keypoints_arr)  # (J, 2)
+        pred_keypoints = np.stack(pred_keypoints, axis=0)
 
-        pred_loader = PredictionExtractor(json_path, file_format="json")
-        pred_keypoints_org = pred_loader.get_keypoint_array(frame_range=frame_range)
-
-        testing_video_path = os.path.join(
-            os.path.dirname(json_path),
-            f"{os.path.splitext(os.path.basename(json_path))[0]}.avi",
-        )
-
+        # Optional rescale
         orig_w, orig_h = get_video_resolution(original_video_path)
+        pred_video_path = os.path.join(
+            os.path.dirname(pred_pkl_path),
+            f"{os.path.splitext(os.path.basename(pred_pkl_path))[0]}.avi",
+        )
 
-        if os.path.exists(testing_video_path):
-            testing_w, testing_h = get_video_resolution(testing_video_path)
-            if (testing_w, testing_h) != (orig_w, orig_h):
+        if os.path.exists(pred_video_path):
+            test_w, test_h = get_video_resolution(pred_video_path)
+            if (test_w, test_h) != (orig_w, orig_h):
                 pred_keypoints = rescale_keypoints(
-                    pred_keypoints_org, orig_w / testing_w, orig_h / testing_h
+                    pred_keypoints, orig_w / test_w, orig_h / test_h
                 )
-            else:
-                pred_keypoints = pred_keypoints_org
-        else:
-            logger.warning(
-                f"No degraded video found at {testing_video_path}, using unscaled predictions."
-            )
-            pred_keypoints = pred_keypoints_org
 
         min_len = min(len(gt_keypoints), len(pred_keypoints))
+
         return gt_keypoints[:min_len], pred_keypoints[:min_len]
 
     except Exception as e:
@@ -148,8 +137,10 @@ def run_humaneva_assessment(
     output_dir: str,
     input_dir: str,
 ):
-    gt_enum_class = import_class_from_string(pipeline_config.dataset.joint_enum_module)
-    pred_enum_class = import_class_from_string(pipeline_config.dataset.keypoint_format)
+    gt_enum_class = import_class_from_string(
+        pipeline_config.dataset.joint_enum_module)
+    pred_enum_class = import_class_from_string(
+        pipeline_config.dataset.keypoint_format)
 
     logger.info("Running HumanEva assessment...")
 
@@ -159,18 +150,20 @@ def run_humaneva_assessment(
     csv_file_path = pipeline_config.paths.ground_truth_file
     original_video_base = input_dir
 
-    # ✅ Create a global evaluator to collect all rows
     global_results = []
 
     for root, _, files in os.walk(pred_root):
         for file in files:
-            if not file.endswith(".json"):
+            if not file.endswith(".pkl") or "gt" in file:
                 continue
 
-            json_path = os.path.join(root, file)
+            pred_pkl_path = os.path.join(root, file)
+            json_name = file.replace(".pkl", ".json")
+            json_path = os.path.join(root, json_name)
+
             result = get_humaneva_metadata_from_video(json_path)
             if not result:
-                logger.warning(f"Could not parse HumanEva info from {json_path}")
+                logger.warning(f"Could not parse HumanEva info from {file}")
                 continue
 
             subject = result["subject"]
@@ -184,9 +177,7 @@ def run_humaneva_assessment(
                 subject,
                 action,
                 camera_idx,
-                json_path,
-                pipeline_config,
-                global_config,
+                pred_pkl_path,
                 csv_file_path,
                 original_video_base,
             )
@@ -199,7 +190,8 @@ def run_humaneva_assessment(
                 params = metric_cfg.get("params", {})
 
                 metric_entry = next(
-                    (m for m in EVALUATION_METRICS if m["name"] == metric_name),
+                    (m for m in EVALUATION_METRICS if m["name"]
+                     == metric_name),
                     None,
                 )
                 if not metric_entry:
@@ -219,7 +211,6 @@ def run_humaneva_assessment(
                     pred_enum=pred_enum_class,
                 )
 
-                # ✅ Local evaluation to gather rows
                 evaluator = MetricsEvaluator(output_path=None)
                 evaluator.evaluate(
                     calculator,
@@ -233,7 +224,6 @@ def run_humaneva_assessment(
                 )
                 global_results.extend(evaluator.results)
 
-    # ✅ Save combined results at the end
     if global_results:
         df = pd.DataFrame(global_results)
         parent_folder_name = os.path.basename(
