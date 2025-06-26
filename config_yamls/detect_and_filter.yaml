@@ -32,7 +32,7 @@ filter:
   params:
     sigma: 0.5
 
-  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/run_pose_estimation_and_filter/detect/2025-06-14_21-08-42/S1/Image_Data/Walking_1_(C1)" # <-- ADD THIS
+  # input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/run_pose_estimation_and_filter/detect/2025-06-14_21-08-42/S1/Image_Data/Walking_1_(C1)" # <-- ADD THIS
 
   outlier_removal:
     enable: True

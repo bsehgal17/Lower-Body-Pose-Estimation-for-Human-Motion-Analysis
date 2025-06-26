@@ -47,7 +47,17 @@ pipelines:
   #       config_file: "config_yamls/testing_filter_array_values.yaml"
 
 
-  - name: evaluate_pose_accuracy
+  # - name: evaluate_pose_accuracy
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: testing_full_pipeline
     steps:
+      - command: detect
+        config_file: "config_yamls/detect_and_filter.yaml"
+      - command: noise
+        config_file: "config_yamls/pipeline_config.yaml"  
+      - command: filter
+        config_file: "config_yamls/detect_and_filter.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
