@@ -92,19 +92,15 @@ def _handle_filter_command(
 
     # Resolve input dir from pipeline_config.filter.input_dir or fallback
     if not pipeline_config.filter.input_dir:
-        noise_dir = os.path.join(
-            base_pipeline_out, args.pipeline_name, "noise")
-        detect_dir = os.path.join(
-            base_pipeline_out, args.pipeline_name, "detect")
+        noise_dir = os.path.join(base_pipeline_out, args.pipeline_name, "noise")
+        detect_dir = os.path.join(base_pipeline_out, args.pipeline_name, "detect")
 
         if os.path.exists(noise_dir):
             pipeline_config.filter.input_dir = noise_dir
-            logger.info(
-                f"Auto-selected input_dir from noise step: {noise_dir}")
+            logger.info(f"Auto-selected input_dir from noise step: {noise_dir}")
         elif os.path.exists(detect_dir):
             pipeline_config.filter.input_dir = detect_dir
-            logger.info(
-                f"Auto-selected input_dir from detect step: {detect_dir}")
+            logger.info(f"Auto-selected input_dir from detect step: {detect_dir}")
         else:
             logger.warning(
                 "Could not auto-resolve input_dir for filter. You may need to specify it manually."
@@ -135,6 +131,24 @@ def _handle_assess_command(
     step_out = run_dir
     step_out.mkdir(parents=True, exist_ok=True)
 
+    if not pipeline_config.evaluation.input_dir:
+        noise_dir = os.path.join(base_pipeline_out, args.pipeline_name, "noise")
+        detect_dir = os.path.join(base_pipeline_out, args.pipeline_name, "detect")
+
+        if os.path.exists(noise_dir):
+            pipeline_config.evaluation.input_dir = noise_dir
+            logger.info(f"Auto-selected input_dir from noise step: {noise_dir}")
+        elif os.path.exists(detect_dir):
+            pipeline_config.evaluation.input_dir = detect_dir
+            logger.info(f"Auto-selected input_dir from detect step: {detect_dir}")
+        else:
+            logger.warning(
+                "Could not auto-resolve input_dir for filter. You may need to specify it manually."
+            )
+
     run_pose_assessment_pipeline(
-        pipeline_config, global_config, output_dir=step_out, input_dir=input_dir
+        pipeline_config,
+        global_config,
+        output_dir=step_out,
+        input_dir=pipeline_config.evaluation.input_dir,
     )

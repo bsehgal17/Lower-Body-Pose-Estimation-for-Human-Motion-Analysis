@@ -31,23 +31,27 @@ pipelines:
 
 
 
-  - name: run_filter_single_value
-    steps:
-      - command: filter
-        config_file: "config_yamls/testing_single_filter_value.yaml"
-
-  - name: run_filter_range_values
-    steps:
-      - command: filter
-        config_file: "config_yamls/testing_filter_range_vlaues.yaml"
-
-  - name: run_filter_array_values
-    steps:
-      - command: filter
-        config_file: "config_yamls/testing_filter_array_values.yaml"
-
-
-  # - name: evaluate_pose_accuracy
+  # - name: run_filter_single_value
   #   steps:
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  #     - command: filter
+  #       config_file: "config_yamls/testing_single_filter_value.yaml"
+
+  # - name: run_filter_range_values
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/testing_filter_range_vlaues.yaml"
+
+  # - name: run_filter_array_values
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/testing_filter_array_values.yaml"
+
+
+  - name: evaluate_pose_accuracy
+    steps:
+      - command: detect
+        config_file: "config_yamls/detect_and_filter.yaml"
+      - command: noise
+        config_file: "config_yamls/pipeline_config.yaml"  
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
