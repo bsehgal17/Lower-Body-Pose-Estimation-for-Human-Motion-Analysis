@@ -5,6 +5,7 @@ import pickle
 from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 from itertools import product
+from pathlib import Path
 
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
@@ -97,6 +98,17 @@ class KeypointFilterProcessor:
             # Apply filtering to frames only
             filtered_variants = self._apply_filter_to_data(frames, root)
 
+            # Convert json_path to Path
+            json_path_obj = Path(json_path)
+
+            # Find the anchor index (e.g., "S1", "S2", etc.)
+            anchor_index = next(i for i, part in enumerate(
+                json_path_obj.parts) if part.startswith("S"))
+
+            # Construct relative path from anchor up to parent of .json file
+            # excludes the filename
+            relative_subdir = Path(*json_path_obj.parts[anchor_index:-1])
+
             # Save each param variant result
             for suffix, filtered_frames in filtered_variants:
                 filtered_keypoints = {
@@ -105,7 +117,7 @@ class KeypointFilterProcessor:
                 }
 
                 output_folder = os.path.join(
-                    self.custom_output_dir, f"{self.filter_name}_{suffix}")
+                    self.custom_output_dir, f"{self.filter_name}_{suffix}", relative_subdir)
                 self._save_filtered(
                     json_path, filtered_keypoints, output_folder)
                 self._save_as_pickle(

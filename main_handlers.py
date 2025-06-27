@@ -107,7 +107,7 @@ def _handle_filter_command(
         pipeline_config_obj=pipeline_config,
     )
 
-    step_out = run_dir / args.command
+    step_out = run_dir
     step_out.mkdir(parents=True, exist_ok=True)
 
     # Set output_dir as per convention
@@ -134,7 +134,9 @@ def _handle_filter_command(
             )
 
     run_keypoint_filtering_from_config(
-        pipeline_config, global_config, output_dir=step_out
+        pipeline_config,
+        global_config,
+        output_dir=step_out,
     )
 
 
