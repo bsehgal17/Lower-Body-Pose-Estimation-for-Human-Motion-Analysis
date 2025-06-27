@@ -210,22 +210,17 @@ class KeypointFilterProcessor:
 
     def _save_filtered(self, original_path: str, data: List[Dict], output_dir: str):
         os.makedirs(output_dir, exist_ok=True)
-        out_path = os.path.join(
-            output_dir,
-            os.path.basename(original_path).replace(
-                ".json", f"_{self.filter_name}_filtered.json"
-            ),
-        )
+        # keep original filename
+        out_path = os.path.join(output_dir, os.path.basename(original_path))
         with open(out_path, "w") as f:
             json.dump(data, f, indent=4)
         logger.info(f"Filtered keypoints saved to: {out_path}")
 
     def _save_as_pickle(self, original_path: str, data: List[Dict], output_dir: str):
+        os.makedirs(output_dir, exist_ok=True)
         pkl_path = os.path.join(
             output_dir,
-            os.path.basename(original_path).replace(
-                ".json", f"_{self.filter_name}_filtered.pkl"
-            ),
+            os.path.basename(original_path).replace(".json", ".pkl")
         )
         with open(pkl_path, "wb") as f:
             pickle.dump(data, f)

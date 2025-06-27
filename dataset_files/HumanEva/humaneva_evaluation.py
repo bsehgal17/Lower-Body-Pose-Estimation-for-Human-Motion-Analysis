@@ -28,6 +28,7 @@ def assess_single_sample(
 
         original_video_path = os.path.join(
             original_video_base,
+            subject, "Image_Data",
             f"{safe_action_name}_({cam_name}).avi",
         )
 
@@ -148,7 +149,8 @@ def run_humaneva_assessment(
         pipeline_config.evaluation.input_dir or pipeline_config.detect.output_dir
     )
     csv_file_path = pipeline_config.paths.ground_truth_file
-    original_video_base = input_dir
+    original_video_base = os.path.join(
+        global_config.paths.input_dir, pipeline_config.paths.dataset)
 
     global_results = []
 

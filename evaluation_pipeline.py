@@ -18,4 +18,5 @@ def run_pose_assessment_pipeline(
             pipeline_config, global_config, output_dir, input_dir
         )
     else:
-        raise NotImplementedError(f"Assessment not implemented for dataset '{dataset}'")
+        raise NotImplementedError(
+            f"Assessment not implemented for dataset '{dataset}'")
