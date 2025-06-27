@@ -4,7 +4,7 @@ A **modular, extensible, and dataset-aware** pipeline for lower-body human pose 
 
 ---
 
-## 🚀 Features
+## Features
 
 * **Detection** (MMDetection) and **Pose Estimation** (MMPose)
 * **Noise Simulation** for robustness testing
@@ -17,7 +17,7 @@ A **modular, extensible, and dataset-aware** pipeline for lower-body human pose 
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 <details>
 <summary>Click to expand</summary>
@@ -46,7 +46,7 @@ project_root/
 
 ---
 
-## 📦 Installation
+## Installation
 
 1. Clone the repository:
 ```
@@ -69,9 +69,9 @@ pip install -r requirements.txt
 Ensure they are added to your PYTHONPATH if necessary.
 
 ---
-## ⚙️ Configuration Guidelines
+## Configuration Guidelines
 
-### 🔁 Config Files
+### Config Files
 
 The system uses **two layers of configuration**:
 
@@ -179,28 +179,26 @@ dataset:
 ```
 ---
 
-## 🔄 Input Directory Resolution for `noise` and `filter`
+## Input Directory Resolution for `noise`, `filter` and `evaluation`
 
 For **multi-step pipelines**, the system resolves the `input_dir` automatically when not explicitly provided:
 
-### 📥 `noise` step:
+### `noise` step:
 
 * Uses `noise.input_dir` if explicitly set.
 * Otherwise falls back to the **detection output folder**, e.g. `.../detect/`.
 
-### 🧼 `filter` step:
+### `filter` step and `evaluation` step:
 
-* Uses `filter.input_dir` if explicitly set.
+* Uses `filter.input_dir` or `noise.input_dir` if explicitly set.
 * Otherwise:
 
   * If a `noise` step has already run, it uses `noise.output_dir`.
   * If not, it uses `detect.output_dir`.
 
-This behavior ensures that `noise → filter` pipelines require **minimal configuration** while remaining reproducible and extensible.
-
 ---
 
-## 🧠 Filter Parameter Options
+## Filter Parameter Options
 
 The `filter.params` section supports multiple formats for flexible testing and hyperparameter sweeps:
 
@@ -249,7 +247,7 @@ filter:
 
 ---
 
-## 🛠️ Pipeline Runner (Single Step)
+## Pipeline Runner (Single Step)
 
 To run a single processing step:
 
@@ -266,7 +264,7 @@ Supported commands:
 
 ---
 
-## 🔀 Main Orchestrator (Multi-Step)
+## Main Orchestrator (Multi-Step)
 
 Define a full pipeline in `pipelines.yaml`:
 
@@ -293,7 +291,7 @@ python main.py
 ```
 ---
 
-## 📌 Usage
+## Usage
 
 ### CLI (Single Step)
 ```
@@ -313,7 +311,7 @@ python pipeline_runner.py assess --config_file config_yamls/eval_config.yaml
 
 ---
 
-## 📂 Output Structure
+## Output Structure
 
 Each stage stores its results in:
 
@@ -329,7 +327,7 @@ results/
 
 ---
 
-## 📝 Notes
+## Notes
 
 * `noise` and `filter` automatically resolve their inputs unless overridden.
 * Parameters for filtering can be expanded via lists or range expressions.
