@@ -21,6 +21,7 @@ def assess_single_sample(
     pred_pkl_path,
     csv_file_path,
     original_video_base,
+    pipeline_config: PipelineConfig,  # Added
 ):
     try:
         cam_name = f"C{camera_idx + 1}"
@@ -60,12 +61,12 @@ def assess_single_sample(
                 raise ValueError(f"No people in frame {frame['frame_idx']}")
             keypoints_arr = np.array(people[0]["keypoints"])
             if keypoints_arr.ndim == 3 and keypoints_arr.shape[0] == 1:
-                # unwrap singleton batch dimension
                 keypoints_arr = keypoints_arr[0]
             pred_keypoints.append(keypoints_arr)  # (J, 2)
+
         pred_keypoints = np.stack(pred_keypoints, axis=0)
 
-        # Optional rescale
+        # Rescale if necessary
         orig_w, orig_h = get_video_resolution(original_video_path)
         pred_video_path = os.path.join(
             os.path.dirname(pred_pkl_path),
@@ -79,6 +80,20 @@ def assess_single_sample(
                     pred_keypoints, orig_w / test_w, orig_h / test_h
                 )
 
+        # Get synced start frame from pipeline_config
+        try:
+            sync_start = pipeline_config.dataset.sync_data["data"][subject][action][camera_idx]
+            if sync_start >= len(pred_keypoints):
+                logger.warning(
+                    f"Sync start index {sync_start} is out of bounds for prediction length {len(pred_keypoints)}")
+                return None
+        except KeyError:
+            logger.warning(
+                f"No sync start index for {subject} | {action} | C{camera_idx}")
+            sync_start = 0
+
+        # Apply sync trimming
+        pred_keypoints = pred_keypoints[sync_start:]
         min_len = min(len(gt_keypoints), len(pred_keypoints))
 
         return gt_keypoints[:min_len], pred_keypoints[:min_len]
@@ -182,6 +197,7 @@ def run_humaneva_assessment(
                 pred_pkl_path,
                 csv_file_path,
                 original_video_base,
+                pipeline_config=pipeline_config,
             )
             if not sample:
                 continue
