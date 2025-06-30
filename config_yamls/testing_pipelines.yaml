@@ -12,7 +12,7 @@ pipelines:
       - command: filter
         config_file: "config_yamls/filter_low_threshold.yaml"
       - command: evaluation
-        config_file: "dataset_files/evaluation_low_threshold.yaml"
+        config_file: "config_yamls/evaluation_low_threshold.yaml"
 
   - name: testing_with_poisson_off
     steps:

@@ -31,7 +31,6 @@ filter:
   name: "gaussian"
   params:
     sigma: 0.5
-  kpt_threshold: 0.1
   enable_interpolation: true
   outlier_removal:
     enable: true
