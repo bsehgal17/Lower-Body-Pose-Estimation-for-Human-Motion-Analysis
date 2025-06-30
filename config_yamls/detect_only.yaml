@@ -11,9 +11,9 @@ models:
 
 processing:
   device: cuda:0
-  nms_threshold: 0.3
-  detection_threshold: 0.3
-  kpt_threshold: 0.3
+  nms_threshold: 0.5
+  detection_threshold: 0.5
+  kpt_threshold: 0.5
 
 noise:
   apply_poisson_noise: true

@@ -30,7 +30,6 @@ filter:
   params:
     process_noise: 1e-3
     measurement_noise: 1e-1
-  kpt_threshold: 0.3
   enable_interpolation: true
   outlier_removal:
     enable: true

@@ -30,7 +30,7 @@ noise:
 filter:
   name: "gaussian"
   params:
-    sigma: 0.5
+    sigma: 0.3
   enable_interpolation: true
   outlier_removal:
     enable: true
