@@ -18,6 +18,7 @@ processing:
 noise:
   apply_poisson_noise: true
   apply_gaussian_noise: true
+  poisson_scale: 1.0
   gaussian_std: 1.0
   apply_motion_blur: true
   motion_blur_kernel_size: 3
