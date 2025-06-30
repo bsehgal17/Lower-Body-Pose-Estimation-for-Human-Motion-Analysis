@@ -1,12 +1,12 @@
 paths:
   dataset: HumanEva
-  ground_truth_file: C:\Users\BhavyaSehgal\Downloads\S1_C1_Jog 1.csv
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 
 models:
   det_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/demo/mmdetection_cfg/faster_rcnn_r50_fpn_coco.py
   det_checkpoint: https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
-  pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/projects/rtmpose/rtmpose/wholebody_2d_keypoint/rtmw-x_8xb704-270e_cocktail14-256x192.py
+  pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-x_8xb320-270e_cocktail14-384x288.py
   pose_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/rtmw-x_simcc-cocktail14_pt-ucoco_270e-384x288-f840f204_20231122.pth
 
 processing:
@@ -18,25 +18,22 @@ processing:
 noise:
   apply_poisson_noise: true
   apply_gaussian_noise: true
+  gaussian_std: 1.0
   apply_motion_blur: true
+  motion_blur_kernel_size: 3
   apply_brightness_reduction: true
-  brightness_factor: 30
-  poisson_scale: 1.0
-  gaussian_std: 2.0
-  motion_blur_kernel_size: 5
-  target_resolution: null  # or [640, 480]
+  brightness_factor: 20
 
 
 filter:
-  name: "savitzky"
+  name: "gaussian"
   params:
-    window_length: "range(5, 10, 2)"
-    polyorder: 2
+    sigma: 0.5
 
-  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/run_pose_estimation_and_noise_and_filter/detect/2025-06-25_13-37-58" # <-- ADD THIS
+  # input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/rtmpose_l_whole/S1/Jog_1_(C1)/"  # <-- ADD THIS
 
   outlier_removal:
-    enable: true
+    enable: True
     method: "iqr"
     params:
       iqr_multiplier: 1.5
@@ -57,9 +54,8 @@ filter:
 
 
 
-
 evaluation:
-  input_dir: C:\Users\BhavyaSehgal\Downloads\bhavya_phd\test_dataset_results\degraded_videos\S3\Walking_1_(C2) # NEW FIELD
+  # input_dir: C:\Users\BhavyaSehgal\Downloads\bhavya_phd\test_dataset_results\degraded_videos\S3\Walking_1_(C2) # NEW FIELD
   metrics:
     - name: overall_pck
       params:
@@ -71,17 +67,3 @@ evaluation:
     #   params: {}
 
 
-dataset:
- joint_enum_module: utils.joint_enum.GTJointsHumanEVa
- keypoint_format: utils.joint_enum.PredJointsCOCOWholebody 
- sync_data:
-    data:
-      S1:
-        Walking 1: [667, 667, 667]
-        Jog 1: [49, 50, 51]
-      S2:
-        Walking 1: [547, 547, 546]
-        Jog 1: [493, 491, 502]
-      S3:
-        Walking 1: [524, 524, 524]
-        Jog 1: [464, 462, 462]
