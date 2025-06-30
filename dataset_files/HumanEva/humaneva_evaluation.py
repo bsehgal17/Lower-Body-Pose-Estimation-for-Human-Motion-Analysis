@@ -36,7 +36,10 @@ def assess_single_sample(
         # Save/load GT from same folder as CSV
         gt_dir = os.path.dirname(csv_file_path)
         gt_pkl_name = f"{subject}_{safe_action_name}_{cam_name}_gt.pkl"
-        gt_pkl_path = os.path.join(gt_dir, gt_pkl_name)
+        gt_pkl_folder = os.path.join(gt_dir, "pickle_files")
+        if not os.path.exists(gt_pkl_folder):
+            os.mkdir(gt_pkl_folder)
+        gt_pkl_path = os.path.join(gt_dir, "pickle_files", gt_pkl_name)
 
         if not os.path.exists(gt_pkl_path):
             logger.info(f"Generating ground truth PKL: {gt_pkl_path}")

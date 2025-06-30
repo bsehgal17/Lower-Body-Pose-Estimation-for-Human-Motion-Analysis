@@ -1,6 +1,6 @@
 paths:
   dataset: HumanEva
-  ground_truth_file: /storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/combined_chunk0_data.csv
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 
 models:
@@ -57,7 +57,7 @@ filter:
 
 
 evaluation:
-  # input_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/testing_full_pipeline/detect/2025-06-26_23-26-41/S1/Image_Data/Walking_1_(C1)/ # NEW FIELD
+  input_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_and_evaluate/detect/2025-06-29_22-24-05/S1/Image_Data/Walking_1_(C1)/ # NEW FIELD
   metrics:
     - name: overall_pck
       params:

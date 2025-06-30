@@ -46,16 +46,16 @@ pipelines:
   #     - command: filter
   #       config_file: "config_yamls/testing_filter_array_values.yaml"
 
-  - name: detect_and_evaluate
-    steps:
-      - command: detect
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-  # - name: evaluate_pose_accuracy
+  # - name: detect_and_evaluate
   #   steps:
+  #     - command: detect
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: evaluate_pose_accuracy
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
   # - name: testing_full_pipeline
   #   steps:
   #     - command: detect
