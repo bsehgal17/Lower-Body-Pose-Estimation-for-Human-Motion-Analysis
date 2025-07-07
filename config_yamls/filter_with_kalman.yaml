@@ -27,7 +27,7 @@ noise:
   target_resolution: null  # or [640, 480]
 
 
-ffilter:
+filter:
   name: "kalman"
   params:
     process_noise: 1e-3

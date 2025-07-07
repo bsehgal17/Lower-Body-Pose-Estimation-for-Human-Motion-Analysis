@@ -32,7 +32,7 @@ class FilterLibrary:
         return np.array(
             [
                 np.mean(
-                    data[max(0, i - half_window) : min(num_frames, i + half_window + 1)]
+                    data[max(0, i - half_window): min(num_frames, i + half_window + 1)]
                 )
                 for i in range(num_frames)
             ]
@@ -56,6 +56,9 @@ class FilterLibrary:
     def kalman(data, process_noise, measurement_noise):
         if len(data) == 0:
             return np.array([])
+        process_noise = float(process_noise)
+        measurement_noise = float(measurement_noise)
+
         kf = FilterLibrary._init_kalman(process_noise, measurement_noise)
         filtered, _ = kf.filter(data)
         return filtered[:, 0]
