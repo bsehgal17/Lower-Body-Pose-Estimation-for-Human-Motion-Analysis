@@ -12,8 +12,8 @@ models:
 processing:
   device: cuda:0
   nms_threshold: 0.5
-  detection_threshold: 0.5
-  kpt_threshold: 0.5
+  detection_threshold: 0.3
+  kpt_threshold: 0.3
 
 noise:
   apply_poisson_noise: true
@@ -28,11 +28,12 @@ noise:
 
 
 filter:
-  name: "gaussian"
+  name: "ekf"
   params:
-    sigma: 0.5
+    process_noise: 1e-4
+    measurement_noise: 1e-2
 
-  # input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/run_pose_estimation_and_filter/detect/2025-06-14_21-08-42/S1/Image_Data/Walking_1_(C1)" # <-- ADD THIS
+  # input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/rtmpose_l_whole/S1/Jog_1_(C1)/"  # <-- ADD THIS
 
   outlier_removal:
     enable: True
@@ -69,17 +70,3 @@ evaluation:
     #   params: {}
 
 
-dataset:
- joint_enum_module: utils.joint_enum.GTJointsHumanEVa
- keypoint_format: utils.joint_enum.PredJointsCOCOWholebody 
- sync_data:
-    data:
-      S1:
-        Walking 1: [667, 667, 667]
-        Jog 1: [49, 50, 51]
-      S2:
-        Walking 1: [547, 547, 546]
-        Jog 1: [493, 491, 502]
-      S3:
-        Walking 1: [524, 524, 524]
-        Jog 1: [464, 462, 462]

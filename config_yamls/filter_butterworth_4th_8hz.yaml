@@ -18,18 +18,22 @@ processing:
 noise:
   apply_poisson_noise: true
   apply_gaussian_noise: true
-  poisson_scale: 1.0
-  gaussian_std: 1.0
   apply_motion_blur: true
-  motion_blur_kernel_size: 3
   apply_brightness_reduction: true
-  brightness_factor: 20
+  brightness_factor: 30
+  poisson_scale: 1.0
+  gaussian_std: 2.0
+  motion_blur_kernel_size: 5
+  target_resolution: null  # or [640, 480]
 
 
 filter:
-  name: "gaussian"
+  name: "butterworth"
   params:
-    sigma: 0.5
+    order: 4
+    cutoff: 8.0
+    fs: 30.0  # sampling frequency, adjust as needed
+
 
   # input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/rtmpose_l_whole/S1/Jog_1_(C1)/"  # <-- ADD THIS
 

@@ -1,4 +1,3 @@
-
 from .filter_library import FilterLibrary
 
 FILTER_FN_MAP = {
@@ -9,5 +8,7 @@ FILTER_FN_MAP = {
     "savitzky": FilterLibrary.savitzky_golay,
     "wiener": FilterLibrary.wiener,
     "kalman": FilterLibrary.kalman,
-    "kalman_rts": FilterLibrary.kalman_rts,
+    "gvcspl": FilterLibrary.gvcspl,
+    "ekf": FilterLibrary.extended_kalman,
+    "ukf": FilterLibrary.unscented_kalman,
 }

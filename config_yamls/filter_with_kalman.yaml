@@ -11,7 +11,7 @@ models:
 
 processing:
   device: cuda:0
-  nms_threshold: 0.3
+  nms_threshold: 0.5
   detection_threshold: 0.3
   kpt_threshold: 0.3
 
@@ -30,14 +30,29 @@ noise:
 filter:
   name: "kalman"
   params:
-    process_noise: 1e-3
-    measurement_noise: 1e-1
-  enable_interpolation: true
+    process_noise: 1e-4
+    measurement_noise: 1e-2
+
+  # input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/rtmw_results/rtmpose_l_whole/S1/Jog_1_(C1)/"  # <-- ADD THIS
+
   outlier_removal:
-    enable: true
+    enable: True
     method: "iqr"
     params:
       iqr_multiplier: 1.5
+
+  enable_interpolation: true
+  interpolation_kind: "linear"
+
+  enable_filter_plots: true
+
+  joints_to_filter:
+    - LEFT_ANKLE
+    - RIGHT_ANKLE
+    - LEFT_KNEE
+    - RIGHT_KNEE
+    - LEFT_HIP
+    - RIGHT_HIP
 
 
 
@@ -55,17 +70,3 @@ evaluation:
     #   params: {}
 
 
-dataset:
- joint_enum_module: utils.joint_enum.GTJointsHumanEVa
- keypoint_format: utils.joint_enum.PredJointsCOCOWholebody 
- sync_data:
-    data:
-      S1:
-        Walking 1: [667, 667, 667]
-        Jog 1: [49, 50, 51]
-      S2:
-        Walking 1: [547, 547, 546]
-        Jog 1: [493, 491, 502]
-      S3:
-        Walking 1: [524, 524, 524]
-        Jog 1: [464, 462, 462]
