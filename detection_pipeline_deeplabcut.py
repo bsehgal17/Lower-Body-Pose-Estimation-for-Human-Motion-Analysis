@@ -22,12 +22,10 @@ def run_detection_pipeline(pipeline_config: PipelineConfig, global_config: Globa
 
     # Initialize components with pipeline_config where applicable
     detector = DeepLabCutDetector(pipeline_config)
-    visualizer = DeepLabCutVisualizer(
-        config_path=global_config.paths.dlc_config)
+    visualizer = DeepLabCutVisualizer()
     processor = FrameProcessorDLC(detector, visualizer, pipeline_config)
 
-    processor = FrameProcessor(
-        detector, visualizer, pipeline_config)
+    
 
     video_files = get_video_files(input_dir, global_config.video.extensions)
     if not video_files:

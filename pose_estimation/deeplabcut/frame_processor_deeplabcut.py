@@ -5,7 +5,7 @@ class FrameProcessorDLC:
         self.config = config
 
     def process_frame(self, frame, frame_idx, output_list):
-        keypoints = self.detector.detect(frame)
+        keypoints = self.detector.detect_and_estimate(frame)
         if self.visualizer:
             frame = self.visualizer.draw_keypoints(frame, keypoints)
 

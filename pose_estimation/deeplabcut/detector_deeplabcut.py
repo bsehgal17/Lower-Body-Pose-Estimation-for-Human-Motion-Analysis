@@ -39,11 +39,15 @@ class DeepLabCutDetector:
         )
 
     def detect_and_estimate(self, frame):
-        image_pil = Image.fromarray(frame).convert("RGB")
+        # frame: np.ndarray (H x W x 3)
+        image_pil = Image.fromarray(frame).convert("RGB")  # only for preprocessing
         image_tensor = self.preprocess(image_pil).to(self.device)
 
+        # Run human detection
         with torch.no_grad():
             preds = self.detector([image_tensor])[0]
+
+        # Get human bounding boxes
         bboxes = [
             box for box, label in zip(preds["boxes"].cpu().numpy(), preds["labels"].cpu().numpy()) if label == 1
         ]
@@ -55,6 +59,10 @@ class DeepLabCutDetector:
         bboxes_xywh[:, 2] -= bboxes_xywh[:, 0]
         bboxes_xywh[:, 3] -= bboxes_xywh[:, 1]
 
+        # Prepare context for RTMPose
         ctx = [{"bboxes": bboxes_xywh[:self.max_detections]}]
-        results = self.runner.inference([(image_pil, ctx[0])])[0]  # (N, J, 3)
+
+        # ✅ Use original NumPy frame, not PIL image
+        results = self.runner.inference([(frame, ctx[0])])[0]  # (N, J, 3)
         return results
+
