@@ -20,46 +20,12 @@ def combine_keypoints(pose_results, frame_idx, video_data, bboxes):
     video_data.append(frame_data)
 
 
-def _convert_ndarray_to_list(obj):
-    """Recursively convert NumPy arrays to Python lists."""
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    elif isinstance(obj, dict):
-        return {k: _convert_ndarray_to_list(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [_convert_ndarray_to_list(i) for i in obj]
-    else:
-        return obj
-
-
-def is_valid_point(pt):
-    return not np.allclose(pt, [-1, -1, -1])
-
-
-def filter_valid_keypoints(keypoints_array):
-    # keypoints_array shape: (N_individuals, N_keypoints, 3)
-    if isinstance(keypoints_array, np.ndarray):
-        return [person.tolist() for person in keypoints_array if any(is_valid_point(p) for p in person)]
-    return keypoints_array  # fallback
-
-
 def save_keypoints_to_json(video_data, save_dir, video_name, detector_config: dict = None):
     output_json_path = os.path.join(save_dir, f"{video_name}.json")
 
-    # Ensure it's a list of frame dictionaries
-    if not isinstance(video_data, list):
-        raise ValueError("video_data must be a list of dicts per frame")
-
-    filtered_data = []
-    for frame_data in video_data:
-        frame_dict = {
-            "bodyparts": frame_data["bodyparts"].tolist() if isinstance(frame_data["bodyparts"], np.ndarray) else frame_data["bodyparts"],
-            "bboxes": frame_data.get("bboxes", None)
-        }
-        filtered_data.append(frame_dict)
-
+    # Bundle keypoints and detector config
     output = {
-        "keypoints": filtered_data
+        "keypoints": video_data,
     }
 
     if detector_config:
@@ -67,9 +33,6 @@ def save_keypoints_to_json(video_data, save_dir, video_name, detector_config: di
 
     with open(output_json_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2)
-
-    print(f"Saved filtered keypoints to: {output_json_path}")
-
 
 
 def unpack_prediction_pkl(pkl_path, person_idx=0):

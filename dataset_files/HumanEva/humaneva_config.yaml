@@ -2,8 +2,15 @@ paths:
   dataset: HumanEva
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
+models:
+  detector: deeplabcut
 
-
+processing:
+  device: cuda:0
+  nms_threshold: 0.3
+  detection_threshold: 0.3
+  kpt_threshold: 0.3
+  
 noise:
   apply_poisson_noise: true
   apply_gaussian_noise: true
