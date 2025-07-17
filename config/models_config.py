@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import logging
 import os
+from typing import Optional
+
 
 # Configure logging
 logging.basicConfig(
@@ -12,11 +14,11 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ModelsConfig:
     """Configuration for pose estimation models (e.g., MMPose)."""
-
-    det_config: str
-    det_checkpoint: str
-    pose_config: str
-    pose_checkpoint: str
+    detector: str
+    det_config: Optional[str] = None
+    det_checkpoint: Optional[str] = None
+    pose_config: Optional[str] = None
+    pose_checkpoint: Optional[str] = None
 
     def __post_init__(self):
         # Basic validation for local files (checkpoints can be URLs)

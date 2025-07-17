@@ -7,9 +7,9 @@ from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from utils.video_io import get_video_files
 from utils.json_io import save_keypoints_to_json
-from deeplabcut_detector import DeepLabCutDetector
-from frame_processor_dlc import FrameProcessorDLC
-from pose_estimation.visualization import PoseVisualizer
+from pose_estimation.deeplabcut.detector_deeplabcut import DeepLabCutDetector
+from pose_estimation.deeplabcut.frame_processor_deeplabcut import FrameProcessorDLC
+from pose_estimation.deeplabcut.deeplabcut_visualization import DeepLabCutVisualizer
 from pose_estimation.processors.frame_processor import FrameProcessor
 from pose_estimation.processors.video_loader import VideoIO
 
@@ -22,7 +22,8 @@ def run_detection_pipeline(pipeline_config: PipelineConfig, global_config: Globa
 
     # Initialize components with pipeline_config where applicable
     detector = DeepLabCutDetector(pipeline_config)
-    visualizer = PoseVisualizer(None, pipeline_config)  # or skip if not needed
+    visualizer = DeepLabCutVisualizer(
+        config_path=global_config.paths.dlc_config)
     processor = FrameProcessorDLC(detector, visualizer, pipeline_config)
 
     processor = FrameProcessor(

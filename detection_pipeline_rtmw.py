@@ -7,9 +7,9 @@ from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from utils.video_io import get_video_files
 from utils.json_io import save_keypoints_to_json
-from pose_estimation.detector_rtmw import Detector
-from pose_estimation.estimator_rtmw import PoseEstimator
-from pose_estimation.visualization import PoseVisualizer
+from pose_estimation.rtmw.detector_rtmw import Detector
+from pose_estimation.rtmw.estimator_rtmw import PoseEstimator
+from pose_estimation.rtmw.visualization import PoseVisualizer
 from pose_estimation.processors.frame_processor import FrameProcessor
 from pose_estimation.processors.video_loader import VideoIO
 
