@@ -22,6 +22,8 @@ class OverallPCKCalculator(BasePCKCalculator):
 
     def compute(self, gt, pred):
         gt, pred = np.array(gt), np.array(pred)
+        if pred.shape[-1] == 3:
+            pred = pred[..., :2]
         if gt.shape[0] != pred.shape[0] or gt.ndim != 3:
             raise ValueError("Input shape mismatch")
 

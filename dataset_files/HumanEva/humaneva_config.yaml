@@ -67,7 +67,7 @@ evaluation:
 
 dataset:
  joint_enum_module: utils.joint_enum.GTJointsHumanEVa
- keypoint_format: utils.joint_enum.PredJointsCOCOWholebody 
+ keypoint_format: utils.joint_enum.PredJointsDeepLabCut
  sync_data:
     data:
       S1:
