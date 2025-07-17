@@ -29,35 +29,34 @@ def convert_to_standard_format(predictions):
     std_formatted = []
 
     for frame_idx, frame_data in enumerate(predictions):
-        kps = frame_data.get("bodyparts", np.zeros((0, 0, 3)))
-        bbs = frame_data.get("bboxes", np.zeros((0, 4)))
-
-        kps = np.asarray(kps)
-        bbs = np.asarray(bbs)
+        kps = np.asarray(frame_data.get("bodyparts", []))
+        bbs = np.asarray(frame_data.get("bboxes", []))
 
         frame_entry = {
             "frame_idx": frame_idx,
             "keypoints": []
         }
 
-        if kps.ndim == 3:
-            for i in range(kps.shape[0]):
-                kp = kps[i]
-                bbox = bbs[i] if i < len(bbs) else [-1, -1, -1, -1]
+        if kps.ndim == 2:
+            kps = kps[None, ...]  # Convert to shape (1, J, 3)
 
-                # Skip if all keypoints are [-1, -1, -1]
-                if np.all(kp == -1):
-                    continue
+        for i in range(kps.shape[0]):
+            kp = kps[i]
+            bbox = bbs[i] if i < len(bbs) else [-1, -1, -1, -1]
 
-                # Skip if bbox is exactly [-1, -1, -1, -1]
-                if np.all(bbox == -1):
-                    continue
+            # Skip if all keypoints are [-1, -1, -1]
+            if np.all(kp == -1):
+                continue
 
-                frame_entry["keypoints"].append({
-                    "keypoints": kp.tolist(),
-                    "scores": kp[:, 2].tolist(),
-                    "bboxes": bbox.tolist()
-                })
+            # Skip if bbox is exactly [-1, -1, -1, -1]
+            if np.all(bbox == -1):
+                continue
+
+            frame_entry["keypoints"].append({
+                "keypoints": kp[:, :2].tolist(),
+                "scores": kp[:, 2].tolist(),
+                "bboxes": bbox.tolist()
+            })
 
         std_formatted.append(frame_entry)
 
@@ -161,19 +160,20 @@ def run_detection_pipeline(pipeline_config: PipelineConfig, global_config: Globa
 
         logger.info(
             f"Saved keypoints to: {output_json_file} and {output_pkl_file}")
+        wrapped_preds = {}
+        for idx, frame in enumerate(predictions):
+            if "bodyparts" in frame and isinstance(frame["bodyparts"], np.ndarray):
+                # Use only first individual
+                bp = frame["bodyparts"]
+                if bp.ndim == 3 and bp.shape[0] > 0:
+                    # only first person
+                    wrapped_preds[idx] = {"bodyparts": bp[0:1]}
 
         # Step 3: Overlay video
         try:
             df = dlc_torch.build_predictions_dataframe(
                 scorer="rtmpose-body7",
-                predictions={
-                    idx: {
-                        "single": {
-                            "bodyparts": frame
-                        }
-                    }
-                    for idx, frame in enumerate(predictions)
-                },
+                predictions=wrapped_preds,
                 parameters=dlc_torch.PoseDatasetParameters(
                     bodyparts=pose_cfg["metadata"]["bodyparts"],
                     unique_bpts=pose_cfg["metadata"]["unique_bodyparts"],
@@ -183,6 +183,7 @@ def run_detection_pipeline(pipeline_config: PipelineConfig, global_config: Globa
 
             clip = VideoProcessorCV(
                 str(video_path), sname=overlay_video_file, codec="mp4v")
+
             CreateVideo(
                 clip,
                 df,
