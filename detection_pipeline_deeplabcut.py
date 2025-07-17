@@ -7,8 +7,8 @@ from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from utils.video_io import get_video_files
 from utils.json_io import save_keypoints_to_json
-from pose_estimation.detector import Detector
-from pose_estimation.estimator import PoseEstimator
+from deeplabcut_detector import DeepLabCutDetector
+from frame_processor_dlc import FrameProcessorDLC
 from pose_estimation.visualization import PoseVisualizer
 from pose_estimation.processors.frame_processor import FrameProcessor
 from pose_estimation.processors.video_loader import VideoIO
@@ -21,11 +21,12 @@ def run_detection_pipeline(pipeline_config: PipelineConfig, global_config: Globa
     logger.info("Initializing models...")
 
     # Initialize components with pipeline_config where applicable
-    detector = Detector(pipeline_config)
-    estimator = PoseEstimator(pipeline_config)
-    visualizer = PoseVisualizer(estimator, pipeline_config)
+    detector = DeepLabCutDetector(pipeline_config)
+    visualizer = PoseVisualizer(None, pipeline_config)  # or skip if not needed
+    processor = FrameProcessorDLC(detector, visualizer, pipeline_config)
+
     processor = FrameProcessor(
-        detector, estimator, visualizer, pipeline_config)
+        detector, visualizer, pipeline_config)
 
     video_files = get_video_files(input_dir, global_config.video.extensions)
     if not video_files:
