@@ -1,73 +1,102 @@
-from evaluation.base_calculators import BasePCKCalculator
+from evaluation.base_calculators import BasePCKCalculator, average_if_tuple
 import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class JointwisePCKCalculator(BasePCKCalculator):
-    def __init__(
-        self, threshold=0.2, joints_to_evaluate=None, gt_enum=None, pred_enum=None
-    ):
+    def __init__(self, params, gt_enum, pred_enum):
+        if "threshold" not in params:
+            raise ValueError(
+                "Parameter 'threshold' is required for JointwisePCKCalculator.")
+
+        threshold = params["threshold"]
+        joints_to_evaluate = params.get("joints_to_evaluate", None)
+        self.norm_joints = params.get("norm_joints", None)
+
         super().__init__(threshold=threshold, joints_to_evaluate=joints_to_evaluate)
+
         if gt_enum is None or pred_enum is None:
             raise ValueError("Both gt_enum and pred_enum must be provided.")
 
         self.gt_enum = gt_enum
         self.pred_enum = pred_enum
 
+    def _select_norm_joints(self):
+        joint_set = set(self.joints_to_evaluate or [])
+
+        if "LEFT_SHOULDER" in joint_set and "RIGHT_SHOULDER" in joint_set:
+            return ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"]
+        elif "LEFT_KNEE" in joint_set and "RIGHT_KNEE" in joint_set:
+            return ["LEFT_KNEE", "RIGHT_KNEE", "LEFT_HIP", "RIGHT_HIP"]
+        elif "LEFT_HIP" in joint_set and "RIGHT_HIP" in joint_set:
+            return ["LEFT_HIP", "RIGHT_HIP"]
+        else:
+            raise ValueError(
+                "Could not determine normalization joints from joints_to_evaluate.")
+
     def compute(self, gt, pred):
         gt, pred = np.array(gt), np.array(pred)
 
-        # Default to all joint names from GT enum if not specified
         if self.joints_to_evaluate is None:
             self.joints_to_evaluate = [j.name for j in self.gt_enum]
 
-        # Default normalization: distance between first two joints
-        norm_joint_1 = getattr(self.gt_enum, self.joints_to_evaluate[0])
-        norm_joint_2 = getattr(self.gt_enum, self.joints_to_evaluate[1])
-        norm_idx1 = norm_joint_1.value
-        norm_idx2 = norm_joint_2.value
-        norm_ref_1 = (
-            (gt[:, norm_idx1[0]] + gt[:, norm_idx1[1]]) / 2
-            if isinstance(norm_idx1, tuple)
-            else gt[:, norm_idx1]
-        )
-        norm_ref_2 = (
-            (gt[:, norm_idx2[0]] + gt[:, norm_idx2[1]]) / 2
-            if isinstance(norm_idx2, tuple)
-            else gt[:, norm_idx2]
-        )
-        norm_length = np.linalg.norm(norm_ref_1 - norm_ref_2, axis=-1)
+        # Determine norm_joints
+        norm_joints = self.norm_joints or self._select_norm_joints()
+
+        # Compute normalization length
+        norm_parts = []
+        for i in range(0, len(norm_joints), 2):
+            try:
+                j1 = getattr(self.gt_enum, norm_joints[i])
+                j2 = getattr(self.gt_enum, norm_joints[i + 1])
+
+                p1 = np.array([average_if_tuple(x) for x in gt[:, j1.value]])
+                p2 = np.array([average_if_tuple(x) for x in gt[:, j2.value]])
+                norm_parts.append(np.linalg.norm(p1 - p2, axis=-1))
+            except AttributeError:
+                logger.warning(
+                    f"Normalization joint missing: {norm_joints[i]} or {norm_joints[i+1]} — skipping.")
+                continue
+
+        if not norm_parts:
+            raise ValueError("No valid joint pairs found for normalization.")
+
+        norm_length = np.mean(norm_parts, axis=0)
 
         gt_pts, pred_pts, joint_names = [], [], []
 
         for joint in self.joints_to_evaluate:
-            if (
-                joint in self.pred_enum.__members__
-                and joint in self.gt_enum.__members__
-            ):
-                g_idx = self.gt_enum[joint].value
-                p_idx = self.pred_enum[joint].value
+            if joint not in self.gt_enum.__members__:
+                logger.warning(
+                    f"Joint '{joint}' not found in GT enum. Skipping.")
+                continue
+            if joint not in self.pred_enum.__members__:
+                logger.warning(
+                    f"Joint '{joint}' not found in Pred enum. Skipping.")
+                continue
 
-                gt_point = (
-                    (gt[:, g_idx[0]] + gt[:, g_idx[1]]) / 2
-                    if isinstance(g_idx, tuple)
-                    else gt[:, g_idx]
-                )
-                pred_point = (
-                    (pred[:, p_idx[0]] + pred[:, p_idx[1]]) / 2
-                    if isinstance(p_idx, tuple)
-                    else pred[:, p_idx]
-                )
+            g_idx = self.gt_enum[joint].value
+            p_idx = self.pred_enum[joint].value
 
-                gt_pts.append(gt_point)
-                pred_pts.append(pred_point)
-                joint_names.append(joint)
+            gt_point = (gt[:, g_idx[0]] + gt[:, g_idx[1]]) / \
+                2 if isinstance(g_idx, tuple) else gt[:, g_idx]
+            pred_point = (pred[:, p_idx[0]] + pred[:, p_idx[1]]) / \
+                2 if isinstance(p_idx, tuple) else pred[:, p_idx]
+
+            gt_pts.append(gt_point)
+            pred_pts.append(pred_point)
+            joint_names.append(joint)
+
+        if not joint_names:
+            raise ValueError(
+                "No valid joints were matched between GT and prediction enums.")
 
         gt_points = np.stack(gt_pts, axis=1)
         pred_points = np.stack(pred_pts, axis=1)
 
-        distances = (
-            np.linalg.norm(gt_points - pred_points, axis=-1)
-            / norm_length[:, np.newaxis]
-        )
+        distances = np.linalg.norm(
+            gt_points - pred_points, axis=-1) / norm_length[:, np.newaxis]
         jointwise_pck = (distances < self.threshold).astype(int) * 100
         return joint_names, jointwise_pck
