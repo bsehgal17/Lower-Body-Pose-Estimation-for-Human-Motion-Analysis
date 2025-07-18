@@ -21,52 +21,24 @@ class GTJointsHumanEVa(Enum):
 
 
 class GTJointsMoVi(Enum):
-    HEAD = (0, 1, 2, 3)  # LFHD, RFHD, LBHD, RBHD
-
-    # Eyes (inner+outer combined per eye)
-    LEFT_EYE = (5, 6)     # L_EYE_OUTER + L_EYE_INNER
-    RIGHT_EYE = (7, 8)    # R_EYE_OUTER + R_EYE_INNER
-
-    # Ears
-    LEFT_EAR = 12
-    RIGHT_EAR = 13
-
-    # Core
-    NECK = 17        # CLAV
-    CHEST = 18       # STRN
-    SPINE = 19       # C7
-
-    # Shoulders
-    LEFT_SHOULDER = 22
-    RIGHT_SHOULDER = 23
-
-    # Arms
-    LEFT_ELBOW = 26
-    RIGHT_ELBOW = 27
-    LEFT_WRIST = 28
-    RIGHT_WRIST = 29
-
-    # Hands
-    LEFT_HAND = 30   # LFIN
-    RIGHT_HAND = 31  # RFIN
-
-    # Hips
-    LEFT_HIP = 32    # LASI
-    RIGHT_HIP = 33   # RASI
-
-    # Legs
-    LEFT_KNEE = 38
-    RIGHT_KNEE = 39
-    LEFT_ANKLE = 42
-    RIGHT_ANKLE = 43
-
-    # Feet (combined markers)
-    LEFT_HEEL = 44
-    RIGHT_HEEL = 45
-    LEFT_TOE = 46    # 2nd metatarsal
-    RIGHT_TOE = 47
-    LEFT_FOOT_SIDE = (48, 50)  # LMT5 + LMT1
-    RIGHT_FOOT_SIDE = (49, 51)  # RMT5 + RMT1
+    HEAD = 15
+    NECK = 14
+    LEFT_SHOULDER = 16
+    RIGHT_SHOULDER = 17
+    LEFT_ELBOW = 18
+    RIGHT_ELBOW = 19
+    LEFT_WRIST = 20
+    RIGHT_WRIST = 21
+    LEFT_HIP = 1
+    RIGHT_HIP = 2
+    LEFT_KNEE = 4
+    RIGHT_KNEE = 5
+    LEFT_ANKLE = 7
+    RIGHT_ANKLE = 8
+    # LEFT_HEEL = 44
+    # RIGHT_HEEL = 45
+    LEFT_TOE = 10    # 2nd metatarsal
+    RIGHT_TOE = 11
 
 
 class PredJointsCOCOWholebody(Enum):
