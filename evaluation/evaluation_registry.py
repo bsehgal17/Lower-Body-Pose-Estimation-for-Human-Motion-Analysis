@@ -6,12 +6,12 @@ EVALUATION_METRICS = [
     {
         "name": "overall_pck",
         "class": OverallPCKCalculator,
-        "param_spec": ["threshold"],  # user must provide a threshold
+        "param_spec": ["threshold", "joints_to_evaluate"],  # ✅ updated
     },
     {
         "name": "jointwise_pck",
         "class": JointwisePCKCalculator,
-        "param_spec": ["threshold"],
+        "param_spec": ["threshold", "joints_to_evaluate"],  # ✅ updated
     },
     # {
     #     "name": "gat_metric",
