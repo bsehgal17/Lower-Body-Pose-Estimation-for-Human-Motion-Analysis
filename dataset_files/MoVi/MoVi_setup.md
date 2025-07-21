@@ -1,12 +1,12 @@
 # 2D Joint Projection Pipeline from MoVi Dataset
 
-The script MoVi_setup_all.py extracts and projects 3D motion capture (MoCap) joints onto 2D video frames using the **MoVi Dataset**, camera calibration files, and motion segmentation data.
+The script [MoVi_setup_all.py](https://github.com/bsehgal17/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/blob/main/dataset_files/MoVi/MoVi_setup_all.py) extracts and projects 3D motion capture (MoCap) joints onto 2D video frames using the **MoVi Dataset**, camera calibration files, and motion segmentation data.
 
 ---
 
 ## Overview
 
-### 🔧 What It Does
+### What It Does
 
 * Extracts **3D joint positions** from AMASS-formatted `.mat` files.
 * Projects 3D joints to 2D image coordinates using camera **intrinsics** and **extrinsics**.
