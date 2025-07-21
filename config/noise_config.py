@@ -3,16 +3,16 @@ from typing import Optional, Tuple
 
 
 class NoiseConfig(BaseModel):
-    apply_poisson_noise: bool
+    apply_poisson_noise: Optional[bool] = None
     poisson_scale: Optional[float] = None
 
-    apply_gaussian_noise: bool
+    apply_gaussian_noise: Optional[bool] = None
     gaussian_std: Optional[float] = None
 
-    apply_motion_blur: bool
+    apply_motion_blur: Optional[bool] = None
     motion_blur_kernel_size: Optional[int] = None
 
-    apply_brightness_reduction: bool
+    apply_brightness_reduction: Optional[bool] = None
     brightness_factor: Optional[int] = None
 
     target_resolution: Optional[Tuple[int, int]] = None

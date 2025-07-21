@@ -56,8 +56,6 @@ def _handle_noise_command(
     args, pipeline_config: PipelineConfig, global_config: GlobalConfig
 ):
     from noise_simulator import NoiseSimulator
-    run_detection_pipeline = _get_detection_pipeline_fn(
-        pipeline_config.models.detector)
 
     # Step 0: Set up base input/output paths
     input_dir, base_pipeline_out = get_pipeline_io_paths(
@@ -85,19 +83,29 @@ def _handle_noise_command(
     simulator = NoiseSimulator(pipeline_config, global_config)
     simulator.process_all_videos(str(input_folder), str(output_folder))
 
-    # Step 2: Run detection on noisy videos
-    detect_out_dir = Path(output_folder) / "detect"
-    detect_out_dir.mkdir(parents=True, exist_ok=True)
+    # Step 2: Conditionally run detection only if models and detector are configured
+    if (
+        pipeline_config.models is not None
+        and getattr(pipeline_config.models, "detector", None) is not None
+    ):
+        run_detection_pipeline = _get_detection_pipeline_fn(
+            pipeline_config.models.detector
+        )
 
-    logger.info(f"Running detection on noisy videos from: {output_folder}")
-    logger.info(f"Detection results will be saved to: {detect_out_dir}")
+        detect_out_dir = Path(output_folder) / "detect"
+        detect_out_dir.mkdir(parents=True, exist_ok=True)
 
-    run_detection_pipeline(
-        pipeline_config=pipeline_config,
-        global_config=global_config,
-        input_dir=str(output_folder),
-        output_dir=str(detect_out_dir),
-    )
+        logger.info(f"Running detection on noisy videos from: {output_folder}")
+        logger.info(f"Detection results will be saved to: {detect_out_dir}")
+
+        run_detection_pipeline(
+            pipeline_config=pipeline_config,
+            global_config=global_config,
+            input_dir=str(output_folder),
+            output_dir=str(detect_out_dir),
+        )
+    else:
+        logger.info("No detection model configured; skipping detection step.")
 
 
 def _handle_filter_command(

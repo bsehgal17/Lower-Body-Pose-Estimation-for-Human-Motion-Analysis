@@ -22,34 +22,37 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class PipelineConfig:
-    """Full configuration for a specific processing pipeline."""
-
     paths: PipelinePathsConfig
-    models: ModelsConfig
-    processing: ProcessingConfig
+    models: Optional[ModelsConfig] = None
+    processing: Optional[ProcessingConfig] = None
     filter: Optional[FilterConfig] = None
     noise: Optional[NoiseConfig] = None
     evaluation: Optional[EvaluationConfig] = None
-    dataset: Optional[DatasetConfig] = None  # <- added
+    dataset: Optional[DatasetConfig] = None
 
     # ------------------------------------------------------------------
     # YAML (de)serialization helpers
     # ------------------------------------------------------------------
+
     @classmethod
     def from_yaml(cls, yaml_path: str) -> "PipelineConfig":
         if not os.path.exists(yaml_path):
-            raise FileNotFoundError(f"Pipeline config file not found: {yaml_path}")
+            raise FileNotFoundError(
+                f"Pipeline config file not found: {yaml_path}")
         with open(yaml_path, "r", encoding="utf-8") as f:
             raw_config = yaml.safe_load(f)
 
         return cls(
             paths=PipelinePathsConfig(**raw_config.get("paths", {})),
-            models=ModelsConfig(**raw_config.get("models", {})),
-            processing=ProcessingConfig(**raw_config.get("processing", {})),
+            models=ModelsConfig(
+                **raw_config["models"]) if "models" in raw_config else None,
+            processing=ProcessingConfig(
+                **raw_config["processing"]) if "processing" in raw_config else None,
             filter=FilterConfig(**raw_config["filter"])
             if "filter" in raw_config
             else None,
-            noise=NoiseConfig(**raw_config["noise"]) if "noise" in raw_config else None,
+            noise=NoiseConfig(
+                **raw_config["noise"]) if "noise" in raw_config else None,
             evaluation=EvaluationConfig(**raw_config["evaluation"])
             if "evaluation" in raw_config
             else None,
@@ -60,11 +63,14 @@ class PipelineConfig:
 
     def to_yaml(self, yaml_path: str):
         """Dump the current config to YAML."""
-        cfg_dict = {
-            "paths": self.paths.__dict__,
-            "models": self.models.__dict__,
-            "processing": self.processing.__dict__,
-        }
+        cfg_dict = {}
+
+        if self.paths:
+            cfg_dict["paths"] = self.paths.__dict__
+        if self.models:
+            cfg_dict["models"] = self.models.__dict__
+        if self.processing:
+            cfg_dict["processing"] = self.processing.__dict__
         if self.filter:
             cfg_dict["filter"] = self.filter.__dict__
         if self.noise:

@@ -5,7 +5,7 @@ import os
 import pandas as pd
 
 # --- USER CONFIGURATION ---
-FOLDER_PATH = r"C:\Users\BhavyaSehgal\Downloads\evidence for brightness"
+FOLDER_PATH = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanMovi"
 # ---------------------------
 
 
@@ -15,7 +15,8 @@ def analyze_brightness_single(video_path, output_dir):
         print(f"Error: Cannot open video {video_path}")
         return None
 
-    fps = int(cap.get(cv2.CAP_PROP_FPS)) or 30  # fallback to 30 if fps not detected
+    # fallback to 30 if fps not detected
+    fps = int(cap.get(cv2.CAP_PROP_FPS)) or 30
     video_name = os.path.splitext(os.path.basename(video_path))[0]
     print(f"Video: {video_name}, FPS: {fps}")
 
@@ -50,7 +51,8 @@ def analyze_brightness_single(video_path, output_dir):
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
-    time_plot_path = os.path.join(output_dir, f"brightness_over_time_{video_name}.png")
+    time_plot_path = os.path.join(
+        output_dir, f"brightness_over_time_{video_name}.png")
     plt.savefig(time_plot_path)
     plt.close()
 
@@ -61,7 +63,8 @@ def analyze_brightness_single(video_path, output_dir):
     plt.ylabel("Frequency")
     plt.title(f"Brightness Histogram - {video_name}")
     plt.tight_layout()
-    hist_plot_path = os.path.join(output_dir, f"brightness_histogram_{video_name}.png")
+    hist_plot_path = os.path.join(
+        output_dir, f"brightness_histogram_{video_name}.png")
     plt.savefig(hist_plot_path)
     plt.close()
 
@@ -81,20 +84,21 @@ def analyze_brightness_folder(folder_path):
     os.makedirs(output_dir, exist_ok=True)
 
     results = []
-    video_files = [
-        f
-        for f in os.listdir(folder_path)
-        if f.lower().endswith((".mp4", ".avi", ".mov", ".mkv"))
-    ]
+
+    # Walk through all subdirectories and find video files
+    video_files = []
+    for root, _, files in os.walk(folder_path):
+        for f in files:
+            if f.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
+                video_files.append(os.path.join(root, f))
 
     if not video_files:
-        print("No video files found in the folder.")
+        print("No video files found in the folder or subfolders.")
         return
 
-    for video_file in video_files:
-        full_path = os.path.join(folder_path, video_file)
-        print(f"\nProcessing: {video_file}")
-        result = analyze_brightness_single(full_path, output_dir)
+    for video_path in video_files:
+        print(f"\nProcessing: {video_path}")
+        result = analyze_brightness_single(video_path, output_dir)
         if result:
             results.append(result)
 
