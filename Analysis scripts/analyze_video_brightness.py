@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 # --- USER CONFIGURATION ---
-FOLDER_PATH = r"C:\Users\BhavyaSehgal\Downloads\evidence for brightness"
+FOLDER_PATH = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanMovi/test_noise_20"
 OUTPUT_DIR_NAME = "brightness_analysis"  # Separate output folder name
 REGIONAL_ANALYSIS = True  # Set False to disable regional brightness analysis
 # ---------------------------
@@ -88,7 +88,8 @@ def analyze_video(video_path, output_dir):
     video_name = os.path.splitext(os.path.basename(video_path))[0]
 
     print(f"\nAnalyzing: {video_name}")
-    print(f"Duration: {total_frames / fps:.1f}s, FPS: {fps}, Frames: {total_frames}")
+    print(
+        f"Duration: {total_frames / fps:.1f}s, FPS: {fps}, Frames: {total_frames}")
 
     # Initialize data storage
     frame_data = []
@@ -136,7 +137,8 @@ def analyze_video(video_path, output_dir):
 
     # Add regional stats if enabled and available
     if REGIONAL_ANALYSIS and "regions" in frame_data[0]:
-        regions = ["1-1", "1-2", "1-3", "2-1", "2-2", "2-3", "3-1", "3-2", "3-3"]
+        regions = ["1-1", "1-2", "1-3", "2-1",
+                   "2-2", "2-3", "3-1", "3-2", "3-3"]
         for region_pos in regions:
             region_means = []
             for f in frame_data:
@@ -147,7 +149,8 @@ def analyze_video(video_path, output_dir):
                             break
 
             if region_means:  # Only add if we found data
-                video_stats[f"region_{region_pos}_mean"] = np.mean(region_means)
+                video_stats[f"region_{region_pos}_mean"] = np.mean(
+                    region_means)
                 video_stats[f"region_{region_pos}_std"] = np.std(region_means)
 
     # Visualization
@@ -170,7 +173,8 @@ def plot_brightness_over_time(timestamps, brightness_values, video_name, output_
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f"{video_name}_brightness_timeseries.png"))
+    plt.savefig(os.path.join(
+        output_dir, f"{video_name}_brightness_timeseries.png"))
     plt.close()
 
 
@@ -181,7 +185,8 @@ def plot_brightness_histogram(brightness_values, video_name, output_dir):
     plt.ylabel("Frequency")
     plt.title(f"Brightness Distribution - {video_name}")
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f"{video_name}_brightness_histogram.png"))
+    plt.savefig(os.path.join(
+        output_dir, f"{video_name}_brightness_histogram.png"))
     plt.close()
 
 
@@ -198,7 +203,8 @@ def plot_regional_brightness(luminance_frame, video_name, output_dir):
 
     plt.title(f"Regional Brightness - {video_name}\n(Sampled Frame)")
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f"{video_name}_regional_brightness.png"))
+    plt.savefig(os.path.join(
+        output_dir, f"{video_name}_regional_brightness.png"))
     plt.close()
 
 

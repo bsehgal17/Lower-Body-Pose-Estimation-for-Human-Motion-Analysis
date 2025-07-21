@@ -13,7 +13,7 @@ class NoiseConfig(BaseModel):
     motion_blur_kernel_size: Optional[int] = None
 
     apply_brightness_reduction: Optional[bool] = None
-    brightness_factor: Optional[int] = None
+    brightness_factor: Optional[float] = None
 
     target_resolution: Optional[Tuple[int, int]] = None
 

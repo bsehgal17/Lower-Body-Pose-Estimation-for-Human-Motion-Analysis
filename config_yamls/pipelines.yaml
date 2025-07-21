@@ -40,20 +40,6 @@ pipelines:
       - command: noise
         config_file: "config_yamls/test_noise_30.yaml"
 
-  - name: test_noise_40
-    steps:
-      - command: noise
-        config_file: "config_yamls/test_noise_40.yaml"
-
-  - name: test_noise_50
-    steps:
-      - command: noise
-        config_file: "config_yamls/test_noise_50.yaml"
-
-  - name: test_noise_60
-    steps:
-      - command: noise
-        config_file: "config_yamls/test_noise_60.yaml"
 
   # - name: unscented_kalman_filter_pipeline
   #   steps:
