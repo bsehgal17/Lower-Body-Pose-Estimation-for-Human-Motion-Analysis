@@ -126,26 +126,5 @@ convert_npy_to_csv("results_all_subjects/Subject_001/joints2d_projected.npy")
 
 ---
 
-## Run the Script
 
-### Main Entry Point
-
-```bash
-python main.py
-```
-
-```python
-# main.py
-if __name__ == "__main__":
-    base = r"C:\path\to\MoVi dataset"
-    process_all_subjects(
-        intr_dir=os.path.join(base, "Camera Parameters", "Calib"),
-        extr_dir=os.path.join(base, "Camera Parameters", "Calib"),
-        amass_dir=os.path.join(base, "AMASS"),
-        video_dir=os.path.join(base, "dataverse_files"),
-        v3d_dir=os.path.join(base, "MoVi_mocap"),
-        output_root=os.path.join(base, "results_all_subjects"),
-        motion="walking",
-    )
-```
 
