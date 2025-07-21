@@ -1,10 +1,10 @@
-# 🕺 2D Joint Projection Pipeline from MoVi Dataset
+# 2D Joint Projection Pipeline from MoVi Dataset
 
-The script MoVi_setup_all.py  extracts and projects 3D motion capture (MoCap) joints onto 2D video frames using the **MoVi Dataset**, camera calibration files, and motion segmentation data.
+The script MoVi_setup_all.py extracts and projects 3D motion capture (MoCap) joints onto 2D video frames using the **MoVi Dataset**, camera calibration files, and motion segmentation data.
 
 ---
 
-## 📌 Overview
+## Overview
 
 ### 🔧 What It Does
 
@@ -16,7 +16,7 @@ The script MoVi_setup_all.py  extracts and projects 3D motion capture (MoCap) jo
 
 ---
 
-## 🗂 Directory Structure
+## Directory Structure
 
 ```
 MoVi dataset/
@@ -32,7 +32,7 @@ MoVi dataset/
 
 ---
 
-## 📥 Input Files
+## Input Files
 
 | File                       | Description                                         |
 | -------------------------- | --------------------------------------------------- |
@@ -44,7 +44,7 @@ MoVi dataset/
 
 ---
 
-## 🧠 How It Works
+## How It Works
 
 ### 1. Load Camera Parameters
 
@@ -87,7 +87,7 @@ np.save("joints2d_projected.npy", joints2d_trimmed)
 
 ---
 
-## 📤 Convert `.npy` to `.csv`
+## Convert `.npy` to `.csv`
 
 ### `convert_npy_to_csv.py`
 
@@ -107,7 +107,7 @@ def convert_npy_to_csv(npy_path):
     df = pd.DataFrame(flattened, columns=headers)
     csv_path = npy_path.replace(".npy", ".csv")
     df.to_csv(csv_path, index=False)
-    print(f"✅ Saved CSV: {csv_path}")
+    print(f"Saved CSV: {csv_path}")
 
 # Example
 convert_npy_to_csv("results_all_subjects/Subject_001/joints2d_projected.npy")
@@ -115,7 +115,7 @@ convert_npy_to_csv("results_all_subjects/Subject_001/joints2d_projected.npy")
 
 ---
 
-## ✅ Outputs per Subject
+## Outputs per Subject
 
 | Output File              | Description                                |
 | ------------------------ | ------------------------------------------ |
@@ -126,7 +126,7 @@ convert_npy_to_csv("results_all_subjects/Subject_001/joints2d_projected.npy")
 
 ---
 
-## 🚀 Run the Script
+## Run the Script
 
 ### Main Entry Point
 
