@@ -99,45 +99,42 @@ def assess_single_sample(
 
 class MetricsEvaluator:
     def __init__(self, output_path=None):
-        self.results = []
+        self.rows = []
         self.output_path = output_path
-        self.added_keys = set()
 
     def evaluate(self, calculator, gt, pred, subject, action, camera, metric_name, params):
         result = calculator.compute(gt, pred)
 
-        if isinstance(result, tuple) and len(result) == 2:
+        base_row = {
+            "subject": subject,
+            "action": action,
+            "camera": camera,
+            "metric": metric_name,
+            "joints_to_evaluate": str(getattr(calculator, 'joints_to_evaluate', None))
+        }
+
+        key = f"{metric_name}_{params['threshold']:.2f}"
+
+        if isinstance(result, (float, int, np.floating, np.integer)):
+            base_row[key] = result
+
+        elif isinstance(result, tuple) and len(result) == 2:
             joint_names, jointwise_scores = result
-            for joint, scores in zip(joint_names, jointwise_scores.T):
-                key = (subject, action, camera,
-                       metric_name, joint, str(params))
-                if key not in self.added_keys:
-                    self.added_keys.add(key)
-                    self.results.append({
-                        "subject": subject,
-                        "action": action,
-                        "camera": camera,
-                        "metric": metric_name,
-                        "joint": joint,
-                        **params,
-                        "score": scores.mean(),
-                    })
+            base_row["jointwise_" + key] = jointwise_scores.mean()
+            base_row[key] = jointwise_scores.mean()
+
         else:
-            key = (subject, action, camera, metric_name, str(params))
-            if key not in self.added_keys:
-                self.added_keys.add(key)
-                self.results.append({
-                    "subject": subject,
-                    "action": action,
-                    "camera": camera,
-                    "metric": metric_name,
-                    **params,
-                    "score": result,
-                })
+            logger.warning(
+                f"Unrecognized result type for {metric_name}: {type(result)}")
+            return
+
+        self.rows.append(base_row)
 
     def save(self):
         if self.output_path:
-            df = pd.DataFrame(self.results)
+            df = pd.DataFrame(self.rows)
+            df = df.groupby(["subject", "action", "camera", "metric",
+                            "joints_to_evaluate"], dropna=False).first().reset_index()
             df.to_excel(self.output_path, index=False)
 
 
@@ -215,18 +212,12 @@ def run_humaneva_assessment(
                     metric_name, params
                 )
 
-    if evaluator.results:
-        df = pd.DataFrame(evaluator.results)
+    if evaluator.rows:
         parent_folder_name = os.path.basename(
             os.path.dirname(os.path.normpath(pred_root)))
-
-        for metric_cfg in pipeline_config.evaluation.metrics:
-            metric_name = metric_cfg["name"]
-            metric_df = df[df["metric"] == metric_name]
-            if not metric_df.empty:
-                out_path = os.path.join(
-                    output_dir, f"{parent_folder_name}_{metric_name}.xlsx")
-                metric_df.to_excel(out_path, index=False)
-                logger.info(f"Saved: {out_path}")
+        evaluator.output_path = os.path.join(
+            output_dir, f"{parent_folder_name}_evaluation.xlsx")
+        evaluator.save()
+        logger.info(f"Saved: {evaluator.output_path}")
 
     logger.info("HumanEva assessment completed.")
