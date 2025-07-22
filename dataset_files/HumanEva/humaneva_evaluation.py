@@ -109,8 +109,7 @@ class MetricsEvaluator:
             "subject": subject,
             "action": action,
             "camera": camera,
-            "metric": metric_name,
-            "joints_to_evaluate": str(getattr(calculator, 'joints_to_evaluate', None))
+            "metric": metric_name
         }
 
         key = f"{metric_name}_{params['threshold']:.2f}"
@@ -133,8 +132,8 @@ class MetricsEvaluator:
     def save(self):
         if self.output_path:
             df = pd.DataFrame(self.rows)
-            df = df.groupby(["subject", "action", "camera", "metric",
-                            "joints_to_evaluate"], dropna=False).first().reset_index()
+            df = df.groupby(["subject", "action", "camera",
+                            "metric"], dropna=False).first().reset_index()
             df.to_excel(self.output_path, index=False)
 
 
