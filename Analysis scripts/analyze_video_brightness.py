@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 # --- USER CONFIGURATION ---
-FOLDER_PATH = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanMovi/test_noise_20"
+FOLDER_PATH = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanMovi/test_noise_30"
 OUTPUT_DIR_NAME = "brightness_analysis"  # Separate output folder name
 REGIONAL_ANALYSIS = True  # Set False to disable regional brightness analysis
 # ---------------------------

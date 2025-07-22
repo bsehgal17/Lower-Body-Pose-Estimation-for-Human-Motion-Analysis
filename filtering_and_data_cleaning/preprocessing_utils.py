@@ -20,8 +20,6 @@ class TimeSeriesPreprocessor:
             return self._remove_outliers_iqr(data_series, **kwargs)
         elif self.method == "zscore":
             return self._remove_outliers_zscore(data_series, **kwargs)
-        else:
-            raise ValueError(f"Unsupported outlier method: {self.method}")
 
     def interpolate(self, data_series):
         data = np.array(data_series)

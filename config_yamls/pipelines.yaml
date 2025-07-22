@@ -17,81 +17,67 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  
-
-  # - name: extended_kalman_filter_pipeline
+  # - name: test_noise_20
   #   steps:
-  #     - command: detect
-  #       config_file: "config_yamls/detect_and_filter.yaml"
   #     - command: noise
-  #       config_file: "config_yamls/pipeline_config.yaml"
-  #     - command: filter
-  #       config_file: "config_yamls/filter_with_ekf.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  #       config_file: "config_yamls/test_noise_20.yaml"
 
-  - name: test_noise_20
+  # - name: test_noise_30
+  #   steps:
+  #     - command: noise
+  #       config_file: "config_yamls/test_noise_30.yaml"
+
+  - name: extended_kalman_filter_pipeline
     steps:
-      - command: noise
-        config_file: "config_yamls/test_noise_20.yaml"
-
-  - name: test_noise_30
+      - command: filter
+        config_file: "config_yamls/filter_with_ekf.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: savgol_filter_pipeline
     steps:
-      - command: noise
-        config_file: "config_yamls/test_noise_30.yaml"
+      - command: filter
+        config_file: "config_yamls/filter_with_savgol.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
+  - name: gaussian_filter_pipeline
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_with_gaussian.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: unscented_kalman_filter_pipeline
-  #   steps:
-  #     - command: detect
-  #       config_file: "config_yamls/detect_and_filter.yaml"
-  #     - command: noise
-  #       config_file: "config_yamls/pipeline_config.yaml"
-  #     - command: filter
-  #       config_file: "config_yamls/filter_with_ukf.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: unscented_kalman_filter_pipeline
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_with_ukf.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: butterworth_4th_order_8hz_pipeline
-  #   steps:
-  #     - command: detect
-  #       config_file: "config_yamls/detect_and_filter.yaml"
-  #     - command: noise
-  #       config_file: "config_yamls/pipeline_config.yaml"
-  #     - command: filter
-  #       config_file: "config_yamls/filter_butterworth_4th_8hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: butterworth_4th_order_8hz_pipeline
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_butterworth_4th_8hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: fdf_pipeline
-  #   steps:
-  #     - command: detect
-  #       config_file: "config_yamls/detect_and_filter.yaml"
-  #     - command: noise
-  #       config_file: "config_yamls/pipeline_config.yaml"
-  #     - command: filter
-  #       config_file: "config_yamls/filter_fdf.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: fdf_pipeline
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_fdf.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: butterworth_2nd_order_1hz_pipeline
-  #   steps:
-  #     - command: detect
-  #       config_file: "config_yamls/detect_and_filter.yaml"
-  #     - command: noise
-  #       config_file: "config_yamls/pipeline_config.yaml"
-  #     - command: filter
-  #       config_file: "config_yamls/filter_butterworth_2nd_1hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: butterworth_2nd_order_1hz_pipeline
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_butterworth_2nd_1hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: gvcspl_filter_pipeline
-  #   steps:
-  #     - command: detect
-  #       config_file: "config_yamls/detect_and_filter.yaml"
-  #     - command: noise
-  #       config_file: "config_yamls/pipeline_config.yaml"
-  #     - command: filter
-  #       config_file: "config_yamls/filter_gvcspl.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: gvcspl_filter_pipeline
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_gvcspl.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
