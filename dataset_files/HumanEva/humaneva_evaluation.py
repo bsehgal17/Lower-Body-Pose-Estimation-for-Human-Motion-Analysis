@@ -99,8 +99,10 @@ def assess_single_sample(
 
 class MetricsEvaluator:
     def __init__(self, output_path=None):
-        self.rows = []
+        self.overall_rows = []
+        self.jointwise_rows = []
         self.output_path = output_path
+        self.joint_names = None
 
     def evaluate(self, calculator, gt, pred, subject, action, camera, metric_name, params):
         result = calculator.compute(gt, pred)
@@ -108,33 +110,79 @@ class MetricsEvaluator:
         base_row = {
             "subject": subject,
             "action": action,
-            "camera": camera,
-            "metric": metric_name
+            "camera": camera
         }
 
-        key = f"{metric_name}_{params['threshold']:.2f}"
+        threshold = params.get('threshold', 0)
+        key = f"{metric_name}_{threshold:.2f}"
 
         if isinstance(result, (float, int, np.floating, np.integer)):
-            base_row[key] = result
+            # Pure overall metric (not derived from joints)
+            overall_row = base_row.copy()
+            overall_row[f"overall_{key}"] = result
+            self.overall_rows.append(overall_row)
 
         elif isinstance(result, tuple) and len(result) == 2:
             joint_names, jointwise_scores = result
-            base_row["jointwise_" + key] = jointwise_scores.mean()
-            base_row[key] = jointwise_scores.mean()
+            if self.joint_names is None:
+                self.joint_names = joint_names
 
-        else:
-            logger.warning(
-                f"Unrecognized result type for {metric_name}: {type(result)}")
+            # Jointwise metrics (one column per joint)
+            jointwise_row = base_row.copy()
+            for joint_name, score in zip(joint_names, jointwise_scores):
+                jointwise_row[f"{joint_name}_{key}"] = score
+            self.jointwise_rows.append(jointwise_row)
+
+    def save(self, output_dir):
+        if not (self.overall_rows or self.jointwise_rows):
             return
 
-        self.rows.append(base_row)
+        parent_folder_name = os.path.basename(
+            os.path.dirname(os.path.normpath(self.output_path)))
 
-    def save(self):
-        if self.output_path:
-            df = pd.DataFrame(self.rows)
-            df = df.groupby(["subject", "action", "camera",
-                            "metric"], dropna=False).first().reset_index()
-            df.to_excel(self.output_path, index=False)
+        # Save overall metrics (only true overall metrics)
+        if self.overall_rows:
+            df_overall = pd.DataFrame(self.overall_rows)
+            df_overall = df_overall.groupby(
+                ["subject", "action", "camera"]).first().reset_index()
+
+            overall_path = os.path.join(
+                output_dir, f"{parent_folder_name}_overall_metrics.xlsx")
+            with pd.ExcelWriter(overall_path, engine='openpyxl') as writer:
+                df_overall.to_excel(writer, index=False,
+                                    sheet_name='Overall Metrics')
+
+                worksheet = writer.sheets['Overall Metrics']
+                for column in worksheet.columns:
+                    col_name = column[0].value
+                    max_len = max(
+                        df_overall[col_name].astype(str).map(len).max(),
+                        len(col_name)
+                    ) + 2
+                    worksheet.column_dimensions[column[0]
+                                                .column_letter].width = max_len
+
+        # Save jointwise metrics (detailed per-joint)
+        if self.jointwise_rows:
+            df_jointwise = pd.DataFrame(self.jointwise_rows)
+            df_jointwise = df_jointwise.groupby(
+                ["subject", "action", "camera"]).first().reset_index()
+
+            jointwise_path = os.path.join(
+                output_dir, f"{parent_folder_name}_jointwise_metrics.xlsx")
+            with pd.ExcelWriter(jointwise_path, engine='openpyxl') as writer:
+                df_jointwise.to_excel(
+                    writer, index=False, sheet_name='Jointwise Metrics')
+
+                worksheet = writer.sheets['Jointwise Metrics']
+                for column in worksheet.columns:
+                    col_name = column[0].value
+                    max_len = max(
+                        df_jointwise[col_name].astype(str).map(len).max(),
+                        len(col_name)
+                    ) + 2
+                    worksheet.column_dimensions[column[0]
+                                                .column_letter].width = max_len
 
 
 def run_humaneva_assessment(
@@ -211,12 +259,8 @@ def run_humaneva_assessment(
                     metric_name, params
                 )
 
-    if evaluator.rows:
-        parent_folder_name = os.path.basename(
-            os.path.dirname(os.path.normpath(pred_root)))
-        evaluator.output_path = os.path.join(
-            output_dir, f"{parent_folder_name}_evaluation.xlsx")
-        evaluator.save()
-        logger.info(f"Saved: {evaluator.output_path}")
+    if evaluator.overall_rows or evaluator.jointwise_rows:
+        evaluator.output_path = pred_root
+        evaluator.save(output_dir)
 
     logger.info("HumanEva assessment completed.")
