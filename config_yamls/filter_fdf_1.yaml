@@ -7,8 +7,8 @@ filter:
   name: "fdf"
   params:
     cutoff: 1.0       # Hz
-    fs: 30.0          # Sampling frequency
-    transition_width: 0.5
+    fs: 60.0   
+    order: 2       # Sampling frequency
     window_type: "hann"
   outlier_removal:
     enable: False

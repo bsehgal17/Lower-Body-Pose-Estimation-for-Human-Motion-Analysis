@@ -8,7 +8,7 @@ filter:
   params:
     order: 4
     cutoff: 8.0
-    fs: 30.0  # sampling frequency, adjust as needed
+    fs: 60.0  # sampling frequency, adjust as needed
   outlier_removal:
     enable: False
 

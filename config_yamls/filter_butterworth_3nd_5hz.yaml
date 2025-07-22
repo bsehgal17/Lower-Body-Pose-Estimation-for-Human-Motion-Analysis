@@ -18,9 +18,11 @@ noise:
 filter:
   name: "butterworth"
   params:
-    order: 2
-    cutoff: 1.0
-    fs: 30.0  # sampling frequency, adjust as needed
+    order: 3
+    cutoff: 5.0
+    fs: 60.0  # sampling frequency, adjust as needed
+  outlier_removal:
+      enable: False
 
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_HumanEva"  # <-- ADD THIS

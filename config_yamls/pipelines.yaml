@@ -45,6 +45,13 @@ pipelines:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
+  - name: gaussian_filter_pipeline_1
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_with_gaussian_1.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
   - name: gaussian_filter_pipeline
     steps:
       - command: filter
@@ -63,6 +70,13 @@ pipelines:
     steps:
       - command: filter
         config_file: "config_yamls/filter_butterworth_4th_8hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: butterworth_3th_order_5hz_pipeline
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_butterworth_3nd_5hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
@@ -109,5 +123,19 @@ pipelines:
     steps:
       - command: filter
         config_file: "config_yamls/filter_gvcspl_30.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+
+  - name: kalman_filter
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_with_kalman.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: kalman_filter_5
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_with_kalman_5.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"

@@ -5,7 +5,7 @@ paths:
 filter:
   name: "kalman"
   params:
-    process_noise: [[1e-4, 0], [0, 1e-3]]
+    process_noise: 1e-4
     measurement_noise: 1e-2
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_HumanEva"  # <-- ADD THIS

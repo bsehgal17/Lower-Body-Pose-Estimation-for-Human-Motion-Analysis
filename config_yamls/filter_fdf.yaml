@@ -8,7 +8,7 @@ filter:
   params:
     cutoff: 8.0          # Match Butterworth cutoff
     order: 4             # Simulate 4th-order Butterworth roll-off
-    fs: 30.0             # Sampling frequency (30 FPS)
+    fs: 60.0             # Sampling frequency (30 FPS)
     window_type: "hann" 
   outlier_removal:
     enable: False
