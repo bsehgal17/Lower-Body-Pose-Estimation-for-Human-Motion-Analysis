@@ -29,17 +29,17 @@ class KeypointFilterProcessor:
             config.dataset.keypoint_format)
 
         self.enable_outlier_removal = getattr(
-            config.filter.outlier_removal, "enable", False
+            config.filter.outlier_removal, "enable"
         )
         self.outlier_method = getattr(
-            config.filter.outlier_removal, "method", "iqr")
+            config.filter.outlier_removal, "method")
         self.outlier_params = getattr(
             config.filter.outlier_removal, "params", {})
 
         self.enable_interp = getattr(
-            config.filter, "enable_interpolation", True)
+            config.filter, "enable_interpolation")
         self.interpolation_kind = getattr(
-            config.filter, "interpolation_kind", "linear")
+            config.filter, "interpolation_kind")
         self.joints_to_filter = self._get_joints_to_filter()
         self.filter_fn = self._get_filter_function()
 
@@ -179,14 +179,26 @@ class KeypointFilterProcessor:
                         continue
 
                     try:
-                        preprocessor = TimeSeriesPreprocessor(
-                            method=self.outlier_method if self.enable_outlier_removal else None,
-                            interpolation=self.interpolation_kind if self.enable_interp else None,
-                        )
-                        x_proc = preprocessor.clean(
-                            x_series, **self.outlier_params)
-                        y_proc = preprocessor.clean(
-                            y_series, **self.outlier_params)
+                        # Step 1: Start with original series
+                        x_proc, y_proc = x_series.copy(), y_series.copy()
+
+                        # Step 2: Preprocess if needed
+                        if self.enable_outlier_removal or self.enable_interp:
+                            preprocessor = TimeSeriesPreprocessor(
+                                method=self.outlier_method if self.enable_outlier_removal else None,
+                                interpolation=self.interpolation_kind if self.enable_interp else None,
+                            )
+                            try:
+                                x_proc = preprocessor.clean(
+                                    x_proc, **(self.outlier_params if self.enable_outlier_removal else {})
+                                )
+                                y_proc = preprocessor.clean(
+                                    y_proc, **(self.outlier_params if self.enable_outlier_removal else {})
+                                )
+                            except Exception as e:
+                                logger.warning(
+                                    f"Preprocessing failed on joint {joint_id}, person {person_idx}. Proceeding with raw series. Error: {e}"
+                                )
 
                         x_filt = self.filter_fn(x_proc, **param_set)
                         y_filt = self.filter_fn(y_proc, **param_set)

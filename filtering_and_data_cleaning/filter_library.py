@@ -10,32 +10,63 @@ class FilterLibrary:
     def butterworth(data, cutoff, fs, order):
         if len(data) <= order:
             return np.array(data)
+        try:
+            cutoff = float(cutoff)
+            fs = float(fs)
+            order = int(order)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid Butterworth parameters: cutoff={cutoff}, fs={fs}, order={order}") from e
         b, a = butter(order, cutoff / (0.5 * fs), btype="low", analog=False)
         return filtfilt(b, a, data)
 
     @staticmethod
     def gaussian(data, sigma):
+        try:
+            sigma = float(sigma)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid sigma for Gaussian filter: {sigma}") from e
         return gaussian_filter1d(data, sigma=sigma)
 
     @staticmethod
     def median(data, window_size):
         if len(data) == 0:
             return np.array([])
+        try:
+            window_size = int(window_size)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid window_size for median filter: {window_size}") from e
         return median_filter(data, size=window_size)
 
     @staticmethod
     def moving_average(data, window_size):
         num_frames = len(data)
+        try:
+            window_size = int(window_size)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid window_size for moving average: {window_size}") from e
+
         if num_frames < window_size:
             return np.array(data)
         half_window = window_size // 2
         return np.array([
-            np.mean(data[max(0, i - half_window): min(num_frames, i + half_window + 1)])
+            np.mean(data[max(0, i - half_window)
+                    : min(num_frames, i + half_window + 1)])
             for i in range(num_frames)
         ])
 
     @staticmethod
     def savitzky_golay(data, window_length, polyorder):
+        try:
+            window_length = int(window_length)
+            polyorder = int(polyorder)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid params for savgol filter: window_length={window_length}, polyorder={polyorder}") from e
+
         if len(data) < window_length:
             window_length = len(data) if len(data) % 2 == 1 else len(data) - 1
         if window_length < 3:
@@ -44,6 +75,12 @@ class FilterLibrary:
 
     @staticmethod
     def wiener(data, window_size):
+        try:
+            window_size = int(window_size)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid window_size for Wiener filter: {window_size}") from e
+
         if len(data) < window_size:
             return np.array(data)
         return wiener(data, mysize=window_size)
@@ -52,6 +89,13 @@ class FilterLibrary:
     def kalman(data, process_noise, measurement_noise):
         if len(data) == 0:
             return np.array([])
+        try:
+            process_noise = float(process_noise)
+            measurement_noise = float(measurement_noise)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid Kalman filter params: process_noise={process_noise}, measurement_noise={measurement_noise}") from e
+
         kf = FilterLibrary._init_kalman(process_noise, measurement_noise)
         filtered, _ = kf.filter(data)
         return filtered[:, 0]
@@ -62,6 +106,12 @@ class FilterLibrary:
         if len(data) < 6:
             return np.array(data)
         x = np.arange(len(data))
+        try:
+            if smoothing_factor is not None:
+                smoothing_factor = float(smoothing_factor)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid smoothing factor for GVCSPL: {smoothing_factor}") from e
         spline = UnivariateSpline(x, data, s=smoothing_factor, k=5)
         return spline(x)
 
@@ -70,27 +120,31 @@ class FilterLibrary:
         """Simplified 1D Extended Kalman Filter."""
         if len(data) == 0:
             return np.array([])
-        x = np.array([0.0])  # Initial state
-        P = np.array([[1.0]])  # Covariance
-        Q = np.array([[process_noise]])  # Process noise
-        R = np.array([[measurement_noise]])  # Measurement noise
-        H = np.array([[1.0]])  # Measurement matrix
-        F = np.array([[1.0]])  # State transition
+        try:
+            process_noise = float(process_noise)
+            measurement_noise = float(measurement_noise)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid EKF params: process_noise={process_noise}, measurement_noise={measurement_noise}") from e
+
+        x = np.array([0.0])
+        P = np.array([[1.0]])
+        Q = np.array([[process_noise]])
+        R = np.array([[measurement_noise]])
+        H = np.array([[1.0]])
+        F = np.array([[1.0]])
         results = []
 
         for z in data:
-            # Predict
             x = F @ x
             P = F @ P @ F.T + Q
-
-            # Update
             y = z - H @ x
             S = H @ P @ H.T + R
             K = P @ H.T @ np.linalg.inv(S)
             x = x + K @ y
             P = (np.eye(len(P)) - K @ H) @ P
-
             results.append(x[0])
+
         return np.array(results)
 
     @staticmethod
@@ -101,6 +155,12 @@ class FilterLibrary:
 
         if len(data) == 0:
             return np.array([])
+        try:
+            process_noise = float(process_noise)
+            measurement_noise = float(measurement_noise)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid UKF params: process_noise={process_noise}, measurement_noise={measurement_noise}") from e
 
         def fx(x, dt): return x
         def hx(x): return x
@@ -126,6 +186,6 @@ class FilterLibrary:
             observation_matrices=np.array([[1, 0]]),
             initial_state_mean=[0, 0],
             initial_state_covariance=np.eye(2),
-            transition_covariance=process_noise * np.eye(2),
-            observation_covariance=measurement_noise,
+            transition_covariance=float(process_noise) * np.eye(2),
+            observation_covariance=float(measurement_noise),
         )
