@@ -53,8 +53,7 @@ class FilterLibrary:
             return np.array(data)
         half_window = window_size // 2
         return np.array([
-            np.mean(data[max(0, i - half_window)
-                    : min(num_frames, i + half_window + 1)])
+            np.mean(data[max(0, i - half_window): min(num_frames, i + half_window + 1)])
             for i in range(num_frames)
         ])
 
@@ -189,3 +188,49 @@ class FilterLibrary:
             transition_covariance=float(process_noise) * np.eye(2),
             observation_covariance=float(measurement_noise),
         )
+    import numpy as np
+
+    def fdf_filter(signal, cutoff, fs, order, window_type=None):
+        """
+        Frequency Domain Filter that mimics Butterworth behavior.
+
+        Parameters:
+        - signal: 1D NumPy array
+        - cutoff: float, cutoff frequency in Hz
+        - fs: float, sampling frequency in Hz
+        - order: int, smoothness of the filter (higher = sharper roll-off)
+        - window_type: Optional[str], type of window to apply ("hann", "hamming", None)
+
+        Returns:
+        - filtered: NumPy array of filtered signal
+        """
+        if len(signal) == 0:
+            return np.array([])
+
+        signal = np.asarray(signal, dtype=np.float64)
+
+        # Frequencies
+        n = len(signal)
+        freqs = np.fft.rfftfreq(n, d=1/fs)
+
+        # FFT
+        spectrum = np.fft.rfft(signal)
+
+        # Butterworth-style low-pass mask
+        mask = 1 / (1 + (freqs / cutoff)**(2 * order))
+
+        # Optional tapering window to reduce spectral leakage
+        if window_type == "hann":
+            taper = np.hanning(len(mask)*2)[len(mask):]
+            mask *= taper
+        elif window_type == "hamming":
+            taper = np.hamming(len(mask)*2)[len(mask):]
+            mask *= taper
+
+        # Apply mask
+        filtered_spectrum = spectrum * mask
+
+        # Inverse FFT
+        filtered_signal = np.fft.irfft(filtered_spectrum, n=n)
+
+        return filtered_signal

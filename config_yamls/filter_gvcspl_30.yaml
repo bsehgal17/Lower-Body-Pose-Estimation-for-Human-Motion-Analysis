@@ -3,30 +3,17 @@ paths:
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 
-noise:
-  apply_poisson_noise: true
-  apply_gaussian_noise: true
-  apply_motion_blur: true
-  apply_brightness_reduction: true
-  brightness_factor: 30
-  poisson_scale: 1.0
-  gaussian_std: 2.0
-  motion_blur_kernel_size: 5
-  target_resolution: null  # or [640, 480]
-
-
 filter:
-  name: "butterworth"
+  name: "gvcspl"
   params:
-    order: 2
-    cutoff: 1.0
-    fs: 30.0  # sampling frequency, adjust as needed
+    smoothing_factor: 100
 
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_HumanEva"  # <-- ADD THIS
-
+  outlier_removal:
+    enable: False
   # outlier_removal:
-  #   enable: False
+  #   enable: True
   #   method: "iqr"
   #   params:
   #     iqr_multiplier: 1.5

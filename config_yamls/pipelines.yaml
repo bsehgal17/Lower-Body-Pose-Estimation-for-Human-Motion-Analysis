@@ -26,7 +26,12 @@ pipelines:
   #   steps:
   #     - command: noise
   #       config_file: "config_yamls/test_noise_30.yaml"
-
+  - name: gvcspl_filter_pipeline
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_gvcspl.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
   - name: extended_kalman_filter_pipeline
     steps:
       - command: filter
@@ -75,9 +80,34 @@ pipelines:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gvcspl_filter_pipeline
+  
+  - name: savgol_filter_pipeline_11
     steps:
       - command: filter
-        config_file: "config_yamls/filter_gvcspl.yaml"
+        config_file: "config_yamls/filter_with_savgol_11.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: gaussian_filter_pipeline_3
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_with_gaussian_3.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+
+  - name: fdf_pipeline_2hz_eq
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_fdf_1.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+
+
+  - name: gvcspl_filter_pipeline_30
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter_gvcspl_30.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"

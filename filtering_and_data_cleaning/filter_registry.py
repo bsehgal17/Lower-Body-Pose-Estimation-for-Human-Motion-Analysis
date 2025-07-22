@@ -11,4 +11,5 @@ FILTER_FN_MAP = {
     "gvcspl": FilterLibrary.gvcspl,
     "ekf": FilterLibrary.extended_kalman,
     "ukf": FilterLibrary.unscented_kalman,
+    "fdf": FilterLibrary.fdf_filter
 }

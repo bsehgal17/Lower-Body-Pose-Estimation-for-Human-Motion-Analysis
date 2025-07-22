@@ -6,9 +6,10 @@ paths:
 filter:
   name: "fdf"
   params:
-    cutoff: 8.0
-    order: 2
-    fs: 30.0
+    cutoff: 8.0          # Match Butterworth cutoff
+    order: 4             # Simulate 4th-order Butterworth roll-off
+    fs: 30.0             # Sampling frequency (30 FPS)
+    window_type: "hann" 
   outlier_removal:
     enable: False
 
@@ -49,5 +50,18 @@ evaluation:
     #     threshold: 0.05
     # - name: gat_metric
     #   params: {}
-
+dataset:
+ joint_enum_module: utils.joint_enum.GTJointsHumanEVa
+ keypoint_format: utils.joint_enum.PredJointsDeepLabCut
+ sync_data:
+    data:
+      S1:
+        Walking 1: [667, 667, 667]
+        Jog 1: [49, 50, 51]
+      S2:
+        Walking 1: [547, 547, 546]
+        Jog 1: [493, 491, 502]
+      S3:
+        Walking 1: [524, 524, 524]
+        Jog 1: [464, 462, 462]
 
