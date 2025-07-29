@@ -2,21 +2,15 @@ paths:
   dataset: HumanEva
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
-
 filter:
-  name: "fdf"
+  name: "savitzky"
   params:
-    cutoff: 1.0       # Hz
-    fs: 60.0   
-    order: 2       # Sampling frequency
-    window_type: "hann"
-  outlier_removal:
-    enable: False
-
+    window_length: 31
+    polyorder: 2
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_HumanEva"  # <-- ADD THIS
-
-
+  outlier_removal:
+    enable: False
   # outlier_removal:
   #   enable: True
   #   method: "iqr"
@@ -50,6 +44,8 @@ evaluation:
     #     threshold: 0.05
     # - name: gat_metric
     #   params: {}
+
+
 dataset:
  joint_enum_module: utils.joint_enum.GTJointsHumanEVa
  keypoint_format: utils.joint_enum.PredJointsDeepLabCut
@@ -64,4 +60,3 @@ dataset:
       S3:
         Walking 1: [524, 524, 524]
         Jog 1: [464, 462, 462]
-

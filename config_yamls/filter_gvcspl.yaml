@@ -6,7 +6,7 @@ paths:
 filter:
   name: "gvcspl"
   params:
-    smoothing_factor: 100
+    smoothing_factor: 10
 
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_HumanEva"  # <-- ADD THIS

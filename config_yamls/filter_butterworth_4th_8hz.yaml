@@ -6,8 +6,8 @@ paths:
 filter:
   name: "butterworth"
   params:
-    order: 4
-    cutoff: 8.0
+    order: 2
+    cutoff: 4.0
     fs: 60.0  # sampling frequency, adjust as needed
   outlier_removal:
     enable: False

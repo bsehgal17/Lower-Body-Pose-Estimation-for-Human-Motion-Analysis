@@ -5,7 +5,7 @@ paths:
 filter:
   name: "savitzky"
   params:
-    window_length: 11
+    window_length: 15
     polyorder: 3
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_HumanEva"  # <-- ADD THIS
