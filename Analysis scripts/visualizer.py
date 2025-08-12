@@ -4,21 +4,57 @@ import pandas as pd
 import matplotlib.cm as cm
 
 
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+
 def plot_brightness_distribution(all_brightness_data, save_path=None):
     """
-    Plots a histogram of the brightness distribution across all frames in the dataset.
+    Plots a histogram of the brightness distribution across all frames in the dataset
+    with enhanced features and a fixed x-axis range.
     """
     if not all_brightness_data:
         print("No brightness data to plot.")
         return
 
+    # Use a better plotting style
+    sns.set_style("whitegrid")
+
+    # Calculate statistics for annotations
+    mean_brightness = np.mean(all_brightness_data)
+    std_dev_brightness = np.std(all_brightness_data)
+    num_frames = len(all_brightness_data)
+
     plt.figure(figsize=(10, 6))
-    plt.hist(all_brightness_data, bins=100,
-             color='skyblue', edgecolor='black', alpha=0.7)
-    plt.title('Overall Brightness Distribution of the Video Dataset')
-    plt.xlabel('Mean Frame Brightness (L Channel)')
-    plt.ylabel('Frequency (Number of Frames)')
+
+    # Create the histogram
+    plt.hist(all_brightness_data, bins=30,
+             color='lightcoral', edgecolor='black', alpha=0.8)
+
+    # Add a vertical line for the mean
+    plt.axvline(mean_brightness, color='darkred', linestyle='dashed',
+                linewidth=2, label=f'Mean: {mean_brightness:.2f}')
+
+    # Add text annotations for key statistics
+    plt.text(0.95, 0.90, f"Mean: {mean_brightness:.2f}\nStd Dev: {std_dev_brightness:.2f}",
+             transform=plt.gca().transAxes,
+             fontsize=12,
+             verticalalignment='top',
+             horizontalalignment='right',
+             bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.6))
+
+    plt.title(
+        f'Overall Brightness Distribution ({num_frames} Frames)', fontsize=16)
+    plt.xlabel('Mean Frame Brightness (L* Channel, 0-255)', fontsize=12)
+    plt.ylabel('Frequency (Number of Frames)', fontsize=12)
+
+    # Set the x-axis to go from 0 to 255
+    plt.xlim(0, 255)
+
+    plt.legend()
     plt.grid(axis='y', alpha=0.75)
+    plt.tight_layout()
 
     if save_path:
         plt.savefig(save_path)

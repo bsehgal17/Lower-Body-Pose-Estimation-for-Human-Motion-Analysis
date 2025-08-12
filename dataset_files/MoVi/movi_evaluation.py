@@ -15,51 +15,92 @@ logger = logging.getLogger(__name__)
 
 class MoViMetricsEvaluator:
     def __init__(self, output_path=None):
-        self.results = []
+        self.overall_rows = []
+        self.jointwise_rows = []
         self.output_path = output_path
-        self.added_keys = set()
+        self.joint_names = None
 
     def evaluate(self, calculator, gt, pred, subject, metric_name, params):
         result = calculator.compute(gt, pred)
 
-        if isinstance(result, tuple) and len(result) == 2:
+        base_row = {
+            "subject": subject,
+            "metric": metric_name,
+        }
+
+        threshold = params.get('threshold', 0)
+        key = f"{metric_name}_{threshold:.2f}"
+
+        if isinstance(result, (float, int, np.floating, np.integer)):
+            # Overall metric
+            overall_row = base_row.copy()
+            overall_row[f"overall_{key}"] = result
+            self.overall_rows.append(overall_row)
+
+        elif isinstance(result, tuple) and len(result) == 2:
             joint_names, jointwise_scores = result
-            for joint, scores in zip(joint_names, jointwise_scores.T):
-                key = (subject, metric_name, joint, str(params))
-                if key not in self.added_keys:
-                    self.added_keys.add(key)
-                    self.results.append({
-                        "subject": subject,
-                        "metric": metric_name,
-                        "joint": joint,
-                        **params,
-                        "score": scores.mean(),
-                    })
-        else:
-            key = (subject, metric_name, str(params))
-            if key not in self.added_keys:
-                self.added_keys.add(key)
-                self.results.append({
-                    "subject": subject,
-                    "metric": metric_name,
-                    **params,
-                    "score": result,
-                })
+            if self.joint_names is None:
+                self.joint_names = joint_names
+
+            # Jointwise metrics
+            jointwise_row = base_row.copy()
+            for joint_name, score in zip(joint_names, jointwise_scores):
+                jointwise_row[f"{joint_name}_{key}"] = score
+            self.jointwise_rows.append(jointwise_row)
 
     def save(self, output_dir: str, parent_folder_name: str):
-        if not self.results:
+        if not (self.overall_rows or self.jointwise_rows):
             return
 
-        df = pd.DataFrame(self.results)
+        # Save overall metrics
+        if self.overall_rows:
+            df_overall = pd.DataFrame(self.overall_rows)
+            df_overall = df_overall.groupby(
+                ["subject", "metric"]).first().reset_index()
 
-        # Save one file per metric
-        for metric_name in df["metric"].unique():
-            metric_df = df[df["metric"] == metric_name]
-            out_path = os.path.join(
-                output_dir, f"{parent_folder_name}_{metric_name}.xlsx"
+            overall_path = os.path.join(
+                output_dir, f"{parent_folder_name}_overall_metrics.xlsx"
             )
-            metric_df.to_excel(out_path, index=False)
-            logger.info(f"Saved: {out_path}")
+
+            with pd.ExcelWriter(overall_path, engine='openpyxl') as writer:
+                df_overall.to_excel(writer, index=False,
+                                    sheet_name='Overall Metrics')
+
+                # Auto-adjust column widths
+                worksheet = writer.sheets['Overall Metrics']
+                for column in worksheet.columns:
+                    col_name = column[0].value
+                    max_len = max(
+                        df_overall[col_name].astype(str).map(len).max(),
+                        len(col_name)
+                    ) + 2
+                    worksheet.column_dimensions[column[0]
+                                                .column_letter].width = max_len
+
+        # Save jointwise metrics
+        if self.jointwise_rows:
+            df_jointwise = pd.DataFrame(self.jointwise_rows)
+            df_jointwise = df_jointwise.groupby(
+                ["subject", "metric"]).first().reset_index()
+
+            jointwise_path = os.path.join(
+                output_dir, f"{parent_folder_name}_jointwise_metrics.xlsx"
+            )
+
+            with pd.ExcelWriter(jointwise_path, engine='openpyxl') as writer:
+                df_jointwise.to_excel(
+                    writer, index=False, sheet_name='Jointwise Metrics')
+
+                # Auto-adjust column widths
+                worksheet = writer.sheets['Jointwise Metrics']
+                for column in worksheet.columns:
+                    col_name = column[0].value
+                    max_len = max(
+                        df_jointwise[col_name].astype(str).map(len).max(),
+                        len(col_name)
+                    ) + 2
+                    worksheet.column_dimensions[column[0]
+                                                .column_letter].width = max_len
 
 
 def get_latest_prediction_folder(pred_root: str) -> str:
@@ -99,18 +140,21 @@ def run_movi_assessment(
                 continue
 
             pred_path = os.path.join(root, file)
-            # e.g., Subject_3_walking.pkl → '3'
             subject_id = file.split("_")[1]
             subject_str = f"Subject_{subject_id}"
 
             try:
-                # derive ground truth and video paths
                 gt_csv_path = os.path.join(
-                    pipeline_config.paths.ground_truth_file, subject_str, "joints2d_projected.csv"
+                    pipeline_config.paths.ground_truth_file,
+                    subject_str,
+                    "joints2d_projected.csv"
                 )
                 video_filename = file.replace(".pkl", ".avi")
                 video_path = os.path.join(
-                    global_config.paths.input_dir, "MoVi", "all_cropped_videos", video_filename
+                    global_config.paths.input_dir,
+                    "MoVi",
+                    "all_cropped_videos",
+                    video_filename
                 )
 
                 gt, pred = assess_single_movi_sample(
@@ -141,15 +185,20 @@ def run_movi_assessment(
                     )
 
                 calculator = metric_entry["class"](
-                    params=params, gt_enum=gt_enum_class, pred_enum=pred_enum_class
+                    params=params,
+                    gt_enum=gt_enum_class,
+                    pred_enum=pred_enum_class
                 )
 
-                evaluator.evaluate(calculator, gt, pred,
-                                   subject_str, metric_name, params)
+                evaluator.evaluate(
+                    calculator,
+                    gt,
+                    pred,
+                    subject_str,
+                    metric_name,
+                    params
+                )
 
     parent_folder_name = os.path.basename(os.path.normpath(pred_root))
-
     evaluator.save(output_dir, parent_folder_name)
-
-
-logger.info("MoVi assessment completed.")
+    logger.info("MoVi assessment completed.")

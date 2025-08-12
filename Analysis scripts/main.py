@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime
 
 # Import configuration from the new file
-from HumanEva_config import (
+from MoVi_config import (
     VIDEO_DIRECTORY,
     PCK_FILE_PATH,
     PCK_SCORE_COLUMNS,
@@ -25,9 +25,7 @@ from video_file_mapper import find_video_for_pck_row
 
 
 def main():
-    """
-    Orchestrates the per-video brightness and PCK score analysis.
-    """
+
     # Create the save folder if it doesn't exist
     if not os.path.exists(SAVE_FOLDER):
         os.makedirs(SAVE_FOLDER)
