@@ -69,9 +69,7 @@ class MetricsEvaluator:
                 per_frame_df[k] = v
             self.per_frame_rows.append(per_frame_df)
 
-    def save(self, output_dir, group_keys: list[str] = None):
-        """Saves collected metrics to Excel files using explicit group keys."""
-
+    def save(self, output_dir, group_keys: list = None):
         if not (self.overall_rows or self.jointwise_rows or self.per_frame_rows):
             logger.warning(
                 "No data collected for any metrics. Skipping file save.")
@@ -81,10 +79,6 @@ class MetricsEvaluator:
             os.path.normpath(self.output_path))
         output_excel_path = os.path.join(
             output_dir, f"{parent_folder_name}_metrics.xlsx")
-
-        # Use a default set of keys if none are provided
-        if not group_keys:
-            group_keys = ['subject', 'action', 'camera']
 
         with pd.ExcelWriter(output_excel_path, engine='openpyxl') as writer:
 
@@ -97,21 +91,74 @@ class MetricsEvaluator:
                 df_overall.to_excel(writer, index=False,
                                     sheet_name='Overall Metrics')
 
+                # Add the auto-sizing logic for the 'Overall Metrics' sheet
+                worksheet = writer.sheets['Overall Metrics']
+                for column in worksheet.columns:
+                    col_name = column[0].value
+                    # Find the maximum length of the column data or header
+                    max_len = max(
+                        df_overall[col_name].astype(str).map(len).max(),
+                        len(col_name)
+                    ) + 2
+                    worksheet.column_dimensions[column[0]
+                                                .column_letter].width = max_len
+
             # Save jointwise metrics
             if self.jointwise_rows:
                 df_jointwise = pd.DataFrame(self.jointwise_rows)
                 if not df_jointwise.empty:
                     df_jointwise = df_jointwise.groupby(
                         group_keys, dropna=False).first().reset_index()
-                df_jointwise.to_excel(
-                    writer, index=False, sheet_name='Jointwise Metrics')
+                df_jointwise.to_excel(writer, index=False,
+                                      sheet_name='Jointwise Metrics')
 
-            # Save per-frame metrics
+                # Add the auto-sizing logic for the 'Jointwise Metrics' sheet
+                worksheet = writer.sheets['Jointwise Metrics']
+                for column in worksheet.columns:
+                    col_name = column[0].value
+                    # Find the maximum length of the column data or header
+                    max_len = max(
+                        df_jointwise[col_name].astype(str).map(len).max(),
+                        len(col_name)
+                    ) + 2
+                    worksheet.column_dimensions[column[0]
+                                                .column_letter].width = max_len
+
+            # Save per-frame metrics (no resizing needed for this)
             if self.per_frame_rows:
+                # Concatenate all the individual per-frame dataframes
                 df_per_frame = pd.concat(
                     self.per_frame_rows, ignore_index=True)
-                df_per_frame.to_excel(
-                    writer, index=False, sheet_name='Per-Frame Scores')
+
+                # Find all unique grouping keys (e.g., subject, action)
+                # and all unique metric keys (e.g., pck_per_frame_pck_0.01)
+                id_vars = [
+                    key for key in group_keys if key in df_per_frame.columns] + ['frame_idx']
+                value_vars = [
+                    col for col in df_per_frame.columns if col not in id_vars]
+
+                if not id_vars or not value_vars:
+                    logger.warning(
+                        "Could not identify columns for per-frame score pivoting. Saving as-is.")
+                    df_per_frame.to_excel(
+                        writer, index=False, sheet_name='Per-Frame Scores')
+                else:
+                    # Merge scores from different metrics into single rows using a pivot operation
+                    # This ensures all scores for a given frame are on the same row.
+                    df_per_frame = pd.melt(df_per_frame,
+                                           id_vars=id_vars,
+                                           value_vars=value_vars,
+                                           var_name='metric_id',
+                                           value_name='score')
+
+                    df_per_frame = df_per_frame.pivot_table(
+                        index=id_vars,
+                        columns='metric_id',
+                        values='score'
+                    ).reset_index()
+
+                    df_per_frame.to_excel(
+                        writer, index=False, sheet_name='Per-Frame Scores')
 
 
 def run_assessment(evaluator, pipeline_config, global_config, input_dir, output_dir, gt_enum_class, pred_enum_class, data_loader_func, group_keys: list = None):
