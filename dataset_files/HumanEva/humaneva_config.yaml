@@ -58,6 +58,7 @@ filter:
 
 
 evaluation:
+  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/detect/2025-07-29_13-12-55/
   metrics:
     - name: overall_pck
       params:
@@ -161,6 +162,56 @@ evaluation:
           - LEFT_ANKLE
           - RIGHT_ANKLE
 
+    - name: per_frame_pck
+      params:
+        threshold: 0.01
+        joints_to_evaluate:
+          # - LEFT_SHOULDER
+          # - RIGHT_SHOULDER
+          # - LEFT_ELBOW
+          # - RIGHT_ELBOW
+          # - LEFT_WRIST
+          # - RIGHT_WRIST
+          - LEFT_HIP
+          - RIGHT_HIP
+          - LEFT_KNEE
+          - RIGHT_KNEE
+          - LEFT_ANKLE
+          - RIGHT_ANKLE
+
+    - name: per_frame_pck
+      params:
+        threshold: 0.02
+        joints_to_evaluate:
+          # - LEFT_SHOULDER
+          # - RIGHT_SHOULDER
+          # - LEFT_ELBOW
+          # - RIGHT_ELBOW
+          # - LEFT_WRIST
+          # - RIGHT_WRIST
+          - LEFT_HIP
+          - RIGHT_HIP
+          - LEFT_KNEE
+          - RIGHT_KNEE
+          - LEFT_ANKLE
+          - RIGHT_ANKLE
+
+    - name: per_frame_pck
+      params:
+        threshold: 0.05
+        joints_to_evaluate:
+          # - LEFT_SHOULDER
+          # - RIGHT_SHOULDER
+          # - LEFT_ELBOW
+          # - RIGHT_ELBOW
+          # - LEFT_WRIST
+          # - RIGHT_WRIST
+          - LEFT_HIP
+          - RIGHT_HIP
+          - LEFT_KNEE
+          - RIGHT_KNEE
+          - LEFT_ANKLE
+          - RIGHT_ANKLE
 
 
 dataset:
