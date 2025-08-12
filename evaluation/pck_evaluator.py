@@ -1,5 +1,6 @@
 from evaluation.result_aggregator import ResultAggregator
 from typing import Dict
+import numpy as np
 
 
 class PCKEvaluator:
@@ -18,6 +19,21 @@ class PCKEvaluator:
             metadata=metadata,
             joint_names=joint_names,
             jointwise_scores=jointwise_pck,
+            threshold=calculator.threshold,
+        )
+
+    def evaluate_per_frame(self, calculator, gt, pred, metadata: Dict):
+        """
+        Evaluates PCK scores for each frame and adds them to the aggregator.
+        """
+        per_frame_pck = calculator.compute(gt, pred)
+        if not isinstance(per_frame_pck, np.ndarray) or per_frame_pck.ndim != 1:
+            raise ValueError(
+                "Per-frame calculator must return a 1D numpy array.")
+
+        self.aggregator.add_per_frame_result(
+            metadata=metadata,
+            per_frame_scores=per_frame_pck,
             threshold=calculator.threshold,
         )
 
