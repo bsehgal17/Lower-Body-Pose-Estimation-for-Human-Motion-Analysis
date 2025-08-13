@@ -1,53 +1,60 @@
+# pck_data_processor.py
+
 import pandas as pd
 
 
 class PCKDataProcessor:
     """
-    Handles loading and processing PCK score data from an Excel file.
+    Handles loading and processing PCK score data from a spreadsheet.
+    It is designed to be generic, accepting a configuration object to
+    handle dataset-specific column names and sheet names.
     """
 
-    def __init__(self, file_path, score_columns):
+    def __init__(self, config):
         """
-        Initializes the processor with the file path and relevant columns.
+        Initializes the processor with the configuration object.
 
         Args:
-            file_path (str): Path to the Excel file.
-            score_columns (list): List of column names for PCK scores.
+            config (object): A configuration object containing file paths and column names.
         """
-        self.file_path = file_path
-        self.score_columns = score_columns
+        self.config = config
 
     def load_pck_scores(self):
         """
         Loads the PCK scores from the 'Overall Metrics' sheet into a pandas DataFrame.
-        Assumes the first row contains the column headers.
+        Dynamically handles required columns based on the config.
 
         Returns:
             pd.DataFrame or None: The DataFrame with PCK scores, or None if loading fails.
         """
         try:
-            # Load the data from the 'Overall Metrics' sheet.
-            df = pd.read_excel(
-                self.file_path, sheet_name='Overall Metrics', header=0)
+            df = pd.read_excel(self.config.PCK_FILE_PATH,
+                               sheet_name='Overall Metrics', header=0)
 
-            # Remove any rows that have NaN in the 'subject' column,
-            # as these are likely summary rows and not per-video data points.
-            df = df.dropna(subset=['subject']).reset_index(drop=True)
+            # Dynamically determine the video identifier columns from the config
+            id_cols = [col for col in [self.config.SUBJECT_COLUMN,
+                                       self.config.ACTION_COLUMN, self.config.CAMERA_COLUMN] if col is not None]
 
-            # Ensure the required columns exist
-            required_cols = ['subject', 'action',
-                             'camera'] + self.score_columns
+            # Drop rows where any of the identifier columns are missing
+            if id_cols:
+                df = df.dropna(subset=id_cols).reset_index(drop=True)
+
+            # Dynamically determine all required columns
+            required_cols = id_cols + self.config.PCK_OVERALL_SCORE_COLUMNS
             if not all(col in df.columns for col in required_cols):
                 print(f"Error: One or more required columns are missing from the 'Overall Metrics' sheet. "
                       f"Expected: {required_cols}")
                 return None
 
-            # The 'subject' column is read as a string, but the 'camera' might be an int.
-            # This ensures consistent data types for processing.
-            df['camera'] = df['camera'].astype(int)
+            # Handle the camera column data type if it exists
+            if self.config.CAMERA_COLUMN in df.columns:
+                df[self.config.CAMERA_COLUMN] = df[self.config.CAMERA_COLUMN].astype(
+                    int)
+
             return df
         except FileNotFoundError:
-            print(f"Error: The file {self.file_path} was not found.")
+            print(
+                f"Error: The file {self.config.PCK_FILE_PATH} was not found.")
             return None
         except Exception as e:
             print(
@@ -57,25 +64,35 @@ class PCKDataProcessor:
     def load_pck_per_frame_scores(self):
         """
         Loads the per-frame PCK scores from the 'Per-Frame Scores' sheet.
+        Dynamically handles required columns based on the config.
 
         Returns:
             pd.DataFrame or None: The DataFrame with per-frame scores, or None if loading fails.
         """
         try:
-            # Load the data from the 'Per-Frame Scores' sheet.
-            df = pd.read_excel(
-                self.file_path, sheet_name='Per-Frame Scores', header=0)
+            df = pd.read_excel(self.config.PCK_FILE_PATH,
+                               sheet_name='Per-Frame Scores', header=0)
 
-            # Ensure the required columns exist
-            required_cols = ['subject', 'frame_idx'] + self.score_columns
+            # Dynamically determine all required columns
+            id_cols = [col for col in [self.config.SUBJECT_COLUMN,
+                                       self.config.ACTION_COLUMN, self.config.CAMERA_COLUMN] if col is not None]
+            required_cols = id_cols + ['frame_idx'] + \
+                self.config.PCK_PER_FRAME_SCORE_COLUMNS
+
             if not all(col in df.columns for col in required_cols):
                 print(f"Error: One or more required columns are missing from the 'Per-Frame Scores' sheet. "
                       f"Expected: {required_cols}")
                 return None
 
+            # Handle the camera column data type if it exists
+            if self.config.CAMERA_COLUMN in df.columns:
+                df[self.config.CAMERA_COLUMN] = df[self.config.CAMERA_COLUMN].astype(
+                    int)
+
             return df
         except FileNotFoundError:
-            print(f"Error: The file {self.file_path} was not found.")
+            print(
+                f"Error: The file {self.config.PCK_FILE_PATH} was not found.")
             return None
         except Exception as e:
             print(
