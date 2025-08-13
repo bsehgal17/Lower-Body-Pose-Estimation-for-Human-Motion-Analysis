@@ -60,7 +60,7 @@ def plot_brightness_distribution(all_brightness_data, save_path=None):
         plt.savefig(save_path)
         print(f"Brightness distribution plot saved to {save_path}")
 
-    plt.show()
+    # plt.show()
 
 
 def plot_overall_relation(overall_avg_l, avg_pck_scores, save_path=None):
@@ -114,7 +114,7 @@ def plot_overall_relation(overall_avg_l, avg_pck_scores, save_path=None):
         plt.savefig(save_path)
         print(f"Overall relation plot saved to {save_path}")
 
-    plt.show()
+    # plt.show()
 
 
 def plot_pck_vs_metric(df, x_column, y_column, subject_col, action_col, camera_col, title, x_label, save_path=None):
@@ -159,59 +159,53 @@ def plot_pck_vs_metric(df, x_column, y_column, subject_col, action_col, camera_c
         plt.savefig(save_path)
         print(f"Scatter plot saved to {save_path}")
 
-    plt.show()
+    # plt.show()
 
 
-def plot_per_frame_timeseries(df, pck_score_columns, save_path=None):
+def plot_pck_vs_brightness_trends(df, x_column, y_column, subject_col, action_col, camera_col, title, x_label, save_path=None):
     """
-    Plots a time series of per-frame PCK scores and brightness.
-
-    Args:
-        df (pd.DataFrame): DataFrame containing per-frame data.
-        pck_score_columns (list): List of columns with PCK scores to plot.
-        save_path (str, optional): Path to save the plot.
+    Plots PCK scores vs. a given metric (e.g., brightness) for each video,
+    connecting the per-frame dots to show trends over time, with improved axis scaling.
     """
+    plt.figure(figsize=(14, 10))
 
-    # We will plot multiple PCK thresholds for each video
-    for pck_col in pck_score_columns:
-        fig, ax1 = plt.subplots(figsize=(15, 8))
+    unique_videos = df.groupby([subject_col, action_col, camera_col])
+    colors = cm.get_cmap('tab20', len(unique_videos))
 
-        # --- Plot Brightness on the first Y-axis ---
-        color = 'tab:blue'
-        ax1.set_xlabel('Frame Index')
-        ax1.set_ylabel('Brightness', color=color)
-        ax1.set_title(
-            f'Per-Frame PCK and Brightness Time Series (Metric: {pck_col})')
+    i = 0
+    for name, group in unique_videos:
+        subject, action, camera = name
+        label = f"S{subject}, {action}, {camera}"
 
-        # Plot brightness for each video
-        for video_id in df['video_id'].unique():
-            video_df = df[df['video_id'] == video_id]
-            ax1.plot(video_df['frame_idx'],
-                     video_df['brightness'], color=color, alpha=0.5)
-        ax1.tick_params(axis='y', labelcolor=color)
+        plt.plot(group[x_column], group[y_column],
+                 marker='o', markersize=4, linestyle='-',
+                 color=colors(i), label=label, alpha=0.6)
+        i += 1
 
-        # --- Plot PCK Scores on the second Y-axis ---
-        ax2 = ax1.twinx()  # Instantiate a second axes that shares the same x-axis
-        color = 'tab:red'
-        ax2.set_ylabel(f'PCK Score ({pck_col})', color=color)
+    x_min_data = df[x_column].min()
+    x_max_data = df[x_column].max()
 
-        # Plot PCK scores for each video
-        for video_id in df['video_id'].unique():
-            video_df = df[df['video_id'] == video_id]
-            ax2.plot(video_df['frame_idx'], video_df[pck_col],
-                     color=color, label=f'PCK ({video_id})')
-        ax2.tick_params(axis='y', labelcolor=color)
-        ax2.set_ylim(0, 100)  # PCK scores are between 0 and 100
+    x_min = np.floor(x_min_data / 5) * 5
+    x_max = np.ceil(x_max_data / 5) * 5
 
-        # Create a single legend
-        lines1, labels1 = ax1.get_legend_handles_labels()
-        lines2, labels2 = ax2.get_legend_handles_labels()
-        ax2.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
+    plt.xlim(x_min, x_max)
+    plt.xticks(np.arange(x_min, x_max + 1, 5))
+    plt.tick_params(axis='x', rotation=45)
 
-        fig.tight_layout()
+    y_min, y_max = df[y_column].min(), df[y_column].max()
+    plt.ylim(y_min - (y_max-y_min)*0.05, y_max + (y_max-y_min)*0.05)
 
-        if save_path:
-            plt.savefig(save_path.replace('.png', f'_{pck_col}.png'))
-            print(
-                f"Saved time series plot to {save_path.replace('.png', f'_{pck_col}.png')}")
-        plt.show()
+    plt.title(title)
+    plt.xlabel(x_label)
+    plt.ylabel(f'PCK Score ({y_column[-4:]})')
+    plt.grid(True)
+
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+
+    plt.tight_layout(rect=[0, 0, 0.85, 1])
+
+    if save_path:
+        plt.savefig(save_path)
+        print(f"Plot with trends saved to {save_path}")
+
+    # plt.show()

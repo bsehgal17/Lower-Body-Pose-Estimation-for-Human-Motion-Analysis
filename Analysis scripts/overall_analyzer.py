@@ -7,7 +7,7 @@ from datetime import datetime
 from HumanEva_config import (
     VIDEO_DIRECTORY,
     PCK_FILE_PATH,
-    PCK_SCORE_COLUMNS,
+    PCK_OVERALL_SCORE_COLUMNS,
     SAVE_FOLDER,
     SUBJECT_COLUMN,
     ACTION_COLUMN,
@@ -68,7 +68,7 @@ def run_overall_analysis():
         all_brightness_data, save_path=brightness_plot_path)
 
     # Step 2: Load PCK scores and calculate overall averages
-    pck_processor = PCKDataProcessor(PCK_FILE_PATH, PCK_SCORE_COLUMNS)
+    pck_processor = PCKDataProcessor(PCK_FILE_PATH, PCK_OVERALL_SCORE_COLUMNS)
     pck_df = pck_processor.load_pck_scores()
 
     if pck_df is None:
@@ -76,7 +76,7 @@ def run_overall_analysis():
         return
 
     overall_avg_pck_scores = {
-        col: pck_df[col].mean() for col in PCK_SCORE_COLUMNS}
+        col: pck_df[col].mean() for col in PCK_OVERALL_SCORE_COLUMNS}
     print("\nOverall Average PCK Scores for the dataset:")
     for col, avg_val in overall_avg_pck_scores.items():
         print(f"- {col}: {avg_val:.4f}")
@@ -115,7 +115,7 @@ def run_overall_analysis():
     pck_df['avg_brightness'] = pd.to_numeric(pck_df['avg_brightness'])
     pck_df['avg_contrast'] = pd.to_numeric(pck_df['avg_contrast'])
 
-    for pck_col in PCK_SCORE_COLUMNS:
+    for pck_col in PCK_OVERALL_SCORE_COLUMNS:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         save_filename = f"pck_vs_brightness_{pck_col[-4:]}_{timestamp}.png"
         save_path = os.path.join(SAVE_FOLDER, save_filename)
@@ -131,7 +131,7 @@ def run_overall_analysis():
             save_path=save_path
         )
 
-    for pck_col in PCK_SCORE_COLUMNS:
+    for pck_col in PCK_OVERALL_SCORE_COLUMNS:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         save_filename = f"pck_vs_contrast_{pck_col[-4:]}_{timestamp}.png"
         save_path = os.path.join(SAVE_FOLDER, save_filename)
