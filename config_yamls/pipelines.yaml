@@ -17,12 +17,12 @@ pipelines:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: detect_RTMW
-  #   steps:
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
+  - name: detect_RTMW
+    steps:
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test.yaml"
 
 
   # - name: test_noise_20

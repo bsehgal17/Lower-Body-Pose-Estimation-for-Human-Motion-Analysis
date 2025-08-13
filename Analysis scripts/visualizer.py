@@ -160,3 +160,58 @@ def plot_pck_vs_metric(df, x_column, y_column, subject_col, action_col, camera_c
         print(f"Scatter plot saved to {save_path}")
 
     plt.show()
+
+
+def plot_per_frame_timeseries(df, pck_score_columns, save_path=None):
+    """
+    Plots a time series of per-frame PCK scores and brightness.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing per-frame data.
+        pck_score_columns (list): List of columns with PCK scores to plot.
+        save_path (str, optional): Path to save the plot.
+    """
+
+    # We will plot multiple PCK thresholds for each video
+    for pck_col in pck_score_columns:
+        fig, ax1 = plt.subplots(figsize=(15, 8))
+
+        # --- Plot Brightness on the first Y-axis ---
+        color = 'tab:blue'
+        ax1.set_xlabel('Frame Index')
+        ax1.set_ylabel('Brightness', color=color)
+        ax1.set_title(
+            f'Per-Frame PCK and Brightness Time Series (Metric: {pck_col})')
+
+        # Plot brightness for each video
+        for video_id in df['video_id'].unique():
+            video_df = df[df['video_id'] == video_id]
+            ax1.plot(video_df['frame_idx'],
+                     video_df['brightness'], color=color, alpha=0.5)
+        ax1.tick_params(axis='y', labelcolor=color)
+
+        # --- Plot PCK Scores on the second Y-axis ---
+        ax2 = ax1.twinx()  # Instantiate a second axes that shares the same x-axis
+        color = 'tab:red'
+        ax2.set_ylabel(f'PCK Score ({pck_col})', color=color)
+
+        # Plot PCK scores for each video
+        for video_id in df['video_id'].unique():
+            video_df = df[df['video_id'] == video_id]
+            ax2.plot(video_df['frame_idx'], video_df[pck_col],
+                     color=color, label=f'PCK ({video_id})')
+        ax2.tick_params(axis='y', labelcolor=color)
+        ax2.set_ylim(0, 100)  # PCK scores are between 0 and 100
+
+        # Create a single legend
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax2.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
+
+        fig.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path.replace('.png', f'_{pck_col}.png'))
+            print(
+                f"Saved time series plot to {save_path.replace('.png', f'_{pck_col}.png')}")
+        plt.show()

@@ -19,17 +19,17 @@ class PCKDataProcessor:
 
     def load_pck_scores(self):
         """
-        Loads the PCK scores from the Excel file into a pandas DataFrame.
+        Loads the PCK scores from the 'Overall Metrics' sheet into a pandas DataFrame.
         Assumes the first row contains the column headers.
 
         Returns:
             pd.DataFrame or None: The DataFrame with PCK scores, or None if loading fails.
         """
         try:
-            # Load the data, assuming the first row is the header.
-            df = pd.read_excel(self.file_path, header=0)
+            # Load the data from the 'Overall Metrics' sheet.
+            df = pd.read_excel(
+                self.file_path, sheet_name='Overall Metrics', header=0)
 
-            # --- New Logic: Clean the DataFrame ---
             # Remove any rows that have NaN in the 'subject' column,
             # as these are likely summary rows and not per-video data points.
             df = df.dropna(subset=['subject']).reset_index(drop=True)
@@ -38,7 +38,7 @@ class PCKDataProcessor:
             required_cols = ['subject', 'action',
                              'camera'] + self.score_columns
             if not all(col in df.columns for col in required_cols):
-                print(f"Error: One or more required columns are missing from the Excel file. "
+                print(f"Error: One or more required columns are missing from the 'Overall Metrics' sheet. "
                       f"Expected: {required_cols}")
                 return None
 
@@ -50,5 +50,34 @@ class PCKDataProcessor:
             print(f"Error: The file {self.file_path} was not found.")
             return None
         except Exception as e:
-            print(f"An error occurred while loading the Excel file: {e}")
+            print(
+                f"An error occurred while loading the 'Overall Metrics' sheet: {e}")
+            return None
+
+    def load_pck_per_frame_scores(self):
+        """
+        Loads the per-frame PCK scores from the 'Per-Frame Scores' sheet.
+
+        Returns:
+            pd.DataFrame or None: The DataFrame with per-frame scores, or None if loading fails.
+        """
+        try:
+            # Load the data from the 'Per-Frame Scores' sheet.
+            df = pd.read_excel(
+                self.file_path, sheet_name='Per-Frame Scores', header=0)
+
+            # Ensure the required columns exist
+            required_cols = ['subject', 'frame_idx'] + self.score_columns
+            if not all(col in df.columns for col in required_cols):
+                print(f"Error: One or more required columns are missing from the 'Per-Frame Scores' sheet. "
+                      f"Expected: {required_cols}")
+                return None
+
+            return df
+        except FileNotFoundError:
+            print(f"Error: The file {self.file_path} was not found.")
+            return None
+        except Exception as e:
+            print(
+                f"An error occurred while loading the 'Per-Frame Scores' sheet: {e}")
             return None
