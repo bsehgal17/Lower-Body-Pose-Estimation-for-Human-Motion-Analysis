@@ -8,7 +8,7 @@ from per_frame_analyzer import run_per_frame_analysis
 def main():
     """Main entry point to run all analyses."""
 
-    run_overall_analysis()
+    # run_overall_analysis()
 
     print("\n" + "="*50 + "\n")
 

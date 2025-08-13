@@ -16,8 +16,8 @@ from video_analyzer import VideoAnalyzer
 from pck_data_processor import PCKDataProcessor
 from visualizer import (
     plot_pck_vs_metric,
-    plot_pck_vs_brightness_trends  # New import
-)
+    plot_pck_vs_brightness_trends,
+    plot_pck_vs_brightness_interactive)
 from video_file_mapper import find_video_for_pck_row
 
 
@@ -92,35 +92,47 @@ def run_per_frame_analysis():
 
     # Generate plots for each PCK threshold
     for pck_col in PCK_PER_FRAME_SCORE_COLUMNS:
-
-        # 2. Enhanced PCK vs brightness plot with frame numbers
-        save_filename_trend = f"per_frame_pck_vs_brightness_trends_{pck_col[-4:]}_{timestamp}.png"
-        save_path_trend = os.path.join(SAVE_FOLDER, save_filename_trend)
-        plot_pck_vs_brightness_trends(
+        # 4. New: PCK vs Brightness with frame index annotations
+        plot_pck_vs_brightness_interactive(
             combined_df,
             x_column='brightness',
             y_column=pck_col,
             subject_col=SUBJECT_COLUMN,
             action_col=ACTION_COLUMN,
             camera_col=CAMERA_COLUMN,
-            title=f'Per-Frame PCK Score ({pck_col[-4:]}) vs. Video Brightness (Trends)',
-            x_label='Per-Frame Video Brightness (L Channel)',
-            save_path=save_path_trend
+            frame_col='frame_idx',
+            title=f'Interactive_Per-Frame_PCK_{pck_col[-4:]}_vs_Brightness',
+            save_dir=SAVE_FOLDER
         )
 
-        # 3. Optional: Traditional scatter plot (keep if needed)
-        save_filename_metric = f"pcer_frame_pck_vs_brightness_{pck_col[-4:]}_{timestamp}.png"
-        save_path_metric = os.path.join(SAVE_FOLDER, save_filename_metric)
-        plot_pck_vs_metric(
-            df=combined_df,
-            x_column='brightness',
-            y_column=pck_col,
-            subject_col='subject',
-            action_col='action',
-            camera_col='camera',
-            title=f'PCK ({pck_col[-4:]}) vs Brightness',
-            x_label='Brightness (L*)',
-            save_path=save_path_metric
-        )
+    #     # 2. Enhanced PCK vs brightness plot with frame numbers
+    #     save_filename_trend = f"per_frame_pck_vs_brightness_trends_{pck_col[-4:]}_{timestamp}.png"
+    #     save_path_trend = os.path.join(SAVE_FOLDER, save_filename_trend)
+    #     plot_pck_vs_brightness_trends(
+    #         combined_df,
+    #         x_column='brightness',
+    #         y_column=pck_col,
+    #         subject_col=SUBJECT_COLUMN,
+    #         action_col=ACTION_COLUMN,
+    #         camera_col=CAMERA_COLUMN,
+    #         title=f'Per-Frame PCK Score ({pck_col[-4:]}) vs. Video Brightness (Trends)',
+    #         x_label='Per-Frame Video Brightness (L Channel)',
+    #         save_path=save_path_trend
+    #     )
 
-    print(f"\nAnalysis complete. Results saved to {SAVE_FOLDER}")
+    #     # 3. Optional: Traditional scatter plot (keep if needed)
+    #     save_filename_metric = f"pcer_frame_pck_vs_brightness_{pck_col[-4:]}_{timestamp}.png"
+    #     save_path_metric = os.path.join(SAVE_FOLDER, save_filename_metric)
+    #     plot_pck_vs_metric(
+    #         df=combined_df,
+    #         x_column='brightness',
+    #         y_column=pck_col,
+    #         subject_col='subject',
+    #         action_col='action',
+    #         camera_col='camera',
+    #         title=f'PCK ({pck_col[-4:]}) vs Brightness',
+    #         x_label='Brightness (L*)',
+    #         save_path=save_path_metric
+    #     )
+
+    # print(f"\nAnalysis complete. Results saved to {SAVE_FOLDER}")

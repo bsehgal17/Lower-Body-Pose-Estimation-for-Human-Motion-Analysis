@@ -1,3 +1,5 @@
+import os
+import plotly.express as px
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -209,3 +211,46 @@ def plot_pck_vs_brightness_trends(df, x_column, y_column, subject_col, action_co
         print(f"Plot with trends saved to {save_path}")
 
     # plt.show()
+
+
+def plot_pck_vs_brightness_interactive(df, x_column, y_column, subject_col, action_col, camera_col, frame_col, title, save_dir):
+    """
+    Interactive PCK vs brightness plot.
+    - Different color for each video (subject+action+camera)
+    - Hover shows frame index and video info
+    - No colorbar
+    """
+    # Create a new column combining video info
+    df['video_id'] = df[subject_col].astype(
+        str) + "_" + df[action_col].astype(str) + "_C" + df[camera_col].astype(str)
+
+    fig = px.scatter(
+        df,
+        x=x_column,
+        y=y_column,
+        color='video_id',          # Color by video
+        hover_data={
+            subject_col: True,
+            action_col: True,
+            camera_col: True,
+            frame_col: True,
+            x_column: True,
+            y_column: True
+        },
+        title=title,
+        labels={x_column: "Brightness (L*)",
+                y_column: f"PCK Score ({y_column[-4:]})"}
+    )
+
+    fig.update_traces(marker=dict(size=6, opacity=0.8))
+    fig.update_layout(template="plotly_white", showlegend=True)
+
+    # Remove colorbar (not needed since color is categorical by video)
+    fig.update_layout(coloraxis_showscale=False)
+
+    # Save as HTML
+    html_path = os.path.join(save_dir, f"{title.replace(' ', '_')}.html")
+    fig.write_html(html_path)
+    print(f"Interactive plot saved to: {html_path}")
+
+    fig.show()
