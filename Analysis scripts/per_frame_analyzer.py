@@ -3,7 +3,7 @@
 import os
 import pandas as pd
 from datetime import datetime
-from HumanEva_config import (
+from MoVi_config import (
     VIDEO_DIRECTORY,
     PCK_FILE_PATH,
     PCK_PER_FRAME_SCORE_COLUMNS,

@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from HumanEva_config import (
+from MoVi_config import (
     VIDEO_DIRECTORY,
     PCK_FILE_PATH,
     PCK_OVERALL_SCORE_COLUMNS,
