@@ -1,11 +1,11 @@
 paths:
-  dataset: MoVi
+  dataset: HumanEva
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 models:
   detector: dwpose
-  det_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/DWPose/yolox_l_8xb8-300e_coco.py
-  det_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/DWPose/yolox_l.pth
+  det_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/demo/mmdetection_cfg/faster_rcnn_r50_fpn_coco.py
+  det_checkpoint: https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
   pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/DWPose/dwpose-l_384x288.py
   pose_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/DWPose/dw-ll_ucoco_384.pth
 

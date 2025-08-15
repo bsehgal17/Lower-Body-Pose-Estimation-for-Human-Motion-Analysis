@@ -8,14 +8,21 @@ pipelines:
       - command: detect
         config_file: "config_yamls/DWPose_detector.yaml"
       - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test.yaml"
+        config_file: "config_yamls/DWPose_detector_movi.yaml"
 
   # - name: detect_RTMW
   #   steps:
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml"
+  #     - command: detect
+  #       config_file: "config_yamls/DWPose_detector_humaneva.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: detect_DWPose
+    steps:
+      - command: detect
+        config_file: "config_yamls/DWPose_detector_humaneva.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # - name: detect_RTMW
   #   steps:

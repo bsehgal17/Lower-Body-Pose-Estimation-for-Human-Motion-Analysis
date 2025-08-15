@@ -196,22 +196,41 @@ def run_detection_pipeline(pipeline_config: PipelineConfig, global_config: Globa
                     if len(person_kpts) == 0:
                         continue
 
-                    # Draw keypoints
-                    for x, y, score in person_kpts:
-                        if score > kpt_thresh:
+                    # Check keypoint dimensions before unpacking
+                    if person_kpts.shape[1] == 3:  # Keypoints with scores
+                        # Draw keypoints
+                        for x, y, score in person_kpts:
+                            if score > kpt_thresh:
+                                cv2.circle(frame, (int(x), int(y)),
+                                           3, (0, 255, 0), -1)
+
+                        # Draw skeleton
+                        for i, j in bodyparts2connect:
+                            if (i < len(person_kpts) and j < len(person_kpts) and
+                                    person_kpts[i, 2] > kpt_thresh and
+                                    person_kpts[j, 2] > kpt_thresh):
+                                pt1 = (int(person_kpts[i, 0]),
+                                       int(person_kpts[i, 1]))
+                                pt2 = (int(person_kpts[j, 0]),
+                                       int(person_kpts[j, 1]))
+                                cv2.line(frame, pt1, pt2, (255, 0, 0), 1)
+                    elif person_kpts.shape[1] == 2:  # Keypoints without scores
+                        # Draw keypoints (assuming all are valid)
+                        for x, y in person_kpts:
                             cv2.circle(frame, (int(x), int(y)),
                                        3, (0, 255, 0), -1)
 
-                    # Draw skeleton
-                    for i, j in bodyparts2connect:
-                        if (i < len(person_kpts) and j < len(person_kpts) and
-                                person_kpts[i, 2] > kpt_thresh and
-                                person_kpts[j, 2] > kpt_thresh):
-                            pt1 = (int(person_kpts[i, 0]),
-                                   int(person_kpts[i, 1]))
-                            pt2 = (int(person_kpts[j, 0]),
-                                   int(person_kpts[j, 1]))
-                            cv2.line(frame, pt1, pt2, (255, 0, 0), 1)
+                        # Draw skeleton
+                        for i, j in bodyparts2connect:
+                            if (i < len(person_kpts) and j < len(person_kpts)):
+                                pt1 = (int(person_kpts[i, 0]),
+                                       int(person_kpts[i, 1]))
+                                pt2 = (int(person_kpts[j, 0]),
+                                       int(person_kpts[j, 1]))
+                                cv2.line(frame, pt1, pt2, (255, 0, 0), 1)
+                    else:
+                        logger.warning(
+                            "Unsupported keypoint format, skipping drawing for this person.")
 
                 out.write(frame)
 
