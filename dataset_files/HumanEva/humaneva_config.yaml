@@ -58,11 +58,11 @@ filter:
 
 
 evaluation:
-  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/detect/2025-07-29_13-12-55/
+  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/detect/2025-07-29_13-12-55
   metrics:
     - name: overall_pck
       params:
-        threshold: 0.01
+        threshold: 0.1
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -79,7 +79,7 @@ evaluation:
 
     - name: overall_pck
       params:
-        threshold: 0.02
+        threshold: 0.2
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -96,7 +96,7 @@ evaluation:
 
     - name: overall_pck
       params:
-        threshold: 0.05
+        threshold: 0.5
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -113,7 +113,7 @@ evaluation:
 
     - name: jointwise_pck
       params:
-        threshold: 0.01
+        threshold: 0.1
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -130,7 +130,7 @@ evaluation:
 
     - name: jointwise_pck
       params:
-        threshold: 0.02
+        threshold: 0.2
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -147,7 +147,7 @@ evaluation:
 
     - name: jointwise_pck
       params:
-        threshold: 0.05
+        threshold: 0.5
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -164,7 +164,7 @@ evaluation:
 
     - name: per_frame_pck
       params:
-        threshold: 0.01
+        threshold: 0.1
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -181,7 +181,7 @@ evaluation:
 
     - name: per_frame_pck
       params:
-        threshold: 0.02
+        threshold: 0.2
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -198,7 +198,7 @@ evaluation:
 
     - name: per_frame_pck
       params:
-        threshold: 0.05
+        threshold: 0.5
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER

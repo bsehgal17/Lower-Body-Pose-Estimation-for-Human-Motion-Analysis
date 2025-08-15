@@ -96,7 +96,15 @@ class JointwisePCKCalculator(BasePCKCalculator):
         gt_points = np.stack(gt_pts, axis=1)
         pred_points = np.stack(pred_pts, axis=1)
 
+        # Calculate jointwise distances
         distances = np.linalg.norm(
             gt_points - pred_points, axis=-1) / norm_length[:, np.newaxis]
+
+        # Calculate raw PCK scores for each joint and frame
         jointwise_pck = (distances < self.threshold).astype(int) * 100
-        return joint_names, jointwise_pck
+
+        # Aggregate scores by averaging along the frame dimension (axis=0)
+        averaged_pck_per_joint = np.mean(jointwise_pck, axis=0)
+
+        # Return the joint names and the new, aggregated scores
+        return joint_names, averaged_pck_per_joint
