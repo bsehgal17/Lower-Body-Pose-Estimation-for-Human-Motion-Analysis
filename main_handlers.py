@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 def _get_detection_pipeline_fn(detector_name: str):
     detector_name = detector_name.lower()
-    if detector_name == "deeplabcut":
-        from detection_pipeline_deeplabcut import run_detection_pipeline
-        logger.info("Using DeepLabCut detection pipeline.")
+    if detector_name == "dwpose":
+        from detection_pipeline_DWPose import run_detection_pipeline
+        logger.info("Using DWPose detection pipeline.")
     else:
         from detection_pipeline_rtmw import run_detection_pipeline
         logger.info("Using RTMW/MMpose detection pipeline.")

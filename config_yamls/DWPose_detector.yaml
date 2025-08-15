@@ -1,0 +1,66 @@
+paths:
+  dataset: MoVi
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
+
+models:
+  detector: dwpose
+  det_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/DWPose/yolox_l_8xb8-300e_coco.py
+  det_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/DWPose/yolox_l.pth
+  pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/DWPose/dwpose-l_384x288.py
+  pose_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/DWPose/dw-ll_ucoco_384.pth
+
+processing:
+  device: cuda:0
+  nms_threshold: 0.5
+  detection_threshold: 0.3  # Lowered from RTMW as YOLOX tends to have lower confidence scores
+  kpt_threshold: 0.2  # DWpose has more keypoints (133 vs 17), so lower threshold
+
+noise:
+  apply_poisson_noise: true
+  apply_gaussian_noise: true
+  apply_motion_blur: true
+  apply_brightness_reduction: true
+  brightness_factor: 30
+  poisson_scale: 1.0
+  gaussian_std: 2.0
+  motion_blur_kernel_size: 5
+  target_resolution: null  # or [640, 480]
+
+filter:
+  name: "gaussian"
+  params:
+    sigma: 0.5
+
+  outlier_removal:
+    enable: True
+    method: "iqr"
+    params:
+      iqr_multiplier: 1.5
+
+  enable_interpolation: true
+  interpolation_kind: "linear"
+
+  enable_filter_plots: true
+
+  # Updated for DWpose's whole-body keypoints (133 points)
+  joints_to_filter:
+    - LEFT_ANKLE
+    - RIGHT_ANKLE
+    - LEFT_KNEE
+    - RIGHT_KNEE
+    - LEFT_HIP
+    - RIGHT_HIP
+    # Additional lower body points in DWpose:
+    - LEFT_BIG_TOE
+    - RIGHT_BIG_TOE
+    - LEFT_SMALL_TOE
+    - RIGHT_SMALL_TOE
+    - LEFT_HEEL
+    - RIGHT_HEEL
+
+evaluation:
+  metrics:
+    - name: overall_pck
+      params:
+        threshold: 0.01
+    # DWpose-specific metrics can be added here
