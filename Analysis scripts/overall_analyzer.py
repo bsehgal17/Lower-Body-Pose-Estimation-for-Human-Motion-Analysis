@@ -64,12 +64,43 @@ def run_overall_analysis(config):
         contrast_data = analyzer.get_contrast_data()
 
         if brightness_data and contrast_data:
-            all_brightness_data.extend(brightness_data)
+            # Step 2.1: Handle synchronized data by using it as a starting frame index
+            synced_start_frame = 0
+            if hasattr(config, 'sync_data'):
+                try:
+                    subject_key = f"{video_row_data.get(config.SUBJECT_COLUMN)}"
+                    action_key = video_row_data.get(config.ACTION_COLUMN)
+                    # Correct the action key format to match the sync_data dictionary
+                    if isinstance(action_key, str):
+                        action_key = action_key.replace('_', ' ').title()
+
+                    camera_id = video_row_data.get(config.CAMERA_COLUMN)
+                    # Cameras are 1-based, list is 0-based
+                    camera_index = int(camera_id) - 1
+
+                    # Get the starting frame index from sync data
+                    synced_start_frame = config.sync_data.data[subject_key][action_key][camera_index]
+
+                    # Check if the start frame is valid
+                    if synced_start_frame < 0:
+                        print(
+                            f"Warning: Invalid synced start frame {synced_start_frame}. Using frame 0.")
+                        synced_start_frame = 0
+                except (KeyError, IndexError, TypeError) as e:
+                    print(
+                        f"Warning: No sync data found for {video_row_data}. Using frame 0. Error: {e}")
+
+            # Slice both datasets from the starting frame before calculating the mean
+            brightness_data_sliced = brightness_data[synced_start_frame:]
+            contrast_data_sliced = contrast_data[synced_start_frame:]
+
+            all_brightness_data.extend(brightness_data_sliced)
 
             # Create a dictionary to hold the video's metadata and metrics
             new_row = video_row_data.copy()
-            new_row['avg_brightness'] = pd.Series(brightness_data).mean()
-            new_row['avg_contrast'] = pd.Series(contrast_data).mean()
+            new_row['avg_brightness'] = pd.Series(
+                brightness_data_sliced).mean()
+            new_row['avg_contrast'] = pd.Series(contrast_data_sliced).mean()
             # Append the row to the list
             video_metrics_rows.append(new_row)
 
@@ -114,7 +145,7 @@ def run_overall_analysis(config):
             subject_col=config.SUBJECT_COLUMN,
             action_col=config.ACTION_COLUMN,
             camera_col=config.CAMERA_COLUMN,
-            title=f'PCK ({pck_col[-4:]}) vs Average Brightness',
+            title=f'LOWER PCK ({pck_col[-4:]}) vs Average Brightness',
             x_label='Average Video Brightness (L*)',
             save_path=os.path.join(
                 config.SAVE_FOLDER, f'overall_pck_vs_avg_brightness_{pck_col[-4:]}_{timestamp}.png')
@@ -128,7 +159,7 @@ def run_overall_analysis(config):
             subject_col=config.SUBJECT_COLUMN,
             action_col=config.ACTION_COLUMN,
             camera_col=config.CAMERA_COLUMN,
-            title=f'PCK ({pck_col[-4:]}) vs Average Contrast',
+            title=f'LOWER PCK ({pck_col[-4:]}) vs Average Contrast',
             x_label='Average Video Contrast (L*)',
             save_path=os.path.join(
                 config.SAVE_FOLDER, f'overall_pck_vs_avg_contrast_{pck_col[-4:]}_{timestamp}.png')

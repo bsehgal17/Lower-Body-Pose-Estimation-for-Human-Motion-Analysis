@@ -1,3 +1,5 @@
+# per_frame_analyzer.py
+
 import os
 import pandas as pd
 from datetime import datetime
@@ -15,7 +17,7 @@ def run_per_frame_analysis(config):
     """
     Performs per-frame analysis and generates plots for a given dataset.
     This function is now generic and uses a config object to get all
-    dataset-specific information.
+    dataset-specific information. It now handles synchronized frame counts.
 
     Args:
         config (object): A configuration object containing dataset-specific parameters.
@@ -65,18 +67,53 @@ def run_per_frame_analysis(config):
                 f"Warning: Could not get brightness data for {video_path}. Skipping.")
             continue
 
-        # Align frame counts
-        min_length = min(len(brightness_data), len(video_pck_df))
-        if len(brightness_data) != len(video_pck_df):
-            print(
-                f"Warning: Frame count mismatch for {video_path}. Using {min_length} frames.")
+        # Step 2.1: Handle synchronized data by using it as a starting frame index
+        pck_len = len(video_pck_df)
+        brightness_len = len(brightness_data)
 
-        # Create aligned dataframe
+        synced_start_frame = 0
+        if hasattr(config, 'sync_data'):
+            try:
+                subject_key = f"{video_row_data.get(config.SUBJECT_COLUMN)}"
+                action_key = video_row_data.get(config.ACTION_COLUMN)
+                # Correct the action key format to match the sync_data dictionary
+                if isinstance(action_key, str):
+                    action_key = action_key.replace('_', ' ').title()
+
+                camera_id = video_row_data.get(config.CAMERA_COLUMN)
+                # Cameras are 1-based, list is 0-based
+                camera_index = int(camera_id) - 1
+
+                # Get the starting frame index from sync data
+                synced_start_frame = config.sync_data.data[subject_key][action_key][camera_index]
+
+                # Check if the start frame is valid
+                if synced_start_frame < 0:
+                    print(
+                        f"Warning: Invalid synced start frame {synced_start_frame}. Using frame 0.")
+                    synced_start_frame = 0
+
+            except (KeyError, IndexError, TypeError) as e:
+                print(
+                    f"Warning: No sync data found for {video_row_data}. Using frame 0. Error: {e}")
+
+        # The PCK data is already aligned, so we only slice the brightness data
+        brightness_data_sliced = brightness_data[synced_start_frame:]
+
+        # Recalculate min_length based on the original PCK data and the sliced brightness data
+        min_length = min(len(video_pck_df), len(brightness_data_sliced))
+
+        # Align frame counts using the determined min_length
+        if len(video_pck_df) != len(brightness_data_sliced):
+            print(
+                f"Frame count mismatch for {video_path} after slicing. Using {min_length} frames.")
+
         video_pck_df_aligned = video_pck_df.head(min_length).copy()
-        brightness_data_aligned = brightness_data[:min_length]
+        brightness_data_aligned = brightness_data_sliced[:min_length]
 
         video_pck_df_aligned['brightness'] = brightness_data_aligned
-        video_pck_df_aligned['frame_idx'] = range(min_length)
+        video_pck_df_aligned['frame_idx'] = range(
+            synced_start_frame, synced_start_frame + min_length)
 
         # Add video identifier columns to the aligned dataframe
         for col, value in video_row_data.items():
@@ -102,7 +139,7 @@ def run_per_frame_analysis(config):
             action_col=config.ACTION_COLUMN,
             camera_col=config.CAMERA_COLUMN,
             frame_col='frame_idx',
-            title=f'Interactive_Per-Frame_PCK_{pck_col[-4:]}_vs_Brightness',
+            title=f'Interactive_Per-Frame_LOWER_PCK_{pck_col[-4:]}_vs_Brightness',
             save_dir=config.SAVE_FOLDER
         )
 
@@ -116,7 +153,7 @@ def run_per_frame_analysis(config):
             subject_col=config.SUBJECT_COLUMN,
             action_col=config.ACTION_COLUMN,
             camera_col=config.CAMERA_COLUMN,
-            title=f'Per-Frame PCK Score ({pck_col[-4:]}) vs. Video Brightness (Trends)',
+            title=f'Per-Frame LOWER PCK Score ({pck_col[-4:]}) vs. Video Brightness (Trends)',
             x_label='Per-Frame Video Brightness (L Channel)',
             save_path=save_path_trend
         )
@@ -132,7 +169,7 @@ def run_per_frame_analysis(config):
             subject_col=config.SUBJECT_COLUMN,
             action_col=config.ACTION_COLUMN,
             camera_col=config.CAMERA_COLUMN,
-            title=f'PCK ({pck_col[-4:]}) vs Brightness',
+            title=f'LOWER PCK ({pck_col[-4:]}) vs Brightness',
             x_label='Brightness (L*)',
             save_path=save_path_metric
         )

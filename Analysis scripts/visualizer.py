@@ -57,12 +57,12 @@ def plot_overall_relation(overall_avg_l, avg_pck_scores, save_path=None):
     pck_values = list(avg_pck_scores.values())
 
     fig, ax1 = plt.subplots(figsize=(10, 6))
-    ax1.set_xlabel('PCK Threshold')
-    ax1.set_ylabel('Average PCK Score', color='teal')
+    ax1.set_xlabel('LOWER PCK Threshold')
+    ax1.set_ylabel('Average LOWER PCK Score', color='teal')
     ax1.tick_params(axis='y', labelcolor='teal')
 
     bars = ax1.bar(pck_thresholds, pck_values, color=['skyblue', 'salmon', 'lightgreen'],
-                   label='Average PCK Score', width=0.6)
+                   label='Average LOWER PCK Score', width=0.6)
 
     for bar in bars:
         height = bar.get_height()
@@ -79,7 +79,7 @@ def plot_overall_relation(overall_avg_l, avg_pck_scores, save_path=None):
     ax2.set_ylim(0, max(overall_avg_l * 1.2, ax1.get_ylim()[1]))
 
     fig.suptitle(
-        'Overall Average PCK Scores vs. Overall Average Brightness', fontsize=14)
+        'Overall Average LOWER PCK Scores vs. Overall Average Brightness', fontsize=14)
     fig.tight_layout()
     fig.legend(loc='upper right', bbox_to_anchor=(
         1, 1), bbox_transform=ax1.transAxes)
@@ -97,7 +97,7 @@ def plot_pck_vs_metric(df, x_column, y_column, subject_col, action_col, camera_c
     Dynamically handles grouping based on available columns.
     """
     # Increased figure size for better legend visibility
-    plt.figure(figsize=(15, 10))
+    plt.figure(figsize=(20, 12))
 
     # Dynamically determine which columns to use for grouping
     grouping_cols = [col for col in [subject_col,
@@ -125,15 +125,15 @@ def plot_pck_vs_metric(df, x_column, y_column, subject_col, action_col, camera_c
                         alpha=0.7, color=colors(i), label=label)
             i += 1
         # Adjusted legend placement and added a title for clarity
-        plt.legend(title='Video ID', bbox_to_anchor=(
-            1.02, 1), loc='upper left', borderaxespad=0.)
+        plt.legend(title='Video ID', bbox_to_anchor=(1.02, 1),
+                   loc='upper left', borderaxespad=0., ncol=3)
 
     plt.title(title)
     plt.xlabel(x_label)
-    plt.ylabel(f'PCK Score ({y_column[-4:]})')
+    plt.ylabel(f'LOWER PCK Score ({y_column[-4:]})')
     plt.grid(True)
-    # Use tight_layout without rect to let matplotlib adjust automatically
-    plt.tight_layout()
+    # Use subplots_adjust to make room for the legend on the right
+    plt.subplots_adjust(right=0.75)
 
     if save_path:
         plt.savefig(save_path)
@@ -147,7 +147,7 @@ def plot_pck_vs_brightness_trends(df, x_column, y_column, subject_col, action_co
     Dynamically handles grouping based on available columns.
     """
     # Increased figure size for better legend visibility
-    plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(20, 12))
 
     grouping_cols = [col for col in [subject_col,
                                      action_col, camera_col] if col is not None]
@@ -176,7 +176,7 @@ def plot_pck_vs_brightness_trends(df, x_column, y_column, subject_col, action_co
             i += 1
         # Adjusted legend placement and added a title for clarity
         plt.legend(title='Video ID', bbox_to_anchor=(1.02, 1),
-                   loc='upper left', borderaxespad=0.)
+                   loc='upper left', borderaxespad=0., ncol=3)
 
     x_min_data = df[x_column].min()
     x_max_data = df[x_column].max()
@@ -194,10 +194,10 @@ def plot_pck_vs_brightness_trends(df, x_column, y_column, subject_col, action_co
 
     plt.title(title)
     plt.xlabel(x_label)
-    plt.ylabel(f'PCK Score ({y_column[-4:]})')
+    plt.ylabel(f'LOWER PCK Score ({y_column[-4:]})')
     plt.grid(True)
-    # Use tight_layout without rect to let matplotlib adjust automatically
-    plt.tight_layout()
+    # Use subplots_adjust to make room for the legend on the right
+    plt.subplots_adjust(right=0.75)
 
     if save_path:
         plt.savefig(save_path)
@@ -229,7 +229,7 @@ def plot_pck_vs_brightness_interactive(df, x_column, y_column, subject_col, acti
         hover_data=hover_data,
         title=title,
         labels={x_column: "Brightness (L*)",
-                y_column: f"PCK Score ({y_column[-4:]})"}
+                y_column: f"LOWER PCK Score ({y_column[-4:]})"}
     )
 
     fig.update_traces(marker=dict(size=6, opacity=0.8))
