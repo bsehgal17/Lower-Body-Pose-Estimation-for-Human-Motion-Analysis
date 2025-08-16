@@ -2,7 +2,7 @@ from evaluation.overall_pck import OverallPCKCalculator
 from evaluation.jointwise_pck import JointwisePCKCalculator
 # Import the new calculator
 from evaluation.per_frame_pck import PerFramePCKCalculator
-# from evaluation.gat_metric import GATMetric
+from evaluation.overall_mAP import MAPCalculator
 
 EVALUATION_METRICS = [
     {
@@ -20,9 +20,9 @@ EVALUATION_METRICS = [
         "class": PerFramePCKCalculator,
         "param_spec": ["threshold", "joints_to_evaluate"],
     },
-    # {
-    #     "name": "gat_metric",
-    #     "class": GATMetric,
-    #     "param_spec": [],
-    # },
+    {
+        "name": "map",
+        "class": MAPCalculator,
+        "param_spec": ["kpt_sigmas"],
+    },
 ]
