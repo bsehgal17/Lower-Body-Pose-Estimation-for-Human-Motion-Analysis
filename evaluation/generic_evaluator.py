@@ -22,21 +22,27 @@ class MetricsEvaluator:
         self.output_path = output_path
         self.joint_names = None
 
-    def evaluate(self, calculator, gt, pred, sample_info, metric_name, params):
+    def evaluate(self, calculator, gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores, sample_info, metric_name, params):
         """
         Computes a metric and stores the result.
 
         Args:
             calculator: An instance of a metric calculator.
-            gt: Ground truth data.
-            pred: Prediction data.
+            gt_keypoints: Ground truth keypoints.
+            gt_bboxes: Ground truth bounding boxes.
+            gt_scores: Ground truth scores.
+            pred_keypoints: Prediction keypoints.
+            pred_bboxes: Prediction bounding boxes.
+            pred_scores: Prediction scores.
             sample_info (dict): A dictionary with identifying info for the sample
                                 (e.g., {"subject": "S1", "action": "Walking"}).
             metric_name (str): The name of the metric.
             params (dict): Parameters used for the metric.
         """
         try:
-            result = calculator.compute(gt, pred)
+            # Pass all the relevant data to the calculator's compute method
+            result = calculator.compute(
+                gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores)
         except Exception as e:
             logger.error(
                 f"Error computing metric '{metric_name}' for sample {sample_info}: {e}")
@@ -207,7 +213,7 @@ def run_assessment(evaluator, pipeline_config, global_config, input_dir, output_
             if not sample:
                 continue
 
-            gt, pred, sample_info = sample
+            gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores, sample_info = sample
 
             for metric_cfg in pipeline_config.evaluation.metrics:
                 metric_name = metric_cfg["name"]
@@ -223,7 +229,7 @@ def run_assessment(evaluator, pipeline_config, global_config, input_dir, output_
                     params=params, gt_enum=gt_enum_class, pred_enum=pred_enum_class
                 )
 
-                evaluator.evaluate(calculator, gt, pred,
+                evaluator.evaluate(calculator, gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores,
                                    sample_info, metric_name, params)
 
     if evaluator.overall_rows or evaluator.jointwise_rows or evaluator.per_frame_rows or evaluator.per_frame_oks_rows:

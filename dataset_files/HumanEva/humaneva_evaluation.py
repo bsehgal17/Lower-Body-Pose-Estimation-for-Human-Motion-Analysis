@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_config: GlobalConfig):
     """
     Loads and prepares GT and prediction data for a single HumanEva sample.
-    Returns (gt_keypoints, pred_keypoints, sample_info) or None.
+    Returns (gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores, sample_info).
+    The GT data will have placeholder bboxes and scores since the dataset does not provide them.
     """
     try:
         json_path = pred_pkl_path.replace(".pkl", ".json")
@@ -58,16 +59,31 @@ def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_
         with open(pred_pkl_path, "rb") as f:
             pred_data = pickle.load(f)
 
+        # New lists to store separate prediction data
         pred_keypoints = []
+        pred_bboxes = []
+        pred_scores = []
+
         for frame in pred_data["keypoints"]:
             people = frame["keypoints"]
             if not people:
-                raise ValueError(f"No people in frame {frame['frame_idx']}")
-            keypoints_arr = np.array(people[0]["keypoints"])
-            if keypoints_arr.ndim == 3 and keypoints_arr.shape[0] == 1:
-                keypoints_arr = keypoints_arr[0]
-            pred_keypoints.append(keypoints_arr)
-        pred_keypoints = np.stack(pred_keypoints, axis=0)
+                # If no predictions, append placeholders to keep lists aligned
+                pred_keypoints.append(None)
+                pred_bboxes.append(None)
+                pred_scores.append(None)
+                continue
+
+            # Assuming single person per frame for this use case
+            person = people[0]
+
+            # Extract keypoints, bbox, and score
+            kpts = np.array(person.get("keypoints", []))
+            bbox = person.get("bboxes", [0, 0, 0, 0])
+            score = person.get("scores", 0.0)
+
+            pred_keypoints.append(kpts)
+            pred_bboxes.append(bbox)
+            pred_scores.append(score)
 
         # --- Rescaling and Synchronization (HumanEva specific) ---
         original_video_path = os.path.join(
@@ -80,8 +96,21 @@ def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_
         if os.path.exists(pred_video_path):
             test_w, test_h = get_video_resolution(pred_video_path)
             if (test_w, test_h) != (orig_w, orig_h):
-                pred_keypoints = rescale_keypoints(
-                    pred_keypoints, orig_w / test_w, orig_h / test_h)
+                # Rescale keypoints in the list
+                scale_x = orig_w / test_w
+                scale_y = orig_h / test_h
+                for i in range(len(pred_keypoints)):
+                    if pred_keypoints[i] is not None:
+                        pred_keypoints[i] = rescale_keypoints(
+                            pred_keypoints[i], scale_x, scale_y)
+                        # Bboxes need to be rescaled too
+                        bbox = pred_bboxes[i]
+                        pred_bboxes[i] = [
+                            bbox[0] * scale_x,
+                            bbox[1] * scale_y,
+                            bbox[2] * scale_x,
+                            bbox[3] * scale_y,
+                        ]
 
         try:
             sync_start = pipeline_config.dataset.sync_data["data"][subject][action][camera_idx]
@@ -94,8 +123,15 @@ def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_
                 f"No sync index for {subject} | {action} | {camera_str}")
             sync_start = 0
 
+        # Adjust lists based on sync
         pred_keypoints = pred_keypoints[sync_start:]
+        pred_bboxes = pred_bboxes[sync_start:]
+        pred_scores = pred_scores[sync_start:]
         min_len = min(len(gt_keypoints), len(pred_keypoints))
+
+        # Create placeholder lists for GT bboxes and scores for MAPCalculator
+        gt_bboxes = [None] * min_len
+        gt_scores = [1.0] * min_len
 
         sample_info = {
             "subject": subject,
@@ -103,7 +139,16 @@ def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_
             "camera": camera_idx
         }
 
-        return gt_keypoints[:min_len], pred_keypoints[:min_len], sample_info
+        # Return all the separate lists in the expected order
+        return (
+            gt_keypoints[:min_len],
+            gt_bboxes,
+            gt_scores,
+            pred_keypoints[:min_len],
+            pred_bboxes[:min_len],
+            pred_scores[:min_len],
+            sample_info
+        )
 
     except Exception as e:
         logger.error(f"Assessment error for {pred_pkl_path}: {e}")
@@ -138,7 +183,7 @@ def run_humaneva_assessment(
         gt_enum_class=gt_enum_class,
         pred_enum_class=pred_enum_class,
         data_loader_func=humaneva_data_loader,
-        group_keys=grouping_keys  # Pass the explicit keys for grouping
+        group_keys=grouping_keys
     )
 
     logger.info("HumanEva assessment completed.")

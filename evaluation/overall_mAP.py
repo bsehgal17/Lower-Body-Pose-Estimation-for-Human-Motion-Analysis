@@ -33,7 +33,7 @@ class MAPCalculator(BaseCalculator):
 
         Args:
             params (dict): A dictionary of parameters. Must include 'kpt_sigmas'
-                           and 'joints_to_evaluate'.
+                            and 'joints_to_evaluate'.
             gt_enum (Enum): An enum mapping ground truth joint names to indices.
             pred_enum (Enum): An enum mapping predicted joint names to indices.
             verbose (bool): If True, prints additional information.
@@ -111,44 +111,41 @@ class MAPCalculator(BaseCalculator):
 
         return numerator / denominator if denominator > 0 else 0.0
 
-    def compute(self, gt_poses, pred_poses):
+    def compute(self, gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores):
         """
         Computes the overall mAP for lower body pose estimation across a video.
 
         Args:
-            gt_poses (list): List of dictionaries containing ground truth poses.
-                             Each dict should have 'keypoints' and 'bbox_area'.
-            pred_poses (list): List of dictionaries containing predicted poses.
-                               Each dict should have 'keypoints', 'bbox_area',
-                               and 'score' (confidence).
+            gt_keypoints (list): List of ground truth keypoints for each frame.
+            gt_bboxes (list): List of ground truth bounding boxes.
+            gt_scores (list): List of ground truth scores.
+            pred_keypoints (list): List of predicted keypoints for each frame.
+            pred_bboxes (list): List of predicted bounding boxes.
+            pred_scores (list): List of predicted scores.
 
         Returns:
             dict: A dictionary of mAP results.
         """
-        # Ensure gt_poses is in the correct format (list of dicts)
-        if isinstance(gt_poses, np.ndarray):
-            gt_poses_list = []
-            for pose_kpts in gt_poses:
-                gt_poses_list.append({
-                    'keypoints': pose_kpts,
-                    'bbox_area': 1.0,  # Placeholder
+        # Create a list of dictionaries for each ground truth pose
+        gt_poses = []
+        for kpts, bbox, score in zip(gt_keypoints, gt_bboxes, gt_scores):
+            if kpts is not None and bbox is not None:
+                gt_poses.append({
+                    'keypoints': kpts,
+                    'bbox_area': (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]),
+                    'score': score,
                     'matched': False
                 })
-            gt_poses = gt_poses_list
 
-        # Ensure pred_poses is in the correct format (list of dicts)
-        if isinstance(pred_poses, np.ndarray):
-            # Convert the numpy array to a list of dictionaries
-            # Note: We're using placeholder values for score and bbox_area
-            # as they are not present in the numpy array.
-            pred_poses_list = []
-            for pose_kpts in pred_poses:
-                pred_poses_list.append({
-                    'keypoints': pose_kpts,
-                    'bbox_area': 1.0,  # Placeholder
-                    'score': 1.0
+        # Create a list of dictionaries for each predicted pose
+        pred_poses = []
+        for kpts, bbox, score in zip(pred_keypoints, pred_bboxes, pred_scores):
+            if kpts is not None and bbox is not None:
+                pred_poses.append({
+                    'keypoints': kpts,
+                    'bbox_area': (bbox[0][2] - bbox[0][0]) * (bbox[0][3] - bbox[0][1]),
+                    'score': score
                 })
-            pred_poses = pred_poses_list
 
         # Store results for each OKS threshold
         ap_results = {}
@@ -197,7 +194,7 @@ class MAPCalculator(BaseCalculator):
                     gt_s = np.sqrt(gt_pose.get('bbox_area', 0))
 
                     current_oks = self._calculate_oks(
-                        gt_kpts, pred_kpts, gt_s, self.kpt_sigmas, common_joints)
+                        gt_kpts, pred_kpts, pred_s, self.kpt_sigmas, common_joints)
                     if current_oks > best_oks:
                         best_oks = current_oks
                         best_gt_idx = i
