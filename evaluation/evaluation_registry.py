@@ -23,6 +23,6 @@ EVALUATION_METRICS = [
     {
         "name": "map",
         "class": MAPCalculator,
-        "param_spec": ["kpt_sigmas"],
+        "param_spec": ["kpt_sigmas", "joints_to_evaluate"],
     },
 ]

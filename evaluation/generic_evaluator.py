@@ -18,6 +18,7 @@ class MetricsEvaluator:
         self.overall_rows = []
         self.jointwise_rows = []
         self.per_frame_rows = []  # New list for per-frame scores
+        self.per_frame_oks_rows = []  # New list for individual OKS scores
         self.output_path = output_path
         self.joint_names = None
 
@@ -68,6 +69,24 @@ class MetricsEvaluator:
             for k, v in sample_info.items():
                 per_frame_df[k] = v
             self.per_frame_rows.append(per_frame_df)
+        elif isinstance(result, dict):
+            # Handle dictionary results, like from the MAPCalculator
+
+            # Remove individual_oks_scores as per the user's request
+            if 'individual_oks_scores' in result:
+                result.pop('individual_oks_scores')
+
+            # Process the rest of the dictionary as overall metrics
+            overall_row = sample_info.copy()
+            # Add all items from the result dictionary to the overall_row
+            for result_key, result_value in result.items():
+                if isinstance(result_value, dict):
+                    # Flatten nested dictionaries like 'ap_per_threshold'
+                    for sub_key, sub_value in result_value.items():
+                        overall_row[f"{metric_name}_{sub_key}"] = sub_value
+                else:
+                    overall_row[f"{metric_name}_{result_key}"] = result_value
+            self.overall_rows.append(overall_row)
 
     def save(self, output_dir, group_keys: list = None):
         if not (self.overall_rows or self.jointwise_rows or self.per_frame_rows):
@@ -207,7 +226,7 @@ def run_assessment(evaluator, pipeline_config, global_config, input_dir, output_
                 evaluator.evaluate(calculator, gt, pred,
                                    sample_info, metric_name, params)
 
-    if evaluator.overall_rows or evaluator.jointwise_rows or evaluator.per_frame_rows:
+    if evaluator.overall_rows or evaluator.jointwise_rows or evaluator.per_frame_rows or evaluator.per_frame_oks_rows:
         evaluator.output_path = pred_root
         # Pass the received keys to the save method
         evaluator.save(output_dir, group_keys=group_keys)

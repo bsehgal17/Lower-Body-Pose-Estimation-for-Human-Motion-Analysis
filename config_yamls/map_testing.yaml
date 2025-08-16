@@ -61,6 +61,13 @@ evaluation:
   metrics:
     - name: map
       params:
+        joints_to_evaluate:
+            - LEFT_HIP
+            - RIGHT_HIP
+            - LEFT_KNEE
+            - RIGHT_KNEE
+            - LEFT_ANKLE
+            - RIGHT_ANKLE
         kpt_sigmas:
           left_hip: 0.26
           right_hip: 0.26

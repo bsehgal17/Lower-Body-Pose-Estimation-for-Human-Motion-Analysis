@@ -13,13 +13,27 @@ class BaseCalculator:
         pass
 
 
+def _get_joint_point(keypoints_list, index):
+    """
+    Helper function to get a single joint point from a list of keypoints.
+    If the index is a tuple, it averages the points at those indices.
+    """
+    if isinstance(index, (list, tuple)):
+        point1 = np.array(keypoints_list[index[0]])
+        point2 = np.array(keypoints_list[index[1]])
+        return (point1 + point2) / 2
+    else:
+        return np.array(keypoints_list[index])
+
+
 class MAPCalculator(BaseCalculator):
     def __init__(self, params, gt_enum, pred_enum, verbose=False):
         """
         Initializes the mAP calculator for lower body pose estimation.
 
         Args:
-            params (dict): A dictionary of parameters. Must include 'kpt_sigmas'.
+            params (dict): A dictionary of parameters. Must include 'kpt_sigmas'
+                           and 'joints_to_evaluate'.
             gt_enum (Enum): An enum mapping ground truth joint names to indices.
             pred_enum (Enum): An enum mapping predicted joint names to indices.
             verbose (bool): If True, prints additional information.
@@ -27,17 +41,23 @@ class MAPCalculator(BaseCalculator):
         # Call the base class initializer
         super().__init__(**params)
 
+        # Check for required parameters. This enforces a complete YAML config.
         if "kpt_sigmas" not in params:
             raise ValueError(
                 "Parameter 'kpt_sigmas' is required for MAPCalculator.")
+        if "joints_to_evaluate" not in params:
+            raise ValueError(
+                "Parameter 'joints_to_evaluate' is required for MAPCalculator.")
 
-        # Define the lower body keypoints to evaluate.
-        # These correspond to the standard COCO keypoints.
-        self.joints_to_evaluate = [
-            "left_hip", "right_hip",
-            "left_knee", "right_knee",
-            "left_ankle", "right_ankle"
-        ]
+        # Get the joints to evaluate directly from the parameters.
+        # This section now handles single joint names as well as tuples of joints.
+        # It flattens the list for easier processing later.
+        self.joints_to_evaluate = []
+        for item in params["joints_to_evaluate"]:
+            if isinstance(item, (list, tuple)):
+                self.joints_to_evaluate.extend(item)
+            else:
+                self.joints_to_evaluate.append(item)
 
         # Use the provided keypoint sigmas for the OKS calculation.
         # These are crucial constants that normalize distance by joint difficulty.
@@ -48,7 +68,7 @@ class MAPCalculator(BaseCalculator):
         self.pred_enum = pred_enum
         self.verbose = verbose
 
-    def _calculate_oks(self, gt, pred, s, kpt_sigmas):
+    def _calculate_oks(self, gt, pred, s, kpt_sigmas, common_joints):
         """
         Calculates the Object Keypoint Similarity (OKS) for a single instance.
 
@@ -57,6 +77,7 @@ class MAPCalculator(BaseCalculator):
             pred (np.array): Predicted keypoints (N x 2).
             s (float): The scale of the person (sqrt of bounding box area).
             kpt_sigmas (dict): Per-keypoint normalization constants.
+            common_joints (list): The list of common joint names to evaluate.
 
         Returns:
             float: The OKS score.
@@ -69,23 +90,22 @@ class MAPCalculator(BaseCalculator):
         gt = np.atleast_2d(gt)
         pred = np.atleast_2d(pred)
 
-        # Calculate squared Euclidean distances for all keypoints
+        # Calculate squared Euclidean distances for all common keypoints
         distances_sq = np.sum((gt - pred)**2, axis=1)
 
-        # Apply the OKS formula, only for the lower body keypoints
+        # Apply the OKS formula
         numerator = 0
         denominator = 0
 
-        # Iterate over the joints we care about for OKS calculation
-        for i, joint_name in enumerate(self.joints_to_evaluate):
+        # Iterate over the joints we care about for OKS calculation, using the common joints list
+        for i, joint_name in enumerate(common_joints):
             # Check if the joint exists and is valid
             if joint_name in kpt_sigmas:
                 # Get the sigma value for the current joint
                 sigma = kpt_sigmas[joint_name]
-                # The k_i value in the formula is sigma.
-                # The exponent term is di^2 / (2 * s^2 * ki^2)
+                # The exponent term is di^2 / (2 * s**2 * ki**2)
                 numerator += np.exp(-distances_sq[i] / (2 * s**2 * sigma**2))
-                denominator += 1  # We're only evaluating a fixed set of joints
+                denominator += 1
 
         return numerator / denominator if denominator > 0 else 0.0
 
@@ -103,12 +123,47 @@ class MAPCalculator(BaseCalculator):
         Returns:
             dict: A dictionary of mAP results.
         """
+        # Ensure gt_poses is in the correct format (list of dicts)
+        if isinstance(gt_poses, np.ndarray):
+            gt_poses_list = []
+            for pose_kpts in gt_poses:
+                gt_poses_list.append({
+                    'keypoints': pose_kpts,
+                    'bbox_area': 1.0,  # Placeholder
+                    'matched': False
+                })
+            gt_poses = gt_poses_list
+
+        # Ensure pred_poses is in the correct format (list of dicts)
+        if isinstance(pred_poses, np.ndarray):
+            # Convert the numpy array to a list of dictionaries
+            # Note: We're using placeholder values for score and bbox_area
+            # as they are not present in the numpy array.
+            pred_poses_list = []
+            for pose_kpts in pred_poses:
+                pred_poses_list.append({
+                    'keypoints': pose_kpts,
+                    'bbox_area': 1.0,  # Placeholder
+                    'score': 1.0
+                })
+            pred_poses = pred_poses_list
+
         # Store results for each OKS threshold
         ap_results = {}
         oks_thresholds = np.arange(0.5, 1.0, 0.05)
 
-        if not gt_poses or not pred_poses:
-            logger.warning("No ground truth or predictions to evaluate.")
+        # Determine the set of common joints to evaluate
+        gt_joints_set = set(self.gt_enum.__members__)
+        pred_joints_set = set(self.pred_enum.__members__)
+
+        common_joints = [
+            joint for joint in self.joints_to_evaluate
+            if joint in gt_joints_set and joint in pred_joints_set
+        ]
+
+        if not gt_poses or not pred_poses or not common_joints:
+            logger.warning(
+                "No ground truth, predictions, or common joints to evaluate.")
             return {"mAP": 0.0, "mAP_50": 0.0, "mAP_75": 0.0, "ap_per_threshold": ap_results, "individual_oks_scores": []}
 
         # Match predictions to ground truth
@@ -117,20 +172,29 @@ class MAPCalculator(BaseCalculator):
             best_oks = 0.0
             best_gt_idx = -1
 
-            # Use .get() to avoid key errors and provide a default
-            pred_kpts = np.array(pred_pose.get('keypoints', []))
+            # This is the updated section to handle single or tuple indices for a joint.
+            pred_kpts = np.array([
+                _get_joint_point(pred_pose.get(
+                    'keypoints', []), self.pred_enum[j].value)
+                for j in common_joints
+            ])
             pred_score = pred_pose.get('score', 0)
             pred_s = np.sqrt(pred_pose.get('bbox_area', 0))
 
             # Find the best matching ground truth pose
             for i, gt_pose in enumerate(gt_poses):
-                gt_kpts = np.array(gt_pose.get('keypoints', []))
-                gt_s = np.sqrt(gt_pose.get('bbox_area', 0))
+                # Ensure the ground truth pose hasn't been matched yet
+                if not gt_pose.get('matched', False):
+                    # This is the updated section to handle single or tuple indices for a joint.
+                    gt_kpts = np.array([
+                        _get_joint_point(gt_pose.get(
+                            'keypoints', []), self.gt_enum[j].value)
+                        for j in common_joints
+                    ])
+                    gt_s = np.sqrt(gt_pose.get('bbox_area', 0))
 
-                # Make sure the ground truth pose hasn't been matched yet
-                if 'matched' not in gt_pose:
                     current_oks = self._calculate_oks(
-                        gt_kpts, pred_kpts, gt_s, self.kpt_sigmas)
+                        gt_kpts, pred_kpts, gt_s, self.kpt_sigmas, common_joints)
                     if current_oks > best_oks:
                         best_oks = current_oks
                         best_gt_idx = i
