@@ -49,15 +49,13 @@ class MAPCalculator(BaseCalculator):
             raise ValueError(
                 "Parameter 'joints_to_evaluate' is required for MAPCalculator.")
 
-        # Get the joints to evaluate directly from the parameters.
-        # This section now handles single joint names as well as tuples of joints.
-        # It flattens the list for easier processing later.
+        # Get the joints to evaluate directly from the parameters and convert to lowercase for consistency.
         self.joints_to_evaluate = []
         for item in params["joints_to_evaluate"]:
             if isinstance(item, (list, tuple)):
-                self.joints_to_evaluate.extend(item)
+                self.joints_to_evaluate.extend([j.lower() for j in item])
             else:
-                self.joints_to_evaluate.append(item)
+                self.joints_to_evaluate.append(item.lower())
 
         # Use the provided keypoint sigmas for the OKS calculation.
         # These are crucial constants that normalize distance by joint difficulty.
@@ -67,6 +65,10 @@ class MAPCalculator(BaseCalculator):
         self.gt_enum = gt_enum
         self.pred_enum = pred_enum
         self.verbose = verbose
+
+        # New: Get OKS thresholds from params or use a default list
+        self.oks_thresholds = params.get(
+            'oks_thresholds', [0.01, 0.02, 0.05, 0.1, 0.2, 0.5])
 
     def _calculate_oks(self, gt, pred, s, kpt_sigmas, common_joints):
         """
@@ -150,11 +152,12 @@ class MAPCalculator(BaseCalculator):
 
         # Store results for each OKS threshold
         ap_results = {}
-        oks_thresholds = np.arange(0.5, 1.0, 0.05)
+        # Now using the class variable, which is set by the YAML config
+        oks_thresholds = self.oks_thresholds
 
-        # Determine the set of common joints to evaluate
-        gt_joints_set = set(self.gt_enum.__members__)
-        pred_joints_set = set(self.pred_enum.__members__)
+        # Determine the set of common joints to evaluate and convert to lowercase
+        gt_joints_set = set(j.lower() for j in self.gt_enum.__members__)
+        pred_joints_set = set(j.lower() for j in self.pred_enum.__members__)
 
         common_joints = [
             joint for joint in self.joints_to_evaluate
@@ -175,7 +178,7 @@ class MAPCalculator(BaseCalculator):
             # This is the updated section to handle single or tuple indices for a joint.
             pred_kpts = np.array([
                 _get_joint_point(pred_pose.get(
-                    'keypoints', []), self.pred_enum[j].value)
+                    'keypoints', []), self.pred_enum[j.upper()].value)
                 for j in common_joints
             ])
             pred_score = pred_pose.get('score', 0)
@@ -188,7 +191,7 @@ class MAPCalculator(BaseCalculator):
                     # This is the updated section to handle single or tuple indices for a joint.
                     gt_kpts = np.array([
                         _get_joint_point(gt_pose.get(
-                            'keypoints', []), self.gt_enum[j].value)
+                            'keypoints', []), self.gt_enum[j.upper()].value)
                         for j in common_joints
                     ])
                     gt_s = np.sqrt(gt_pose.get('bbox_area', 0))

@@ -69,12 +69,19 @@ evaluation:
             - LEFT_ANKLE
             - RIGHT_ANKLE
         kpt_sigmas:
-          left_hip: 0.26
-          right_hip: 0.26
-          left_knee: 0.35
-          right_knee: 0.35
-          left_ankle: 0.35
-          right_ankle: 0.35
+          LEFT_HIP: 0.26
+          RIGHT_HI: 0.26
+          LEFT_KNEE: 0.35
+          RIGHT_KNEE: 0.35
+          LEFT_ANKLE: 0.35
+          RIGHT_ANKLE: 0.35
+        oks_thresholds:
+          - 0.01
+          - 0.02
+          - 0.05
+          - 0.1
+          - 0.2
+          - 0.5
 
 
 dataset:
