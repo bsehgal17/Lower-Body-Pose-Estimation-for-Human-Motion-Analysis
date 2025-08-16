@@ -117,10 +117,10 @@ class MAPCalculator(BaseCalculator):
 
         Args:
             gt_keypoints (list): List of ground truth keypoints for each frame.
-            gt_bboxes (list): List of ground truth bounding boxes.
+            gt_bboxes (list): List of ground truth bounding boxes (optional).
             gt_scores (list): List of ground truth scores.
             pred_keypoints (list): List of predicted keypoints for each frame.
-            pred_bboxes (list): List of predicted bounding boxes.
+            pred_bboxes (list): List of predicted bounding boxes (optional).
             pred_scores (list): List of predicted scores.
 
         Returns:
@@ -128,22 +128,51 @@ class MAPCalculator(BaseCalculator):
         """
         # Create a list of dictionaries for each ground truth pose
         gt_poses = []
-        for kpts, bbox, score in zip(gt_keypoints, gt_bboxes, gt_scores):
-            if kpts is not None and bbox is not None:
+        for i in range(len(gt_keypoints)):
+            kpts = gt_keypoints[i]
+            score = gt_scores[i]
+            # Check if the bbox list exists and has an entry for the current index
+            bbox = gt_bboxes[i] if gt_bboxes is not None and i < len(
+                gt_bboxes) and gt_bboxes[i] is not None else None
+
+            if kpts is not None:
+                # Handle potential 3D array shape, which is a common output format for models
+                # like OpenPose. Reshape to (N, 2)
+                if len(kpts.shape) == 3:
+                    kpts = kpts.reshape(-1, kpts.shape[-1])
+                # Use bounding box area if available, otherwise default to a consistent 1.0
+                bbox_area = (bbox[2] - bbox[0]) * (bbox[3] -
+                                                   bbox[1]) if bbox is not None else 1.0
                 gt_poses.append({
                     'keypoints': kpts,
-                    'bbox_area': (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]),
+                    'bbox_area': bbox_area,
                     'score': score,
                     'matched': False
                 })
 
         # Create a list of dictionaries for each predicted pose
         pred_poses = []
-        for kpts, bbox, score in zip(pred_keypoints, pred_bboxes, pred_scores):
-            if kpts is not None and bbox is not None:
+        for i in range(len(pred_keypoints)):
+            kpts = pred_keypoints[i]
+            score = pred_scores[i]
+            # Check if the bbox list exists and has an entry for the current index
+            bbox = pred_bboxes[i] if pred_bboxes is not None and i < len(
+                pred_bboxes) and pred_bboxes[i] is not None else None
+
+            if kpts is not None:
+                # Handle potential 3D array shape, which is a common output format for models
+                # like OpenPose. Reshape to (N, 2)
+                if len(kpts.shape) == 3:
+                    kpts = kpts.reshape(-1, kpts.shape[-1])
+                # Use bounding box area if available, otherwise default to a consistent 1.0
+                # NOTE: We use the same fallback value for both GT and Pred bboxes to maintain
+                # a fair and consistent OKS calculation. Using the predicted bbox area for GT
+                # would introduce a bias.
+                bbox_area = (bbox[0][2] - bbox[0][0]) * (bbox[0][3] -
+                                                         bbox[0][1]) if bbox is not None else 1.0
                 pred_poses.append({
                     'keypoints': kpts,
-                    'bbox_area': (bbox[0][2] - bbox[0][0]) * (bbox[0][3] - bbox[0][1]),
+                    'bbox_area': bbox_area,
                     'score': score
                 })
 
@@ -194,7 +223,7 @@ class MAPCalculator(BaseCalculator):
                     gt_s = np.sqrt(gt_pose.get('bbox_area', 0))
 
                     current_oks = self._calculate_oks(
-                        gt_kpts, pred_kpts, pred_s, self.kpt_sigmas, common_joints)
+                        gt_kpts, pred_kpts, gt_s, self.kpt_sigmas, common_joints)
                     if current_oks > best_oks:
                         best_oks = current_oks
                         best_gt_idx = i
