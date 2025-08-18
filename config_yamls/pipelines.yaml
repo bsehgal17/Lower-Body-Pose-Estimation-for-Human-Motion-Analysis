@@ -18,8 +18,8 @@ pipelines:
         config_file: "config_yamls/jointwise_ap_testing.yaml"
       - command: evaluation
         config_file: "config_yamls/map_testing.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+      # - command: evaluation
+      #   config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # - name: detect_DWPose
   #   steps:
@@ -28,16 +28,16 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: detect_RTMW
-  #   steps:
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
-  #     - command: evaluation
-  #       config_file: "config_yamls/map_testing_movi.yaml"
-  #     - command: evaluation
-  #       config_file: "config_yamls/jointwise_ap_testing_movi.yaml"
+  - name: detect_RTMW
+    steps:
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test.yaml"
+      - command: evaluation
+        config_file: "config_yamls/map_testing_movi.yaml"
+      - command: evaluation
+        config_file: "config_yamls/jointwise_ap_testing_movi.yaml"
 
 
 

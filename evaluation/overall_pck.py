@@ -95,9 +95,9 @@ class OverallPCKCalculator(BasePCKCalculator):
                 gt_point = gt[:, g_idx]
 
             if isinstance(p_idx, tuple):
-                pred_point = (pred[0][:, p_idx[0]] + pred[0][:, p_idx[1]]) / 2
+                pred_point = (pred[:, p_idx[0]] + pred[:, p_idx[1]]) / 2
             else:
-                pred_point = pred[0][:, p_idx]
+                pred_point = pred[:, p_idx]
 
             gt_pts.append(gt_point)
             pred_pts.append(pred_point)

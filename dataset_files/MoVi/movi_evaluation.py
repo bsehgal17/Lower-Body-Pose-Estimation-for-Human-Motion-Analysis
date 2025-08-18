@@ -61,12 +61,22 @@ def run_movi_assessment(
                     video_filename
                 )
 
-                gt, pred = assess_single_movi_sample(
+                # Unpack all six returned values from the assessor function
+                gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores = assess_single_movi_sample(
                     gt_csv_path, pred_path, video_path
                 )
             except Exception as e:
                 logger.error(f"Failed to process {file}: {e}")
                 continue
+
+            # --- START of the fix ---
+            # Check if pred_keypoints is a single NumPy array (from MoVi)
+            # and convert it to a list of arrays to match HumanEva's format.
+            if isinstance(pred_keypoints, np.ndarray):
+                pred_keypoints = [
+                    pred_keypoints[i] for i in range(pred_keypoints.shape[0])
+                ]
+            # --- END of the fix ---
 
             for metric_cfg in pipeline_config.evaluation.metrics:
                 metric_name = metric_cfg["name"]
@@ -89,19 +99,18 @@ def run_movi_assessment(
 
                 evaluator.evaluate(
                     calculator,
-                    gt,
-                    # Placeholder for bboxes and scores (not available in this simplified GT)
-                    [None] * len(gt),
-                    [None] * len(gt),
-                    pred["keypoints"],
-                    pred["bboxes"],
-                    pred["scores"],
+                    gt_keypoints,
+                    gt_bboxes,
+                    gt_scores,
+                    pred_keypoints,
+                    pred_bboxes,
+                    pred_scores,
                     sample_info,
                     metric_name,
                     params
                 )
 
     # Final save call, now correctly implemented
-    evaluator.save()
+    evaluator.save(output_dir, grouping_keys)
 
     logger.info("MoVi assessment completed.")

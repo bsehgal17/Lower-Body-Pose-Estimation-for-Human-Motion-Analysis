@@ -77,7 +77,22 @@ def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_
             person = people[0]
 
             # Extract keypoints, bbox, and score
-            kpts = np.array(person.get("keypoints", []))
+            kpts_raw = person.get("keypoints", [])
+
+            # --- START of the new fix ---
+            # Unpack the list containing the single keypoint array
+            if isinstance(kpts_raw, list) and len(kpts_raw) > 0 and isinstance(kpts_raw[0], np.ndarray):
+                kpts = kpts_raw[0]
+            else:
+                kpts = np.array(kpts_raw)
+            # --- END of the new fix ---
+
+            # Now, handle any extra dimensions on the resulting array
+            if kpts.ndim == 4:
+                kpts = np.squeeze(kpts, axis=1)
+            elif kpts.ndim == 3 and kpts.shape[0] == 1:
+                kpts = np.squeeze(kpts, axis=0)
+
             bbox = person.get("bboxes", [0, 0, 0, 0])
             score = person.get("scores", 0.0)
 

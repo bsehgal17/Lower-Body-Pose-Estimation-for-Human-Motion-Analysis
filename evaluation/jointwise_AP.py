@@ -143,7 +143,7 @@ class JointwiseAPCalculator(BaseCalculator):
 
                 pred_kpt_idx = self.pred_enum[joint_name.upper()].value
                 pred_kpt = _get_joint_point(
-                    pred_pose['keypoints'][0], pred_kpt_idx)
+                    pred_pose['keypoints'], pred_kpt_idx)
                 pred_s = np.sqrt(pred_pose['bbox_area'])
 
                 # We need a way to track which GT joints have been matched to a pred joint

@@ -82,8 +82,8 @@ class JointwisePCKCalculator(BasePCKCalculator):
 
             gt_point = (gt[:, g_idx[0]] + gt[:, g_idx[1]]) / \
                 2 if isinstance(g_idx, tuple) else gt[:, g_idx]
-            pred_point = (pred[0][:, p_idx[0]] + pred[0][:, p_idx[1]]) / \
-                2 if isinstance(p_idx, tuple) else pred[0][:, p_idx]
+            pred_point = (pred[:, p_idx[0]] + pred[:, p_idx[1]]) / \
+                2 if isinstance(p_idx, tuple) else pred[:, p_idx]
 
             gt_pts.append(gt_point)
             pred_pts.append(pred_point)
