@@ -53,8 +53,8 @@ def assess_single_movi_sample(gt_csv_path, pred_pkl_path, video_path=None):
 
         pred_keypoints.append(keypoints_arr)
         pred_bboxes.append(
-            np.array(person["bbox"]) if "bbox" in person else None)
-        pred_scores.append(person.get("score", None))
+            np.array(person["bboxes"]) if "bboxes" in person else None)
+        pred_scores.append(person.get("scores", None))
 
     # --- Optional resolution correction ---
     if video_path:
