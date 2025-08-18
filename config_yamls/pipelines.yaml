@@ -15,7 +15,7 @@ pipelines:
       # - command: detect
       #   config_file: "config_yamls/DWPose_detector_humaneva.yaml"
       - command: evaluation
-        config_file: "config_yamls/map_testing.yaml"
+        config_file: "config_yamls/jointwise_ap_testing.yaml"
 
   # - name: detect_DWPose
   #   steps:
