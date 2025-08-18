@@ -171,7 +171,7 @@ def run_humaneva_assessment(
     pred_root = pipeline_config.evaluation.input_dir or pipeline_config.detect.output_dir
     # Pass the output path to the evaluator
     evaluator = MetricsEvaluator(
-        output_path=os.path.join(output_dir, "metrics.xlsx"))
+        output_path=output_dir)
 
     run_assessment(
         evaluator=evaluator,

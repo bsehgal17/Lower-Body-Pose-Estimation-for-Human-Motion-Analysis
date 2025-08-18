@@ -36,8 +36,8 @@ class JointwisePCKCalculator(BasePCKCalculator):
             raise ValueError(
                 "Could not determine normalization joints from joints_to_evaluate.")
 
-    def compute(self, gt, pred):
-        gt, pred = np.array(gt), np.array(pred)
+    def compute(self, gt_keypoints, pred_keypoints):
+        gt, pred = np.array(gt_keypoints), np.array(pred_keypoints)
 
         if self.joints_to_evaluate is None:
             self.joints_to_evaluate = [j.name for j in self.gt_enum]
@@ -82,8 +82,8 @@ class JointwisePCKCalculator(BasePCKCalculator):
 
             gt_point = (gt[:, g_idx[0]] + gt[:, g_idx[1]]) / \
                 2 if isinstance(g_idx, tuple) else gt[:, g_idx]
-            pred_point = (pred[:, p_idx[0]] + pred[:, p_idx[1]]) / \
-                2 if isinstance(p_idx, tuple) else pred[:, p_idx]
+            pred_point = (pred[0][:, p_idx[0]] + pred[0][:, p_idx[1]]) / \
+                2 if isinstance(p_idx, tuple) else pred[0][:, p_idx]
 
             gt_pts.append(gt_point)
             pred_pts.append(pred_point)

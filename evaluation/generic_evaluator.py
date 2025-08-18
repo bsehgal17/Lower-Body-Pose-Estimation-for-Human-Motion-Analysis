@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import logging
+import inspect
 from evaluation.evaluation_registry import EVALUATION_METRICS
 from evaluation.result_aggregator import ResultAggregator
 
@@ -17,40 +18,37 @@ class MetricsEvaluator:
     def __init__(self, output_path: str):
         self.aggregator = ResultAggregator(output_path=output_path)
         self.output_path = output_path
-        self.joint_names = None
 
     def evaluate(self, calculator, gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores, sample_info, metric_name, params):
         """
         Computes a metric and stores the result in the aggregator.
         """
         try:
-            result = calculator.compute(
-                gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores)
+            sig = inspect.signature(calculator.compute)
+            available_args = {
+                'gt_keypoints': gt_keypoints,
+                'gt_bboxes': gt_bboxes,
+                'gt_scores': gt_scores,
+                'pred_keypoints': pred_keypoints,
+                'pred_bboxes': pred_bboxes,
+                'pred_scores': pred_scores
+            }
+            filtered_args = {
+                param: available_args[param]
+                for param in sig.parameters
+                if param in available_args
+            }
+            result = calculator.compute(**filtered_args)
         except Exception as e:
             logger.error(
                 f"Error computing metric '{metric_name}' for sample {sample_info}: {e}")
             return
 
-        # Delegate data storage to the aggregator based on the metric type
-        if metric_name == "pck":
-            self.aggregator.add_overall_result(
-                sample_info, result, params.get("threshold"))
-        elif metric_name == "jointwise_pck":
-            self.aggregator.add_jointwise_result(
-                sample_info, result[0], result[1], params.get("threshold"))
-        elif metric_name == "per_frame_pck":
-            self.aggregator.add_per_frame_result(
-                sample_info, result, params.get("threshold"))
-        elif metric_name == "map":
-            self.aggregator.add_map_result(sample_info, result)
-        elif metric_name == "jointwise_ap":
-            self.aggregator.add_jointwise_ap_result(sample_info, result)
-        else:
-            logger.warning(f"Unknown metric type: {metric_name}")
+        self.aggregator.add_metric(sample_info, result, metric_name, params)
 
     def save(self):
         """Saves all collected results using the internal aggregator."""
-        self.aggregator.save()
+        self.aggregator.save(self.output_path)
 
 
 def run_assessment(
@@ -98,5 +96,4 @@ def run_assessment(
                 evaluator.evaluate(calculator, gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores,
                                    sample_info, metric_name, params)
 
-    # The final save call is now correct because it uses the evaluator's save() method
     evaluator.save()

@@ -44,8 +44,8 @@ class OverallPCKCalculator(BasePCKCalculator):
             return ["LEFT_HIP", "RIGHT_HIP"]
         return ["LEFT_HIP", "RIGHT_HIP"]
 
-    def compute(self, gt, pred):
-        gt, pred = np.array(gt), np.array(pred)
+    def compute(self, gt_keypoints, pred_keypoints):
+        gt, pred = np.array(gt_keypoints), np.array(pred_keypoints)
         if pred.shape[-1] == 3:
             pred = pred[..., :2]
 
@@ -89,10 +89,15 @@ class OverallPCKCalculator(BasePCKCalculator):
 
             g_idx, p_idx = self.gt_enum[joint].value, self.pred_enum[joint].value
 
-            gt_point = (gt[:, g_idx[0]] + gt[:, g_idx[1]]) / \
-                2 if isinstance(g_idx, tuple) else gt[:, g_idx]
-            pred_point = (pred[:, p_idx[0]] + pred[:, p_idx[1]]) / \
-                2 if isinstance(p_idx, tuple) else pred[:, p_idx]
+            if isinstance(g_idx, tuple):
+                gt_point = (gt[:, g_idx[0]] + gt[:, g_idx[1]]) / 2
+            else:
+                gt_point = gt[:, g_idx]
+
+            if isinstance(p_idx, tuple):
+                pred_point = (pred[0][:, p_idx[0]] + pred[0][:, p_idx[1]]) / 2
+            else:
+                pred_point = pred[0][:, p_idx]
 
             gt_pts.append(gt_point)
             pred_pts.append(pred_point)
