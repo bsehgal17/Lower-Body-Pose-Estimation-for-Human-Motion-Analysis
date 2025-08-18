@@ -169,10 +169,9 @@ def run_humaneva_assessment(
     logger.info("Running HumanEva assessment using generic evaluator...")
 
     pred_root = pipeline_config.evaluation.input_dir or pipeline_config.detect.output_dir
-    evaluator = MetricsEvaluator()
-
-    # Define the keys for grouping explicitly here
-    grouping_keys = ['subject', 'action', 'camera']
+    # Pass the output path to the evaluator
+    evaluator = MetricsEvaluator(
+        output_path=os.path.join(output_dir, "metrics.xlsx"))
 
     run_assessment(
         evaluator=evaluator,
@@ -183,7 +182,6 @@ def run_humaneva_assessment(
         gt_enum_class=gt_enum_class,
         pred_enum_class=pred_enum_class,
         data_loader_func=humaneva_data_loader,
-        group_keys=grouping_keys
     )
 
     logger.info("HumanEva assessment completed.")

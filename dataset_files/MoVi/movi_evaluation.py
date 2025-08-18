@@ -31,7 +31,10 @@ def run_movi_assessment(
 
     pred_root = pipeline_config.evaluation.input_dir or pipeline_config.detect.output_dir
 
-    evaluator = MetricsEvaluator()
+    # Instantiate the MetricsEvaluator with the output path
+    output_excel_path = os.path.join(output_dir, "metrics.xlsx")
+    evaluator = MetricsEvaluator(output_path=output_excel_path)
+
     # Define a list to store metadata keys for saving
     grouping_keys = ['subject']
 
@@ -87,17 +90,18 @@ def run_movi_assessment(
                 evaluator.evaluate(
                     calculator,
                     gt,
-                    pred,
+                    # Placeholder for bboxes and scores (not available in this simplified GT)
+                    [None] * len(gt),
+                    [None] * len(gt),
+                    pred["keypoints"],
+                    pred["bboxes"],
+                    pred["scores"],
                     sample_info,
                     metric_name,
                     params
                 )
 
-    parent_folder_name = os.path.basename(os.path.normpath(pred_root))
-
-    # Save the results using the generic evaluator, passing the MoVi-specific grouping keys
-    # The `MetricsEvaluator` class's save method should be able to handle this.
-    evaluator.output_path = pred_root
-    evaluator.save(output_dir, group_keys=grouping_keys)
+    # Final save call, now correctly implemented
+    evaluator.save()
 
     logger.info("MoVi assessment completed.")
