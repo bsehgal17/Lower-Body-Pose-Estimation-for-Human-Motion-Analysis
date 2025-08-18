@@ -46,9 +46,10 @@ class MetricsEvaluator:
 
         self.aggregator.add_metric(sample_info, result, metric_name, params)
 
-    def save(self):
+    def save(self, grouping_keys: list = None):
         """Saves all collected results using the internal aggregator."""
-        self.aggregator.save(self.output_path)
+        # Fix: The `save` method now correctly accepts and passes `grouping_keys`
+        self.aggregator.save(self.output_path, grouping_keys)
 
 
 def run_assessment(
@@ -60,6 +61,7 @@ def run_assessment(
     gt_enum_class,
     pred_enum_class,
     data_loader_func,
+    grouping_keys: list,  # New parameter to pass down
 ):
     """
     A generalized function to run evaluation on any dataset.
@@ -96,4 +98,5 @@ def run_assessment(
                 evaluator.evaluate(calculator, gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores,
                                    sample_info, metric_name, params)
 
-    evaluator.save()
+    # Fix: Pass the `grouping_keys` argument to the `evaluator.save` method
+    evaluator.save(grouping_keys)

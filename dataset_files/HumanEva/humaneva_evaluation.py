@@ -188,6 +188,9 @@ def run_humaneva_assessment(
     evaluator = MetricsEvaluator(
         output_path=output_dir)
 
+    # Define the grouping keys for HumanEva
+    grouping_keys = ['subject', 'action', 'camera']
+
     run_assessment(
         evaluator=evaluator,
         pipeline_config=pipeline_config,
@@ -197,6 +200,7 @@ def run_humaneva_assessment(
         gt_enum_class=gt_enum_class,
         pred_enum_class=pred_enum_class,
         data_loader_func=humaneva_data_loader,
+        grouping_keys=grouping_keys,  # Pass the grouping keys
     )
 
     logger.info("HumanEva assessment completed.")

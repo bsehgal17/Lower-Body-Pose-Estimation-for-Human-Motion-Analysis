@@ -134,7 +134,7 @@ class ResultAggregator:
             return
 
         if not group_keys:
-            group_keys = ['subject', 'action', 'camera']
+            group_keys = None
 
         parent_folder_name = os.path.basename(
             os.path.normpath(self.output_path))
