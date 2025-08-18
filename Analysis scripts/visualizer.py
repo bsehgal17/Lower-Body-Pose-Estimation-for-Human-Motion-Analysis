@@ -7,27 +7,33 @@ import matplotlib.cm as cm
 import seaborn as sns
 
 
-def plot_brightness_distribution(all_brightness_data, save_path=None):
+def plot_overall_distribution(data, metric_name, units, save_path=None):
     """
-    Plots a histogram of the brightness distribution across all frames in the dataset
-    with enhanced features and a fixed x-axis range.
+    Plots a histogram of the distribution of any given data with enhanced features.
+
+    Args:
+        data (list or np.array): The data to plot (e.g., brightness values, sharpness scores).
+        metric_name (str): The name of the metric (e.g., 'Brightness', 'Sharpness').
+        units (str): The units for the metric (e.g., 'L* Channel, 0-255', 'Laplacian Variance').
+        save_path (str, optional): The full path to save the plot.
+                                   If None, the plot is not saved.
     """
-    if not all_brightness_data:
-        print("No brightness data to plot.")
+    if not data:
+        print(f"No {metric_name} data to plot.")
         return
 
     sns.set_style("whitegrid")
-    mean_brightness = np.mean(all_brightness_data)
-    std_dev_brightness = np.std(all_brightness_data)
-    num_frames = len(all_brightness_data)
+    mean_value = np.mean(data)
+    std_dev_value = np.std(data)
+    num_frames = len(data)
 
     plt.figure(figsize=(10, 6))
-    plt.hist(all_brightness_data, bins=30,
+    plt.hist(data, bins=30,
              color='lightcoral', edgecolor='black', alpha=0.8)
-    plt.axvline(mean_brightness, color='darkred', linestyle='dashed',
-                linewidth=2, label=f'Mean: {mean_brightness:.2f}')
+    plt.axvline(mean_value, color='darkred', linestyle='dashed',
+                linewidth=2, label=f'Mean: {mean_value:.2f}')
 
-    plt.text(0.95, 0.90, f"Mean: {mean_brightness:.2f}\nStd Dev: {std_dev_brightness:.2f}",
+    plt.text(0.95, 0.90, f"Mean: {mean_value:.2f}\nStd Dev: {std_dev_value:.2f}",
              transform=plt.gca().transAxes,
              fontsize=12,
              verticalalignment='top',
@@ -35,17 +41,20 @@ def plot_brightness_distribution(all_brightness_data, save_path=None):
              bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.6))
 
     plt.title(
-        f'Overall Brightness Distribution ({num_frames} Frames)', fontsize=16)
-    plt.xlabel('Mean Frame Brightness (L* Channel, 0-255)', fontsize=12)
+        f'Overall {metric_name} Distribution ({num_frames} Frames)', fontsize=16)
+    plt.xlabel(f'Mean Frame {metric_name} ({units})', fontsize=12)
     plt.ylabel('Frequency (Number of Frames)', fontsize=12)
-    plt.xlim(0, 255)
+    # Automatically determine x-axis limits based on the data
+    plt.xlim(min(data) * 0.95, max(data) * 1.05)
     plt.legend()
     plt.grid(axis='y', alpha=0.75)
     plt.tight_layout()
 
     if save_path:
+        # Create the directory if it doesn't exist
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(save_path)
-        print(f"Brightness distribution plot saved to {save_path}")
+        print(f"{metric_name} distribution plot saved to {save_path}")
     plt.close()
 
 
