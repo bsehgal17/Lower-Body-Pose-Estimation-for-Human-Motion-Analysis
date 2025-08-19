@@ -53,7 +53,7 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
             save_dir=config.SAVE_FOLDER
         )
 
-        save_filename_trend = f"per_frame_pck_vs_{metric_name}_trends_{pck_col[-4:]}_{timestamp}.png"
+        save_filename_trend = f"per_frame_pck_vs_{metric_name}_trends_{pck_col[-4:]}_{timestamp}.svg"
         save_path_trend = os.path.join(config.SAVE_FOLDER, save_filename_trend)
         plot_pck_vs_brightness_trends(
             combined_df,
@@ -67,7 +67,7 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
             save_path=save_path_trend
         )
 
-        save_filename_metric = f"per_frame_pck_vs_{metric_name}_{pck_col[-4:]}_{timestamp}.png"
+        save_filename_metric = f"per_frame_pck_vs_{metric_name}_{pck_col[-4:]}_{timestamp}.svg"
         save_path_metric = os.path.join(
             config.SAVE_FOLDER, save_filename_metric)
         plot_pck_vs_metric(
@@ -121,7 +121,7 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
 
         # for pck_col in config.PCK_PER_FRAME_SCORE_COLUMNS:
         #     # Generate and save the scatter plot for this single video
-        #     save_filename_metric = f"{save_file_prefix}_pck_vs_{metric_name}_{pck_col[-4:]}_{timestamp}.png"
+        #     save_filename_metric = f"{save_file_prefix}_pck_vs_{metric_name}_{pck_col[-4:]}_{timestamp}.svg"
         #     save_path_metric = os.path.join(
         #         video_save_dir, save_filename_metric)
         #     plot_pck_vs_metric(
@@ -137,7 +137,7 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
         #     )
 
         #     # Generate and save the trends plot for this single video
-        #     save_filename_trend = f"{save_file_prefix}_pck_vs_{metric_name}_trends_{pck_col[-4:]}_{timestamp}.png"
+        #     save_filename_trend = f"{save_file_prefix}_pck_vs_{metric_name}_trends_{pck_col[-4:]}_{timestamp}.svg"
         #     save_path_trend = os.path.join(video_save_dir, save_filename_trend)
         #     plot_pck_vs_brightness_trends(
         #         df=group,  # Pass the filtered DataFrame
