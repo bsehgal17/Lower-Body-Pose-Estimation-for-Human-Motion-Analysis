@@ -34,7 +34,7 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
             action_col=config.ACTION_COLUMN,
             camera_col=config.CAMERA_COLUMN,
             frame_col='frame_idx',
-            title=f'Interactive_Per-Frame_LOWER_PCK_{pck_col[-4:]}_vs_{metric_name.title()}',
+            title=f'Interactive_Per-Frame_LOWER_PCK_{pck_col[-4:]}_vs_{metric_name.title()} ({config.DATASET_NAME} {config.MODEL})',
             save_dir=config.SAVE_FOLDER
         )
 
@@ -47,7 +47,7 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
             subject_col=config.SUBJECT_COLUMN,
             action_col=config.ACTION_COLUMN,
             camera_col=config.CAMERA_COLUMN,
-            title=f'Per-Frame LOWER PCK Score ({pck_col[-4:]}) vs. Video {metric_name.title()} (Trends)',
+            title=f'Per-Frame LOWER PCK Score ({pck_col[-4:]}) vs. Video {metric_name.title()} (Trends) ({config.DATASET_NAME} {config.MODEL})',
             x_label=f'Per-Frame Video {metric_name.title()}',
             save_path=save_path_trend
         )
@@ -62,7 +62,7 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
             subject_col=config.SUBJECT_COLUMN,
             action_col=config.ACTION_COLUMN,
             camera_col=config.CAMERA_COLUMN,
-            title=f'LOWER PCK ({pck_col[-4:]}) vs {metric_name.title()}',
+            title=f'LOWER PCK ({pck_col[-4:]}) vs {metric_name.title()} ({config.DATASET_NAME} {config.MODEL})',
             x_label=f'{metric_name.title()} (L*)',
             save_path=save_path_metric
         )

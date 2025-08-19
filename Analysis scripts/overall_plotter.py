@@ -33,6 +33,7 @@ def plot_overall_analysis(config, merged_df, all_metric_data, metric_name):
         all_metric_data,
         metric_name=metric_name.title(),
         units='L* Channel, 0-255',
+        title=f"Overall {metric_name.title()} Distribution ({config.DATASET_NAME} {config.MODEL})",
         save_path=os.path.join(
             config.SAVE_FOLDER, f'overall_{metric_name}_distribution_{timestamp}.png')
     )
@@ -44,6 +45,7 @@ def plot_overall_analysis(config, merged_df, all_metric_data, metric_name):
     plot_overall_relation(
         overall_avg_metric,
         avg_pck_scores,
+        title=f"Overall {metric_name.title()} vs. PCK Scores ({config.DATASET_NAME}{config.MODEL})",
         save_path=os.path.join(
             config.SAVE_FOLDER, f'overall_pck_vs_{metric_name}_{timestamp}.png')
     )
@@ -57,7 +59,7 @@ def plot_overall_analysis(config, merged_df, all_metric_data, metric_name):
             subject_col=config.SUBJECT_COLUMN,
             action_col=config.ACTION_COLUMN,
             camera_col=config.CAMERA_COLUMN,
-            title=f'LOWER PCK ({pck_col[-4:]}) vs Average {metric_name.title()}',
+            title=f'LOWER PCK ({pck_col[-4:]}) vs Average {metric_name.title()} ({config.DATASET_NAME}{config.MODEL})',
             x_label=f'Average Video {metric_name.title()} (L*)',
             save_path=os.path.join(
                 config.SAVE_FOLDER, f'overall_pck_vs_avg_{metric_name}_{pck_col[-4:]}_{timestamp}.png')

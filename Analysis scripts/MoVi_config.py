@@ -3,6 +3,7 @@ VIDEO_DIRECTORY = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi"
 PCK_FILE_PATH = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-08-15_17-45-58/all_cropped_videos_metrics.xlsx"
 SAVE_FOLDER = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/MoVi/High_threshold"
 DATASET_NAME = "movi"
+MODEL = "RTMW"
 # --- PCK Data Columns ---
 PCK_OVERALL_SCORE_COLUMNS = [
     'overall_overall_pck_0.01',

@@ -35,6 +35,13 @@ pipelines:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
+  - name: detect_HRNet_normal
+    steps:
+      - command: detect
+        config_file: "config_yamls/HRNet_detector_humaneva_normal.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
   # - name: detect_RTMW
   #   steps:
   #     # - command: detect

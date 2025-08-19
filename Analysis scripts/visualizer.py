@@ -7,7 +7,7 @@ import matplotlib.cm as cm
 import seaborn as sns
 
 
-def plot_overall_distribution(data, metric_name, units, save_path=None):
+def plot_overall_distribution(data, metric_name, units, title=None, save_path=None):
     """
     Plots a histogram of the distribution of any given data with enhanced features.
 
@@ -15,6 +15,7 @@ def plot_overall_distribution(data, metric_name, units, save_path=None):
         data (list or np.array): The data to plot (e.g., brightness values, sharpness scores).
         metric_name (str): The name of the metric (e.g., 'Brightness', 'Sharpness').
         units (str): The units for the metric (e.g., 'L* Channel, 0-255', 'Laplacian Variance').
+        title (str, optional): The title for the plot. If None, a default title is generated.
         save_path (str, optional): The full path to save the plot.
                                    If None, the plot is not saved.
     """
@@ -40,8 +41,12 @@ def plot_overall_distribution(data, metric_name, units, save_path=None):
              horizontalalignment='right',
              bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.6))
 
-    plt.title(
-        f'Overall {metric_name} Distribution ({num_frames} Frames)', fontsize=16)
+    if title:
+        plt.title(title, fontsize=16)
+    else:
+        plt.title(
+            f'Overall {metric_name} Distribution ({num_frames} Frames)', fontsize=16)
+
     plt.xlabel(f'Mean Frame {metric_name} ({units})', fontsize=12)
     plt.ylabel('Frequency (Number of Frames)', fontsize=12)
     # Automatically determine x-axis limits based on the data
@@ -58,7 +63,7 @@ def plot_overall_distribution(data, metric_name, units, save_path=None):
     plt.close()
 
 
-def plot_overall_relation(overall_avg_l, avg_pck_scores, save_path=None):
+def plot_overall_relation(overall_avg_l, avg_pck_scores, title, save_path=None):
     """
     Plots the overall average brightness against the average PCK scores for each threshold.
     """
@@ -87,8 +92,7 @@ def plot_overall_relation(overall_avg_l, avg_pck_scores, save_path=None):
              bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
     ax2.set_ylim(0, max(overall_avg_l * 1.2, ax1.get_ylim()[1]))
 
-    fig.suptitle(
-        'Overall Average LOWER PCK Scores vs. Overall Average Brightness', fontsize=14)
+    fig.suptitle(title, fontsize=14)
     fig.tight_layout()
     fig.legend(loc='upper right', bbox_to_anchor=(
         1, 1), bbox_transform=ax1.transAxes)
