@@ -17,12 +17,12 @@ pipelines:
   
   - name: Perturbed_RTMW_X
     steps:
-      - command: detect
-        config_file: "config_yamls/rtmw_detector.yaml
-      - command: noise
-        config_file: "config_yamls/rtmw_detector.yaml"
-      - command: detect
-        config_file: "config_yamls/rtmw_detector.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml
+      # - command: noise
+      #   config_file: "config_yamls/rtmw_detector.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml"
       # - command: evaluation
       #   config_file: "config_yamls/jointwise_ap_testing.yaml"
       # - command: evaluation
