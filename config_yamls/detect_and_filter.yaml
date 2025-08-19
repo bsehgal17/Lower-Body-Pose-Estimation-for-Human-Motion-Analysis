@@ -6,8 +6,8 @@ models:
   detector: rtmw
   det_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/demo/mmdetection_cfg/faster_rcnn_r50_fpn_coco.py
   det_checkpoint: https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
-  pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/configs/wholebody_2d_keypoint/rtmpose/coco-wholebody/rtmpose-l_8xb32-270e_coco-wholebody-384x288.py
-  pose_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/DWPose/rtmpose-l_simcc-coco-wholebody_pt-aic-coco_270e-384x288-eaeb96c8_20230125.pth
+  pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-l_8xb320-270e_cocktail14-384x288.py
+  pose_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/rtmw-dw-x-l_simcc-cocktail14_270e-384x288-20231122.pth
 
 processing:
   device: cuda:0

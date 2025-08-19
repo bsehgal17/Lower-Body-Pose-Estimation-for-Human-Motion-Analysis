@@ -3,44 +3,32 @@ orchestrator:
   default_device: "cuda:0"
 
 pipelines:
-  # - name: detect_dwpose
+
+  # - name: detect_RTMW_L_HumanEva
   #   steps:
   #     - command: detect
-  #       config_file: "config_yamls/DWPose_detector_movi.yaml"
+  #       config_file: "config_yamls/detect_and_filter.yaml"
+  #     # - command: evaluation
+  #     #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+  #     # - command: evaluation
+  #     #   config_file: "config_yamls/map_testing.yaml"
   #     - command: evaluation
-  #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
-
-  - name: detect_RTMPose_l
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  
+  - name: Perturbed_RTMW_X
     steps:
       - command: detect
-        config_file: "config_yamls/detect_and_filter.yaml"
+        config_file: "config_yamls/rtmw_detector.yaml
+      - command: noise
+        config_file: "config_yamls/rtmw_detector.yaml"
+      - command: detect
+        config_file: "config_yamls/rtmw_detector.yaml"
       # - command: evaluation
       #   config_file: "config_yamls/jointwise_ap_testing.yaml"
       # - command: evaluation
       #   config_file: "config_yamls/map_testing.yaml"
       - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: detect_DWPose
-    steps:
-      - command: detect
-        config_file: "config_yamls/DWPose_detector_humaneva.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: detect_HRNet
-    steps:
-      - command: detect
-        config_file: "config_yamls/HRNet_detector_humaneva.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: detect_HRNet_normal
-    steps:
-      - command: detect
-        config_file: "config_yamls/HRNet_detector_humaneva_normal.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
 
   # - name: detect_RTMW
   #   steps:
@@ -52,18 +40,6 @@ pipelines:
   #       config_file: "config_yamls/map_testing_movi.yaml"
   #     - command: evaluation
   #       config_file: "config_yamls/jointwise_ap_testing_movi.yaml"
-
-
-
-  # - name: test_noise_20
-  #   steps:
-  #     - command: noise
-  #       config_file: "config_yamls/test_noise_20.yaml"
-
-  # - name: test_noise_30
-  #   steps:
-  #     - command: noise
-  #       config_file: "config_yamls/test_noise_30.yaml"
 
 
   # - name: savgol_filter_pipeline_60_3

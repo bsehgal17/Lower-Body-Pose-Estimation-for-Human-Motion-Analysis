@@ -1,5 +1,5 @@
 paths:
-  dataset: MoVi
+  dataset: HumanEva
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 
@@ -7,8 +7,8 @@ models:
   detector: rtmw
   det_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/demo/mmdetection_cfg/faster_rcnn_r50_fpn_coco.py
   det_checkpoint: https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
-  pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-l_8xb320-270e_cocktail14-384x288.py
-  pose_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/rtmw-dw-x-l_simcc-cocktail14_270e-384x288-20231122.pth
+  pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-x_8xb320-270e_cocktail14-384x288.py
+  pose_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/rtmw-x_simcc-cocktail14_pt-ucoco_270e-384x288-f840f204_20231122.pth
 
 processing:
   device: cuda:0
@@ -21,11 +21,11 @@ noise:
   apply_gaussian_noise: true
   apply_motion_blur: true
   apply_brightness_reduction: true
-  brightness_factor: 30
+  brightness_factor: 40
   poisson_scale: 1.0
-  gaussian_std: 2.0
+  gaussian_std: 1.5
   motion_blur_kernel_size: 5
-  target_resolution: null  # or [640, 480]
+  target_resolution: [1280, 720]
 
 
 filter:
