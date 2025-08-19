@@ -1,5 +1,3 @@
-# per_frame_analyzer.py
-
 import os
 from datetime import datetime
 import pandas as pd
@@ -98,6 +96,8 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
     grouping_cols = [col for col in [config.SUBJECT_COLUMN,
                                      config.ACTION_COLUMN, config.CAMERA_COLUMN] if col is not None]
 
+    print(f"Debug: Grouping columns detected: {grouping_cols}")
+
     if not grouping_cols:
         print("Warning: No valid grouping columns found. Cannot generate per-video plots.")
         return
@@ -114,39 +114,41 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
                           col in enumerate(grouping_cols)]
         video_id_label = "_".join(video_id_parts)
 
+        print(f"Debug: Plotting for video group: {video_id_label}")
+
         title_prefix = f"Video {video_id_label}:"
         save_file_prefix = f"video_{video_id_label}"
 
-        for pck_col in config.PCK_PER_FRAME_SCORE_COLUMNS:
-            # Generate and save the scatter plot for this single video
-            save_filename_metric = f"{save_file_prefix}_pck_vs_{metric_name}_{pck_col[-4:]}_{timestamp}.png"
-            save_path_metric = os.path.join(
-                video_save_dir, save_filename_metric)
-            plot_pck_vs_metric(
-                df=group,  # Pass the filtered DataFrame for a single video
-                x_column=metric_name,
-                y_column=pck_col,
-                subject_col=None,  # Pass None since we're plotting a single video
-                action_col=None,
-                camera_col=None,
-                title=f'{title_prefix} LOWER PCK ({pck_col[-4:]}) vs {metric_name.title()}',
-                x_label=f'{metric_name.title()} (L*)',
-                save_path=save_path_metric
-            )
+        # for pck_col in config.PCK_PER_FRAME_SCORE_COLUMNS:
+        #     # Generate and save the scatter plot for this single video
+        #     save_filename_metric = f"{save_file_prefix}_pck_vs_{metric_name}_{pck_col[-4:]}_{timestamp}.png"
+        #     save_path_metric = os.path.join(
+        #         video_save_dir, save_filename_metric)
+        #     plot_pck_vs_metric(
+        #         df=group,  # Pass the filtered DataFrame for a single video
+        #         x_column=metric_name,
+        #         y_column=pck_col,
+        #         subject_col=None,  # Pass None since we're plotting a single video
+        #         action_col=None,
+        #         camera_col=None,
+        #         title=f'{title_prefix} LOWER PCK ({pck_col[-4:]}) vs {metric_name.title()}',
+        #         x_label=f'{metric_name.title()} (L*)',
+        #         save_path=save_path_metric
+        #     )
 
-            # Generate and save the trends plot for this single video
-            save_filename_trend = f"{save_file_prefix}_pck_vs_{metric_name}_trends_{pck_col[-4:]}_{timestamp}.png"
-            save_path_trend = os.path.join(video_save_dir, save_filename_trend)
-            plot_pck_vs_brightness_trends(
-                df=group,  # Pass the filtered DataFrame
-                x_column=metric_name,
-                y_column=pck_col,
-                subject_col=None,  # Pass None
-                action_col=None,
-                camera_col=None,
-                title=f'{title_prefix} Per-Frame LOWER PCK Score ({pck_col[-4:]}) vs. Video {metric_name.title()} (Trends)',
-                x_label=f'Per-Frame Video {metric_name.title()}',
-                save_path=save_path_trend
-            )
+        #     # Generate and save the trends plot for this single video
+        #     save_filename_trend = f"{save_file_prefix}_pck_vs_{metric_name}_trends_{pck_col[-4:]}_{timestamp}.png"
+        #     save_path_trend = os.path.join(video_save_dir, save_filename_trend)
+        #     plot_pck_vs_brightness_trends(
+        #         df=group,  # Pass the filtered DataFrame
+        #         x_column=metric_name,
+        #         y_column=pck_col,
+        #         subject_col=None,  # Pass None
+        #         action_col=None,
+        #         camera_col=None,
+        #         title=f'{title_prefix} Per-Frame LOWER PCK Score ({pck_col[-4:]}) vs. Video {metric_name.title()} (Trends)',
+        #         x_label=f'Per-Frame Video {metric_name.title()}',
+        #         save_path=save_path_trend
+        #     )
 
     print("\nPer-frame analysis complete.")
