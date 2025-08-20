@@ -49,7 +49,8 @@ def get_video_resolution(video_path):
 def rescale_keypoints(pred_keypoints, scale_x, scale_y):
     rescaled = []
     for frame in pred_keypoints:
-        rescaled_frame = [[x * scale_x, y * scale_y] for x, y in frame]
+        x, y = frame
+        rescaled_frame = [x * scale_x, y * scale_y]
         rescaled.append(rescaled_frame)
     return rescaled
 
@@ -99,7 +100,8 @@ def extract_frames_from_video_tree(
                             if resize:
                                 frame = cv2.resize(frame, resize)
                             frame_name = f"frame_{saved_count:05d}.jpg"
-                            cv2.imwrite(os.path.join(output_folder, frame_name), frame)
+                            cv2.imwrite(os.path.join(
+                                output_folder, frame_name), frame)
                             saved_count += 1
                             if max_frames and saved_count >= max_frames:
                                 break

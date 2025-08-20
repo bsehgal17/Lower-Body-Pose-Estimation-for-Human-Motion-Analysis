@@ -120,13 +120,17 @@ def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_
                             pred_keypoints[i], scale_x, scale_y)
                         # Bboxes need to be rescaled too
                         bbox = pred_bboxes[i]
-                        pred_bboxes[i] = [
-                            bbox[0] * scale_x,
-                            bbox[1] * scale_y,
-                            bbox[2] * scale_x,
-                            bbox[3] * scale_y,
-                        ]
 
+                        # Unpack the nested lists into individual coordinates
+                        coords = bbox[0]
+
+                        # Now, apply the scaling to each coordinate individually.
+                        pred_bboxes[i] = [
+                            coords[0] * scale_x,
+                            coords[1] * scale_y,
+                            coords[2] * scale_x,
+                            coords[3] * scale_y
+                        ]
         try:
             sync_start = pipeline_config.dataset.sync_data["data"][subject][action][camera_idx]
             if sync_start >= len(pred_keypoints):
