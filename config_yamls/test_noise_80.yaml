@@ -7,7 +7,7 @@ noise:
   apply_gaussian_noise: true
   apply_motion_blur: true
   apply_brightness_reduction: true
-  brightness_factor: 40
+  brightness_factor: 80
   poisson_scale: 1.0
   gaussian_std: 1.5
   motion_blur_kernel_size: 5
