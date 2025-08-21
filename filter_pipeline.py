@@ -6,6 +6,7 @@ from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 from itertools import product
 from pathlib import Path
+import cv2
 
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
@@ -71,6 +72,46 @@ class KeypointFilterProcessor:
             )
         return FILTER_FN_MAP[self.filter_name]
 
+    def _overlay_keypoints_on_video(
+        self, video_path: str, keypoints_frames: List[Dict], output_path: str
+    ):
+        """
+        Overlay keypoints on video frames and save new video.
+        """
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            logger.error(f"Cannot open video {video_path}")
+            return
+
+        # Video properties
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+        frame_idx = 0
+        while True:
+            ret, frame = cap.read()
+            if not ret or frame_idx >= len(keypoints_frames):
+                break
+
+            frame_data = keypoints_frames[frame_idx]["keypoints"]
+
+            for person in frame_data:
+                joints = person["keypoints"][0]
+                for joint in joints:
+                    x, y = int(joint[0]), int(joint[1])
+                    if not np.isnan(x) and not np.isnan(y):
+                        cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+
+            out.write(frame)
+            frame_idx += 1
+
+        cap.release()
+        out.release()
+        logger.info(f"Filtered video saved at: {output_path}")
+
     def process_directory(self):
         for root, _, files in os.walk(self.input_dir):
             for file in files:
@@ -122,6 +163,17 @@ class KeypointFilterProcessor:
                     json_path, filtered_keypoints, output_folder)
                 self._save_as_pickle(
                     json_path, filtered_keypoints, output_folder)
+            video_name = json_path.replace(".json", ".avi")
+            if os.path.exists(video_name):
+                video_output_path = os.path.join(
+                    output_folder,
+                    os.path.basename(video_name)
+                )
+                self._overlay_keypoints_on_video(
+                    video_name, filtered_frames, video_output_path)
+            else:
+                logger.warning(
+                    f"Video file not found for overlay: {video_name}")
 
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
