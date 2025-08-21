@@ -1,0 +1,62 @@
+paths:
+  dataset: HumanEva
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
+
+filter:
+  name: "savitzky"
+  params:
+    window_length: 15
+    polyorder: 3
+
+  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/Perturbed_RTMW_X_40/noise"
+  outlier_removal:
+    enable: False
+  # outlier_removal:
+  #   enable: True
+  #   method: "iqr"
+  #   params:
+  #     iqr_multiplier: 1.5
+
+  # enable_interpolation: true
+  # interpolation_kind: "linear"
+
+  # enable_filter_plots: true
+
+  # joints_to_filter:
+  #   - LEFT_ANKLE
+  #   - RIGHT_ANKLE
+  #   - LEFT_KNEE
+  #   - RIGHT_KNEE
+  #   - LEFT_HIP
+  #   - RIGHT_HIP
+
+
+
+
+evaluation:
+  # input_dir: C:\Users\BhavyaSehgal\Downloads\bhavya_phd\test_dataset_results\degraded_videos\S3\Walking_1_(C2) # NEW FIELD
+  metrics:
+    - name: overall_pck
+      params:
+        threshold: 0.01
+    # - name: jointwise_pck
+    #   params:
+    #     threshold: 0.05
+    # - name: gat_metric
+    #   params: {}
+
+
+dataset:
+ joint_enum_module: utils.joint_enum.GTJointsHumanEVa
+ keypoint_format: utils.joint_enum.PredJointsDeepLabCut
+ sync_data:
+    data:
+      S1:
+        Walking 1: [667, 667, 667]
+        Jog 1: [49, 50, 51]
+      S2:
+        Walking 1: [547, 547, 546]
+        Jog 1: [493, 491, 502]
+      S3:
+        Walking 1: [524, 524, 524]
+        Jog 1: [464, 462, 462]
