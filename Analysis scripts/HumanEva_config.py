@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 # --- File Paths ---
 VIDEO_DIRECTORY = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva"
-PCK_FILE_PATH = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/evaluation/2025-08-19_12-56-43/2025-08-19_12-56-43_metrics.xlsx"
+PCK_FILE_PATH = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/evaluation/2025-08-21_17-21-05/detect/detect_metrics.xlsx"
 SAVE_FOLDER = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/HumanEva/High_threshold"
 DATASET_NAME = "humaneva"
 MODEL = "RTMW"

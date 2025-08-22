@@ -11,7 +11,7 @@ def main():
     print("Loading configuration for MoVi dataset...")
     try:
         # Load the MoVi configuration using the generic manager
-        config = load_config('humaneva')
+        config = load_config('movi')
     except ValueError as e:
         print(f"Error: {e}")
         return

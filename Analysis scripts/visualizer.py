@@ -94,8 +94,9 @@ def plot_overall_relation(overall_avg_l, avg_pck_scores, title, save_path=None):
 
     fig.suptitle(title, fontsize=14)
     fig.tight_layout()
-    fig.legend(loc='upper right', bbox_to_anchor=(
-        1, 1), bbox_transform=ax1.transAxes)
+    plt.legend(title='Video ID', loc='upper center',
+               bbox_to_anchor=(0.5, -0.05),   # put below the plot
+               ncol=2, fontsize=10)
     ax1.grid(axis='y', linestyle='--', alpha=0.7)
 
     if save_path:
@@ -139,11 +140,11 @@ def plot_pck_vs_metric(df, x_column, y_column, subject_col, action_col, camera_c
             i += 1
         # Adjusted legend placement and added a title for clarity
         plt.legend(title='Video ID', bbox_to_anchor=(1.02, 1),
-                   loc='upper left', borderaxespad=0., ncol=3)
+                   loc='upper left', borderaxespad=0., ncol=2)
 
-    plt.title(title)
-    plt.xlabel(x_label)
-    plt.ylabel(f'LOWER PCK Score ({y_column[-4:]})')
+    plt.title(title, fontsize=16)
+    plt.xlabel(x_label, fontsize=12)
+    plt.ylabel(f'LOWER PCK Score ({y_column[-4:]})', fontsize=12)
     plt.grid(True)
     # Use subplots_adjust to make room for the legend on the right
     plt.subplots_adjust(right=0.75)
@@ -152,105 +153,3 @@ def plot_pck_vs_metric(df, x_column, y_column, subject_col, action_col, camera_c
         plt.savefig(save_path)
         print(f"Scatter plot saved to {save_path}")
     plt.close()
-
-
-def plot_pck_vs_brightness_trends(df, x_column, y_column, subject_col, action_col, camera_col, title, x_label, save_path=None):
-    """
-    Plots PCK scores vs. a given metric, connecting per-frame dots to show trends.
-    Dynamically handles grouping based on available columns.
-    """
-    # Increased figure size for better legend visibility
-    plt.figure(figsize=(20, 12))
-
-    grouping_cols = [col for col in [subject_col,
-                                     action_col, camera_col] if col is not None]
-    if not grouping_cols:
-        print("Warning: No grouping columns found. Plotting all data in one line.")
-        plt.plot(df[x_column], df[y_column], marker='o',
-                 markersize=4, linestyle='-', alpha=0.6)
-    else:
-        unique_videos = df.groupby(grouping_cols)
-        colors = cm.get_cmap('tab20', len(unique_videos))
-        i = 0
-        for name, group in unique_videos:
-            label_parts = []
-            if subject_col in grouping_cols:
-                label_parts.append(
-                    f"S{name[grouping_cols.index(subject_col)]}")
-            if action_col in grouping_cols:
-                label_parts.append(f"A{name[grouping_cols.index(action_col)]}")
-            if camera_col in grouping_cols:
-                label_parts.append(f"C{name[grouping_cols.index(camera_col)]}")
-            label = ", ".join(label_parts)
-
-            plt.plot(group[x_column], group[y_column],
-                     marker='o', markersize=4, linestyle='-',
-                     color=colors(i), label=label, alpha=0.6)
-            i += 1
-        # Adjusted legend placement and added a title for clarity
-        plt.legend(title='Video ID', bbox_to_anchor=(1.02, 1),
-                   loc='upper left', borderaxespad=0., ncol=3)
-
-    x_min_data = df[x_column].min()
-    x_max_data = df[x_column].max()
-    x_min = np.floor(x_min_data / 5) * 5
-    x_max = np.ceil(x_max_data / 5) * 5
-
-    plt.xlim(x_min, x_max)
-    plt.xticks(np.arange(x_min, x_max + 1, 5))
-    plt.tick_params(axis='x', rotation=45)
-
-    y_min, y_max = df[y_column].min(), df[y_column].max()
-    plt.ylim(y_min - (y_max-y_min)*0.05, y_max + (y_max-y_min)*0.05)
-    plt.yticks(np.arange(y_min, y_max + 1, 5))
-    plt.tick_params(axis='y', rotation=45)
-
-    plt.title(title)
-    plt.xlabel(x_label)
-    plt.ylabel(f'LOWER PCK Score ({y_column[-4:]})')
-    plt.grid(True)
-    # Use subplots_adjust to make room for the legend on the right
-    plt.subplots_adjust(right=0.75)
-
-    if save_path:
-        plt.savefig(save_path)
-        print(f"Plot with trends saved to {save_path}")
-    plt.close()
-
-
-def plot_pck_vs_brightness_interactive(df, x_column, y_column, subject_col, action_col, camera_col, frame_col, title, save_dir):
-    """
-    Interactive PCK vs brightness plot.
-    Dynamically handles the video identifier.
-    """
-    grouping_cols = [col for col in [subject_col,
-                                     action_col, camera_col] if col is not None]
-
-    # Create a new column combining video info
-    df['video_id_label'] = df.apply(lambda row: "_".join(
-        [f"{col}:{row[col]}" for col in grouping_cols]), axis=1)
-
-    hover_data = {
-        col: True for col in grouping_cols + [frame_col, x_column, y_column]
-    }
-
-    fig = px.scatter(
-        df,
-        x=x_column,
-        y=y_column,
-        color='video_id_label',
-        hover_data=hover_data,
-        title=title,
-        labels={x_column: "Brightness (L*)",
-                y_column: f"LOWER PCK Score ({y_column[-4:]})"}
-    )
-
-    fig.update_traces(marker=dict(size=6, opacity=0.8))
-    fig.update_layout(template="plotly_white", showlegend=True)
-    fig.update_layout(coloraxis_showscale=False)
-
-    html_path = os.path.join(save_dir, f"{title.replace(' ', '_')}.html")
-    fig.write_html(html_path)
-    print(f"Interactive plot saved to: {html_path}")
-
-    # fig.show()

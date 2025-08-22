@@ -1,10 +1,13 @@
 import os
 from datetime import datetime
 import pandas as pd
+import numpy as np
 from visualizer import (
     plot_pck_vs_metric,
     plot_pck_vs_brightness_trends,
-    plot_pck_vs_brightness_interactive
+    plot_pck_vs_brightness_interactive,
+    plot_pck_vs_brightness_boxplot,
+    plot_pck_vs_brightness_median
 )
 
 
@@ -81,43 +84,71 @@ def plot_per_frame_analysis(config, combined_df, metric_name):
             x_label=f'{metric_name.title()} (L*)',
             save_path=save_path_metric
         )
+        save_boxplot = os.path.join(
+            config.SAVE_FOLDER, f"boxplot_pck_vs_{metric_name}_{pck_col[-4:]}_{timestamp}.svg")
+        # Dynamically compute brightness bins
+        min_brightness = combined_df[metric_name].min()
+        max_brightness = combined_df[metric_name].max()
+        bins = np.linspace(min_brightness, max_brightness, 6)  # 20 bins
+
+        # --- Boxplot ---
+        save_boxplot = os.path.join(
+            config.SAVE_FOLDER, f"boxplot_pck_vs_{metric_name}_{pck_col[-4:]}_{timestamp}.svg"
+        )
+        plot_pck_vs_brightness_boxplot(
+            combined_df, metric_name, pck_col,
+            save_path=save_boxplot,
+            bins=bins,
+            title=f"PCK Distribution by Brightness Bin ({pck_col[-4:]})"
+        )
+
+        # --- Median + IQR line ---
+        save_median = os.path.join(
+            config.SAVE_FOLDER, f"median_pck_vs_{metric_name}_{pck_col[-4:]}_{timestamp}.svg"
+        )
+        plot_pck_vs_brightness_median(
+            combined_df, metric_name, pck_col,
+            save_path=save_median,
+            bins=bins,
+            title=f"Median PCK vs Brightness ({pck_col[-4:]})"
+        )
 
     # =========================================================================
     # New functionality: Generate plots for each video individually
     # =========================================================================
-    print("\n" + "=" * 50)
-    print("Generating per-frame plots for each individual video...")
+    # print("\n" + "=" * 50)
+    # print("Generating per-frame plots for each individual video...")
 
-    # Create the subfolder for video-specific plots
-    video_save_dir = os.path.join(config.SAVE_FOLDER, 'videos')
-    os.makedirs(video_save_dir, exist_ok=True)
+    # # Create the subfolder for video-specific plots
+    # video_save_dir = os.path.join(config.SAVE_FOLDER, 'videos')
+    # os.makedirs(video_save_dir, exist_ok=True)
 
-    # Dynamically build the list of grouping columns, ignoring None values
-    grouping_cols = [col for col in [config.SUBJECT_COLUMN,
-                                     config.ACTION_COLUMN, config.CAMERA_COLUMN] if col is not None]
+    # # Dynamically build the list of grouping columns, ignoring None values
+    # grouping_cols = [col for col in [config.SUBJECT_COLUMN,
+    #                                  config.ACTION_COLUMN, config.CAMERA_COLUMN] if col is not None]
 
-    print(f"Debug: Grouping columns detected: {grouping_cols}")
+    # print(f"Debug: Grouping columns detected: {grouping_cols}")
 
-    if not grouping_cols:
-        print("Warning: No valid grouping columns found. Cannot generate per-video plots.")
-        return
+    # if not grouping_cols:
+    #     print("Warning: No valid grouping columns found. Cannot generate per-video plots.")
+    #     return
 
-    unique_videos = combined_df.groupby(grouping_cols)
+    # unique_videos = combined_df.groupby(grouping_cols)
 
-    for name, group in unique_videos:
-        # The 'name' from groupby is a tuple when grouping by multiple columns,
-        # but a single value when grouping by one column. This handles both cases.
-        video_name_parts = name if isinstance(name, tuple) else (name,)
+    # for name, group in unique_videos:
+    #     # The 'name' from groupby is a tuple when grouping by multiple columns,
+    #     # but a single value when grouping by one column. This handles both cases.
+    #     video_name_parts = name if isinstance(name, tuple) else (name,)
 
-        # Create a unique video ID string for titles and filenames
-        video_id_parts = [f"{col}{video_name_parts[i]}" for i,
-                          col in enumerate(grouping_cols)]
-        video_id_label = "_".join(video_id_parts)
+    #     # Create a unique video ID string for titles and filenames
+    #     video_id_parts = [f"{col}{video_name_parts[i]}" for i,
+    #                       col in enumerate(grouping_cols)]
+    #     video_id_label = "_".join(video_id_parts)
 
-        print(f"Debug: Plotting for video group: {video_id_label}")
+    #     print(f"Debug: Plotting for video group: {video_id_label}")
 
-        title_prefix = f"Video {video_id_label}:"
-        save_file_prefix = f"video_{video_id_label}"
+    #     title_prefix = f"Video {video_id_label}:"
+    #     save_file_prefix = f"video_{video_id_label}"
 
         # for pck_col in config.PCK_PER_FRAME_SCORE_COLUMNS:
         #     # Generate and save the scatter plot for this single video
