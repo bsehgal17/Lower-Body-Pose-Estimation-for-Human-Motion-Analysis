@@ -4,27 +4,27 @@ orchestrator:
 
 pipelines:
 
-  # - name: savgol_filter_pipeline_60_3(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_savgol_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: savgol_filter_pipeline_9_3(20)
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_20.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   
-  # - name: savgol_filter_pipeline_15_3(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_savgol_11_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: savgol_filter_pipeline_15_2(20)
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_11_20.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: savgol_filter_pipeline_31_2(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_savgol_31_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: savgol_filter_pipeline_13_5(20)
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_31_20.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
   # - name: gaussian_filter_pipeline_3(20)
@@ -90,27 +90,27 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: savgol_filter_pipeline_60_3(40)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_savgol_40.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: savgol_filter_pipeline_9_3(40)
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_40.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   
-  # - name: savgol_filter_pipeline_15_3(40)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_savgol_11_40.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: savgol_filter_pipeline_15_2(40)
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_11_40.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: savgol_filter_pipeline_31_2(40)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_savgol_31_40.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: savgol_filter_pipeline_13_5(40)
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_31_40.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
   # - name: gaussian_filter_pipeline_3(40)
@@ -176,7 +176,7 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: savgol_filter_pipeline_60_3(60)
+  - name: savgol_filter_pipeline_9_3(60)
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_with_savgol_60.yaml"
@@ -184,14 +184,14 @@ pipelines:
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   
-  - name: savgol_filter_pipeline_15_3(60)
+  - name: savgol_filter_pipeline_15_2(60)
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_with_savgol_11_60.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: savgol_filter_pipeline_31_2(60)
+  - name: savgol_filter_pipeline_13_5(60)
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_with_savgol_31_60.yaml"
@@ -199,70 +199,70 @@ pipelines:
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
-  - name: gaussian_filter_pipeline_3(60)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_3_60.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gaussian_filter_pipeline_3(60)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_3_60.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gaussian_filter_pipeline_1point5(60)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_1_60.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gaussian_filter_pipeline_1point5(60)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_1_60.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gaussian_filter_pipeline_2point5(60)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_60.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gaussian_filter_pipeline_2point5(60)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_60.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: butterworth_2nd_order_4hz_pipeline(60)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_8hz_60.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: butterworth_2nd_order_4hz_pipeline(60)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_8hz_60.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: butterworth_3th_order_6hz_pipeline(60)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_3nd_5hz_60.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: butterworth_3th_order_6hz_pipeline(60)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_3nd_5hz_60.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: butterworth_5th_order_5hz_pipeline(60)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_1hz_60.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: butterworth_5th_order_5hz_pipeline(60)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_2nd_1hz_60.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gvcspl_filter_pipeline(60)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_gvcspl_60.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gvcspl_filter_pipeline(60)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_gvcspl_60.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: fdf_pipeline(60)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_fdf_60.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: fdf_pipeline(60)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_fdf_60.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: kalman_filter(60)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_kalman_60.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: kalman_filter(60)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_kalman_60.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: savgol_filter_pipeline_60_3(80)
+  - name: savgol_filter_pipeline_9_3(80)
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_with_savgol_80.yaml"
@@ -270,14 +270,14 @@ pipelines:
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   
-  - name: savgol_filter_pipeline_15_3(80)
+  - name: savgol_filter_pipeline_15_2(80)
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_with_savgol_11_80.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: savgol_filter_pipeline_31_2(80)
+  - name: savgol_filter_pipeline_13_5(80)
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_with_savgol_31_80.yaml"
@@ -285,70 +285,70 @@ pipelines:
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
-  - name: gaussian_filter_pipeline_3(80)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_3_80.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gaussian_filter_pipeline_3(80)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_3_80.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gaussian_filter_pipeline_1point5(80)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_1_80.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gaussian_filter_pipeline_1point5(80)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_1_80.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gaussian_filter_pipeline_2point5(80)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_80.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gaussian_filter_pipeline_2point5(80)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_80.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: butterworth_2nd_order_4hz_pipeline(80)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_8hz_80.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: butterworth_2nd_order_4hz_pipeline(80)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_8hz_80.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: butterworth_3th_order_6hz_pipeline(80)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_3nd_5hz_80.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: butterworth_3th_order_6hz_pipeline(80)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_3nd_5hz_80.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: butterworth_5th_order_5hz_pipeline(80)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_1hz_80.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: butterworth_5th_order_5hz_pipeline(80)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_2nd_1hz_80.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gvcspl_filter_pipeline(80)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_gvcspl_80.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gvcspl_filter_pipeline(80)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_gvcspl_80.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: fdf_pipeline(80)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_fdf_80.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: fdf_pipeline(80)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_fdf_80.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: kalman_filter(80)
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_kalman_80.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-        
-  - name: savgol_filter_pipeline_60_3
+  # - name: kalman_filter(80)
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_kalman_80.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: savgol_filter_pipeline_9_3
     steps:
         - command: filter
           config_file: "config_yamls/filter/filter_with_savgol.yaml"
@@ -356,14 +356,14 @@ pipelines:
           config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   
-  - name: savgol_filter_pipeline_15_3
+  - name: savgol_filter_pipeline_15__2
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_with_savgol_11.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: savgol_filter_pipeline_31_2
+  - name: savgol_filter_pipeline_13_5
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_with_savgol_31.yaml"
@@ -371,68 +371,68 @@ pipelines:
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
-  - name: gaussian_filter_pipeline_3
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_3.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gaussian_filter_pipeline_3
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_3.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gaussian_filter_pipeline_1point5
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_1.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gaussian_filter_pipeline_1point5
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_1.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gaussian_filter_pipeline_2point5
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gaussian_filter_pipeline_2point5
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: butterworth_2nd_order_4hz_pipeline
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_8hz.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: butterworth_2nd_order_4hz_pipeline
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_8hz.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: butterworth_3th_order_6hz_pipeline
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_3nd_5hz.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: butterworth_3th_order_6hz_pipeline
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_3nd_5hz.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: butterworth_5th_order_5hz_pipeline
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_1hz.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: butterworth_5th_order_5hz_pipeline
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_2nd_1hz.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: gvcspl_filter_pipeline
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_gvcspl.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: gvcspl_filter_pipeline
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_gvcspl.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: fdf_pipeline
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_fdf.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: fdf_pipeline
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_fdf.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: kalman_filter
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_kalman.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: kalman_filter
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_kalman.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
 # - name: detect_RTMW_L_HumanEva
@@ -516,3 +516,13 @@ pipelines:
   #       config_file: "config_yamls/map_testing_movi.yaml"
   #     - command: evaluation
   #       config_file: "config_yamls/jointwise_ap_testing_movi.yaml"
+  # - name: detect_RTMW_X
+  #   steps:
+  #     - command: detect
+  #       config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     # - command: evaluation
+  #     #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+  #     # - command: evaluation
+  #     #   config_file: "config_yamls/map_testing.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"        

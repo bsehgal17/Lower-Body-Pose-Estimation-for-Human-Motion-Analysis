@@ -5,8 +5,8 @@ paths:
 filter:
   name: "savitzky"
   params:
-    window_length: 31
-    polyorder: 2
+    window_length: 13
+    polyorder: 5
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/Perturbed_RTMW_X_80/noise"
   outlier_removal:
