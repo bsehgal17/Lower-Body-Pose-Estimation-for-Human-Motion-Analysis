@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
 import seaborn as sns
+from datetime import datetime
 
 
 def plot_overall_distribution(data, metric_name, units, title=None, save_path=None):
@@ -95,7 +96,7 @@ def plot_overall_relation(overall_avg_l, avg_pck_scores, title, save_path=None):
     fig.suptitle(title, fontsize=14)
     fig.tight_layout()
     plt.legend(title='Video ID', loc='upper center',
-               bbox_to_anchor=(0.5, -0.05),   # put below the plot
+               bbox_to_anchor=(0.5, -0.05),  # put below the plot
                ncol=2, fontsize=10)
     ax1.grid(axis='y', linestyle='--', alpha=0.7)
 
@@ -152,4 +153,24 @@ def plot_pck_vs_metric(df, x_column, y_column, subject_col, action_col, camera_c
     if save_path:
         plt.savefig(save_path)
         print(f"Scatter plot saved to {save_path}")
+    plt.close()
+
+
+# This is the new function you can use to plot without a legend and with a single color.
+def plot_pck_vs_metric_combined(df, x_column, y_column, title, x_label, save_path=None):
+    """
+    Plots a scatter plot of PCK scores vs. a given metric with all points
+    in a single color and no legend.
+    """
+    plt.figure(figsize=(10, 8))
+    plt.scatter(df[x_column], df[y_column], alpha=0.7, color='teal')
+    plt.title(title, fontsize=16)
+    plt.xlabel(x_label, fontsize=12)
+    plt.ylabel(f'LOWER PCK Score ({y_column[-4:]})', fontsize=12)
+    plt.grid(True)
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path)
+        print(f"Combined scatter plot saved to {save_path}")
     plt.close()

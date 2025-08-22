@@ -52,11 +52,11 @@ filter:
     - RIGHT_HIP
 
 evaluation:
-  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/detect/2025-08-07_18-33-39/all_cropped_videos/
+  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/detect
   metrics:
     - name: overall_pck
       params:
-        threshold: 0.1
+        threshold: 0.25
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -73,7 +73,7 @@ evaluation:
 
     - name: overall_pck
       params:
-        threshold: 0.2
+        threshold: 0.3
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -90,7 +90,7 @@ evaluation:
 
     - name: overall_pck
       params:
-        threshold: 0.5
+        threshold: 0.35
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -105,43 +105,9 @@ evaluation:
           - LEFT_ANKLE
           - RIGHT_ANKLE
 
-    - name: jointwise_pck
+    - name: overall_pck
       params:
-        threshold: 0.1
-        joints_to_evaluate:
-          # - LEFT_SHOULDER
-          # - RIGHT_SHOULDER
-          # - LEFT_ELBOW
-          # - RIGHT_ELBOW
-          # - LEFT_WRIST
-          # - RIGHT_WRIST
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-
-    - name: jointwise_pck
-      params:
-        threshold: 0.2
-        joints_to_evaluate:
-          # - LEFT_SHOULDER
-          # - RIGHT_SHOULDER
-          # - LEFT_ELBOW
-          # - RIGHT_ELBOW
-          # - LEFT_WRIST
-          # - RIGHT_WRIST
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-
-    - name: jointwise_pck
-      params:
-        threshold: 0.5
+        threshold: 0.4
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -158,7 +124,7 @@ evaluation:
 
     - name: per_frame_pck
       params:
-        threshold: 0.1
+        threshold: 0.25
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -175,7 +141,7 @@ evaluation:
 
     - name: per_frame_pck
       params:
-        threshold: 0.2
+        threshold: 0.3
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -192,7 +158,7 @@ evaluation:
 
     - name: per_frame_pck
       params:
-        threshold: 0.5
+        threshold: 0.35
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -206,6 +172,74 @@ evaluation:
           - RIGHT_KNEE
           - LEFT_ANKLE
           - RIGHT_ANKLE
+
+    - name: per_frame_pck
+      params:
+        threshold: 0.4
+        joints_to_evaluate:
+          # - LEFT_SHOULDER
+          # - RIGHT_SHOULDER
+          # - LEFT_ELBOW
+          # - RIGHT_ELBOW
+          # - LEFT_WRIST
+          # - RIGHT_WRIST
+          - LEFT_HIP
+          - RIGHT_HIP
+          - LEFT_KNEE
+          - RIGHT_KNEE
+          - LEFT_ANKLE
+          - RIGHT_ANKLE
+
+    # - name: jointwise_pck
+    #   params:
+    #     threshold: 0.1
+    #     joints_to_evaluate:
+    #       # - LEFT_SHOULDER
+    #       # - RIGHT_SHOULDER
+    #       # - LEFT_ELBOW
+    #       # - RIGHT_ELBOW
+    #       # - LEFT_WRIST
+    #       # - RIGHT_WRIST
+    #       - LEFT_HIP
+    #       - RIGHT_HIP
+    #       - LEFT_KNEE
+    #       - RIGHT_KNEE
+    #       - LEFT_ANKLE
+    #       - RIGHT_ANKLE
+
+    # - name: jointwise_pck
+    #   params:
+    #     threshold: 0.2
+    #     joints_to_evaluate:
+    #       # - LEFT_SHOULDER
+    #       # - RIGHT_SHOULDER
+    #       # - LEFT_ELBOW
+    #       # - RIGHT_ELBOW
+    #       # - LEFT_WRIST
+    #       # - RIGHT_WRIST
+    #       - LEFT_HIP
+    #       - RIGHT_HIP
+    #       - LEFT_KNEE
+    #       - RIGHT_KNEE
+    #       - LEFT_ANKLE
+    #       - RIGHT_ANKLE
+
+    # - name: jointwise_pck
+    #   params:
+    #     threshold: 0.5
+    #     joints_to_evaluate:
+    #       # - LEFT_SHOULDER
+    #       # - RIGHT_SHOULDER
+    #       # - LEFT_ELBOW
+    #       # - RIGHT_ELBOW
+    #       # - LEFT_WRIST
+    #       # - RIGHT_WRIST
+    #       - LEFT_HIP
+    #       - RIGHT_HIP
+    #       - LEFT_KNEE
+    #       - RIGHT_KNEE
+    #       - LEFT_ANKLE
+    #       - RIGHT_ANKLE
 
 
 dataset:
