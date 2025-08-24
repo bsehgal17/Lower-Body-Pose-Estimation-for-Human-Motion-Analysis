@@ -4,6 +4,8 @@ from datetime import datetime
 from pck_data_processor import PCKDataProcessor
 from per_frame_data_processor import get_per_frame_data
 from per_frame_plotter import plot_per_frame_analysis
+from bin_analysis import analyze_frames_and_pck
+from anova import run_anova_test
 
 
 def run_per_frame_analysis(config):
@@ -13,7 +15,7 @@ def run_per_frame_analysis(config):
     Args:
         config (object): A configuration object containing dataset-specific parameters.
     """
-    print(f"\nRunning enhanced per-frame analysis for dataset...")
+    print("\nRunning enhanced per-frame analysis for dataset...")
 
     # Step 1: Load PCK data using the generic processor
     pck_per_frame_processor = PCKDataProcessor(config)
@@ -36,9 +38,12 @@ def run_per_frame_analysis(config):
     if combined_df.empty:
         print("No combined data to analyze. Exiting.")
         return
-
-    # Step 3: Generate plots for each available metric
     for metric_name in metrics_to_extract.keys():
-        plot_per_frame_analysis(config, combined_df, metric_name)
+        run_anova_test(
+            config=config, df=combined_df, metric_name=metric_name)
+
+        # analyze_frames_and_pck(
+        #     df=combined_df, config=config, metric_name=metric_name)
+        #     plot_per_frame_analysis(config, combined_df, metric_name)
 
     print(f"\nAnalysis complete. Results saved to {config.SAVE_FOLDER}")
