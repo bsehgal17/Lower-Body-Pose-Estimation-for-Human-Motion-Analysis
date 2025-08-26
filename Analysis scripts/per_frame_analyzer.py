@@ -6,6 +6,8 @@ from per_frame_data_processor import get_per_frame_data
 from per_frame_plotter import plot_per_frame_analysis
 from bin_analysis import analyze_frames_and_pck
 from anova import run_anova_test
+from pck_frames_count import pck_score_frame_count
+from plot_line_histogran import plot_all_thresholds_pck_distribution
 
 
 def run_per_frame_analysis(config):
@@ -39,8 +41,10 @@ def run_per_frame_analysis(config):
         print("No combined data to analyze. Exiting.")
         return
     for metric_name in metrics_to_extract.keys():
-        run_anova_test(
-            config=config, df=combined_df, metric_name=metric_name)
+        plot_all_thresholds_pck_distribution(config, combined_df)
+        # pck_score_frame_count(config, combined_df)
+        # run_anova_test(
+        #     config=config, df=combined_df, metric_name=metric_name)
 
         # analyze_frames_and_pck(
         #     df=combined_df, config=config, metric_name=metric_name)

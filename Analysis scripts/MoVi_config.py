@@ -8,15 +8,15 @@ MODEL = "RTMW"
 PCK_OVERALL_SCORE_COLUMNS = [
     'overall_overall_pck_0.25',
     'overall_overall_pck_0.30',
-    'overall_overall_pck_0.35',
-    'overall_overall_pck_0.40'
+    # 'overall_overall_pck_0.35',
+    # 'overall_overall_pck_0.40'
 ]
 
 PCK_PER_FRAME_SCORE_COLUMNS = [
     'pck_per_frame_pck_0.25',
     'pck_per_frame_pck_0.30',
-    'pck_per_frame_pck_0.35',
-    'pck_per_frame_pck_0.40'
+    # 'pck_per_frame_pck_0.35',
+    # 'pck_per_frame_pck_0.40'
 ]
 
 # Dataset-specific column names
