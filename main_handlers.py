@@ -198,27 +198,68 @@ def _handle_assess_command(
 def _handle_enhance_command(
     args, pipeline_config: PipelineConfig, global_config: GlobalConfig
 ):
-    from clahe_processor import CLAHEProcessor
+    """Handle the enhance command using the new enhancement pipeline."""
+    from enhancement_pipeline import run_enhancement_pipeline
 
-    # The enhancement script is driven by its own config, so we just initialize and run
-    processor = CLAHEProcessor(config_path=args.pipeline_config)
+    input_dir, base_pipeline_out = get_pipeline_io_paths(
+        global_config.paths, pipeline_config.paths.dataset
+    )
 
-    # Allow overriding input/output directories from the command line
+    run_dir = make_run_dir(
+        base_out=base_pipeline_out,
+        pipeline_name=args.pipeline_name,
+        step_name=args.command,
+        cfg_path=args.pipeline_config,
+        global_config_obj=global_config,
+        pipeline_config_obj=pipeline_config,
+    )
+
+    step_out = run_dir
+    step_out.mkdir(parents=True, exist_ok=True)
+
+    # Use command line overrides if provided
+    input_folder = args.input_folder if args.input_folder else input_dir
+    output_folder = args.output_folder if args.output_folder else step_out
+
     if args.input_folder:
-        processor.clahe_config.input_dir = args.input_folder
-        logger.info(f"Overriding input folder with: {args.input_folder}")
-
+        logger.info(f"Overriding input folder: {input_folder}")
     if args.output_folder:
-        processor.clahe_config.output_dir = args.output_folder
-        logger.info(f"Overriding output folder with: {args.output_folder}")
+        logger.info(f"Overriding output folder: {output_folder}")
 
-    # Determine whether to run batch or dataset processing
-    if processor.clahe_config.batch_process:
-        logger.info("Starting batch enhancement process...")
-        processor.process_batch()
+    # Determine enhancement type from config or args (no default)
+    enhancement_type = None
+    if hasattr(pipeline_config, "enhancement") and hasattr(
+        pipeline_config.enhancement, "type"
+    ):
+        enhancement_type = pipeline_config.enhancement.type
+    if hasattr(args, "enhancement_type") and args.enhancement_type:
+        enhancement_type = args.enhancement_type
+        logger.info(f"Using enhancement type from command line: {enhancement_type}")
+
+    if not enhancement_type:
+        raise ValueError("Enhancement type must be specified in config or command line")
+
+    # Determine if we should process as structured dataset (no default)
+    dataset_structure = getattr(args, "dataset_structure", False)
+
+    logger.info(f"Enhancement type: {enhancement_type}")
+    logger.info(f"Input directory: {input_folder}")
+    logger.info(f"Output directory: {output_folder}")
+    logger.info(f"Dataset structure mode: {dataset_structure}")
+
+    success = run_enhancement_pipeline(
+        pipeline_config=pipeline_config,
+        global_config=global_config,
+        input_dir=input_folder,
+        output_dir=output_folder,
+        enhancement_type=enhancement_type,
+        dataset_structure=dataset_structure,
+    )
+
+    if success:
+        logger.info("Enhancement pipeline completed successfully")
     else:
-        logger.info("Starting structured dataset enhancement process...")
-        processor.process_dataset()
+        logger.error("Enhancement pipeline completed with errors")
 
 
 def _get_detection_pipeline_fn(detector_name: str):

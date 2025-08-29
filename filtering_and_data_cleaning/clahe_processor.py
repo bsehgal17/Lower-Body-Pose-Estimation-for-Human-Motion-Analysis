@@ -12,8 +12,8 @@ from typing import Dict, Any, Optional, Union
 import cv2
 import numpy as np
 
-from config.enhancement_config import CLAHEConfig
-from filtering_and_data_cleaning.clahe_enhancement import (
+from ..config.enhancement_config import CLAHEConfig
+from .clahe_enhancement import (
     CLAHEEnhancer,
     batch_enhance_videos,
 )

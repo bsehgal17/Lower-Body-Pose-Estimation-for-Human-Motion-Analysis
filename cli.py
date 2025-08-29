@@ -82,7 +82,7 @@ def parse_main_args(argv: Optional[List[str]] = None):
     parser_enhance = subparsers.add_parser(
         "enhance",
         parents=[common_parser],
-        help="Apply CLAHE enhancement to videos",
+        help="Apply video enhancement (CLAHE, histogram equalization, etc.)",
     )
     parser_enhance.add_argument(
         "--input_folder",
@@ -93,6 +93,18 @@ def parse_main_args(argv: Optional[List[str]] = None):
         "--output_folder",
         type=str,
         help="Optional: Override the output folder specified in the config",
+    )
+    parser_enhance.add_argument(
+        "--enhancement_type",
+        type=str,
+        choices=["clahe", "histogram_eq", "gaussian_blur", "brightness_adjustment"],
+        required=True,
+        help="Type of enhancement to apply (required)",
+    )
+    parser_enhance.add_argument(
+        "--dataset_structure",
+        action="store_true",
+        help="Process videos organized in dataset structure (subject/action/videos)",
     )
     parser_enhance.set_defaults(func=_handle_enhance_command)
 
