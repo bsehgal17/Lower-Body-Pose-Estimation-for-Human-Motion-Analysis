@@ -1,0 +1,17 @@
+paths:
+  dataset: MoVi
+  input_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/MoVi/videos
+  output_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/MoVi/clahe_enhanced
+
+clahe:
+  apply_clahe: true
+  clip_limit: 3.0  # Higher clip limit for potentially more challenging lighting
+  tile_grid_size: [8, 8]
+  color_space: LAB
+  batch_process: true
+
+
+dataset:
+  # MoVi dataset structure - adjust according to actual structure
+  subjects: ['Subject_1', 'Subject_2', 'Subject_3']
+  actions: ['walk', 'run', 'jump', 'sit', 'stand']

@@ -8,22 +8,10 @@ from utils.run_utils import make_run_dir, get_pipeline_io_paths
 logger = logging.getLogger(__name__)
 
 
-def _get_detection_pipeline_fn(detector_name: str):
-    detector_name = detector_name.lower()
-    if detector_name == "dwpose":
-        from detection_pipeline_DWPose import run_detection_pipeline
-        logger.info("Using DWPose detection pipeline.")
-    else:
-        from detection_pipeline_rtmw import run_detection_pipeline
-        logger.info("Using RTMW/MMpose detection pipeline.")
-    return run_detection_pipeline
-
-
 def _handle_detect_command(
     args, pipeline_config: PipelineConfig, global_config: GlobalConfig
 ):
-    run_detection_pipeline = _get_detection_pipeline_fn(
-        pipeline_config.models.detector)
+    run_detection_pipeline = _get_detection_pipeline_fn(pipeline_config.models.detector)
 
     input_dir, base_pipeline_out = get_pipeline_io_paths(
         global_config.paths, pipeline_config.paths.dataset
@@ -132,19 +120,15 @@ def _handle_filter_command(
     pipeline_config.paths.output_dir = str(step_out)
 
     if not pipeline_config.filter.input_dir:
-        noise_dir = os.path.join(
-            base_pipeline_out, args.pipeline_name, "noise")
-        detect_dir = os.path.join(
-            base_pipeline_out, args.pipeline_name, "detect")
+        noise_dir = os.path.join(base_pipeline_out, args.pipeline_name, "noise")
+        detect_dir = os.path.join(base_pipeline_out, args.pipeline_name, "detect")
 
         if os.path.exists(noise_dir):
             pipeline_config.filter.input_dir = noise_dir
-            logger.info(
-                f"Auto-selected input_dir from noise step: {noise_dir}")
+            logger.info(f"Auto-selected input_dir from noise step: {noise_dir}")
         elif os.path.exists(detect_dir):
             pipeline_config.filter.input_dir = detect_dir
-            logger.info(
-                f"Auto-selected input_dir from detect step: {detect_dir}")
+            logger.info(f"Auto-selected input_dir from detect step: {detect_dir}")
         else:
             logger.warning("Could not auto-resolve input_dir for filter.")
 
@@ -155,7 +139,9 @@ def _handle_filter_command(
     )
 
 
-def _handle_assess_command(args, pipeline_config: PipelineConfig, global_config: GlobalConfig):
+def _handle_assess_command(
+    args, pipeline_config: PipelineConfig, global_config: GlobalConfig
+):
     from evaluation_pipeline import run_pose_assessment_pipeline
 
     input_dir, base_pipeline_out = get_pipeline_io_paths(
@@ -176,7 +162,8 @@ def _handle_assess_command(args, pipeline_config: PipelineConfig, global_config:
 
     if pipeline_config.evaluation.input_dir:
         logger.info(
-            f"Using manually specified input_dir: {pipeline_config.evaluation.input_dir}")
+            f"Using manually specified input_dir: {pipeline_config.evaluation.input_dir}"
+        )
         run_pose_assessment_pipeline(
             pipeline_config,
             global_config,
@@ -193,7 +180,8 @@ def _handle_assess_command(args, pipeline_config: PipelineConfig, global_config:
             step_eval_dir.mkdir(parents=True, exist_ok=True)
 
             logger.info(
-                f"Running evaluation for step: {step}, using input_dir: {step_dir}")
+                f"Running evaluation for step: {step}, using input_dir: {step_dir}"
+            )
             pipeline_config.evaluation.input_dir = step_dir
             run_pose_assessment_pipeline(
                 pipeline_config,
@@ -203,4 +191,44 @@ def _handle_assess_command(args, pipeline_config: PipelineConfig, global_config:
             )
         else:
             logger.warning(
-                f"Step output folder not found: {step_dir}, skipping evaluation.")
+                f"Step output folder not found: {step_dir}, skipping evaluation."
+            )
+
+
+def _handle_enhance_command(
+    args, pipeline_config: PipelineConfig, global_config: GlobalConfig
+):
+    from clahe_processor import CLAHEProcessor
+
+    # The enhancement script is driven by its own config, so we just initialize and run
+    processor = CLAHEProcessor(config_path=args.pipeline_config)
+
+    # Allow overriding input/output directories from the command line
+    if args.input_folder:
+        processor.clahe_config.input_dir = args.input_folder
+        logger.info(f"Overriding input folder with: {args.input_folder}")
+
+    if args.output_folder:
+        processor.clahe_config.output_dir = args.output_folder
+        logger.info(f"Overriding output folder with: {args.output_folder}")
+
+    # Determine whether to run batch or dataset processing
+    if processor.clahe_config.batch_process:
+        logger.info("Starting batch enhancement process...")
+        processor.process_batch()
+    else:
+        logger.info("Starting structured dataset enhancement process...")
+        processor.process_dataset()
+
+
+def _get_detection_pipeline_fn(detector_name: str):
+    detector_name = detector_name.lower()
+    if detector_name == "dwpose":
+        from detection_pipeline_DWPose import run_detection_pipeline
+
+        logger.info("Using DWPose detection pipeline.")
+    else:
+        from detection_pipeline_rtmw import run_detection_pipeline
+
+        logger.info("Using RTMW/MMpose detection pipeline.")
+    return run_detection_pipeline

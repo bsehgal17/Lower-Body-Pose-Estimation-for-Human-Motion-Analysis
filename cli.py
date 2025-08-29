@@ -5,6 +5,7 @@ from main_handlers import (
     _handle_noise_command,
     _handle_assess_command,
     _handle_filter_command,
+    _handle_enhance_command,
 )
 
 
@@ -76,5 +77,23 @@ def parse_main_args(argv: Optional[List[str]] = None):
         "evaluation", parents=[common_parser], help="Run pose accuracy evaluation"
     )
     parser_assess.set_defaults(func=_handle_assess_command)
+
+    # Subcommand: enhance
+    parser_enhance = subparsers.add_parser(
+        "enhance",
+        parents=[common_parser],
+        help="Apply CLAHE enhancement to videos",
+    )
+    parser_enhance.add_argument(
+        "--input_folder",
+        type=str,
+        help="Optional: Override the input folder specified in the config",
+    )
+    parser_enhance.add_argument(
+        "--output_folder",
+        type=str,
+        help="Optional: Override the output folder specified in the config",
+    )
+    parser_enhance.set_defaults(func=_handle_enhance_command)
 
     return parser.parse_args(argv)

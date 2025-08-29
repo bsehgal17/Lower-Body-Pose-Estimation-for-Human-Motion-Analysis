@@ -1,0 +1,26 @@
+paths:
+  dataset: HumanEva
+  input_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/HumanEva/videos
+  output_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/HumanEva/clahe_enhanced
+
+clahe:
+  apply_clahe: true
+  clip_limit: 2.0
+  tile_grid_size: [8, 8]
+  color_space: LAB  # Options: LAB, HSV, YUV, GRAY
+  batch_process: true
+  file_extensions: ['.mp4', '.avi', '.mov']
+
+
+dataset:
+  sync_data:
+    data:
+      S1:
+        Walking 1: [667, 667, 667]
+        Jog 1: [49, 50, 51]
+      S2:
+        Walking 1: [547, 547, 546]
+        Jog 1: [493, 491, 502]
+      S3:
+        Walking 1: [524, 524, 524]
+        Jog 1: [464, 462, 462]
