@@ -10,7 +10,7 @@ paths:
 # Enhancement configuration
 enhancement:
   # Type of enhancement to apply (required)
-  type: clahe  # Options: clahe, histogram_eq, gaussian_blur, brightness_adjustment
+ type: clahe  # Options: clahe, histogram_eq, gaussian_blur, brightness_adjustment
   
   # CLAHE specific settings (required when type is clahe)
   clahe:

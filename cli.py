@@ -95,9 +95,10 @@ def parse_main_args(argv: Optional[List[str]] = None):
         help="Optional: Override the output folder specified in the config",
     )
     parser_enhance.add_argument(
-        "--enhancement_type",
+        "--type",
         type=str,
-        choices=["clahe", "histogram_eq", "gaussian_blur", "brightness_adjustment"],
+        choices=["clahe", "histogram_eq",
+                 "gaussian_blur", "brightness_adjustment"],
         required=True,
         help="Type of enhancement to apply (required)",
     )
