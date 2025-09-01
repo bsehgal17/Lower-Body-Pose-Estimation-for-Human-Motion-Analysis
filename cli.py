@@ -97,9 +97,15 @@ def parse_main_args(argv: Optional[List[str]] = None):
     parser_enhance.add_argument(
         "--type",
         type=str,
+<<<<<<< HEAD
+        choices=["clahe", "histogram_eq",
+                 "gaussian_blur", "brightness_adjustment"],
+        help="Type of enhancement to apply (required)",
+=======
         choices=["clahe", "histogram_eq", "gaussian_blur", "brightness_adjustment"],
         required=False,
         help="Type of enhancement to apply (optional if specified in config)",
+>>>>>>> 4033093631b8f7f8e020efe7ba7dbf2c6dd27fdb
     )
     parser_enhance.add_argument(
         "--dataset_structure",

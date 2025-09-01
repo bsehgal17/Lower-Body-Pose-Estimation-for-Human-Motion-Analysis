@@ -4,8 +4,7 @@
 # Dataset and path configuration
 paths:
   dataset: HumanEva
-  input_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/HumanEva/videos
-  output_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/HumanEva/enhanced
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 # Enhancement configuration
 enhancement:
@@ -34,23 +33,4 @@ enhancement:
     dataset_structure: true  # Whether videos are organized in subject/action structure
     generate_report: true  # Generate enhancement comparison report
 
-# Dataset structure (for structured processing)
-dataset:
-  name: HumanEva
-  structure:
-    type: subject_action  # subject/action/videos organization
-    subjects: ['S1', 'S2', 'S3']
-    actions: ['Walking', 'Jogging', 'ThrowCatch', 'Gestures', 'Boxing', 'Balance']
-  
-  # Video file settings
-  video:
-    extensions: ['.mp4', '.avi', '.mov']
-    fps: 60
-    resolution: [640, 480]
 
-# Output settings
-output:
-  prefix: enhanced_  # Prefix for enhanced video files
-  format: mp4  # Output video format
-  quality: high  # Options: low, medium, high
-  preserve_structure: true  # Maintain directory structure in output
