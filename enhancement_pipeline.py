@@ -80,12 +80,28 @@ class EnhancementPipeline:
         logger.info(f"Enhancement type: {enhancement_type}")
         logger.info(f"Input: {input_dir}")
         logger.info(f"Output: {output_dir}")
+        logger.info("Folder structure will be preserved in output directory")
 
         success_count = 0
 
         for video_file in tqdm(video_files, desc="Enhancing videos"):
             video_path = Path(video_file)
-            output_path = output_dir / f"enhanced_{video_path.name}"
+
+            # Calculate relative path from input directory to maintain folder structure
+            try:
+                relative_path = video_path.relative_to(input_dir)
+                # Create the same folder structure in output directory
+                output_path = (
+                    output_dir / relative_path.parent / f"enhanced_{relative_path.name}"
+                )
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                logger.debug(
+                    f"Processing {relative_path} -> {output_path.relative_to(output_dir)}"
+                )
+            except ValueError:
+                # If relative_to fails, fall back to simple naming
+                output_path = output_dir / f"enhanced_{video_path.name}"
+                logger.debug(f"Processing {video_path.name} -> {output_path.name}")
 
             success = self._apply_enhancement(video_path, output_path, enhancement_type)
 
@@ -272,11 +288,24 @@ class EnhancementPipeline:
         # Compare statistics for each video pair
         for orig_video in original_videos:
             orig_path = Path(orig_video)
-            enhanced_path = output_dir / f"enhanced_{orig_path.name}"
+
+            # Calculate the enhanced video path maintaining folder structure
+            try:
+                relative_path = orig_path.relative_to(input_dir)
+                enhanced_path = (
+                    output_dir / relative_path.parent / f"enhanced_{relative_path.name}"
+                )
+            except ValueError:
+                # If relative_to fails, fall back to simple naming
+                enhanced_path = output_dir / f"enhanced_{orig_path.name}"
 
             if enhanced_path.exists():
                 stats = self._compare_video_statistics(orig_path, enhanced_path)
-                stats["video_name"] = orig_path.name
+                stats["video_name"] = (
+                    str(relative_path)
+                    if "relative_path" in locals()
+                    else orig_path.name
+                )
                 report_data["video_comparisons"].append(stats)
 
         # Save report
