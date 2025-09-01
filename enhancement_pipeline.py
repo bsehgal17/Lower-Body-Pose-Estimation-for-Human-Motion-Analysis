@@ -69,8 +69,9 @@ class EnhancementPipeline:
 
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Get video files
-        video_files = get_video_files(str(input_dir))
+        # Get video files with common video extensions
+        video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm"]
+        video_files = get_video_files(str(input_dir), video_extensions)
         if not video_files:
             logger.warning(f"No video files found in {input_dir}")
             return False  # Changed from True to False - no videos should be considered failure
@@ -205,7 +206,16 @@ class EnhancementPipeline:
                 action_output_dir.mkdir(parents=True, exist_ok=True)
 
                 # Process videos in this action directory
-                video_files = get_video_files(str(action_dir))
+                video_extensions = [
+                    ".mp4",
+                    ".avi",
+                    ".mov",
+                    ".mkv",
+                    ".wmv",
+                    ".flv",
+                    ".webm",
+                ]
+                video_files = get_video_files(str(action_dir), video_extensions)
                 total_videos += len(video_files)
 
                 for video_file in video_files:
@@ -249,8 +259,9 @@ class EnhancementPipeline:
         output_dir = Path(output_dir)
         report_path = Path(report_path)
 
-        original_videos = get_video_files(str(input_dir))
-        enhanced_videos = get_video_files(str(output_dir))
+        video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm"]
+        original_videos = get_video_files(str(input_dir), video_extensions)
+        enhanced_videos = get_video_files(str(output_dir), video_extensions)
 
         report_data = {
             "original_count": len(original_videos),
