@@ -70,7 +70,8 @@ class EnhancementPipeline:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         # Get video files with common video extensions
-        video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm"]
+        video_extensions = [".mp4", ".avi", ".mov",
+                            ".mkv", ".wmv", ".flv", ".webm"]
         video_files = get_video_files(str(input_dir), video_extensions)
         if not video_files:
             logger.warning(f"No video files found in {input_dir}")
@@ -92,7 +93,7 @@ class EnhancementPipeline:
                 relative_path = video_path.relative_to(input_dir)
                 # Create the same folder structure in output directory
                 output_path = (
-                    output_dir / relative_path.parent / f"enhanced_{relative_path.name}"
+                    output_dir / relative_path.parent / f"{relative_path.name}"
                 )
                 output_path.parent.mkdir(parents=True, exist_ok=True)
                 logger.debug(
@@ -100,10 +101,12 @@ class EnhancementPipeline:
                 )
             except ValueError:
                 # If relative_to fails, fall back to simple naming
-                output_path = output_dir / f"enhanced_{video_path.name}"
-                logger.debug(f"Processing {video_path.name} -> {output_path.name}")
+                output_path = output_dir / f"{video_path.name}"
+                logger.debug(
+                    f"Processing {video_path.name} -> {output_path.name}")
 
-            success = self._apply_enhancement(video_path, output_path, enhancement_type)
+            success = self._apply_enhancement(
+                video_path, output_path, enhancement_type)
 
             if success:
                 success_count += 1
@@ -136,7 +139,8 @@ class EnhancementPipeline:
             )
             return success
         except Exception as e:
-            logger.error(f"{enhancement_type} enhancement failed for {input_path}: {e}")
+            logger.error(
+                f"{enhancement_type} enhancement failed for {input_path}: {e}")
             return False
 
     def _get_enhancement_parameters(self, enhancement_type: str) -> dict:
@@ -165,9 +169,12 @@ class EnhancementPipeline:
 
         elif enhancement_type == "gaussian_blur":
             if hasattr(self.enhancement_config, "blur"):
-                params["kernel_size"] = tuple(self.enhancement_config.blur.kernel_size)
-                params["sigma_x"] = getattr(self.enhancement_config.blur, "sigma_x", 0)
-                params["sigma_y"] = getattr(self.enhancement_config.blur, "sigma_y", 0)
+                params["kernel_size"] = tuple(
+                    self.enhancement_config.blur.kernel_size)
+                params["sigma_x"] = getattr(
+                    self.enhancement_config.blur, "sigma_x", 0)
+                params["sigma_y"] = getattr(
+                    self.enhancement_config.blur, "sigma_y", 0)
             else:
                 raise ValueError(
                     "Gaussian blur requires 'blur' section in configuration"
@@ -231,12 +238,13 @@ class EnhancementPipeline:
                     ".flv",
                     ".webm",
                 ]
-                video_files = get_video_files(str(action_dir), video_extensions)
+                video_files = get_video_files(
+                    str(action_dir), video_extensions)
                 total_videos += len(video_files)
 
                 for video_file in video_files:
                     video_path = Path(video_file)
-                    output_path = action_output_dir / f"enhanced_{video_path.name}"
+                    output_path = action_output_dir / f"{video_path.name}"
 
                     logger.info(
                         f"Processing: {subject_dir.name}/{action_dir.name}/{video_path.name}"
@@ -275,7 +283,8 @@ class EnhancementPipeline:
         output_dir = Path(output_dir)
         report_path = Path(report_path)
 
-        video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm"]
+        video_extensions = [".mp4", ".avi", ".mov",
+                            ".mkv", ".wmv", ".flv", ".webm"]
         original_videos = get_video_files(str(input_dir), video_extensions)
         enhanced_videos = get_video_files(str(output_dir), video_extensions)
 
@@ -293,14 +302,15 @@ class EnhancementPipeline:
             try:
                 relative_path = orig_path.relative_to(input_dir)
                 enhanced_path = (
-                    output_dir / relative_path.parent / f"enhanced_{relative_path.name}"
+                    output_dir / relative_path.parent / f"{relative_path.name}"
                 )
             except ValueError:
                 # If relative_to fails, fall back to simple naming
-                enhanced_path = output_dir / f"enhanced_{orig_path.name}"
+                enhanced_path = output_dir / f"{orig_path.name}"
 
             if enhanced_path.exists():
-                stats = self._compare_video_statistics(orig_path, enhanced_path)
+                stats = self._compare_video_statistics(
+                    orig_path, enhanced_path)
                 stats["video_name"] = (
                     str(relative_path)
                     if "relative_path" in locals()
@@ -338,8 +348,10 @@ class EnhancementPipeline:
             if not cap_orig.isOpened() or not cap_enh.isOpened():
                 return stats
 
-            stats["frame_count_original"] = int(cap_orig.get(cv2.CAP_PROP_FRAME_COUNT))
-            stats["frame_count_enhanced"] = int(cap_enh.get(cv2.CAP_PROP_FRAME_COUNT))
+            stats["frame_count_original"] = int(
+                cap_orig.get(cv2.CAP_PROP_FRAME_COUNT))
+            stats["frame_count_enhanced"] = int(
+                cap_enh.get(cv2.CAP_PROP_FRAME_COUNT))
 
             brightness_changes = []
             contrast_changes = []
@@ -372,7 +384,8 @@ class EnhancementPipeline:
             cap_enh.release()
 
             if brightness_changes:
-                stats["avg_brightness_change"] = float(np.mean(brightness_changes))
+                stats["avg_brightness_change"] = float(
+                    np.mean(brightness_changes))
                 stats["avg_contrast_change"] = float(np.mean(contrast_changes))
 
         except Exception as e:
@@ -412,7 +425,8 @@ def run_enhancement_pipeline(
             input_dir, output_dir, enhancement_type
         )
     else:
-        success = pipeline.process_videos(input_dir, output_dir, enhancement_type)
+        success = pipeline.process_videos(
+            input_dir, output_dir, enhancement_type)
 
     # Generate report
     report_path = Path(output_dir) / "enhancement_report.json"
