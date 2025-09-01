@@ -140,7 +140,7 @@ class EnhancementPipeline:
 
         elif enhancement_type == "brightness_adjustment":
             if hasattr(self.enhancement_config, "brightness"):
-                params["brightness_factor"] = self.enhancement_config.brightness.factor
+                params["factor"] = self.enhancement_config.brightness.factor
             else:
                 raise ValueError(
                     "Brightness adjustment requires 'brightness' section in configuration"

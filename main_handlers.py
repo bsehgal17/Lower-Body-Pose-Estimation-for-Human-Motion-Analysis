@@ -232,8 +232,8 @@ def _handle_enhance_command(
         pipeline_config.enhancement, "type"
     ):
         enhancement_type = pipeline_config.enhancement.type
-    if hasattr(args, "enhancement_type") and args.enhancement_type:
-        enhancement_type = args.enhancement_type
+    if hasattr(args, "type") and args.type:
+        enhancement_type = args.type
         logger.info(f"Using enhancement type from command line: {enhancement_type}")
 
     if not enhancement_type:
