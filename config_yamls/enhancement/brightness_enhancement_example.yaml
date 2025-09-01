@@ -1,0 +1,43 @@
+# Brightness Enhancement Pipeline Configuration Example
+# This configuration demonstrates brightness adjustment enhancement
+
+# Dataset and path configuration
+paths:
+  dataset: MoVi
+  input_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/MoVi/videos
+  output_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/MoVi/brightness_enhanced
+
+# Enhancement configuration
+enhancement:
+  # Type of enhancement to apply (required)
+  type: brightness_adjustment
+  
+  # Brightness adjustment settings (required when type is brightness_adjustment)
+  brightness:
+    factor: 1.3  # Brightness multiplication factor (>1 = brighter, <1 = darker)
+  
+  # Processing settings
+  processing:
+    batch_size: 10
+    dataset_structure: true
+    generate_report: true
+
+# Dataset structure
+dataset:
+  name: MoVi
+  structure:
+    type: subject_action
+    subjects: ['F_Subjects', 'M_Subjects']
+    actions: ['walk']
+  
+  video:
+    extensions: ['.mp4', '.avi']
+    fps: 50
+    resolution: [1000, 1000]
+
+# Output settings
+output:
+  prefix: bright_
+  format: mp4
+  quality: high
+  preserve_structure: true

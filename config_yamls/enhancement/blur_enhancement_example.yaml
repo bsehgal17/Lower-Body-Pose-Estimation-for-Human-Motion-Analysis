@@ -1,0 +1,45 @@
+# Gaussian Blur Enhancement Pipeline Configuration Example
+# This configuration demonstrates gaussian blur enhancement
+
+# Dataset and path configuration
+paths:
+  dataset: HumanEva
+  input_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/HumanEva/videos
+  output_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset/HumanEva/blur_enhanced
+
+# Enhancement configuration
+enhancement:
+  # Type of enhancement to apply (required)
+  type: gaussian_blur
+  
+  # Gaussian blur settings (required when type is gaussian_blur)
+  blur:
+    kernel_size: [5, 5]  # Blur kernel size (must be odd numbers)
+    sigma_x: 1.0  # Standard deviation in X direction
+    sigma_y: 1.0  # Standard deviation in Y direction (0 means same as sigma_x)
+  
+  # Processing settings
+  processing:
+    batch_size: 5  # Smaller batch for blur processing
+    dataset_structure: true
+    generate_report: true
+
+# Dataset structure
+dataset:
+  name: HumanEva
+  structure:
+    type: subject_action
+    subjects: ['S1', 'S2', 'S3']
+    actions: ['Walking', 'Jogging']
+  
+  video:
+    extensions: ['.mp4', '.avi']
+    fps: 60
+    resolution: [640, 480]
+
+# Output settings
+output:
+  prefix: blur_
+  format: mp4
+  quality: medium
+  preserve_structure: true
