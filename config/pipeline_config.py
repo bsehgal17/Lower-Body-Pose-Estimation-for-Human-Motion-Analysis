@@ -12,6 +12,7 @@ from .filter_config import FilterConfig
 from .noise_config import NoiseConfig
 from .evaluation_config import EvaluationConfig
 from .dataset_config import DatasetConfig  # <- new import
+from .enhancement_config import EnhancementConfig  # <- enhancement import
 
 
 logging.basicConfig(
@@ -29,6 +30,7 @@ class PipelineConfig:
     noise: Optional[NoiseConfig] = None
     evaluation: Optional[EvaluationConfig] = None
     dataset: Optional[DatasetConfig] = None
+    enhancement: Optional[EnhancementConfig] = None
 
     # ------------------------------------------------------------------
     # YAML (de)serialization helpers
@@ -37,28 +39,70 @@ class PipelineConfig:
     @classmethod
     def from_yaml(cls, yaml_path: str) -> "PipelineConfig":
         if not os.path.exists(yaml_path):
-            raise FileNotFoundError(
-                f"Pipeline config file not found: {yaml_path}")
+            raise FileNotFoundError(f"Pipeline config file not found: {yaml_path}")
         with open(yaml_path, "r", encoding="utf-8") as f:
             raw_config = yaml.safe_load(f)
 
         return cls(
             paths=PipelinePathsConfig(**raw_config.get("paths", {})),
-            models=ModelsConfig(
-                **raw_config["models"]) if "models" in raw_config else None,
-            processing=ProcessingConfig(
-                **raw_config["processing"]) if "processing" in raw_config else None,
+            models=ModelsConfig(**raw_config["models"])
+            if "models" in raw_config
+            else None,
+            processing=ProcessingConfig(**raw_config["processing"])
+            if "processing" in raw_config
+            else None,
             filter=FilterConfig(**raw_config["filter"])
             if "filter" in raw_config
             else None,
-            noise=NoiseConfig(
-                **raw_config["noise"]) if "noise" in raw_config else None,
+            noise=NoiseConfig(**raw_config["noise"]) if "noise" in raw_config else None,
             evaluation=EvaluationConfig(**raw_config["evaluation"])
             if "evaluation" in raw_config
             else None,
             dataset=DatasetConfig(**raw_config["dataset"])
             if "dataset" in raw_config
             else None,
+            enhancement=cls._parse_enhancement_config(raw_config.get("enhancement"))
+            if "enhancement" in raw_config
+            else None,
+        )
+
+    @classmethod
+    def _parse_enhancement_config(cls, enhancement_data):
+        """Parse enhancement configuration data."""
+        if not enhancement_data:
+            return None
+
+        from .enhancement_config import (
+            EnhancementConfig,
+            CLAHEConfig,
+            BrightnessConfig,
+            BlurConfig,
+            EnhancementProcessingConfig,
+        )
+
+        # Parse sub-configs
+        clahe = None
+        if "clahe" in enhancement_data:
+            clahe = CLAHEConfig(**enhancement_data["clahe"])
+
+        brightness = None
+        if "brightness" in enhancement_data:
+            brightness = BrightnessConfig(**enhancement_data["brightness"])
+
+        blur = None
+        if "blur" in enhancement_data:
+            blur = BlurConfig(**enhancement_data["blur"])
+
+        processing = None
+        if "processing" in enhancement_data:
+            processing = EnhancementProcessingConfig(**enhancement_data["processing"])
+
+        return EnhancementConfig(
+            type=enhancement_data.get("type"),
+            clahe=clahe,
+            brightness=brightness,
+            blur=blur,
+            processing=processing,
         )
 
     def to_yaml(self, yaml_path: str):
@@ -79,6 +123,8 @@ class PipelineConfig:
             cfg_dict["evaluation"] = self.evaluation.__dict__
         if self.dataset:
             cfg_dict["dataset"] = self.dataset.__dict__
+        if self.enhancement:
+            cfg_dict["enhancement"] = self.enhancement.__dict__
 
         with open(yaml_path, "w", encoding="utf-8") as f:
             yaml.dump(cfg_dict, f, indent=4)
