@@ -7,7 +7,7 @@ from per_frame_plotter import plot_per_frame_analysis
 from bin_analysis import analyze_frames_and_pck
 from anova import run_anova_test
 from pck_frames_count import pck_score_frame_count
-from plot_line_histogran import plot_all_thresholds_pck_distribution
+from plot_line_histogran import plot_brightness_overlay_and_stats
 
 
 def run_per_frame_analysis(config):
@@ -41,7 +41,7 @@ def run_per_frame_analysis(config):
         print("No combined data to analyze. Exiting.")
         return
     for metric_name in metrics_to_extract.keys():
-        plot_all_thresholds_pck_distribution(config, combined_df)
+        plot_brightness_overlay_and_stats(config, combined_df, bin_width=1)
         # pck_score_frame_count(config, combined_df)
         # run_anova_test(
         #     config=config, df=combined_df, metric_name=metric_name)

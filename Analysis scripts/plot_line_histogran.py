@@ -1,52 +1,116 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 
-def plot_all_thresholds_pck_distribution(config, df):
+def plot_brightness_overlay_and_stats(config, df, bin_width=2, normalize=True):
     """
-    Plots line distributions of PCK scores (40–120) for all thresholds in one plot.
+    Plots brightness distributions for PCK=0 and PCK=100 (line histogram)
+    and calculates mean, std, IQR for all PCK groups.
 
     Args:
         config (object): Config object with SAVE_FOLDER and PCK_PER_FRAME_SCORE_COLUMNS.
-        df (pd.DataFrame): DataFrame containing per-frame PCK scores for multiple thresholds.
+        df (pd.DataFrame): DataFrame with columns ["brightness"] and multiple PCK columns.
+        bin_width (int): Width of brightness bins (default=2).
+        normalize (bool): Normalize y-axis by total frames.
     """
-    print("\n" + "="*50)
-    print("Running PCK Multi-Threshold Line Plot...")
+    print("\n" + "=" * 60)
+    print("Running Brightness Overlay + Statistics by PCK Scores...")
 
     if not hasattr(config, "PCK_PER_FRAME_SCORE_COLUMNS"):
         raise ValueError(
             "Config must have PCK_PER_FRAME_SCORE_COLUMNS attribute.")
 
-    pck_cols = [
+    valid_pck_cols = [
         col for col in config.PCK_PER_FRAME_SCORE_COLUMNS if col in df.columns]
-    if not pck_cols:
+    if not valid_pck_cols:
         print("⚠️ No valid PCK columns found in DataFrame.")
         return
 
-    # Define bins (integers from 40 to 120)
-    bins = list(range(-2, 102))
-
+    # ------------------- Plotting -------------------
+    bins = np.arange(df["brightness"].min(),
+                     df["brightness"].max() + bin_width, bin_width)
     plt.figure(figsize=(12, 7))
 
-    for pck_col in pck_cols:
-        # Round values to nearest int and count
-        counts = df[pck_col].round().astype(
-            int).value_counts().reindex(bins, fill_value=0)
-        plt.plot(counts.index, counts.values, marker="o",
-                 linestyle="-", label=pck_col)
+    for pck_col in valid_pck_cols:
+        subset = df[["brightness", pck_col]].dropna()
+        if subset.empty:
+            continue
 
-    # Labels and formatting
-    plt.title("Frame Count per PCK Score (All Thresholds)")
-    plt.xlabel("PCK Score")
-    plt.ylabel("Number of Frames")
+        subset["PCK_Group"] = subset[pck_col].round().astype(int)
+
+        for score in sorted(subset["PCK_Group"].unique()):
+            if score != 0 or score != 100:
+                continue
+            brightness_values = subset.loc[subset["PCK_Group"]
+                                           == score, "brightness"].values
+            if len(brightness_values) == 0:
+                continue
+
+            counts, bin_edges = np.histogram(brightness_values, bins=bins)
+            if normalize:
+                counts = counts / counts.sum()
+
+            plt.plot(
+                bin_edges[:-1],
+                counts,
+                linestyle="-",
+                marker="o",
+                markersize=3,
+                label=f"{pck_col} | PCK={score}"
+            )
+
+    plt.title("Brightness Distribution Overlaid ")
+    plt.xlabel("Brightness")
+    plt.ylabel("Relative Frequency" if normalize else "Frame Count")
     plt.grid(True, linestyle="--", alpha=0.6)
-    plt.legend(title="Thresholds", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
 
-    # Save
-    save_path = os.path.join(config.SAVE_FOLDER, "pck_all_thresholds.png")
+    save_path = os.path.join(
+        config.SAVE_FOLDER, f"brightness_pck_overlay{pck_col}(0 and 100).svg")
     plt.savefig(save_path, dpi=300, bbox_inches="tight")
     plt.close()
+    print(f"Overlay plot saved to {save_path}")
 
-    print(f"✅ Multi-threshold PCK line plot saved to {save_path}")
-    print("="*50 + "\nPlot Completed.")
+    # ------------------- Statistics -------------------
+    stats_list = []
+    for pck_col in valid_pck_cols:
+        subset = df[["brightness", pck_col]].dropna()
+        subset["PCK_Group"] = subset[pck_col].round().astype(int)
+
+        for score in sorted(subset["PCK_Group"].unique()):
+            brightness_values = subset.loc[subset["PCK_Group"]
+                                           == score, "brightness"].values
+            if len(brightness_values) == 0:
+                continue
+
+            mean_val = np.mean(brightness_values)
+            std_val = np.std(brightness_values)
+            iqr_val = np.percentile(brightness_values, 75) - \
+                np.percentile(brightness_values, 25)
+
+            stats_list.append({
+                "PCK_Column": pck_col,
+                "PCK_Group": score,
+                "Mean_Brightness": mean_val,
+                "Std_Deviation": std_val,
+                "IQR": iqr_val,
+                "Frame_Count": len(brightness_values)
+            })
+
+    stats_df = pd.DataFrame(stats_list)
+
+    # Save/update Excel
+    stats_file = os.path.join(
+        config.SAVE_FOLDER, f"brightness_pck_statistics{pck_col}.xlsx")
+    if os.path.exists(stats_file):
+        existing_df = pd.read_excel(stats_file)
+        combined_df = pd.concat([existing_df, stats_df], ignore_index=True)
+        combined_df.to_excel(stats_file, index=False)
+        print(f"Updated statistics saved to '{stats_file}'")
+    else:
+        stats_df.to_excel(stats_file, index=False)
+        print(f"Statistics created at '{stats_file}'")
+
+    print("=" * 60 + "\nOverlay and Statistics Completed.")
