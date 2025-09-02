@@ -3,7 +3,7 @@ import numpy as np
 
 
 def apply_brightness_reduction(frame, noise_params):
-    if not getattr(noise_params, "apply_brightness_reduction", False):
+    if not getattr(noise_params, "apply_brightness_reduction"):
         return frame
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV).astype(np.float32)

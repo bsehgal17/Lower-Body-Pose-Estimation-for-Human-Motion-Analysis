@@ -2,8 +2,8 @@ from .types import add_realistic_noise
 
 
 def apply_combined_noise(frame, noise_params):
-    apply_poisson = getattr(noise_params, "apply_poisson_noise", True)
-    apply_gaussian = getattr(noise_params, "apply_gaussian_noise", True)
+    apply_poisson = getattr(noise_params, "apply_poisson_noise")
+    apply_gaussian = getattr(noise_params, "apply_gaussian_noise")
 
     if apply_poisson or apply_gaussian:
         frame = add_realistic_noise(
