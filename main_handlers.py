@@ -34,8 +34,10 @@ def _find_enhanced_videos_dir(pipeline_name: str, global_config: GlobalConfig):
     video_extensions = global_config.video.extensions
     for ext in video_extensions:
         enhanced_files = list(base_output_dir.glob(f"**/*clahe*{ext}"))
-        enhanced_files.extend(list(base_output_dir.glob(f"**/*enhanced*{ext}")))
-        enhanced_files.extend(list(base_output_dir.glob(f"**/*histogram*{ext}")))
+        enhanced_files.extend(
+            list(base_output_dir.glob(f"**/*enhanced*{ext}")))
+        enhanced_files.extend(
+            list(base_output_dir.glob(f"**/*histogram*{ext}")))
         if enhanced_files:
             enhanced_dir = enhanced_files[0].parent
             logger.info(f"Found enhanced videos by prefix in: {enhanced_dir}")
@@ -55,7 +57,8 @@ def _find_enhanced_detection_results_dir(
 
     # Look for detection results from enhanced pipeline
     # The detection pipeline with enhanced videos creates: base_output_dir/pipeline_name_enhanced/detect/
-    enhanced_detection_dir = base_output_dir / f"{pipeline_name}_enhanced" / "detect"
+    enhanced_detection_dir = base_output_dir / \
+        f"{pipeline_name}_enhanced" / "detect"
 
     if enhanced_detection_dir.exists() and any(enhanced_detection_dir.iterdir()):
         logger.info(
@@ -96,14 +99,16 @@ def _find_enhanced_detection_results_dir(
 def _handle_detect_command(
     args, pipeline_config: PipelineConfig, global_config: GlobalConfig
 ):
-    run_detection_pipeline = _get_detection_pipeline_fn(pipeline_config.models.detector)
+    run_detection_pipeline = _get_detection_pipeline_fn(
+        pipeline_config.models.detector)
 
     input_dir, base_pipeline_out = get_pipeline_io_paths(
         global_config.paths, pipeline_config.paths.dataset
     )
 
     # Check if enhanced videos exist from previous pipeline step
-    enhanced_videos_dir = _find_enhanced_videos_dir(args.pipeline_name, global_config)
+    enhanced_videos_dir = _find_enhanced_videos_dir(
+        args.pipeline_name, global_config)
 
     if enhanced_videos_dir:
         logger.info(
@@ -114,18 +119,17 @@ def _handle_detect_command(
         run_dir = make_run_dir(
             base_out=base_pipeline_out,
             pipeline_name=f"{args.pipeline_name}_enhanced",
-            task_name="detect",
             step_name=args.command,
             cfg_path=args.pipeline_config,
             global_config_obj=global_config,
             pipeline_config_obj=pipeline_config,
         )
     else:
-        logger.info(f"No enhanced videos found, using original videos: {input_dir}")
+        logger.info(
+            f"No enhanced videos found, using original videos: {input_dir}")
         run_dir = make_run_dir(
             base_out=base_pipeline_out,
             pipeline_name=args.pipeline_name,
-            task_name="detect",
             step_name=args.command,
             cfg_path=args.pipeline_config,
             global_config_obj=global_config,
@@ -227,15 +231,19 @@ def _handle_filter_command(
     pipeline_config.paths.output_dir = str(step_out)
 
     if not pipeline_config.filter.input_dir:
-        noise_dir = os.path.join(base_pipeline_out, args.pipeline_name, "noise")
-        detect_dir = os.path.join(base_pipeline_out, args.pipeline_name, "detect")
+        noise_dir = os.path.join(
+            base_pipeline_out, args.pipeline_name, "noise")
+        detect_dir = os.path.join(
+            base_pipeline_out, args.pipeline_name, "detect")
 
         if os.path.exists(noise_dir):
             pipeline_config.filter.input_dir = noise_dir
-            logger.info(f"Auto-selected input_dir from noise step: {noise_dir}")
+            logger.info(
+                f"Auto-selected input_dir from noise step: {noise_dir}")
         elif os.path.exists(detect_dir):
             pipeline_config.filter.input_dir = detect_dir
-            logger.info(f"Auto-selected input_dir from detect step: {detect_dir}")
+            logger.info(
+                f"Auto-selected input_dir from detect step: {detect_dir}")
         else:
             logger.warning("Could not auto-resolve input_dir for filter.")
 
@@ -273,7 +281,8 @@ def _handle_assess_command(
             pipeline_config_obj=pipeline_config,
         )
     else:
-        logger.info("No enhanced detection results found, using regular evaluation")
+        logger.info(
+            "No enhanced detection results found, using regular evaluation")
         run_dir = make_run_dir(
             base_out=base_pipeline_out,
             pipeline_name=args.pipeline_name,
@@ -319,7 +328,8 @@ def _handle_assess_command(
     else:
         # Fall back to regular step evaluation
         for step in step_candidates:
-            step_dir = os.path.join(base_pipeline_out, args.pipeline_name, step)
+            step_dir = os.path.join(
+                base_pipeline_out, args.pipeline_name, step)
             if os.path.exists(step_dir):
                 step_eval_dir = step_out / step
                 step_eval_dir.mkdir(parents=True, exist_ok=True)
@@ -379,10 +389,12 @@ def _handle_enhance_command(
         enhancement_type = pipeline_config.enhancement.type
     if hasattr(args, "type") and args.type:
         enhancement_type = args.type
-        logger.info(f"Using enhancement type from command line: {enhancement_type}")
+        logger.info(
+            f"Using enhancement type from command line: {enhancement_type}")
 
     if not enhancement_type:
-        raise ValueError("Enhancement type must be specified in config or command line")
+        raise ValueError(
+            "Enhancement type must be specified in config or command line")
 
     # Determine if we should create comparison images (default: True, unless --no_comparison_images is set)
     create_comparison_images = True
