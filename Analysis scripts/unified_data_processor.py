@@ -1,5 +1,5 @@
 """
-Data processor using separated components.
+Unified data processor using modular components.
 """
 
 from core.base_classes import BaseDataProcessor
@@ -16,8 +16,8 @@ import os
 from typing import Dict, Any
 
 
-class DataProcessor(BaseDataProcessor):
-    """Data processor combining all processing functionality."""
+class UnifiedDataProcessor(BaseDataProcessor):
+    """Unified data processor combining all processing functionality."""
 
     def __init__(self, config):
         super().__init__(config)

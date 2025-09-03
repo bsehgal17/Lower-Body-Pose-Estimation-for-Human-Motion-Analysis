@@ -1,8 +1,8 @@
-# Analysis System - Enhanced Architecture
+# Modular Analysis System - Enhanced Architecture
 
-This directory contains a highly componentized analysis system for pose estimation data analysis with each functionality in its own dedicated module.
+This directory contains a highly modular, separated analysis system for pose estimation data analysis with each functionality in its own dedicated module.
 
-## 🏗️ Component-Based Architecture
+## 🏗️ New Modular Architecture
 
 ### Core Components (`core/`)
 
@@ -48,8 +48,8 @@ This directory contains a highly componentized analysis system for pose estimati
 - `performance_utils.py` - Performance monitoring and progress tracking
 
 ### Main Components
-- `data_processor.py` - Unified processor using all components
-- `main.py` - Main pipeline using separated components
+- `unified_data_processor.py` - Unified processor using all modular components
+- `modular_main.py` - Main pipeline using separated components
 - `main.py` - Original pipeline (maintained for compatibility)
 
 ## 🚀 Key Improvements
@@ -81,11 +81,11 @@ This directory contains a highly componentized analysis system for pose estimati
 
 ## 📊 Usage Examples
 
-### Basic Analysis
+### Basic Modular Analysis
 ```python
-from main import AnalysisPipeline
+from modular_main import ModularAnalysisPipeline
 
-pipeline = AnalysisPipeline("movi")
+pipeline = ModularAnalysisPipeline("movi")
 pipeline.run_complete_analysis(
     metrics_config={"brightness": "get_brightness_data"},
     run_overall=True,
@@ -101,8 +101,8 @@ from core.config import ConfigManager
 config = ConfigManager.load_config("humaneva")
 
 # Data Processing
-from data_processor import DataProcessor
-processor = DataProcessor(config)
+from unified_data_processor import UnifiedDataProcessor
+processor = UnifiedDataProcessor(config)
 pck_data = processor.load_pck_scores()
 
 # Analysis
@@ -225,22 +225,23 @@ Analysis scripts/
 │   ├── file_utils.py
 │   ├── data_validator.py
 │   └── performance_utils.py
-├── data_processor.py
-├── main.py
+├── unified_data_processor.py
+├── modular_main.py
+├── main.py (original)
 └── README.md
 ```
 
-## 🔧 Usage
+## 🔧 Migration Guide
 
-### Component Composition
-1. **Import Changes**: Use component-based import paths
-2. **Factory Usage**: Use factories for component creation
+### From Original to Modular System
+1. **Import Changes**: Update imports to use new modular paths
+2. **Factory Usage**: Use factories instead of direct class instantiation
 3. **Component Composition**: Compose functionality using individual components
-4. **Configuration**: Use the config management system
+4. **Configuration**: Use new config management system
 
 ### Compatibility
-- Clean component-based architecture
-- `main.py` demonstrates component usage
-- All functionality is preserved in component form
+- Original `main.py` is maintained for backward compatibility
+- New `modular_main.py` demonstrates modular usage
+- All original functionality is preserved in modular form
 
-This enhanced component-based architecture provides maximum flexibility, maintainability, and extensibility.
+This enhanced modular architecture provides maximum flexibility, maintainability, and extensibility while preserving all existing functionality.

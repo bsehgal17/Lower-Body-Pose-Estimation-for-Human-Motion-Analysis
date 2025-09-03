@@ -1,0 +1,45 @@
+"""
+Factory for creating visualization instances.
+"""
+
+from ..base_classes import BaseVisualizer
+from .distribution_visualizer import DistributionVisualizer
+from .scatter_visualizer import ScatterPlotVisualizer
+from .bar_visualizer import BarPlotVisualizer
+from .pck_line_visualizer import PCKLinePlotVisualizer
+
+
+class VisualizationFactory:
+    """Factory for creating visualization components."""
+
+    _visualizers = {
+        "distribution": DistributionVisualizer,
+        "scatter": ScatterPlotVisualizer,
+        "bar": BarPlotVisualizer,
+        "pck_line": PCKLinePlotVisualizer,
+    }
+
+    @classmethod
+    def create_visualizer(cls, visualizer_type: str, config) -> BaseVisualizer:
+        """Create a visualizer of the specified type."""
+        visualizer_type = visualizer_type.lower()
+
+        if visualizer_type not in cls._visualizers:
+            raise ValueError(
+                f"Unknown visualizer type: {visualizer_type}. Available: {list(cls._visualizers.keys())}"
+            )
+
+        return cls._visualizers[visualizer_type](config)
+
+    @classmethod
+    def register_visualizer(cls, visualizer_type: str, visualizer_class: type):
+        """Register a new visualizer type."""
+        if not issubclass(visualizer_class, BaseVisualizer):
+            raise ValueError("Visualizer class must inherit from BaseVisualizer")
+
+        cls._visualizers[visualizer_type.lower()] = visualizer_class
+
+    @classmethod
+    def get_available_visualizers(cls):
+        """Get list of available visualizer types."""
+        return list(cls._visualizers.keys())

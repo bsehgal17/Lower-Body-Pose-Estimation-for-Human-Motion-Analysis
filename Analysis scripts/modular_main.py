@@ -1,18 +1,18 @@
 """
-Analysis pipeline using separated components.
+Modular analysis pipeline using separated components.
 """
 
 from core.config import ConfigManager
 from core.analyzers import AnalyzerFactory
 from core.visualizers import VisualizationFactory
-from data_processor import DataProcessor
+from unified_data_processor import UnifiedDataProcessor
 from utils import PerformanceMonitor, ProgressTracker
 import os
 from datetime import datetime
 
 
-class AnalysisPipeline:
-    """Analysis pipeline using separated components."""
+class ModularAnalysisPipeline:
+    """Modular analysis pipeline using separated components."""
 
     def __init__(self, dataset_name: str):
         """Initialize the analysis pipeline."""
@@ -20,7 +20,7 @@ class AnalysisPipeline:
         self.config = ConfigManager.load_config(dataset_name)
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         os.makedirs(self.config.save_folder, exist_ok=True)
-        self.data_processor = DataProcessor(self.config)
+        self.data_processor = UnifiedDataProcessor(self.config)
 
     @PerformanceMonitor.timing_decorator
     def run_complete_analysis(
@@ -31,7 +31,9 @@ class AnalysisPipeline:
         per_frame_analysis_types: list,
     ):
         """Run complete analysis pipeline."""
-        print(f"Starting analysis pipeline for {self.dataset_name.upper()} dataset...")
+        print(
+            f"Starting modular analysis pipeline for {self.dataset_name.upper()} dataset..."
+        )
 
         if run_overall:
             self._run_overall_analysis(metrics_config)
@@ -41,12 +43,12 @@ class AnalysisPipeline:
             self._run_per_frame_analysis(metrics_config, per_frame_analysis_types)
 
         print(
-            f"\nComplete analysis pipeline finished for {self.dataset_name.upper()} dataset."
+            f"\nComplete modular analysis pipeline finished for {self.dataset_name.upper()} dataset."
         )
 
     def _run_overall_analysis(self, metrics_config: dict):
-        """Run overall analysis using separated components."""
-        print("Running overall analysis with separated components...")
+        """Run overall analysis using modular components."""
+        print("Running overall analysis with modular components...")
 
         pck_df = self.data_processor.load_pck_scores()
         if pck_df is None:
@@ -63,8 +65,8 @@ class AnalysisPipeline:
         print(f"Overall analysis complete. Results saved to {self.config.save_folder}")
 
     def _run_per_frame_analysis(self, metrics_config: dict, analysis_types: list):
-        """Run per-frame analysis using separated components."""
-        print("Running per-frame analysis with separated components...")
+        """Run per-frame analysis using modular components."""
+        print("Running per-frame analysis with modular components...")
 
         pck_df = self.data_processor.load_pck_per_frame_scores()
         if pck_df is None:
@@ -98,7 +100,7 @@ class AnalysisPipeline:
         )
 
     def _create_overall_visualizations(self, merged_df, all_metric_data, metric_name):
-        """Create overall analysis visualizations using separated components."""
+        """Create overall analysis visualizations using modular components."""
         viz_factory = VisualizationFactory()
 
         # Distribution plot
@@ -119,7 +121,7 @@ class AnalysisPipeline:
     def _run_statistical_analyses(
         self, combined_df, metric_name, analysis_types, progress
     ):
-        """Run statistical analyses using separated components."""
+        """Run statistical analyses using modular components."""
         for analysis_type in analysis_types:
             try:
                 analyzer = AnalyzerFactory.create_analyzer(analysis_type, self.config)
@@ -130,7 +132,7 @@ class AnalysisPipeline:
                 progress.update()
 
     def _create_per_frame_visualizations(self, combined_df, metric_name):
-        """Create per-frame visualizations using separated components."""
+        """Create per-frame visualizations using modular components."""
         viz_factory = VisualizationFactory()
 
         # Scatter plot
@@ -145,7 +147,7 @@ class AnalysisPipeline:
             print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
 
     def _create_pck_line_plot(self, combined_df):
-        """Create PCK line plot for all thresholds using separated components."""
+        """Create PCK line plot for all thresholds using modular components."""
         viz_factory = VisualizationFactory()
 
         try:
@@ -156,7 +158,7 @@ class AnalysisPipeline:
 
 
 def main():
-    """Main entry point for analysis."""
+    """Main entry point for modular analysis."""
     dataset_name = "movi"
 
     metrics_config = {
@@ -168,14 +170,14 @@ def main():
     run_per_frame_analysis = True
     per_frame_analysis_types = ["pck_frame_count"]
 
-    # Test the components
-    print("Testing components...")
+    # Test the modular components
+    print("Testing modular components...")
     print(f"Available analyzers: {AnalyzerFactory.get_available_analyzers()}")
     print(f"Available visualizers: {VisualizationFactory.get_available_visualizers()}")
-    print("Components test complete.\n")
+    print("Modular components test complete.\n")
 
     try:
-        pipeline = AnalysisPipeline(dataset_name)
+        pipeline = ModularAnalysisPipeline(dataset_name)
         pipeline.run_complete_analysis(
             metrics_config=metrics_config,
             run_overall=run_overall_analysis,
