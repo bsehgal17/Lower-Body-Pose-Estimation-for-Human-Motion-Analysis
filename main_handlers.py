@@ -297,43 +297,34 @@ def _handle_enhance_command(
     if success:
         logger.info("Enhancement pipeline completed successfully")
 
-        # Check if we should automatically run detection on enhanced videos
-        pipeline_steps_str = getattr(args, "pipeline_steps", "")
-        if pipeline_steps_str:
-            pipeline_steps = [step.strip()
-                              for step in pipeline_steps_str.split(",")]
-            logger.info(f"Pipeline steps: {pipeline_steps}")
+        # Step 2: Conditionally run detection only if models and detector are configured
+        if (
+            pipeline_config.models is not None
+            and getattr(pipeline_config.models, "detector", None) is not None
+        ):
+            run_detection_pipeline = _get_detection_pipeline_fn(
+                pipeline_config.models.detector
+            )
 
-            # Step 2: Conditionally run detection only if models and detector are configured
-            if (
-                hasattr(pipeline_config, "models")
-                and pipeline_config.models is not None
-                and getattr(pipeline_config.models, "detector", None) is not None
-            ):
-                run_detection_pipeline = _get_detection_pipeline_fn(
-                    pipeline_config.models.detector
-                )
+            detect_out_dir = Path(output_folder) / "detect"
+            detect_out_dir.mkdir(parents=True, exist_ok=True)
 
-                detect_out_dir = Path(output_folder) / "detect"
-                detect_out_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                f"Running detection on enhanced videos from: {output_folder}")
+            logger.info(
+                f"Detection results will be saved to: {detect_out_dir}")
 
-                logger.info(
-                    f"Running detection on enhanced videos from: {output_folder}"
-                )
-                logger.info(
-                    f"Detection results will be saved to: {detect_out_dir}")
+            run_detection_pipeline(
+                pipeline_config=pipeline_config,
+                global_config=global_config,
+                input_dir=str(output_folder),
+                output_dir=str(detect_out_dir),
+            )
+        else:
+            logger.info(
+                "No detection model configured; skipping detection step.")
 
-                run_detection_pipeline(
-                    pipeline_config=pipeline_config,
-                    global_config=global_config,
-                    input_dir=str(output_folder),
-                    output_dir=str(detect_out_dir),
-                )
-            else:
-                logger.info(
-                    "No detection model configured; skipping detection step on enhanced videos."
-                )
-
+        return True
     else:
         logger.error("Enhancement pipeline completed with errors")
         return False
