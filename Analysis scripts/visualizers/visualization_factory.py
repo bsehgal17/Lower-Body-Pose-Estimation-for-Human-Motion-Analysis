@@ -7,6 +7,7 @@ from .distribution_visualizer import DistributionVisualizer
 from .scatter_visualizer import ScatterPlotVisualizer
 from .bar_visualizer import BarPlotVisualizer
 from .pck_line_visualizer import PCKLinePlotVisualizer
+from .pck_brightness_visualizer import PCKBrightnessDistributionVisualizer
 
 
 class VisualizationFactory:
@@ -17,6 +18,7 @@ class VisualizationFactory:
         "scatter": ScatterPlotVisualizer,
         "bar": BarPlotVisualizer,
         "pck_line": PCKLinePlotVisualizer,
+        "pck_brightness": PCKBrightnessDistributionVisualizer,
     }
 
     @classmethod

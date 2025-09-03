@@ -5,7 +5,7 @@ Factory for creating analyzer instances.
 from base_classes import BaseAnalyzer
 from .anova_analyzer import ANOVAAnalyzer
 from .bin_analyzer import BinAnalyzer
-from .pck_frame_count_analyzer import PCKFrameCountAnalyzer
+from .pck_brightness_analyzer import PCKBrightnessAnalyzer
 
 
 class AnalyzerFactory:
@@ -14,7 +14,7 @@ class AnalyzerFactory:
     _analyzers = {
         "anova": ANOVAAnalyzer,
         "bin_analysis": BinAnalyzer,
-        "pck_frame_count": PCKFrameCountAnalyzer,
+        "pck_brightness": PCKBrightnessAnalyzer,
     }
 
     @classmethod
