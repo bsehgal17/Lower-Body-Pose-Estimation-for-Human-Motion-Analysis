@@ -5,7 +5,7 @@ Distribution visualization components.
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from ..base_classes import BaseVisualizer
+from base_classes import BaseVisualizer
 
 
 class DistributionVisualizer(BaseVisualizer):

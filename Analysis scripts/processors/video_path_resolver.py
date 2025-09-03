@@ -4,7 +4,7 @@ Video file discovery and path management.
 
 import os
 import pandas as pd
-from ..base_classes import BaseDataProcessor
+from base_classes import BaseDataProcessor
 
 
 class VideoPathResolver(BaseDataProcessor):

@@ -4,7 +4,7 @@ Data merging and combination utilities.
 
 import pandas as pd
 from typing import List, Dict, Any
-from ..base_classes import BaseDataProcessor
+from base_classes import BaseDataProcessor
 
 
 class DataMerger(BaseDataProcessor):

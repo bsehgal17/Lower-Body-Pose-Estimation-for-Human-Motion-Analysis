@@ -2,9 +2,9 @@
 Analysis pipeline using separated components.
 """
 
-from core.config import ConfigManager
-from core.analyzers import AnalyzerFactory
-from core.visualizers import VisualizationFactory
+from config import ConfigManager
+from analyzers import AnalyzerFactory
+from visualizers import VisualizationFactory
 from data_processor import DataProcessor
 from utils import PerformanceMonitor, ProgressTracker
 import os

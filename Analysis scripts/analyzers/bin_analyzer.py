@@ -2,7 +2,7 @@
 Bin-based statistical analyzer.
 """
 
-from ..base_classes import BaseAnalyzer
+from base_classes import BaseAnalyzer
 import pandas as pd
 from typing import Dict, Any
 import os

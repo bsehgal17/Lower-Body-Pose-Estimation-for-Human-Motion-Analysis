@@ -4,8 +4,8 @@ PCK data loading and processing.
 
 import pandas as pd
 from typing import List
-from ..base_classes import BaseDataProcessor
-from ...utils.data_validator import DataValidator
+from base_classes import BaseDataProcessor
+from utils.data_validator import DataValidator
 
 
 class PCKDataLoader(BaseDataProcessor):

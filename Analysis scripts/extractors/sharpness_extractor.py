@@ -4,7 +4,7 @@ Sharpness extraction from video frames.
 
 import cv2
 from typing import List
-from ..base_classes import BaseMetricExtractor
+from base_classes import BaseMetricExtractor
 
 
 class SharpnessExtractor(BaseMetricExtractor):

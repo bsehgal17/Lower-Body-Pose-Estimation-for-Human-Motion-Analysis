@@ -2,7 +2,7 @@
 ANOVA analyzer for statistical testing.
 """
 
-from ..base_classes import BaseAnalyzer
+from base_classes import BaseAnalyzer
 import pandas as pd
 from typing import Dict, Any, List
 import scipy.stats as stats

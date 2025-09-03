@@ -2,14 +2,14 @@
 Data processor using separated components.
 """
 
-from core.base_classes import BaseDataProcessor
-from core.processors import (
+from base_classes import BaseDataProcessor
+from processors import (
     PCKDataLoader,
     VideoPathResolver,
     FrameSynchronizer,
     DataMerger,
 )
-from core.extractors import MetricExtractorFactory
+from extractors import MetricExtractorFactory
 from utils import PerformanceMonitor, ProgressTracker
 import pandas as pd
 import os

@@ -2,7 +2,7 @@
 PCK frame count analyzer.
 """
 
-from ..base_classes import BaseAnalyzer
+from base_classes import BaseAnalyzer
 import pandas as pd
 import os
 

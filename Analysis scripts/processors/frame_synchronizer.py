@@ -3,7 +3,7 @@ Frame synchronization utilities.
 """
 
 from typing import Dict, Any
-from ..base_classes import BaseDataProcessor
+from base_classes import BaseDataProcessor
 
 
 class FrameSynchronizer(BaseDataProcessor):
