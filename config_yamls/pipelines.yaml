@@ -7,7 +7,7 @@ pipelines:
   - name: clahe_rtmw_eval_humaneva
     steps:
       - command: enhance
-        config_file: "config_yamls/enhancement/enhancement_pipeline_humaneva.yaml"
+        config_file: "config_yamls/enhancement/clahe_with_comparison.yaml"
       # - command: detect
       #   config_file: "config_yamls/detector/rtmw_detector.yaml"
       - command: evaluation
