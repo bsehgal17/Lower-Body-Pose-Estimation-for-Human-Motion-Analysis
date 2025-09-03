@@ -1,5 +1,5 @@
 """
-Modular analyzers replacing original analysis scripts.
+Analyzers replacing original analysis scripts.
 """
 
 from base_classes import BaseAnalyzer

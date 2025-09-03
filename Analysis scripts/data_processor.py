@@ -1,15 +1,15 @@
 """
-Modular data processor replacing original data processing scripts.
+Data processor replacing original data processing scripts.
 """
 
 from base_classes import BaseDataProcessor
 import pandas as pd
 import os
 from typing import List, Dict, Any
-from modular_extractors import MetricExtractorFactory
+from extractors import MetricExtractorFactory
 
 
-class ModularDataProcessor(BaseDataProcessor):
+class DataProcessor(BaseDataProcessor):
     """Unified data processor combining PCK and video data processing."""
 
     def __init__(self, config):
