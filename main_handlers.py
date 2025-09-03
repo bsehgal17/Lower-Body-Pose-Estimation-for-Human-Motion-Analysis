@@ -299,7 +299,17 @@ def _handle_enhance_command(
                 pipeline_config.models.detector
             )
 
-            detect_out_dir = Path(output_folder) / "detect"
+            # Create enhanced detection output directory at pipeline level
+            enhanced_run_dir = make_run_dir(
+                base_out=base_pipeline_out,
+                pipeline_name=f"{args.pipeline_name}",
+                step_name="detect",
+                cfg_path=args.pipeline_config,
+                global_config_obj=global_config,
+                pipeline_config_obj=pipeline_config,
+            )
+
+            detect_out_dir = enhanced_run_dir
             detect_out_dir.mkdir(parents=True, exist_ok=True)
 
             logger.info(f"Running detection on enhanced videos from: {output_folder}")
