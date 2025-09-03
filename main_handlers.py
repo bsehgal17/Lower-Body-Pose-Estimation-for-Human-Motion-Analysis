@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 def _handle_detect_command(
     args, pipeline_config: PipelineConfig, global_config: GlobalConfig
 ):
-    run_detection_pipeline = _get_detection_pipeline_fn(pipeline_config.models.detector)
+    run_detection_pipeline = _get_detection_pipeline_fn(
+        pipeline_config.models.detector)
 
     input_dir, base_pipeline_out = get_pipeline_io_paths(
         global_config.paths, pipeline_config.paths.dataset
@@ -121,15 +122,19 @@ def _handle_filter_command(
     pipeline_config.paths.output_dir = str(step_out)
 
     if not pipeline_config.filter.input_dir:
-        noise_dir = os.path.join(base_pipeline_out, args.pipeline_name, "noise")
-        detect_dir = os.path.join(base_pipeline_out, args.pipeline_name, "detect")
+        noise_dir = os.path.join(
+            base_pipeline_out, args.pipeline_name, "noise")
+        detect_dir = os.path.join(
+            base_pipeline_out, args.pipeline_name, "detect")
 
         if os.path.exists(noise_dir):
             pipeline_config.filter.input_dir = noise_dir
-            logger.info(f"Auto-selected input_dir from noise step: {noise_dir}")
+            logger.info(
+                f"Auto-selected input_dir from noise step: {noise_dir}")
         elif os.path.exists(detect_dir):
             pipeline_config.filter.input_dir = detect_dir
-            logger.info(f"Auto-selected input_dir from detect step: {detect_dir}")
+            logger.info(
+                f"Auto-selected input_dir from detect step: {detect_dir}")
         else:
             logger.warning("Could not auto-resolve input_dir for filter.")
 
@@ -256,10 +261,12 @@ def _handle_enhance_command(
         enhancement_type = pipeline_config.enhancement.type
     if hasattr(args, "type") and args.type:
         enhancement_type = args.type
-        logger.info(f"Using enhancement type from command line: {enhancement_type}")
+        logger.info(
+            f"Using enhancement type from command line: {enhancement_type}")
 
     if not enhancement_type:
-        raise ValueError("Enhancement type must be specified in config or command line")
+        raise ValueError(
+            "Enhancement type must be specified in config or command line")
 
     # Determine if we should create comparison images (default: True, unless --no_comparison_images is set)
     create_comparison_images = True
@@ -312,8 +319,10 @@ def _handle_enhance_command(
             detect_out_dir = enhanced_run_dir
             detect_out_dir.mkdir(parents=True, exist_ok=True)
 
-            logger.info(f"Running detection on enhanced videos from: {output_folder}")
-            logger.info(f"Detection results will be saved to: {detect_out_dir}")
+            logger.info(
+                f"Running detection on enhanced videos from: {output_folder}")
+            logger.info(
+                f"Detection results will be saved to: {detect_out_dir}")
 
             run_detection_pipeline(
                 pipeline_config=pipeline_config,
@@ -322,7 +331,8 @@ def _handle_enhance_command(
                 output_dir=str(detect_out_dir),
             )
         else:
-            logger.info("No detection model configured; skipping detection step.")
+            logger.info(
+                "No detection model configured; skipping detection step.")
 
         return True
     else:
