@@ -117,6 +117,11 @@ def parse_main_args(argv: Optional[List[str]] = None):
         action="store_true",
         help="Skip creating comparison images",
     )
+    parser_enhance.add_argument(
+        "--pipeline_steps",
+        type=str,
+        help="Comma-separated list of pipeline steps for auto-detection workflow",
+    )
     parser_enhance.set_defaults(func=_handle_enhance_command)
 
     return parser.parse_args(argv)
