@@ -8,7 +8,7 @@ Focus: PCK brightness analysis only.
 import sys
 import os
 import pandas as pd
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 # Add the Analysis scripts directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -21,16 +21,28 @@ from simple_pck_loader import SimplePCKDataLoader
 class SimpleBrightnessAnalyzer:
     """Simple brightness analyzer for PCK scores."""
 
-    def __init__(self, dataset_name: str):
-        """Initialize with dataset name."""
+    def __init__(self, dataset_name: str, score_groups: Optional[List[int]] = None):
+        """Initialize with dataset name and optional score groups."""
         self.dataset_name = dataset_name
+        self.score_groups = score_groups
         self.config = ConfigManager.load_config(dataset_name)
         self.data_loader = SimplePCKDataLoader(dataset_name)
-        self.analyzer = AnalyzerFactory.create_analyzer("pck_brightness", self.config)
+
+        # Create analyzer with score groups if specified
+        if score_groups:
+            self.analyzer = AnalyzerFactory.create_analyzer(
+                "pck_brightness", self.config, score_groups=score_groups
+            )
+        else:
+            self.analyzer = AnalyzerFactory.create_analyzer(
+                "pck_brightness", self.config
+            )
 
     def analyze_brightness_distribution(self) -> Optional[Dict[str, Any]]:
         """Run brightness distribution analysis."""
         print(f"Analyzing brightness distribution for {self.dataset_name}...")
+        if self.score_groups:
+            print(f"Filtering to PCK scores: {self.score_groups}")
         print("=" * 60)
 
         # Load per-frame data
@@ -164,12 +176,21 @@ def main():
     parser.add_argument("dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
     parser.add_argument("--pck-score", type=int, help="Analyze specific PCK score")
     parser.add_argument("--pck-column", help="Specific PCK column to analyze")
+    parser.add_argument(
+        "--score-groups",
+        nargs="+",
+        type=int,
+        help="Specific PCK scores to include in analysis (e.g., --score-groups 0 25 50 75 100)",
+    )
     parser.add_argument("--export", action="store_true", help="Export summary to CSV")
 
     args = parser.parse_args()
 
     try:
-        analyzer = SimpleBrightnessAnalyzer(args.dataset)
+        # Create analyzer with optional score groups
+        analyzer = SimpleBrightnessAnalyzer(
+            args.dataset, score_groups=args.score_groups
+        )
 
         if args.pck_score is not None:
             # Analyze specific PCK score

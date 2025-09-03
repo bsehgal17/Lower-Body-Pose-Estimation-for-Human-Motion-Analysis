@@ -28,24 +28,6 @@ class SimplePlotCreator:
             "pck_brightness", self.config
         )
 
-
-from config import ConfigManager
-from visualizers import VisualizationFactory
-from simple_brightness_analyzer import SimpleBrightnessAnalyzer
-
-
-class SimplePlotCreator:
-    """Simple plot creator for PCK brightness analysis."""
-
-    def __init__(self, dataset_name: str):
-        """Initialize with dataset name."""
-        self.dataset_name = dataset_name
-        self.config = ConfigManager.load_config(dataset_name)
-        self.brightness_analyzer = SimpleBrightnessAnalyzer(dataset_name)
-        self.visualizer = VisualizationFactory.create_visualizer(
-            "pck_brightness", self.config
-        )
-
     def create_all_plots(self, save_prefix: str = None) -> bool:
         """Create all available plots."""
         print(f"Creating plots for {self.dataset_name}...")
@@ -197,12 +179,18 @@ def main():
         help="Type of plots to create",
     )
     parser.add_argument("--prefix", help="Save prefix for plot files")
+    parser.add_argument(
+        "--score-groups",
+        nargs="+",
+        type=int,
+        help="Specific PCK scores to include in plots (e.g., --score-groups 0 25 50 75 100)",
+    )
     parser.add_argument("--list", action="store_true", help="List available plot types")
 
     args = parser.parse_args()
 
     try:
-        creator = SimplePlotCreator(args.dataset)
+        creator = SimplePlotCreator(args.dataset, score_groups=args.score_groups)
 
         if args.list:
             creator.list_available_plots()

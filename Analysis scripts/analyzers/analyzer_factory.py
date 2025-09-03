@@ -18,13 +18,19 @@ class AnalyzerFactory:
     }
 
     @classmethod
-    def create_analyzer(cls, analyzer_type: str, config) -> BaseAnalyzer:
+    def create_analyzer(cls, analyzer_type: str, config, **kwargs) -> BaseAnalyzer:
         """Create an analyzer of the specified type."""
         analyzer_type = analyzer_type.lower()
 
         if analyzer_type not in cls._analyzers:
             raise ValueError(
                 f"Unknown analyzer type: {analyzer_type}. Available: {list(cls._analyzers.keys())}"
+            )
+
+        # Special handling for PCK brightness analyzer with score groups
+        if analyzer_type == "pck_brightness" and "score_groups" in kwargs:
+            return cls._analyzers[analyzer_type](
+                config, score_groups=kwargs["score_groups"]
             )
 
         return cls._analyzers[analyzer_type](config)

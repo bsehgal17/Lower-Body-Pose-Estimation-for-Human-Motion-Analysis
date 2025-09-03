@@ -18,11 +18,12 @@ import os
 class PCKBrightnessAnalyzer(BaseAnalyzer):
     """Analyzer for PCK score vs brightness distribution."""
 
-    def __init__(self, config):
+    def __init__(self, config, score_groups=None):
         """Initialize analyzer with configuration."""
         super().__init__(config)
         self.path_resolver = VideoPathResolver(config)
         self.frame_sync = FrameSynchronizer(config)
+        self.score_groups = score_groups  # List of specific PCK scores to analyze
 
     def analyze(self, data: pd.DataFrame) -> Dict[str, Any]:
         """
@@ -203,4 +204,64 @@ class PCKBrightnessAnalyzer(BaseAnalyzer):
                 f"avg brightness: {brightness_stats['mean']:.1f}"
             )
 
+        # Filter by score groups if specified
+        if self.score_groups is not None:
+            analysis_results = self._filter_by_score_groups(analysis_results)
+
         return analysis_results
+
+    def _filter_by_score_groups(
+        self, analysis_results: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Filter analysis results to include only specified PCK score groups.
+
+        Args:
+            analysis_results: Original analysis results
+
+        Returns:
+            Filtered analysis results containing only specified score groups
+        """
+        if not self.score_groups:
+            return analysis_results
+
+        # Convert score groups to integers for comparison
+        target_scores = [int(score) for score in self.score_groups]
+
+        filtered_results = {
+            "pck_column": analysis_results["pck_column"],
+            "pck_scores": [],
+            "brightness_bins": [],
+            "normalized_frequencies": [],
+            "frame_counts": [],
+            "brightness_stats": {},
+            "raw_data": {},
+        }
+
+        print(f"Filtering to include only PCK scores: {target_scores}")
+
+        # Filter each component
+        for i, pck_score in enumerate(analysis_results["pck_scores"]):
+            if pck_score in target_scores:
+                filtered_results["pck_scores"].append(pck_score)
+                filtered_results["brightness_bins"].append(
+                    analysis_results["brightness_bins"][i]
+                )
+                filtered_results["normalized_frequencies"].append(
+                    analysis_results["normalized_frequencies"][i]
+                )
+                filtered_results["frame_counts"].append(
+                    analysis_results["frame_counts"][i]
+                )
+                filtered_results["brightness_stats"][pck_score] = analysis_results[
+                    "brightness_stats"
+                ][pck_score]
+                filtered_results["raw_data"][pck_score] = analysis_results["raw_data"][
+                    pck_score
+                ]
+
+        print(
+            f"Filtered from {len(analysis_results['pck_scores'])} to {len(filtered_results['pck_scores'])} PCK scores"
+        )
+
+        return filtered_results
