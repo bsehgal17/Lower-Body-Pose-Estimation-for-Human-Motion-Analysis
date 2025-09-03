@@ -65,9 +65,14 @@ class PCKLinePlotVisualizer(BaseVisualizer):
         plt.legend(title="Thresholds", bbox_to_anchor=(1.05, 1), loc="upper left")
 
         # Save with modified path
-        final_save_path = os.path.join(
-            self.config.save_folder, "pck_all_thresholds.svg"
-        )
+        if save_path:
+            final_save_path = os.path.join(
+                self.config.save_folder, f"{save_path}_pck_all_thresholds.svg"
+            )
+        else:
+            final_save_path = os.path.join(
+                self.config.save_folder, "pck_all_thresholds.svg"
+            )
         os.makedirs(self.config.save_folder, exist_ok=True)
         plt.savefig(final_save_path, dpi=300, bbox_inches="tight", format="svg")
         plt.close()

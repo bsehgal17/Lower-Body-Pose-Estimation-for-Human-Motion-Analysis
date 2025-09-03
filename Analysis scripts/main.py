@@ -60,6 +60,14 @@ class AnalysisPipeline:
                 metric_data["merged_df"], metric_data["all_metric_data"], metric_name
             )
 
+        # Create PCK line plot for overall analysis if data is available
+        if results:
+            # Use the first available merged_df for PCK line plot
+            first_result = next(iter(results.values()))
+            if "merged_df" in first_result and first_result["merged_df"] is not None:
+                self._create_pck_line_plot(first_result["merged_df"], analysis_type="overall")
+                self._create_individual_pck_plots(first_result["merged_df"], analysis_type="overall")
+
         print(f"Overall analysis complete. Results saved to {self.config.save_folder}")
 
     def _run_per_frame_analysis(self, metrics_config: dict, analysis_types: list):
@@ -91,7 +99,10 @@ class AnalysisPipeline:
         progress.finish()
 
         # Create PCK line plot if data is available
-        self._create_pck_line_plot(combined_df)
+        self._create_pck_line_plot(combined_df, analysis_type="per_frame")
+        
+        # Create individual PCK threshold plots
+        self._create_individual_pck_plots(combined_df, analysis_type="per_frame")
 
         print(
             f"Per-frame analysis complete. Results saved to {self.config.save_folder}"
@@ -212,15 +223,75 @@ class AnalysisPipeline:
         except Exception as e:
             print(f"Warning: Could not create bar plot for {metric_name}: {e}")
 
-    def _create_pck_line_plot(self, combined_df):
+    def _create_pck_line_plot(self, combined_df, analysis_type="per_frame"):
         """Create PCK line plot for all thresholds using separated components."""
         viz_factory = VisualizationFactory()
 
         try:
             pck_viz = viz_factory.create_visualizer("pck_line", self.config)
-            pck_viz.create_plot(combined_df, "pck_line", "")
-        except ValueError as e:
-            print(f"Warning: Could not create PCK line plot: {e}")
+            
+            # Create a modified save path that includes the analysis type
+            modified_save_path = f"{analysis_type}_pck_line_{self.timestamp}"
+            
+            pck_viz.create_plot(combined_df, "pck_line", modified_save_path)
+            print(f"PCK line plot created for {analysis_type} analysis")
+            
+        except Exception as e:
+            print(f"Warning: Could not create PCK line plot for {analysis_type}: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _create_individual_pck_plots(self, combined_df, analysis_type="per_frame"):
+        """Create individual line plots for each PCK threshold."""
+        try:
+            if not hasattr(self.config, 'pck_per_frame_score_columns'):
+                print("Warning: No PCK score columns found in config")
+                return
+                
+            import matplotlib.pyplot as plt
+            
+            # Define bins (integers from -2 to 102)
+            bins = list(range(-2, 102))
+            
+            for pck_col in self.config.pck_per_frame_score_columns:
+                if pck_col not in combined_df.columns:
+                    continue
+                    
+                plt.figure(figsize=(10, 6))
+                
+                # Round values to nearest int and count
+                counts = (
+                    combined_df[pck_col]
+                    .round()
+                    .astype(int)
+                    .value_counts()
+                    .reindex(bins, fill_value=0)
+                )
+                
+                plt.plot(counts.index, counts.values, marker='o', linestyle='-', linewidth=2, markersize=4)
+                
+                # Labels and formatting
+                plt.title(f'Frame Count per PCK Score - {pck_col}')
+                plt.xlabel('PCK Score')
+                plt.ylabel('Number of Frames')
+                plt.grid(True, linestyle='--', alpha=0.6)
+                
+                # Save individual plot
+                save_path = os.path.join(
+                    self.config.save_folder,
+                    f"{analysis_type}_{pck_col}_line_plot_{self.timestamp}.svg"
+                )
+                
+                os.makedirs(self.config.save_folder, exist_ok=True)
+                plt.savefig(save_path, dpi=300, bbox_inches='tight', format='svg')
+                plt.close()
+                
+                print(f"Individual PCK line plot saved: {save_path}")
+                
+        except Exception as e:
+            print(f"Warning: Could not create individual PCK plots for {analysis_type}: {e}")
+            import traceback
+            traceback.print_exc()
 
 
 def main():
