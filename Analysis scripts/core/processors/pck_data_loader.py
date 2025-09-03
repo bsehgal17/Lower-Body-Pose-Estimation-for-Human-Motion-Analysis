@@ -5,6 +5,7 @@ PCK data loading and processing.
 import pandas as pd
 from typing import List
 from ..base_classes import BaseDataProcessor
+from ...utils.data_validator import DataValidator
 
 
 class PCKDataLoader(BaseDataProcessor):
@@ -37,7 +38,9 @@ class PCKDataLoader(BaseDataProcessor):
                 df = df.reset_index(drop=True)
 
             required_cols = grouping_cols + required_score_columns
-            if not self.validate_data(df, required_cols):
+            if not DataValidator.validate_required_columns(
+                df, required_cols, f"{sheet_name} sheet"
+            ):
                 return None
 
             if self.config.camera_column and self.config.camera_column in df.columns:
