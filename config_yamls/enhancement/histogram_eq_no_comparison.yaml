@@ -1,0 +1,46 @@
+# Histogram Equalization Enhancement without Comparison Images
+# This configuration demonstrates enhancement with comparison images disabled
+
+# Dataset and path configuration
+paths:
+  dataset: Example
+  input_dir: ./input_videos
+  output_dir: ./enhanced_videos
+
+# Enhancement configuration
+enhancement:
+  # Type of enhancement to apply (required)
+  type: histogram_eq  # Global histogram equalization
+  
+  # Comparison images setting - DISABLED
+  create_comparison_images: false  # Skip generating comparison images (faster processing)
+  
+  # Processing settings
+  processing:
+    batch_size: 20  # Larger batch since no comparison images to generate
+    dataset_structure: false
+    generate_report: true
+
+# Output settings
+output:
+  prefix: hist_eq_
+  format: mp4
+  quality: high
+  preserve_structure: true
+
+# Note: With create_comparison_images: false, only enhanced videos and 
+# enhancement_report.json will be generated. No comparison_images/ folder will be created.
+
+# Example usage:
+# python main.py enhance \
+#   --pipeline_config config_yamls/enhancement/histogram_eq_no_comparison.yaml \
+#   --global_config config_yamls/global_config.yaml \
+#   --pipeline_name fast_histogram_eq \
+#   --input_folder ./my_videos \
+#   --output_folder ./results
+
+# This will create:
+# ./results/hist_eq_video1.mp4
+# ./results/hist_eq_video2.mp4  
+# ./results/enhancement_report.json
+# (No comparison images will be generated)

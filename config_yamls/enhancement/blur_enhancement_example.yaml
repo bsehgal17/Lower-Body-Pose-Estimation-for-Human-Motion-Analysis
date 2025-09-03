@@ -12,6 +12,9 @@ enhancement:
   # Type of enhancement to apply (required)
   type: gaussian_blur
   
+  # Comparison images setting
+  create_comparison_images: true  # Generate before/after comparison images for first frames
+  
   # Gaussian blur settings (required when type is gaussian_blur)
   blur:
     kernel_size: [5, 5]  # Blur kernel size (must be odd numbers)

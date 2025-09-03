@@ -12,6 +12,9 @@ enhancement:
   # Type of enhancement to apply (required)
   type: brightness_adjustment
   
+  # Comparison images setting
+  create_comparison_images: true  # Generate before/after comparison images for first frames
+  
   # Brightness adjustment settings (required when type is brightness_adjustment)
   brightness:
     factor: 1.3  # Brightness multiplication factor (>1 = brighter, <1 = darker)

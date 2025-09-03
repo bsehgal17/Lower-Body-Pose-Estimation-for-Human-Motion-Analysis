@@ -624,8 +624,22 @@ def run_enhancement_pipeline(
     report_path = Path(output_dir) / "enhancement_report.json"
     pipeline.generate_enhancement_report(input_dir, output_dir, report_path)
 
-    # Create comparison images if requested
-    if create_comparison_images and success:
+    # Create comparison images if requested (check config first, then parameter)
+    create_images_from_config = False
+    if hasattr(pipeline.enhancement_config, "create_comparison_images"):
+        create_images_from_config = pipeline.enhancement_config.create_comparison_images
+        logger.info(
+            f"Comparison images setting from config: {create_images_from_config}"
+        )
+
+    # Use config setting if available, otherwise use parameter
+    should_create_comparison_images = (
+        create_images_from_config
+        if hasattr(pipeline.enhancement_config, "create_comparison_images")
+        else create_comparison_images
+    )
+
+    if should_create_comparison_images and success:
         comparison_output_dir = Path(output_dir) / "comparison_images"
         logger.info("Creating before/after comparison images...")
         comparison_success = pipeline.save_before_after_comparison_images(

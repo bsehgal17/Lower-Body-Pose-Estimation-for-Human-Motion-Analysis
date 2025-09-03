@@ -1,0 +1,54 @@
+# CLAHE Enhancement Pipeline Configuration with Comparison Images
+# This configuration demonstrates CLAHE enhancement with comparison image generation
+
+# Dataset and path configuration
+paths:
+  dataset: Example
+  input_dir: ./input_videos
+  output_dir: ./enhanced_videos
+
+# Enhancement configuration
+enhancement:
+  # Type of enhancement to apply (required)
+  type: clahe  # Options: clahe, histogram_eq, gaussian_blur, brightness_adjustment
+  
+  # Comparison images setting (NEW FEATURE)
+  create_comparison_images: true  # Generate before/after comparison images for first frames
+  
+  # CLAHE specific settings (required when type is clahe)
+  clahe:
+    clip_limit: 2.0  # Contrast limit for adaptive histogram equalization
+    tile_grid_size: [8, 8]  # Grid size for local histogram equalization
+    color_space: LAB  # Color space: LAB (recommended), RGB, HSV
+  
+  # Processing settings
+  processing:
+    batch_size: 10  # Number of videos to process at once
+    dataset_structure: false  # Set to true if videos are in subject/action folders
+    generate_report: true  # Generate enhancement comparison report
+
+# Output settings
+output:
+  prefix: enhanced_  # Prefix for enhanced video files
+  format: mp4  # Output video format
+  quality: high  # Options: low, medium, high
+  preserve_structure: true  # Maintain directory structure in output
+  
+  # Comparison images will be saved to: output_dir/comparison_images/
+  # Each image shows: original (left) vs enhanced (right)
+  # Filename format: {video_name}_{enhancement_type}_comparison.jpg
+
+# Example usage:
+# python main.py enhance \
+#   --pipeline_config config_yamls/enhancement/clahe_with_comparison.yaml \
+#   --global_config config_yamls/global_config.yaml \
+#   --pipeline_name test_clahe \
+#   --input_folder ./my_videos \
+#   --output_folder ./results
+
+# This will create:
+# ./results/enhanced_video1.mp4
+# ./results/enhanced_video2.mp4  
+# ./results/comparison_images/video1_clahe_comparison.jpg
+# ./results/comparison_images/video2_clahe_comparison.jpg
+# ./results/enhancement_report.json

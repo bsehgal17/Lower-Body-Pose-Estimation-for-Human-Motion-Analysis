@@ -11,6 +11,9 @@ enhancement:
   # Type of enhancement to apply (required)
   type: clahe  # Options: clahe, histogram_eq, gaussian_blur, brightness_adjustment
   
+  # Comparison images setting
+  create_comparison_images: true  # Generate before/after comparison images for first frames
+  
   # CLAHE specific settings (required when type is clahe)
   clahe:
     clip_limit: 2.0  # Slightly lower clip limit for HumanEva
