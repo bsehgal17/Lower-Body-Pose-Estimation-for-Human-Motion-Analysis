@@ -2,10 +2,10 @@
 Main analysis pipeline using modular components.
 """
 
-from modular_config import ConfigManager
-from modular_data_processor import ModularDataProcessor
-from modular_analyzers import AnalyzerFactory
-from modular_visualizers import VisualizationFactory
+from config import ConfigManager
+from data_processor import DataProcessor
+from analyzers import AnalyzerFactory
+from visualizers import VisualizationFactory
 import os
 from datetime import datetime
 
@@ -45,7 +45,7 @@ class AnalysisPipeline:
         """Run overall analysis."""
         print("Running overall analysis...")
 
-        processor = ModularDataProcessor(self.config)
+        processor = DataProcessor(self.config)
         pck_df = processor.load_pck_scores()
 
         if pck_df is None:
@@ -65,7 +65,7 @@ class AnalysisPipeline:
         """Run per-frame analysis."""
         print("Running per-frame analysis...")
 
-        processor = ModularDataProcessor(self.config)
+        processor = DataProcessor(self.config)
         pck_df = processor.load_pck_per_frame_scores()
 
         if pck_df is None:
@@ -145,8 +145,8 @@ def main():
 
     # Test the new modular components
     print("Testing new modular components...")
-    from modular_analyzers import AnalyzerFactory
-    from modular_visualizers import VisualizationFactory
+    from analyzers import AnalyzerFactory
+    from visualizers import VisualizationFactory
 
     print(f"Available analyzers: {AnalyzerFactory.get_available_analyzers()}")
     print(f"Available visualizers: {VisualizationFactory.get_available_visualizers()}")

@@ -1,5 +1,5 @@
 """
-Modular visualizers replacing original plotting scripts.
+Visualizers replacing original plotting scripts.
 """
 
 import os
