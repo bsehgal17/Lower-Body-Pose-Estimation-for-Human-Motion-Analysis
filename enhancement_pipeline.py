@@ -70,8 +70,7 @@ class EnhancementPipeline:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         # Get video files with common video extensions
-        video_extensions = [".mp4", ".avi", ".mov",
-                            ".mkv", ".wmv", ".flv", ".webm"]
+        video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm"]
         video_files = get_video_files(str(input_dir), video_extensions)
         if not video_files:
             logger.warning(f"No video files found in {input_dir}")
@@ -102,11 +101,9 @@ class EnhancementPipeline:
             except ValueError:
                 # If relative_to fails, fall back to simple naming
                 output_path = output_dir / f"{video_path.name}"
-                logger.debug(
-                    f"Processing {video_path.name} -> {output_path.name}")
+                logger.debug(f"Processing {video_path.name} -> {output_path.name}")
 
-            success = self._apply_enhancement(
-                video_path, output_path, enhancement_type)
+            success = self._apply_enhancement(video_path, output_path, enhancement_type)
 
             if success:
                 success_count += 1
@@ -139,8 +136,7 @@ class EnhancementPipeline:
             )
             return success
         except Exception as e:
-            logger.error(
-                f"{enhancement_type} enhancement failed for {input_path}: {e}")
+            logger.error(f"{enhancement_type} enhancement failed for {input_path}: {e}")
             return False
 
     def _get_enhancement_parameters(self, enhancement_type: str) -> dict:
@@ -169,12 +165,9 @@ class EnhancementPipeline:
 
         elif enhancement_type == "gaussian_blur":
             if hasattr(self.enhancement_config, "blur"):
-                params["kernel_size"] = tuple(
-                    self.enhancement_config.blur.kernel_size)
-                params["sigma_x"] = getattr(
-                    self.enhancement_config.blur, "sigma_x", 0)
-                params["sigma_y"] = getattr(
-                    self.enhancement_config.blur, "sigma_y", 0)
+                params["kernel_size"] = tuple(self.enhancement_config.blur.kernel_size)
+                params["sigma_x"] = getattr(self.enhancement_config.blur, "sigma_x", 0)
+                params["sigma_y"] = getattr(self.enhancement_config.blur, "sigma_y", 0)
             else:
                 raise ValueError(
                     "Gaussian blur requires 'blur' section in configuration"
@@ -238,8 +231,7 @@ class EnhancementPipeline:
                     ".flv",
                     ".webm",
                 ]
-                video_files = get_video_files(
-                    str(action_dir), video_extensions)
+                video_files = get_video_files(str(action_dir), video_extensions)
                 total_videos += len(video_files)
 
                 for video_file in video_files:
@@ -283,8 +275,7 @@ class EnhancementPipeline:
         output_dir = Path(output_dir)
         report_path = Path(report_path)
 
-        video_extensions = [".mp4", ".avi", ".mov",
-                            ".mkv", ".wmv", ".flv", ".webm"]
+        video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm"]
         original_videos = get_video_files(str(input_dir), video_extensions)
         enhanced_videos = get_video_files(str(output_dir), video_extensions)
 
@@ -309,8 +300,7 @@ class EnhancementPipeline:
                 enhanced_path = output_dir / f"{orig_path.name}"
 
             if enhanced_path.exists():
-                stats = self._compare_video_statistics(
-                    orig_path, enhanced_path)
+                stats = self._compare_video_statistics(orig_path, enhanced_path)
                 stats["video_name"] = (
                     str(relative_path)
                     if "relative_path" in locals()
@@ -348,10 +338,8 @@ class EnhancementPipeline:
             if not cap_orig.isOpened() or not cap_enh.isOpened():
                 return stats
 
-            stats["frame_count_original"] = int(
-                cap_orig.get(cv2.CAP_PROP_FRAME_COUNT))
-            stats["frame_count_enhanced"] = int(
-                cap_enh.get(cv2.CAP_PROP_FRAME_COUNT))
+            stats["frame_count_original"] = int(cap_orig.get(cv2.CAP_PROP_FRAME_COUNT))
+            stats["frame_count_enhanced"] = int(cap_enh.get(cv2.CAP_PROP_FRAME_COUNT))
 
             brightness_changes = []
             contrast_changes = []
@@ -384,14 +372,217 @@ class EnhancementPipeline:
             cap_enh.release()
 
             if brightness_changes:
-                stats["avg_brightness_change"] = float(
-                    np.mean(brightness_changes))
+                stats["avg_brightness_change"] = float(np.mean(brightness_changes))
                 stats["avg_contrast_change"] = float(np.mean(contrast_changes))
 
         except Exception as e:
             logger.error(f"Error comparing videos: {e}")
 
         return stats
+
+    def save_before_after_comparison_images(
+        self,
+        input_dir: Union[str, Path],
+        output_dir: Union[str, Path],
+        enhancement_type: str,
+        comparison_output_dir: Union[str, Path],
+    ) -> bool:
+        """
+        Save before/after comparison images for the first frame of each video.
+
+        Args:
+            input_dir: Directory containing original videos
+            output_dir: Directory containing enhanced videos
+            enhancement_type: Type of enhancement that was applied
+            comparison_output_dir: Directory to save comparison images
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        input_dir = Path(input_dir)
+        output_dir = Path(output_dir)
+        comparison_output_dir = Path(comparison_output_dir)
+
+        if not input_dir.exists():
+            logger.error(f"Input directory not found: {input_dir}")
+            return False
+
+        if not output_dir.exists():
+            logger.error(f"Enhanced videos directory not found: {output_dir}")
+            return False
+
+        comparison_output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Get video files from input directory
+        video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm"]
+        video_files = get_video_files(str(input_dir), video_extensions)
+
+        if not video_files:
+            logger.warning(f"No video files found in {input_dir}")
+            return False
+
+        logger.info(
+            f"Creating before/after comparison images for {len(video_files)} videos"
+        )
+        logger.info(f"Enhancement type: {enhancement_type}")
+        logger.info(f"Comparison images will be saved to: {comparison_output_dir}")
+
+        success_count = 0
+
+        for video_file in tqdm(video_files, desc="Creating comparison images"):
+            video_path = Path(video_file)
+
+            # Calculate the enhanced video path maintaining folder structure
+            try:
+                relative_path = video_path.relative_to(input_dir)
+                enhanced_video_path = (
+                    output_dir / relative_path.parent / f"{relative_path.name}"
+                )
+            except ValueError:
+                # If relative_to fails, fall back to simple naming
+                enhanced_video_path = output_dir / f"{video_path.name}"
+
+            if not enhanced_video_path.exists():
+                logger.warning(f"Enhanced video not found: {enhanced_video_path}")
+                continue
+
+            # Create comparison image for this video
+            success = self._create_comparison_image(
+                video_path, enhanced_video_path, comparison_output_dir, enhancement_type
+            )
+
+            if success:
+                success_count += 1
+                logger.debug(f"Successfully created comparison for: {video_path.name}")
+            else:
+                logger.error(f"Failed to create comparison for: {video_path.name}")
+
+        logger.info(
+            f"Comparison image creation completed: {success_count}/{len(video_files)} images created successfully"
+        )
+        return success_count == len(video_files)
+
+    def _create_comparison_image(
+        self,
+        original_video_path: Path,
+        enhanced_video_path: Path,
+        output_dir: Path,
+        enhancement_type: str,
+    ) -> bool:
+        """Create a side-by-side comparison image of the first frame from original and enhanced videos."""
+        try:
+            # Read first frame from original video
+            cap_orig = cv2.VideoCapture(str(original_video_path))
+            if not cap_orig.isOpened():
+                logger.error(f"Could not open original video: {original_video_path}")
+                return False
+
+            ret_orig, frame_orig = cap_orig.read()
+            cap_orig.release()
+
+            if not ret_orig:
+                logger.error(
+                    f"Could not read first frame from original video: {original_video_path}"
+                )
+                return False
+
+            # Read first frame from enhanced video
+            cap_enh = cv2.VideoCapture(str(enhanced_video_path))
+            if not cap_enh.isOpened():
+                logger.error(f"Could not open enhanced video: {enhanced_video_path}")
+                return False
+
+            ret_enh, frame_enh = cap_enh.read()
+            cap_enh.release()
+
+            if not ret_enh:
+                logger.error(
+                    f"Could not read first frame from enhanced video: {enhanced_video_path}"
+                )
+                return False
+
+            # Create side-by-side comparison
+            height, width = frame_orig.shape[:2]
+
+            # Create a comparison image with both frames side by side
+            comparison_width = width * 2 + 60  # Extra space for labels and padding
+            comparison_height = height + 100  # Extra space for titles
+            comparison_img = (
+                np.ones((comparison_height, comparison_width, 3), dtype=np.uint8) * 255
+            )
+
+            # Add frames to comparison image
+            comparison_img[80 : 80 + height, 20 : 20 + width] = frame_orig
+            comparison_img[80 : 80 + height, 40 + width : 40 + width * 2] = frame_enh
+
+            # Add text labels
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 1.2
+            font_thickness = 2
+            text_color = (0, 0, 0)  # Black text
+
+            # Title
+            title = f"Enhancement Comparison: {enhancement_type.upper()}"
+            title_size = cv2.getTextSize(title, font, font_scale, font_thickness)[0]
+            title_x = (comparison_width - title_size[0]) // 2
+            cv2.putText(
+                comparison_img,
+                title,
+                (title_x, 30),
+                font,
+                font_scale,
+                text_color,
+                font_thickness,
+            )
+
+            # Video name
+            video_name = original_video_path.stem
+            name_size = cv2.getTextSize(video_name, font, 0.8, 2)[0]
+            name_x = (comparison_width - name_size[0]) // 2
+            cv2.putText(
+                comparison_img, video_name, (name_x, 55), font, 0.8, text_color, 2
+            )
+
+            # Labels for original and enhanced
+            cv2.putText(
+                comparison_img,
+                "Original",
+                (20 + width // 2 - 50, height + 95),
+                font,
+                0.8,
+                text_color,
+                2,
+            )
+            cv2.putText(
+                comparison_img,
+                "Enhanced",
+                (40 + width + width // 2 - 50, height + 95),
+                font,
+                0.8,
+                text_color,
+                2,
+            )
+
+            # Save comparison image
+            output_filename = (
+                f"{original_video_path.stem}_{enhancement_type}_comparison.jpg"
+            )
+            output_path = output_dir / output_filename
+
+            success = cv2.imwrite(str(output_path), comparison_img)
+
+            if success:
+                logger.debug(f"Saved comparison image: {output_path}")
+                return True
+            else:
+                logger.error(f"Failed to save comparison image: {output_path}")
+                return False
+
+        except Exception as e:
+            logger.error(
+                f"Error creating comparison image for {original_video_path}: {e}"
+            )
+            return False
 
 
 def run_enhancement_pipeline(
@@ -401,6 +592,7 @@ def run_enhancement_pipeline(
     output_dir: Union[str, Path],
     enhancement_type: str,
     dataset_structure: bool,
+    create_comparison_images: bool = True,
 ) -> bool:
     """
     Main function to run the enhancement pipeline.
@@ -412,6 +604,7 @@ def run_enhancement_pipeline(
         output_dir: Output directory for enhanced videos
         enhancement_type: Type of enhancement ('clahe', 'histogram_eq')
         dataset_structure: Whether to process as structured dataset
+        create_comparison_images: Whether to create before/after comparison images
 
     Returns:
         bool: True if successful, False otherwise
@@ -425,16 +618,69 @@ def run_enhancement_pipeline(
             input_dir, output_dir, enhancement_type
         )
     else:
-        success = pipeline.process_videos(
-            input_dir, output_dir, enhancement_type)
+        success = pipeline.process_videos(input_dir, output_dir, enhancement_type)
 
     # Generate report
     report_path = Path(output_dir) / "enhancement_report.json"
     pipeline.generate_enhancement_report(input_dir, output_dir, report_path)
 
+    # Create comparison images if requested
+    if create_comparison_images and success:
+        comparison_output_dir = Path(output_dir) / "comparison_images"
+        logger.info("Creating before/after comparison images...")
+        comparison_success = pipeline.save_before_after_comparison_images(
+            input_dir, output_dir, enhancement_type, comparison_output_dir
+        )
+        if comparison_success:
+            logger.info(f"Comparison images saved to: {comparison_output_dir}")
+        else:
+            logger.warning("Some comparison images could not be created")
+
     if success:
         logger.info("Enhancement pipeline completed successfully")
     else:
         logger.error("Enhancement pipeline completed with errors")
+
+    return success
+
+
+def create_enhancement_comparison_images(
+    original_video_dir: Union[str, Path],
+    enhanced_video_dir: Union[str, Path],
+    output_dir: Union[str, Path],
+    enhancement_type: str = "enhancement",
+) -> bool:
+    """
+    Standalone function to create before/after comparison images.
+
+    Args:
+        original_video_dir: Directory containing original videos
+        enhanced_video_dir: Directory containing enhanced videos
+        output_dir: Directory to save comparison images
+        enhancement_type: Type of enhancement for labeling
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    logger.info("Creating enhancement comparison images...")
+
+    # Create a minimal pipeline instance for the comparison functionality
+    # Create minimal config objects
+    pipeline_config = type("PipelineConfig", (), {"enhancement": None})()
+    global_config = type("GlobalConfig", (), {})()
+
+    pipeline = EnhancementPipeline(pipeline_config, global_config)
+
+    # Override the enhancement config extraction to avoid errors
+    pipeline.enhancement_config = None
+
+    success = pipeline.save_before_after_comparison_images(
+        original_video_dir, enhanced_video_dir, enhancement_type, output_dir
+    )
+
+    if success:
+        logger.info(f"Comparison images created successfully in: {output_dir}")
+    else:
+        logger.error("Failed to create comparison images")
 
     return success

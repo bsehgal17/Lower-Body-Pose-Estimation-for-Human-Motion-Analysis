@@ -97,8 +97,7 @@ def parse_main_args(argv: Optional[List[str]] = None):
     parser_enhance.add_argument(
         "--type",
         type=str,
-        choices=["clahe", "histogram_eq",
-                 "gaussian_blur", "brightness_adjustment"],
+        choices=["clahe", "histogram_eq", "gaussian_blur", "brightness_adjustment"],
         required=False,
         help="Type of enhancement to apply (optional if specified in config)",
     )
@@ -106,6 +105,17 @@ def parse_main_args(argv: Optional[List[str]] = None):
         "--dataset_structure",
         action="store_true",
         help="Process videos organized in dataset structure (subject/action/videos)",
+    )
+    parser_enhance.add_argument(
+        "--create_comparison_images",
+        action="store_true",
+        default=True,
+        help="Create before/after comparison images for the first frame of each video (default: True)",
+    )
+    parser_enhance.add_argument(
+        "--no_comparison_images",
+        action="store_true",
+        help="Skip creating comparison images",
     )
     parser_enhance.set_defaults(func=_handle_enhance_command)
 

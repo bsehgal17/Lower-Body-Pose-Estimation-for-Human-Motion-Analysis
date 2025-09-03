@@ -239,6 +239,13 @@ def _handle_enhance_command(
     if not enhancement_type:
         raise ValueError("Enhancement type must be specified in config or command line")
 
+    # Determine if we should create comparison images (default: True, unless --no_comparison_images is set)
+    create_comparison_images = True
+    if hasattr(args, "no_comparison_images") and args.no_comparison_images:
+        create_comparison_images = False
+    elif hasattr(args, "create_comparison_images"):
+        create_comparison_images = args.create_comparison_images
+
     # Determine if we should process as structured dataset (no default)
     dataset_structure = getattr(args, "dataset_structure", False)
 
@@ -246,6 +253,7 @@ def _handle_enhance_command(
     logger.info(f"Input directory: {input_folder}")
     logger.info(f"Output directory: {output_folder}")
     logger.info(f"Dataset structure mode: {dataset_structure}")
+    logger.info(f"Create comparison images: {create_comparison_images}")
 
     success = run_enhancement_pipeline(
         pipeline_config=pipeline_config,
@@ -254,6 +262,7 @@ def _handle_enhance_command(
         output_dir=output_folder,
         enhancement_type=enhancement_type,
         dataset_structure=dataset_structure,
+        create_comparison_images=create_comparison_images,
     )
 
     if success:
