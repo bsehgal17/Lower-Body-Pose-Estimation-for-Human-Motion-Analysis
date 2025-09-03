@@ -1,5 +1,5 @@
-# CLAHE Enhancement Pipeline Configuration for HumanEva Dataset - Standard Settings
-# This configuration uses standard/balanced CLAHE parameters (ORIGINAL/DEFAULT)
+# CLAHE Enhancement Pipeline Configuration for HumanEva Dataset - Aggressive Settings
+# This configuration uses aggressive CLAHE parameters for strong enhancement
 
 # Dataset and path configuration
 paths:
@@ -14,29 +14,28 @@ enhancement:
   # Comparison images setting
   create_comparison_images: true  # Generate before/after comparison images for first frames
   
-  # CLAHE specific settings - STANDARD/BALANCED (original default)
+  # CLAHE specific settings - AGGRESSIVE (strong enhancement)
   clahe:
-    clip_limit: 2.0  # Balanced clip limit for HumanEva
-    tile_grid_size: [8, 8]  # Standard 8x8 grid
-    color_space: LAB  # LAB color space for perceptually uniform enhancement
+    clip_limit: 4.0  # Higher clip limit for stronger contrast enhancement
+    tile_grid_size: [16, 16]  # Larger grid for more localized adaptation
+    color_space: LAB  # Options: LAB, RGB, HSV
   
   # Processing settings
   processing:
-    batch_size: 10  # Number of videos to process at once
+    batch_size: 8  # Slightly smaller batch for more intensive processing
     dataset_structure: true  # Whether videos are organized in subject/action structure
     generate_report: true  # Generate enhancement comparison report
 
 # Output settings
 output:
-  prefix: clahe_standard_  # Prefix for enhanced video files
+  prefix: clahe_aggressive_  # Prefix for enhanced video files
   format: mp4  # Output video format
   quality: high  # Options: low, medium, high
   preserve_structure: true  # Maintain directory structure in output
 
 # Notes:
-# - This is the original/default configuration
-# - Balanced parameters suitable for most HumanEva videos
-# - Good baseline for comparing other configurations
-# - LAB color space provides perceptually uniform enhancement
-
-
+# - Aggressive settings for maximum contrast enhancement
+# - Higher clip_limit (4.0) allows for stronger local contrast
+# - Larger tile grid (16x16) provides very localized adaptation
+# - Good for dark or low-contrast videos
+# - May introduce artifacts in well-lit scenes

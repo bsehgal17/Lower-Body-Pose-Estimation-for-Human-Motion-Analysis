@@ -1,0 +1,50 @@
+# CLAHE Enhancement Pipeline Configuration for HumanEva Dataset - Conservative Settings
+# This configuration uses conservative CLAHE parameters for subtle enhancement
+
+# Dataset and path configuration
+paths:
+  dataset: HumanEva
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
+
+# Enhancement configuration
+enhancement:
+  # Type of enhancement to apply (required)
+  type: clahe  # Options: clahe, histogram_eq, gaussian_blur, brightness_adjustment
+  
+  # Comparison images setting
+  create_comparison_images: true  # Generate before/after comparison images for first frames
+  
+  # CLAHE specific settings - CONSERVATIVE (subtle enhancement)
+  clahe:
+    clip_limit: 1.5  # Lower clip limit for more conservative enhancement
+    tile_grid_size: [4, 4]  # Smaller grid for broader local adaptation
+    color_space: LAB  # Options: LAB, RGB, HSV
+  
+  # Brightness adjustment settings (required when type is brightness_adjustment)
+  # brightness:
+  #   factor: 1.1  # Brightness multiplication factor
+  
+  # Gaussian blur settings (required when type is gaussian_blur)
+  # blur:
+  #   kernel_size: [3, 3]  # Blur kernel size
+  #   sigma_x: 0
+  #   sigma_y: 0
+  
+  # Processing settings
+  processing:
+    batch_size: 10  # Number of videos to process at once
+    dataset_structure: true  # Whether videos are organized in subject/action structure
+    generate_report: true  # Generate enhancement comparison report
+
+# Output settings
+output:
+  prefix: clahe_conservative_  # Prefix for enhanced video files
+  format: mp4  # Output video format
+  quality: high  # Options: low, medium, high
+  preserve_structure: true  # Maintain directory structure in output
+
+# Notes:
+# - Conservative settings for minimal but effective enhancement
+# - Lower clip_limit (1.5) reduces risk of over-enhancement
+# - Smaller tile grid (4x4) provides broader local adaptation
+# - Good for videos that are already well-lit

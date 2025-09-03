@@ -1,5 +1,5 @@
-# CLAHE Enhancement Pipeline Configuration for HumanEva Dataset - Standard Settings
-# This configuration uses standard/balanced CLAHE parameters (ORIGINAL/DEFAULT)
+# CLAHE Enhancement Pipeline Configuration for HumanEva Dataset - Ultra Fine Grid
+# This configuration uses ultra-fine grid for maximum local detail enhancement
 
 # Dataset and path configuration
 paths:
@@ -14,29 +14,29 @@ enhancement:
   # Comparison images setting
   create_comparison_images: true  # Generate before/after comparison images for first frames
   
-  # CLAHE specific settings - STANDARD/BALANCED (original default)
+  # CLAHE specific settings - ULTRA FINE GRID for maximum detail
   clahe:
-    clip_limit: 2.0  # Balanced clip limit for HumanEva
-    tile_grid_size: [8, 8]  # Standard 8x8 grid
+    clip_limit: 2.8  # Moderate-high clip limit for detailed enhancement
+    tile_grid_size: [20, 20]  # Ultra fine 20x20 grid for maximum local detail
     color_space: LAB  # LAB color space for perceptually uniform enhancement
   
   # Processing settings
   processing:
-    batch_size: 10  # Number of videos to process at once
+    batch_size: 6  # Smaller batch for intensive ultra-fine processing
     dataset_structure: true  # Whether videos are organized in subject/action structure
     generate_report: true  # Generate enhancement comparison report
 
 # Output settings
 output:
-  prefix: clahe_standard_  # Prefix for enhanced video files
+  prefix: clahe_ultra_fine_  # Prefix for enhanced video files
   format: mp4  # Output video format
   quality: high  # Options: low, medium, high
   preserve_structure: true  # Maintain directory structure in output
 
 # Notes:
-# - This is the original/default configuration
-# - Balanced parameters suitable for most HumanEva videos
-# - Good baseline for comparing other configurations
-# - LAB color space provides perceptually uniform enhancement
-
-
+# - Uses ultra-fine 20x20 grid for maximum local detail enhancement
+# - Excellent for preserving and enhancing fine details like joint boundaries
+# - Higher computational cost due to fine grid processing
+# - May be particularly effective for pose estimation with small joint features
+# - Good for high-resolution videos where fine detail matters
+# - Can reveal subtle contrast differences in clothing, skin, and background

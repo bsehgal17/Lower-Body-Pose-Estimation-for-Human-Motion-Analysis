@@ -1,0 +1,41 @@
+# CLAHE Enhancement Pipeline Configuration for HumanEva Dataset - HSV Color Space
+# This configuration uses CLAHE in HSV color space with fine-grained grid
+
+# Dataset and path configuration
+paths:
+  dataset: HumanEva
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
+
+# Enhancement configuration
+enhancement:
+  # Type of enhancement to apply (required)
+  type: clahe  # Options: clahe, histogram_eq, gaussian_blur, brightness_adjustment
+  
+  # Comparison images setting
+  create_comparison_images: true  # Generate before/after comparison images for first frames
+  
+  # CLAHE specific settings - HSV COLOR SPACE with FINE GRID
+  clahe:
+    clip_limit: 3.0  # Moderate-high clip limit for HSV processing
+    tile_grid_size: [12, 12]  # Fine-grained grid for detailed local adaptation
+    color_space: HSV  # HSV color space - enhances value channel (brightness)
+  
+  # Processing settings
+  processing:
+    batch_size: 8  # Smaller batch for more detailed processing
+    dataset_structure: true  # Whether videos are organized in subject/action structure
+    generate_report: true  # Generate enhancement comparison report
+
+# Output settings
+output:
+  prefix: clahe_hsv_fine_  # Prefix for enhanced video files
+  format: mp4  # Output video format
+  quality: high  # Options: low, medium, high
+  preserve_structure: true  # Maintain directory structure in output
+
+# Notes:
+# - Uses HSV color space for value (brightness) channel enhancement
+# - Fine-grained 12x12 grid provides detailed local adaptation
+# - HSV processing can better preserve color hue while enhancing brightness
+# - Good for scenes with varying lighting conditions
+# - May be particularly effective for human pose estimation
