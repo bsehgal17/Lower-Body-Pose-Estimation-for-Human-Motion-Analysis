@@ -66,10 +66,10 @@ class PCKLinePlotVisualizer(BaseVisualizer):
 
         # Save with modified path
         final_save_path = os.path.join(
-            self.config.save_folder, "pck_all_thresholds.png"
+            self.config.save_folder, "pck_all_thresholds.svg"
         )
         os.makedirs(self.config.save_folder, exist_ok=True)
-        plt.savefig(final_save_path, dpi=300, bbox_inches="tight")
+        plt.savefig(final_save_path, dpi=300, bbox_inches="tight", format="svg")
         plt.close()
 
         print(f"✅ Multi-threshold PCK line plot saved to {final_save_path}")

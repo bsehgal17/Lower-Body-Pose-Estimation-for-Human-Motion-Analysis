@@ -36,7 +36,7 @@ class BarPlotVisualizer(BaseVisualizer):
 
         # Save the plot
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        plt.savefig(save_path, dpi=300, bbox_inches="tight", format="svg")
         plt.close()
 
         print(f"Bar plot saved to: {save_path}")

@@ -31,16 +31,14 @@ class AnalysisPipeline:
         per_frame_analysis_types: list,
     ):
         """Run complete analysis pipeline."""
-        print(
-            f"Starting analysis pipeline for {self.dataset_name.upper()} dataset...")
+        print(f"Starting analysis pipeline for {self.dataset_name.upper()} dataset...")
 
         if run_overall:
             self._run_overall_analysis(metrics_config)
             print("\n" + "=" * 50 + "\n")
 
         if run_per_frame:
-            self._run_per_frame_analysis(
-                metrics_config, per_frame_analysis_types)
+            self._run_per_frame_analysis(metrics_config, per_frame_analysis_types)
 
         print(
             f"\nComplete analysis pipeline finished for {self.dataset_name.upper()} dataset."
@@ -55,16 +53,14 @@ class AnalysisPipeline:
             print("Cannot proceed with overall analysis without data.")
             return
 
-        results = self.data_processor.process_overall_data(
-            pck_df, metrics_config)
+        results = self.data_processor.process_overall_data(pck_df, metrics_config)
 
         for metric_name, metric_data in results.items():
             self._create_overall_visualizations(
                 metric_data["merged_df"], metric_data["all_metric_data"], metric_name
             )
 
-        print(
-            f"Overall analysis complete. Results saved to {self.config.save_folder}")
+        print(f"Overall analysis complete. Results saved to {self.config.save_folder}")
 
     def _run_per_frame_analysis(self, metrics_config: dict, analysis_types: list):
         """Run per-frame analysis using separated components."""
@@ -75,8 +71,7 @@ class AnalysisPipeline:
             print("Cannot proceed with per-frame analysis without data.")
             return
 
-        combined_df = self.data_processor.process_per_frame_data(
-            pck_df, metrics_config)
+        combined_df = self.data_processor.process_per_frame_data(pck_df, metrics_config)
 
         if combined_df.empty:
             print("No combined data to analyze.")
@@ -84,8 +79,7 @@ class AnalysisPipeline:
 
         # Run analyses with progress tracking
         progress = ProgressTracker(
-            len(metrics_config) *
-            len(analysis_types), "Running statistical analyses"
+            len(metrics_config) * len(analysis_types), "Running statistical analyses"
         )
 
         for metric_name in metrics_config.keys():
@@ -107,20 +101,64 @@ class AnalysisPipeline:
         """Create overall analysis visualizations using separated components."""
         viz_factory = VisualizationFactory()
 
-        # Distribution plot
-        dist_viz = viz_factory.create_visualizer("distribution", self.config)
-        save_path = os.path.join(
-            self.config.save_folder,
-            f"overall_{metric_name}_distribution_{self.timestamp}.svg",
-        )
+        # Distribution plots for aggregated metric data
+        try:
+            dist_viz = viz_factory.create_visualizer("distribution", self.config)
+            save_path = os.path.join(
+                self.config.save_folder,
+                f"overall_{metric_name}_distribution_{self.timestamp}.svg",
+            )
 
-        # Create a simple DataFrame for visualization
-        viz_data = {metric_name: all_metric_data}
-        import pandas as pd
+            # Create a simple DataFrame for visualization
+            viz_data = {metric_name: all_metric_data}
+            import pandas as pd
 
-        viz_df = pd.DataFrame(viz_data)
+            viz_df = pd.DataFrame(viz_data)
 
-        dist_viz.create_plot(viz_df, metric_name, save_path)
+            dist_viz.create_plot(viz_df, metric_name, save_path)
+        except Exception as e:
+            print(
+                f"Warning: Could not create distribution plots for {metric_name}: {e}"
+            )
+
+        # Bar plot for overall data
+        try:
+            bar_viz = viz_factory.create_visualizer("bar", self.config)
+            save_path = os.path.join(
+                self.config.save_folder,
+                f"overall_{metric_name}_bar_{self.timestamp}.svg",
+            )
+
+            # Use the aggregated data for bar plot
+            viz_data = {metric_name: all_metric_data}
+            import pandas as pd
+
+            viz_df = pd.DataFrame(viz_data)
+
+            bar_viz.create_plot(viz_df, metric_name, save_path)
+        except Exception as e:
+            print(f"Warning: Could not create bar plot for {metric_name}: {e}")
+
+        # Scatter plot using merged data if available
+        if (
+            merged_df is not None
+            and not merged_df.empty
+            and f"avg_{metric_name}" in merged_df.columns
+        ):
+            try:
+                scatter_viz = viz_factory.create_visualizer("scatter", self.config)
+                save_path = os.path.join(
+                    self.config.save_folder,
+                    f"overall_{metric_name}_scatter_{self.timestamp}.svg",
+                )
+
+                # Rename the column temporarily for scatter plot
+                scatter_df = merged_df.copy()
+                scatter_df[metric_name] = scatter_df[f"avg_{metric_name}"]
+
+                scatter_viz.create_plot(scatter_df, metric_name, save_path)
+            except Exception as e:
+                print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
 
     def _run_statistical_analyses(
         self, combined_df, metric_name, analysis_types, progress
@@ -128,8 +166,7 @@ class AnalysisPipeline:
         """Run statistical analyses using separated components."""
         for analysis_type in analysis_types:
             try:
-                analyzer = AnalyzerFactory.create_analyzer(
-                    analysis_type, self.config)
+                analyzer = AnalyzerFactory.create_analyzer(analysis_type, self.config)
                 analyzer.analyze(combined_df, metric_name)
                 progress.update()
             except ValueError as e:
@@ -140,17 +177,40 @@ class AnalysisPipeline:
         """Create per-frame visualizations using separated components."""
         viz_factory = VisualizationFactory()
 
+        # Distribution plots (histogram and box plot)
+        try:
+            dist_viz = viz_factory.create_visualizer("distribution", self.config)
+            save_path = os.path.join(
+                self.config.save_folder,
+                f"per_frame_{metric_name}_distribution_{self.timestamp}.svg",
+            )
+            dist_viz.create_plot(combined_df, metric_name, save_path)
+        except Exception as e:
+            print(
+                f"Warning: Could not create distribution plots for {metric_name}: {e}"
+            )
+
         # Scatter plot
         try:
             scatter_viz = viz_factory.create_visualizer("scatter", self.config)
             save_path = os.path.join(
                 self.config.save_folder,
-                f"per_frame_{metric_name}_scatter_{self.timestamp}.png",
+                f"per_frame_{metric_name}_scatter_{self.timestamp}.svg",
             )
             scatter_viz.create_plot(combined_df, metric_name, save_path)
         except Exception as e:
-            print(
-                f"Warning: Could not create scatter plot for {metric_name}: {e}")
+            print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
+
+        # Bar plot
+        try:
+            bar_viz = viz_factory.create_visualizer("bar", self.config)
+            save_path = os.path.join(
+                self.config.save_folder,
+                f"per_frame_{metric_name}_bar_{self.timestamp}.svg",
+            )
+            bar_viz.create_plot(combined_df, metric_name, save_path)
+        except Exception as e:
+            print(f"Warning: Could not create bar plot for {metric_name}: {e}")
 
     def _create_pck_line_plot(self, combined_df):
         """Create PCK line plot for all thresholds using separated components."""
@@ -178,8 +238,7 @@ def main():
     # Test the components
     print("Testing components...")
     print(f"Available analyzers: {AnalyzerFactory.get_available_analyzers()}")
-    print(
-        f"Available visualizers: {VisualizationFactory.get_available_visualizers()}")
+    print(f"Available visualizers: {VisualizationFactory.get_available_visualizers()}")
     print("Components test complete.\n")
 
     try:
