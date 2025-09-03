@@ -64,7 +64,7 @@ class ConfigFactory:
             name="movi",
             video_directory="/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi",
             pck_file_path="/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-08-22_17-37-59/2025-08-22_17-37-59_metrics.xlsx",
-            save_folder="/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/MoVi/High_threshold",
+            save_folder="/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/MoVi/Testing",
             model="RTMW",
             subject_column="subject",
             action_column=None,

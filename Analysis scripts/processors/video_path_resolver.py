@@ -44,7 +44,7 @@ class VideoPathResolver(BaseDataProcessor):
 
         for root, dirs, files in os.walk(self.config.video_directory):
             for file in files:
-                if file.endswith(".mp4") and subject in file:
+                if file.endswith(".avi") and subject in file:
                     return os.path.join(root, file)
 
         return None
