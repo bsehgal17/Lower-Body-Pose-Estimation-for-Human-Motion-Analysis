@@ -27,7 +27,10 @@ def run_pipeline(pipelines_yaml_path: str = "config_yamls/pipelines.yaml"):
         logger.info(f"\n--- Running Pipeline: {pipeline_name} ---")
         logger.info(f"Using Global Config: {global_config_file}")
 
-        for step in pipeline.get("steps", []):
+        # Track pipeline steps to enable enhancement awareness
+        pipeline_steps = [step["command"] for step in pipeline.get("steps", [])]
+
+        for i, step in enumerate(pipeline.get("steps", [])):
             command = step["command"]
             pipeline_config_file = step["config_file"]
 
@@ -35,20 +38,29 @@ def run_pipeline(pipelines_yaml_path: str = "config_yamls/pipelines.yaml"):
                 f"Running step: {command} with pipeline config {pipeline_config_file}"
             )
 
-            result = subprocess.run(
-                [
-                    "python",
-                    "pipeline_runner.py",
-                    command,
-                    "--pipeline_config",
-                    pipeline_config_file,
-                    "--global_config",
-                    global_config_file,
-                    "--pipeline_name",
-                    pipeline_name,
-                ],
-                text=True,
-            )
+            # Build command with enhancement awareness
+            cmd_args = [
+                "python",
+                "pipeline_runner.py",
+                command,
+                "--pipeline_config",
+                pipeline_config_file,
+                "--global_config",
+                global_config_file,
+                "--pipeline_name",
+                pipeline_name,
+            ]
+
+            # Add enhancement context flags
+            if command == "enhance":
+                # Pass pipeline steps information to enhancement handler
+                pipeline_steps_str = ",".join(pipeline_steps)
+                cmd_args.extend(["--pipeline_steps", pipeline_steps_str])
+                logger.info(
+                    f"Enhancement will be aware of pipeline steps: {pipeline_steps_str}"
+                )
+
+            result = subprocess.run(cmd_args, text=True)
 
             if result.returncode != 0:
                 logger.error(f"Step '{command}' failed:\n{result.stderr}")

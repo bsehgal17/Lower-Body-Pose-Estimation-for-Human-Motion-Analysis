@@ -8,6 +8,7 @@ from utils.run_utils import make_run_dir, get_pipeline_io_paths
 logger = logging.getLogger(__name__)
 
 
+<<<<<<< HEAD
 def _find_enhanced_videos_dir(pipeline_name: str, global_config: GlobalConfig):
     """
     Look for enhanced videos directory created by enhancement pipeline.
@@ -96,6 +97,8 @@ def _find_enhanced_detection_results_dir(
     return None
 
 
+=======
+>>>>>>> 0be8ec0357c63d4574781a323f59bec111875b99
 def _handle_detect_command(
     args, pipeline_config: PipelineConfig, global_config: GlobalConfig
 ):
@@ -106,6 +109,7 @@ def _handle_detect_command(
         global_config.paths, pipeline_config.paths.dataset
     )
 
+<<<<<<< HEAD
     # Check if enhanced videos exist from previous pipeline step
     enhanced_videos_dir = _find_enhanced_videos_dir(
         args.pipeline_name, global_config)
@@ -135,6 +139,16 @@ def _handle_detect_command(
             global_config_obj=global_config,
             pipeline_config_obj=pipeline_config,
         )
+=======
+    run_dir = make_run_dir(
+        base_out=base_pipeline_out,
+        pipeline_name=args.pipeline_name,
+        step_name=args.command,
+        cfg_path=args.pipeline_config,
+        global_config_obj=global_config,
+        pipeline_config_obj=pipeline_config,
+    )
+>>>>>>> 0be8ec0357c63d4574781a323f59bec111875b99
 
     step_out = run_dir
     step_out.mkdir(parents=True, exist_ok=True)
@@ -263,11 +277,16 @@ def _handle_assess_command(
         global_config.paths, pipeline_config.paths.dataset
     )
 
-    # Check if enhanced detection results exist from previous pipeline step
-    enhanced_detection_dir = _find_enhanced_detection_results_dir(
-        args.pipeline_name, global_config
+    run_dir = make_run_dir(
+        base_out=base_pipeline_out,
+        pipeline_name=args.pipeline_name,
+        step_name=args.command,
+        cfg_path=args.pipeline_config,
+        global_config_obj=global_config,
+        pipeline_config_obj=pipeline_config,
     )
 
+<<<<<<< HEAD
     if enhanced_detection_dir:
         logger.info(
             f"Found enhanced detection results, using them for evaluation: {enhanced_detection_dir}"
@@ -292,6 +311,8 @@ def _handle_assess_command(
             pipeline_config_obj=pipeline_config,
         )
 
+=======
+>>>>>>> 0be8ec0357c63d4574781a323f59bec111875b99
     step_out = run_dir
     step_out.mkdir(parents=True, exist_ok=True)
 
@@ -309,22 +330,47 @@ def _handle_assess_command(
 
     step_candidates = ["detect", "noise", "filter"]
 
-    # If enhanced detection results exist, prioritize them
-    if enhanced_detection_dir:
-        # Evaluate the enhanced detection results
+    # Regular step evaluation
+    for step in step_candidates:
+        step_dir = os.path.join(base_pipeline_out, args.pipeline_name, step)
+        if os.path.exists(step_dir):
+            step_eval_dir = step_out / step
+            step_eval_dir.mkdir(parents=True, exist_ok=True)
+
+            logger.info(
+                f"Running evaluation for step: {step}, using input_dir: {step_dir}"
+            )
+            pipeline_config.evaluation.input_dir = step_dir
+            run_pose_assessment_pipeline(
+                pipeline_config,
+                global_config,
+                output_dir=step_eval_dir,
+                input_dir=step_dir,
+            )
+        else:
+            logger.warning(
+                f"Step output folder not found: {step_dir}, skipping evaluation."
+            )
+
+    # Also check for enhanced detection results (from auto-detection in enhancement step)
+    enhanced_step_dir = os.path.join(
+        base_pipeline_out, f"{args.pipeline_name}_enhanced", "detect"
+    )
+    if os.path.exists(enhanced_step_dir):
         step_eval_dir = step_out / "enhanced_detect"
         step_eval_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info(
-            f"Running evaluation for enhanced detection, using input_dir: {enhanced_detection_dir}"
+            f"Running evaluation for enhanced detection, using input_dir: {enhanced_step_dir}"
         )
-        pipeline_config.evaluation.input_dir = enhanced_detection_dir
+        pipeline_config.evaluation.input_dir = enhanced_step_dir
         run_pose_assessment_pipeline(
             pipeline_config,
             global_config,
             output_dir=step_eval_dir,
-            input_dir=enhanced_detection_dir,
+            input_dir=enhanced_step_dir,
         )
+<<<<<<< HEAD
     else:
         # Fall back to regular step evaluation
         for step in step_candidates:
@@ -333,21 +379,65 @@ def _handle_assess_command(
             if os.path.exists(step_dir):
                 step_eval_dir = step_out / step
                 step_eval_dir.mkdir(parents=True, exist_ok=True)
+=======
+>>>>>>> 0be8ec0357c63d4574781a323f59bec111875b99
 
-                logger.info(
-                    f"Running evaluation for step: {step}, using input_dir: {step_dir}"
-                )
-                pipeline_config.evaluation.input_dir = step_dir
-                run_pose_assessment_pipeline(
-                    pipeline_config,
-                    global_config,
-                    output_dir=step_eval_dir,
-                    input_dir=step_dir,
-                )
-            else:
-                logger.warning(
-                    f"Step output folder not found: {step_dir}, skipping evaluation."
-                )
+
+def _run_detection_on_enhanced_videos(
+    args,
+    pipeline_config: PipelineConfig,
+    global_config: GlobalConfig,
+    enhanced_videos_dir: str,
+):
+    """
+    Run detection pipeline on enhanced videos.
+    This is called automatically by the enhancement handler when both detection and evaluation
+    are configured in the pipeline.
+    """
+    logger.info(f"Running detection on enhanced videos in: {enhanced_videos_dir}")
+
+    # Get the detection pipeline function
+    run_detection_pipeline = _get_detection_pipeline_fn(pipeline_config.models.detector)
+
+    # Set up enhanced detection output directory
+    input_dir, base_pipeline_out = get_pipeline_io_paths(
+        global_config.paths, pipeline_config.paths.dataset
+    )
+
+    # Create enhanced detection output directory
+    enhanced_run_dir = make_run_dir(
+        base_out=base_pipeline_out,
+        pipeline_name=f"{args.pipeline_name}_enhanced",
+        step_name="detect",
+        cfg_path=args.pipeline_config,
+        global_config_obj=global_config,
+        pipeline_config_obj=pipeline_config,
+    )
+
+    enhanced_step_out = enhanced_run_dir
+    enhanced_step_out.mkdir(parents=True, exist_ok=True)
+
+    try:
+        # Run detection on enhanced videos
+        logger.info(f"Detection input (enhanced videos): {enhanced_videos_dir}")
+        logger.info(f"Detection output: {enhanced_step_out}")
+
+        run_detection_pipeline(
+            pipeline_config,
+            global_config,
+            video_folder=enhanced_videos_dir,  # Use enhanced videos as input
+            output_dir=enhanced_step_out,
+        )
+
+        logger.info("Enhanced video detection completed successfully")
+        return True
+
+    except Exception as e:
+        logger.error(f"Enhanced video detection failed: {e}")
+        import traceback
+
+        traceback.print_exc()
+        return False
 
 
 def _handle_enhance_command(
@@ -424,8 +514,34 @@ def _handle_enhance_command(
 
     if success:
         logger.info("Enhancement pipeline completed successfully")
+
+        # Check if we should automatically run detection on enhanced videos
+        pipeline_steps_str = getattr(args, "pipeline_steps", "")
+        if pipeline_steps_str:
+            pipeline_steps = [step.strip() for step in pipeline_steps_str.split(",")]
+            logger.info(f"Pipeline steps: {pipeline_steps}")
+
+            # If both detect and evaluation are in the pipeline, run detection on enhanced videos
+            if "detect" in pipeline_steps and "evaluation" in pipeline_steps:
+                logger.info(
+                    "Both detection and evaluation found in pipeline - running detection on enhanced videos"
+                )
+
+                # Run detection on the enhanced videos
+                success_detection = _run_detection_on_enhanced_videos(
+                    args, pipeline_config, global_config, output_folder
+                )
+
+                if success_detection:
+                    logger.info("Detection on enhanced videos completed successfully")
+                else:
+                    logger.error("Detection on enhanced videos failed")
+                    return False
+
+        return True
     else:
         logger.error("Enhancement pipeline completed with errors")
+        return False
 
 
 def _get_detection_pipeline_fn(detector_name: str):
