@@ -292,27 +292,18 @@ class JointAnalysisScript:
                     joint_colors.append(colors[j % len(colors)])
 
                 # Create scatter plot with one point per joint (average values)
-                ax_scatter.scatter(
-                    joint_avg_brightness,
-                    joint_avg_pck,
-                    c=joint_colors,
-                    alpha=0.8,
-                    s=100,  # Larger points since we have fewer of them
-                    edgecolors="black",
-                    linewidths=1,
-                )
-
-                # Add labels for each point
-                for i, (brightness, pck, label) in enumerate(
-                    zip(joint_avg_brightness, joint_avg_pck, joint_labels)
+                for i, (brightness, pck, label, color) in enumerate(
+                    zip(joint_avg_brightness, joint_avg_pck, joint_labels, joint_colors)
                 ):
-                    ax_scatter.annotate(
-                        label,
-                        (brightness, pck),
-                        xytext=(5, 5),
-                        textcoords="offset points",
-                        fontsize=9,
+                    ax_scatter.scatter(
+                        brightness,
+                        pck,
+                        c=color,
                         alpha=0.8,
+                        s=100,  # Larger points since we have fewer of them
+                        edgecolors="black",
+                        linewidths=1,
+                        label=label,
                     )
 
                 # Configure scatter plot
@@ -322,6 +313,7 @@ class JointAnalysisScript:
                     f"Average Brightness vs Average PCK - Threshold {threshold}"
                 )
                 ax_scatter.grid(True, alpha=0.3)
+                ax_scatter.legend(loc="best", framealpha=0.9)
 
                 # Add some padding to the axes for better visibility
                 x_margin = (max(joint_avg_brightness) - min(joint_avg_brightness)) * 0.1
