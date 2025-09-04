@@ -166,6 +166,57 @@ class AnalysisPipeline:
             combined_df, metrics_config, analysis_types
         )
 
+        # Run PCK brightness analysis with scenarios if available and multi-analysis is enabled
+        if "pck_brightness" in analysis_types and self.config.analysis_config:
+            multi_analysis_config = self.config.analysis_config.get(
+                "pck_brightness", {}
+            ).get("multi_analysis", {})
+
+            # Only run scenarios in single analysis mode (not when called from multi-analysis pipeline)
+            if multi_analysis_config.get("enabled", False) and not hasattr(
+                self, "_in_multi_analysis_context"
+            ):
+                scenarios = multi_analysis_config.get("scenarios", [])
+                enabled_scenarios = [s for s in scenarios if s.get("enabled", False)]
+
+                if enabled_scenarios:
+                    print(
+                        f"\nRunning PCK brightness analysis with {len(enabled_scenarios)} scenarios..."
+                    )
+
+                    # Get score groups config for resolving score group names
+                    pck_brightness_config = self.config.analysis_config.get(
+                        "pck_brightness", {}
+                    )
+                    score_groups_config = pck_brightness_config.get("score_groups", {})
+
+                    for scenario in enabled_scenarios:
+                        scenario_name = scenario.get("name", "unnamed_scenario")
+                        score_group_name = scenario.get("score_group", "all")
+                        description = scenario.get("description", "No description")
+
+                        # Get the actual score group values
+                        score_group = score_groups_config.get(score_group_name)
+
+                        print(f"\nProcessing scenario '{scenario_name}':")
+                        print(f"  Description: {description}")
+                        print(f"  Score group: {score_group_name} -> {score_group}")
+
+                        if (
+                            score_group is not None
+                        ):  # Skip groups with null values (like 'all')
+                            success = self.stats_manager.run_pck_brightness_analysis_with_score_groups(
+                                combined_df, score_group, scenario_name
+                            )
+                            if success:
+                                print(f"  ✅ Scenario '{scenario_name}' completed")
+                            else:
+                                print(f"  ❌ Scenario '{scenario_name}' failed")
+                        else:
+                            print(
+                                f"  ⚠️  Skipping scenario '{scenario_name}' (null score group)"
+                            )
+
         # Create visualizations for each metric
         for metric_name in metrics_config.keys():
             self.viz_manager.create_per_frame_visualizations(combined_df, metric_name)

@@ -96,6 +96,9 @@ class MultiAnalysisPipeline:
         pipeline = AnalysisPipeline(self.config.name)
         pipeline.timestamp = pipeline.timestamp + f"_{scenario_name}"
 
+        # Set context flag to indicate this is part of multi-analysis pipeline
+        pipeline._in_multi_analysis_context = True
+
         # Load per-frame PCK data for filtered analysis
         pck_df = pipeline.data_processor.load_pck_per_frame_scores()
         if pck_df is not None:
