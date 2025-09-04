@@ -240,11 +240,14 @@ class ScatterPlotVisualizer(BaseVisualizer):
             save_path_base: Base path for saving plots (threshold will be appended)
             pck_columns: List of PCK column names to use
         """
+        print("DEBUG: create_pck_brightness_correlation_plot_per_video called!")
+        print(f"DEBUG: Data shape: {data.shape}")
+        print(f"DEBUG: Data columns: {list(data.columns)}")
+        print(f"DEBUG: PCK columns provided: {pck_columns}")
+
         if pck_columns is None:
             print("Warning: No PCK columns provided for per-video analysis")
-            return
-
-        # Check required columns
+            return  # Check required columns
         required_cols = [brightness_col, video_id_col]
         missing_cols = [col for col in required_cols if col not in data.columns]
         if missing_cols:
@@ -358,13 +361,21 @@ class ScatterPlotVisualizer(BaseVisualizer):
         video_id_col: str = "video_id",
         save_path: str = None,
         pck_columns: list = None,
+        analysis_type: str = "per_frame",
     ):
         """
-        Backward compatibility wrapper - delegates to per-frame analysis.
+        Backward compatibility wrapper - routes to appropriate function based on analysis type.
         """
-        return self.create_pck_brightness_correlation_plot_per_frame(
-            data, brightness_col, video_id_col, save_path, pck_columns
-        )
+        if analysis_type == "per_video":
+            # For per-video analysis, use the new function that creates separate plots
+            return self.create_pck_brightness_correlation_plot_per_video(
+                data, brightness_col, video_id_col, save_path, pck_columns
+            )
+        else:
+            # For per-frame analysis, use the per-frame function
+            return self.create_pck_brightness_correlation_plot_per_frame(
+                data, brightness_col, video_id_col, save_path, pck_columns
+            )
 
     def _add_correlation_stats(self, avg_df: pd.DataFrame, ax):
         """Add correlation statistics as text to the plot."""
