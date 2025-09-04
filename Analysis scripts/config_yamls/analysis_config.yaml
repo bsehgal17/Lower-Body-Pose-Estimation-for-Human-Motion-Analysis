@@ -24,109 +24,144 @@ analysis:
       mid_range: [40, 45, 50, 55, 60]
       research_points: [50, 70, 85, 95]
     
-    # Analysis scenarios with specific bin sizes
-    scenarios:
-      - name: "detailed_extremes"
-        enabled: true
-        score_group: "extremes"
-        bin_size: 1
-        description: "Ultra-detailed analysis of extreme scores"
-        
-      - name: "overview_all"
-        enabled: true
-        score_group: "all" 
-        bin_size: 20
-        description: "Broad overview of all scores"
-        
-      # - name: "precision_high_performance"
-      #   score_group: "high_performance"
-      #   bin_size: 2
-      #   description: "Precise analysis of high-performing scores"
-        
-      # - name: "standard_research"
-      #   score_group: "research_points"
-      #   bin_size: 5
-      #   description: "Standard analysis for research comparison"
-
-  # Multi-dataset box plot configuration
-  multi_boxplot:
-    # Enable/disable multi-dataset box plot functionality
-    enabled: true
-    
-    # Default configuration for multi-dataset comparisons
-    default_settings:
-      figure_size: [12, 6]
-      title_format: "{metric} Distribution Comparison - Box Plots"
-      xlabel: "Datasets"
-      rotation: 45  # Rotation angle for x-axis labels
-      grid: true
-      grid_alpha: 0.3
-    
-    # Predefined dataset configurations
-    dataset_groups:
-      # Example: Compare different enhancement methods
-      enhancement_comparison:
-        enabled: false
-        description: "Compare original vs enhanced data"
-        datasets:
-          - path: "path/to/original_data.xlsx"
-            label: "Original"
-          - path: "path/to/clahe_enhanced.xlsx"
-            label: "CLAHE Enhanced"
-          - path: "path/to/brightness_enhanced.xlsx"
-            label: "Brightness Enhanced"
-        metrics: ["pck_0.1", "pck_0.2", "pck_0.5"]
+    # Visualization configuration
+    visualization:
+      # Enable scatter plot generation
+      create_scatter_plots: true
+      create_individual_plots: true
+      create_combined_plots: true
+      create_comparison_plots: true
+      create_correlation_plots: true
+      save_format: "svg"
       
-      # Example: Compare different detector models
-      detector_comparison:
-        enabled: false
-        description: "Compare different pose estimation models"
-        datasets:
-          - path: "path/to/dwpose_results.xlsx"
-            label: "DWPose"
-          - path: "path/to/hrnet_results.xlsx"
-            label: "HRNet"
-          - path: "path/to/rtmw_results.xlsx"
-            label: "RTMW"
-        metrics: ["pck_0.1", "pck_0.2", "pck_0.5"]
-      
-      # Example: Compare different noise levels
-      noise_level_comparison:
-        enabled: false
-        description: "Compare performance under different noise levels"
-        datasets:
-          - path: "path/to/clean_data.xlsx"
-            label: "Clean"
-          - path: "path/to/noise_20.xlsx"
-            label: "20% Noise"
-          - path: "path/to/noise_40.xlsx"
-            label: "40% Noise"
-          - path: "path/to/noise_60.xlsx"
-            label: "60% Noise"
-          - path: "path/to/noise_80.xlsx"
-            label: "80% Noise"
-        metrics: ["pck_0.1", "pck_0.2", "pck_0.5"]
+      # Scatter plot specific settings
+      scatter_plot_settings:
+        figure_size: [12, 8]
+        alpha: 0.7
+        marker_size: 60
+        show_trend_lines: true
+        show_correlation_stats: true
+        colors: "viridis"  # colormap for different PCK thresholds
     
-    # Custom analysis scenarios
-    custom_scenarios:
-      # Users can define their own dataset comparisons here
-      - name: "my_custom_comparison"
-        enabled: false
-        description: "Custom dataset comparison"
-        datasets:
-          - path: "path/to/dataset1.xlsx"
-            label: "Dataset 1"
-          - path: "path/to/dataset2.xlsx"
-            label: "Dataset 2"
-          - path: "path/to/dataset3.xlsx"
-            label: "Dataset 3"
-        metrics: ["pck_0.1", "pck_0.2"]
-        settings:
-          figure_size: [14, 8]
-          title_format: "Custom {metric} Comparison"
+    # Export settings
+    export:
+      csv_enabled: true
+      json_enabled: true
+      separate_files_per_group: true
+      include_correlation_data: true
+    
+    # Multi-analysis configuration
+    multi_analysis:
+      enabled: true  # Enable multiple analysis scenarios
+      scenarios:
+        - name: "detailed_extremes"
+          enabled: true
+          score_group: "extremes"
+          bin_size: 1
+          description: "Ultra-detailed analysis of extreme scores"
+          create_scatter_plots: true
+          
+        - name: "overview_all"
+          enabled: true
+          score_group: "all" 
+          bin_size: 20
+          description: "Broad overview of all scores"
+          create_scatter_plots: true
+          
+        # - name: "precision_high_performance"
+        #   enabled: true
+        #   score_group: "high_performance"
+        #   bin_size: 2
+        #   description: "Precise analysis of high-performing scores"
+        #   create_scatter_plots: true
+          
+        # - name: "standard_research"
+        #   enabled: true
+        #   score_group: "research_points"
+        #   bin_size: 5
+        #   description: "Standard analysis for research comparison"
+        #   create_scatter_plots: true
 
-# Usage examples:
-# 1. Use default bin size: python pck_brightness_analysis.py movi
-# 2. Override bin size: python pck_brightness_analysis.py movi --bin-size 10
-# 3. Fine-grained analysis: python pck_brightness_analysis.py humaneva --bin-size 1 --scores 95 100
-# 4. Quick overview: python pck_brightness_analysis.py movi --bin-size 20
+
+#   # Multi-dataset box plot configuration
+#   multi_boxplot:
+#     # Enable/disable multi-dataset box plot functionality
+#     enabled: true
+    
+#     # Default configuration for multi-dataset comparisons
+#     default_settings:
+#       figure_size: [12, 6]
+#       title_format: "{metric} Distribution Comparison - Box Plots"
+#       xlabel: "Datasets"
+#       rotation: 45  # Rotation angle for x-axis labels
+#       grid: true
+#       grid_alpha: 0.3
+    
+#     # Predefined dataset configurations
+#     dataset_groups:
+#       # Example: Compare different enhancement methods
+#       enhancement_comparison:
+#         enabled: true
+#         description: "Compare original vs enhanced data"
+#         datasets:
+#           - path: "results/original_data.xlsx"
+#             label: "Original"
+#           - path: "results/clahe_enhanced.xlsx"
+#             label: "CLAHE Enhanced"
+#           - path: "results/brightness_enhanced.xlsx"
+#             label: "Brightness Enhanced"
+#         metrics: ["pck_0.1", "pck_0.2", "pck_0.5"]
+      
+#       # Example: Compare different detector models
+#       detector_comparison:
+#         enabled: true
+#         description: "Compare different pose estimation models"
+#         datasets:
+#           - path: "results/dwpose_results.xlsx"
+#             label: "DWPose"
+#           - path: "results/hrnet_results.xlsx"
+#             label: "HRNet"
+#           - path: "results/rtmw_results.xlsx"
+#             label: "RTMW"
+#         metrics: ["pck_0.1", "pck_0.2", "pck_0.5"]
+      
+#       # Example: Compare different noise levels
+#       noise_level_comparison:
+#         enabled: true
+#         description: "Compare performance under different noise levels"
+#         datasets:
+#           - path: "results/clean_data.xlsx"
+#             label: "Clean"
+#           - path: "results/noise_20.xlsx"
+#             label: "20% Noise"
+#           - path: "results/noise_40.xlsx"
+#             label: "40% Noise"
+#           - path: "results/noise_60.xlsx"
+#             label: "60% Noise"
+#           - path: "results/noise_80.xlsx"
+#             label: "80% Noise"
+#         metrics: ["pck_0.1", "pck_0.2", "pck_0.5"]
+    
+#     # Custom analysis scenarios
+#     custom_scenarios:
+#       # Users can define their own dataset comparisons here
+#       - name: "my_custom_comparison"
+#         enabled: false
+#         description: "Custom dataset comparison"
+#         datasets:
+#           - path: "path/to/dataset1.xlsx"
+#             label: "Dataset 1"
+#           - path: "path/to/dataset2.xlsx"
+#             label: "Dataset 2"
+#           - path: "path/to/dataset3.xlsx"
+#             label: "Dataset 3"
+#         metrics: ["pck_0.1", "pck_0.2"]
+#         settings:
+#           figure_size: [14, 8]
+#           title_format: "Custom {metric} Comparison"
+
+# # Usage examples:
+# # 1. Use default bin size: python pck_brightness_analysis.py movi
+# # 2. Override bin size: python pck_brightness_analysis.py movi --bin-size 10
+# # 3. Fine-grained analysis: python pck_brightness_analysis.py humaneva --bin-size 1 --scores 95 100
+# # 4. Quick overview: python pck_brightness_analysis.py movi --bin-size 20
