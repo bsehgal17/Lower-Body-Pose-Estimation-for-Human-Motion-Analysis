@@ -5,7 +5,6 @@ Handles loading and management of analysis configurations.
 """
 
 from config import ConfigManager, load_analysis_config
-from analyzers import AnalyzerFactory
 from visualizers import VisualizationFactory
 
 
@@ -114,6 +113,8 @@ class ConfigurationTester:
 
     def test_analysis_components(self):
         """Test analysis components availability."""
+        from analyzers import AnalyzerFactory
+
         analysis_config = load_analysis_config()
         per_frame_analysis_types = AnalyzerFactory.get_available_analyzers()
 
