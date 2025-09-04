@@ -4,7 +4,7 @@ Multi-Analysis Pipeline Module
 Handles the execution of multiple analysis scenarios based on YAML configuration.
 """
 
-from analyzers import AnalyzerFactory
+# from analyzers import AnalyzerFactory
 from .statistical_analysis_manager import StatisticalAnalysisManager
 
 
@@ -43,6 +43,7 @@ class MultiAnalysisPipeline:
 
             if i == 1:
                 # First analysis: Run complete pipeline
+                from analyzers import AnalyzerFactory
                 from .analysis_pipeline import AnalysisPipeline
 
                 pipeline = AnalysisPipeline(self.config.name)
