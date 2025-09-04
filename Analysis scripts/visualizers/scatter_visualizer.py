@@ -336,9 +336,8 @@ class ScatterPlotVisualizer(BaseVisualizer):
             plt.grid(True, alpha=0.3)
 
             # Add legend for subjects/grouping column
-            # Add legend for subjects/grouping column
             num_subjects = len(unique_subjects)
-            num_cols = (num_subjects + 3) // 10  # 4 items per column
+            num_cols = (num_subjects + 9) // 10  # 10 items per column
 
             plt.legend(
                 title=video_id_col.title(),

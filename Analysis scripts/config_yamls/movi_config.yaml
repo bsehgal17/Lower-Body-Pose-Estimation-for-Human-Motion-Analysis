@@ -68,13 +68,13 @@ analysis:
       include_correlation_data: true
     
     # Multi-analysis configuration for MoVi
-    multi_analysis:
-      enabled: true
-      scenarios:
-        - name: "movi_motion_extremes"
-          enabled: true
-          score_group: "extremes"
-          bin_size: 1
-          description: "Detailed analysis of extreme scores for motion sequences"
-          create_scatter_plots: true
+    # multi_analysis:
+    #   enabled: true
+    #   scenarios:
+    #     - name: "movi_motion_extremes"
+    #       enabled: true
+    #       score_group: "extremes"
+    #       bin_size: 1
+    #       description: "Detailed analysis of extreme scores for motion sequences"
+    #       create_scatter_plots: true
           
