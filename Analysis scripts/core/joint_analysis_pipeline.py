@@ -13,6 +13,12 @@ from analyzers.joint_analyzer import JointAnalyzer
 from visualizers.joint_visualizer import JointVisualizer
 from processors.joint_report_generator import JointReportGenerator
 
+# Import joint enums
+import sys
+
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from utils.joint_enum import GTJointsHumanEVa, GTJointsMoVi
+
 
 class JointAnalysisPipeline:
     """Main pipeline orchestrator for joint analysis."""
@@ -50,11 +56,40 @@ class JointAnalysisPipeline:
 
         # Initialize components
         self.data_loader = JointDataLoader(dataset_name)
-        self.analyzer = JointAnalyzer(joints_to_analyze, pck_thresholds, dataset_name)
+
+        # Get appropriate joint enum class based on dataset
+        joint_enum_class = self._get_joint_enum_class(dataset_name)
+        self.analyzer = JointAnalyzer(
+            joints_to_analyze, pck_thresholds, joint_enum_class, dataset_name
+        )
+
         self.visualizer = JointVisualizer(self.output_dir, save_results)
         self.report_generator = JointReportGenerator(
             self.output_dir, dataset_name, save_results
         )
+
+    def _get_joint_enum_class(self, dataset_name: str):
+        """Get the appropriate joint enum class for the dataset.
+
+        Args:
+            dataset_name: Name of the dataset
+
+        Returns:
+            Joint enum class for the dataset
+
+        Raises:
+            ValueError: If dataset is not supported
+        """
+        dataset_lower = dataset_name.lower()
+
+        if dataset_lower == "humaneva":
+            return GTJointsHumanEVa
+        elif dataset_lower == "movi":
+            return GTJointsMoVi
+        else:
+            raise ValueError(
+                f"Unsupported dataset: {dataset_name}. Supported datasets: humaneva, movi"
+            )
 
     def run_complete_analysis(self) -> bool:
         """Run the complete joint analysis pipeline.

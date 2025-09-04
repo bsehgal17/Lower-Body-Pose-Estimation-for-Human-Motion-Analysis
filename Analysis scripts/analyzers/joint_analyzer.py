@@ -25,6 +25,7 @@ class JointAnalyzer:
         self,
         joints_to_analyze: List[str],
         pck_thresholds: List[float],
+        joint_enum_class,
         dataset_name: str = None,
     ):
         """Initialize the analyzer.
@@ -32,10 +33,12 @@ class JointAnalyzer:
         Args:
             joints_to_analyze: List of joint names to analyze
             pck_thresholds: List of PCK thresholds to analyze
+            joint_enum_class: Enum class containing joint mappings (e.g., GTJointsHumanEVa, GTJointsMoVi)
             dataset_name: Name of the dataset (for path extraction)
         """
         self.joints_to_analyze = joints_to_analyze
         self.pck_thresholds = pck_thresholds
+        self.joint_enum_class = joint_enum_class
         self.dataset_name = dataset_name
 
         # Extract dataset paths and initialize path resolver if available
@@ -70,15 +73,30 @@ class JointAnalyzer:
             except Exception as e:
                 print(f"WARNING: Could not extract paths from config: {e}")
 
-        # Joint mapping for coordinate extraction
-        self.joint_mapping = {
-            "LEFT_HIP": "LeftHip",
-            "RIGHT_HIP": "RightHip",
-            "LEFT_KNEE": "LeftKnee",
-            "RIGHT_KNEE": "RightKnee",
-            "LEFT_ANKLE": "LeftAnkle",
-            "RIGHT_ANKLE": "RightAnkle",
-        }
+    def _get_joint_number(self, joint_name: str) -> int:
+        """Get joint number from enum for the given joint name.
+
+        Args:
+            joint_name: Name of the joint (e.g., "LEFT_HIP", "RIGHT_KNEE")
+
+        Returns:
+            int: Joint number/index from the enum
+
+        Raises:
+            ValueError: If joint name not found in enum
+        """
+        try:
+            joint_enum_value = getattr(self.joint_enum_class, joint_name)
+
+            # Handle tuples (multiple joint indices) by taking the first one
+            if isinstance(joint_enum_value.value, tuple):
+                return joint_enum_value.value[0]
+            else:
+                return joint_enum_value.value
+        except AttributeError:
+            raise ValueError(
+                f"Joint '{joint_name}' not found in {self.joint_enum_class.__name__}"
+            )
 
     def extract_brightness_from_video(
         self, pck_data: pd.DataFrame, joint_name: str, sampling_radius: int = 3
@@ -100,8 +118,13 @@ class JointAnalyzer:
             return None
 
         brightness_values = []
-        ground_truth_joint_name = self.joint_mapping.get(
-            joint_name, joint_name)
+
+        # Get joint number from enum
+        try:
+            joint_number = self._get_joint_number(joint_name)
+        except ValueError as e:
+            print(f"WARNING: {e}")
+            return None
 
         # Group by video file to process each video
         if "video_file" in pck_data.columns:
@@ -131,8 +154,7 @@ class JointAnalyzer:
                         import pandas as pd
 
                         video_row = pd.Series(video_row_data)
-                        video_path = self.path_resolver.find_video_for_row(
-                            video_row)
+                        video_path = self.path_resolver.find_video_for_row(video_row)
                     else:
                         # Fallback to simple path construction
                         video_path = os.path.join(
@@ -140,8 +162,7 @@ class JointAnalyzer:
                         )
                 else:
                     # Fallback to simple path construction
-                    video_path = os.path.join(
-                        self.video_directory, f"{video_name}.mp4")
+                    video_path = os.path.join(self.video_directory, f"{video_name}.mp4")
 
                 if not video_path or not os.path.exists(video_path):
                     # Try alternative extensions for fallback
@@ -154,17 +175,17 @@ class JointAnalyzer:
                                 video_path = alt_path
                                 break
                         else:
-                            print(
-                                f"WARNING: Video file not found for {video_name}")
+                            print(f"WARNING: Video file not found for {video_name}")
                             continue
                     else:
-                        print(
-                            f"WARNING: Video file not found for {video_name}")
+                        print(f"WARNING: Video file not found for {video_name}")
                         continue
 
                 # Load ground truth coordinates
                 gt_file = os.path.join(
-                    self.ground_truth_directory, f"{video_name}", "joints2d_projected.csv"
+                    self.ground_truth_directory,
+                    f"{video_name}",
+                    "joints2d_projected.csv",
                 )
                 if not os.path.exists(gt_file):
                     # Try alternative naming
@@ -172,20 +193,19 @@ class JointAnalyzer:
                         self.ground_truth_directory, f"{video_name}.csv"
                     )
                     if not os.path.exists(gt_file):
-                        print(
-                            f"WARNING: Ground truth file not found for {video_name}")
+                        print(f"WARNING: Ground truth file not found for {video_name}")
                         continue
 
                 # Load ground truth data
                 gt_data = pd.read_csv(gt_file)
 
                 # Check if joint coordinates are available
-                x_col = f"{ground_truth_joint_name}_x"
-                y_col = f"{ground_truth_joint_name}_y"
+                x_col = f"{joint_number}_x"
+                y_col = f"{joint_number}_y"
 
                 if x_col not in gt_data.columns or y_col not in gt_data.columns:
                     print(
-                        f"WARNING: Joint coordinates not found for {ground_truth_joint_name} in {gt_file}"
+                        f"WARNING: Joint coordinates not found for joint {joint_number} ({joint_name}) in {gt_file}"
                     )
                     continue
 
@@ -199,8 +219,7 @@ class JointAnalyzer:
                 )
 
                 if video_brightness is not None:
-                    print(
-                        f"   Extracted {len(video_brightness)} brightness values")
+                    print(f"   Extracted {len(video_brightness)} brightness values")
                     brightness_values.extend(video_brightness)
                 else:
                     print("   No brightness values extracted from this video")
@@ -242,8 +261,7 @@ class JointAnalyzer:
                 print(f"ERROR: Could not open video {video_path}")
                 return None
 
-            print(
-                f"      Video opened successfully: {os.path.basename(video_path)}")
+            print(f"      Video opened successfully: {os.path.basename(video_path)}")
             print(f"      Ground truth data shape: {gt_data.shape}")
             print(f"      Looking for columns: {x_col}, {y_col}")
 
@@ -330,8 +348,7 @@ class JointAnalyzer:
                 return None
 
         except Exception as e:
-            print(
-                f"WARNING: Error extracting brightness at point ({x}, {y}): {e}")
+            print(f"WARNING: Error extracting brightness at point ({x}, {y}): {e}")
             return None
 
     def calculate_statistics(self, values: np.ndarray) -> Dict[str, float]:
@@ -395,8 +412,7 @@ class JointAnalyzer:
             return None
 
         # Try to extract real brightness values from videos
-        brightness_values = self.extract_brightness_from_video(
-            pck_data, joint_name)
+        brightness_values = self.extract_brightness_from_video(pck_data, joint_name)
 
         # If real extraction fails, fall back to simulation with warning
         if brightness_values is None:
@@ -491,8 +507,7 @@ class JointAnalyzer:
                         f"    WARNING: No data for {joint_name} at threshold {threshold}"
                     )
 
-        print(
-            f"Analysis completed. Generated {len(analysis_results)} results.")
+        print(f"Analysis completed. Generated {len(analysis_results)} results.")
         return analysis_results
 
     def get_average_data_for_plotting(
@@ -522,10 +537,8 @@ class JointAnalyzer:
 
                 if metric_key in analysis_results:
                     result = analysis_results[metric_key]
-                    joint_data["joint_names"].append(
-                        joint_name.replace("_", " "))
-                    joint_data["avg_brightness"].append(
-                        result["avg_brightness"])
+                    joint_data["joint_names"].append(joint_name.replace("_", " "))
+                    joint_data["avg_brightness"].append(result["avg_brightness"])
                     joint_data["avg_pck"].append(result["avg_pck"])
 
             threshold_data[threshold] = joint_data
