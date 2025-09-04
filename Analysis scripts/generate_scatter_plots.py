@@ -14,7 +14,7 @@ from pathlib import Path
 # Add the Analysis scripts directory to the path
 sys.path.append(str(Path(__file__).parent))
 
-from config import ConfigManager, load_analysis_config
+from config import ConfigManager, load_dataset_analysis_config
 from core.data_processor import DataProcessor
 from visualizers.scatter_visualizer import ScatterPlotVisualizer
 
@@ -24,8 +24,9 @@ def create_scatter_plots_single_analysis(dataset_name: str = "movi"):
     print("🎯 Creating Scatter Plots - Single Analysis Mode")
     print("=" * 60)
 
-    # Load configuration
+    # Load dataset-specific configuration only
     config = ConfigManager.load_config(dataset_name)
+    analysis_config = load_dataset_analysis_config(dataset_name)
 
     # Create data processor
     data_processor = DataProcessor(config)
@@ -97,9 +98,9 @@ def create_scatter_plots_multi_analysis(dataset_name: str = "movi"):
     print("🎯 Creating Scatter Plots - Multi Analysis Mode")
     print("=" * 60)
 
-    # Load configuration
+    # Load dataset-specific configuration only
     config = ConfigManager.load_config(dataset_name)
-    analysis_config = load_analysis_config()
+    analysis_config = load_dataset_analysis_config(dataset_name)
 
     # Check if multi-analysis is enabled
     if not analysis_config.is_multi_analysis_enabled():

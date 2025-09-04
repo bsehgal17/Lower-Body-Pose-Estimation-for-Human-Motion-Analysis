@@ -4,7 +4,7 @@ Simplified Analysis Main Entry Point
 Uses modular components for clean and maintainable analysis pipeline.
 """
 
-from config import ConfigManager, load_analysis_config
+from config import ConfigManager, load_dataset_analysis_config
 
 # from analyzers.analyzer_factory import AnalyzerFactory
 from core.pipeline_manager import AnalysisPipeline
@@ -83,8 +83,8 @@ def main():
         "brightness": "get_brightness_data",
     }
 
-    # Load analysis configuration from YAML
-    analysis_config = load_analysis_config()
+    # Load analysis configuration from dataset-specific config only
+    analysis_config = load_dataset_analysis_config(dataset_name)
 
     # Run configuration tests
     run_configuration_tests()

@@ -162,14 +162,85 @@ class AnalysisConfigLoader:
 
 
 # Convenience function for easy import
-def load_analysis_config(config_path: str = None) -> AnalysisConfig:
+def load_analysis_config(
+    config_path: str = None, dataset_name: str = None
+) -> AnalysisConfig:
     """
-    Convenience function to load analysis configuration.
+    Load analysis configuration from dataset-specific config files only.
 
     Args:
-        config_path: Optional path to config file
+        config_path: Optional path to specific config file
+        dataset_name: Dataset name to load dataset-specific config
 
     Returns:
         AnalysisConfig instance
     """
-    return AnalysisConfigLoader.load_config(config_path)
+    if config_path:
+        return AnalysisConfigLoader.load_config(config_path)
+
+    if dataset_name:
+        return load_dataset_analysis_config(dataset_name)
+
+    # If no dataset specified, return default config
+    print("⚠️  No dataset name specified, using default configuration")
+    return AnalysisConfigLoader.create_default_config()
+
+
+def load_dataset_analysis_config(dataset_name: str) -> AnalysisConfig:
+    """
+    Load analysis configuration from dataset-specific config file only.
+
+    Args:
+        dataset_name: Name of the dataset
+
+    Returns:
+        AnalysisConfig instance with dataset-specific settings
+    """
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    analysis_scripts_dir = os.path.dirname(current_dir)
+
+    # Load dataset-specific config
+    dataset_config_path = os.path.join(
+        analysis_scripts_dir, "config_yamls", f"{dataset_name}_config.yaml"
+    )
+
+    if not os.path.exists(dataset_config_path):
+        raise FileNotFoundError(
+            f"Dataset configuration file not found: {dataset_config_path}\n"
+            f"Please create {dataset_name}_config.yaml with analysis configuration."
+        )
+
+    try:
+        with open(dataset_config_path, "r") as file:
+            dataset_config_dict = yaml.safe_load(file)
+
+        # Check if dataset config has analysis section
+        if "analysis" not in dataset_config_dict:
+            raise ValueError(
+                f"Dataset config {dataset_name}_config.yaml is missing 'analysis' section.\n"
+                f"Please add analysis configuration to the dataset config file."
+            )
+
+        print(f"✅ Using dataset-specific analysis config: {dataset_name}_config.yaml")
+        return AnalysisConfig(dataset_config_dict)
+
+    except Exception as e:
+        raise Exception(
+            f"Error loading dataset config {dataset_config_path}: {e}\n"
+            f"Please ensure {dataset_name}_config.yaml exists and has valid analysis configuration."
+        )
+
+
+def load_analysis_config_with_dataset_priority(dataset_name: str) -> AnalysisConfig:
+    """
+    Load analysis configuration from dataset-specific config file only.
+
+    This function is now equivalent to load_dataset_analysis_config.
+
+    Args:
+        dataset_name: Name of the dataset
+
+    Returns:
+        AnalysisConfig instance with dataset-specific settings
+    """
+    return load_dataset_analysis_config(dataset_name)

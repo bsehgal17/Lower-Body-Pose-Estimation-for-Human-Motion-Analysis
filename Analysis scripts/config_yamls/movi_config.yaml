@@ -32,22 +32,79 @@ analysis:
     bin_size: 2  # Default bin size for MoVi dataset
     
     # MoVi-specific bin sizes for different analysis types
-    # bin_sizes:
-    #   motion_analysis: 4    # Fine bins for motion sequences
-    #   dance_analysis: 3     # Very fine bins for dance sequences
-    #   general_analysis: 5   # Standard bins for general analysis
-    #   overview_analysis: 15 # Coarse bins for overview
-    #   precision_analysis: 2 # Very fine bins for precision studies
-    #   rapid_analysis: 20    # Very coarse bins for rapid overview
+    bin_sizes:
+      motion_analysis: 4    # Fine bins for motion sequences
+      dance_analysis: 3     # Very fine bins for dance sequences
+      general_analysis: 5   # Standard bins for general analysis
+      overview_analysis: 15 # Coarse bins for overview
+      precision_analysis: 2 # Very fine bins for precision studies
+      rapid_analysis: 20    # Very coarse bins for rapid overview
     
-    # # Dataset-specific score groups for PCK brightness analysis
-    # score_groups:
-    #   all: null  # Analyze all available scores
-    #   extremes: [0, 100]  # Extreme scores (failure and perfect)
-    #   high_performance: [80, 85, 90, 95, 100]  # High PCK scores
-    #   low_performance: [0, 5, 10, 15, 20]  # Low PCK scores
-    #   mid_performance: [40, 45, 50, 55, 60]  # Mid-range performance
-    #   movi_custom: [70, 80, 90, 95]  # MoVi-specific range
+    # Dataset-specific score groups for PCK brightness analysis
+    score_groups:
+      all: null  # Analyze all available scores
+      extremes: [0, 100]  # Extreme scores (failure and perfect)
+      high_performance: [80, 85, 90, 95, 100]  # High PCK scores
+      low_performance: [0, 5, 10, 15, 20]  # Low PCK scores
+      mid_performance: [40, 45, 50, 55, 60]  # Mid-range performance
+      movi_custom: [70, 80, 90, 95]  # MoVi-specific range
     
-    # # Default score group for this dataset  
-    # default_score_group: "extremes"
+    # Default score group for this dataset  
+    default_score_group: "extremes"
+    
+    # Visualization configuration for MoVi
+    visualization:
+      create_scatter_plots: true
+      create_individual_plots: true
+      create_combined_plots: true
+      create_comparison_plots: true
+      create_correlation_plots: true
+      save_format: "svg"
+      
+      # MoVi-specific scatter plot settings
+      scatter_plot_settings:
+        figure_size: [14, 9]  # Larger plots for motion analysis
+        alpha: 0.8
+        marker_size: 70
+        show_trend_lines: true
+        show_correlation_stats: true
+        colors: "plasma"  # Different colormap for MoVi
+    
+    # Export settings for MoVi
+    export:
+      csv_enabled: true
+      json_enabled: true
+      separate_files_per_group: true
+      include_correlation_data: true
+    
+    # Multi-analysis configuration for MoVi
+    multi_analysis:
+      enabled: true
+      scenarios:
+        - name: "movi_motion_extremes"
+          enabled: true
+          score_group: "extremes"
+          bin_size: 1
+          description: "Detailed analysis of extreme scores for motion sequences"
+          create_scatter_plots: true
+          
+        - name: "movi_dance_performance"
+          enabled: true
+          score_group: "high_performance"
+          bin_size: 3
+          description: "High-performance analysis for dance sequences"
+          create_scatter_plots: true
+          
+        - name: "movi_overview"
+          enabled: true
+          score_group: "all"
+          bin_size: 15
+          description: "General overview for MoVi dataset"
+          create_scatter_plots: true
+          
+        - name: "movi_custom_range"
+          enabled: true
+          score_group: "movi_custom"
+          bin_size: 5
+          description: "MoVi-specific score range analysis"
+          create_scatter_plots: true
