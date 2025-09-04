@@ -23,6 +23,7 @@ class DatasetConfig:
     pck_per_frame_score_columns: List[str]
     sync_data: Any
     analysis_config: Any = None  # Analysis-specific configuration
+    ground_truth_file: str = None  # Path to ground truth coordinates file
 
     def __post_init__(self):
         """Validate configuration after initialization."""
@@ -61,6 +62,10 @@ class DatasetConfig:
 
         if not self.pck_per_frame_score_columns:
             errors.append("PCK per-frame score columns not specified")
+
+        # Optional validation for ground truth file
+        if self.ground_truth_file and not os.path.exists(self.ground_truth_file):
+            errors.append(f"Ground truth file does not exist: {self.ground_truth_file}")
 
         if errors:
             for error in errors:

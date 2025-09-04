@@ -65,6 +65,9 @@ class ConfigFactory:
                 pck_per_frame_score_columns=pck_scores.get("per_frame", []),
                 sync_data=sync_data,
                 analysis_config=analysis_config,  # Pass analysis config directly
+                ground_truth_file=paths.get(
+                    "ground_truth_file"
+                ),  # Add ground truth file
             )
 
         except FileNotFoundError:
