@@ -97,7 +97,7 @@ class JointAnalyzer:
         Returns:
             dict: Analysis results for this joint-threshold combination
         """
-        metric_name = f"{joint_name}_pck_{threshold:g}"
+        metric_name = f"{joint_name}_jointwise_pck_{threshold:g}"
 
         if metric_name not in pck_data.columns:
             return None
@@ -109,7 +109,8 @@ class JointAnalyzer:
             return None
 
         # Generate brightness values
-        brightness_values = self.generate_simulated_brightness(pck_scores, joint_index)
+        brightness_values = self.generate_simulated_brightness(
+            pck_scores, joint_index)
 
         # Calculate statistics
         pck_stats = self.calculate_statistics(pck_scores)
@@ -156,14 +157,15 @@ class JointAnalyzer:
                 )
 
                 if result is not None:
-                    metric_key = f"{joint_name}_pck_{threshold:g}"
+                    metric_key = f"{joint_name}_jointwise_pck_{threshold:g}"
                     analysis_results[metric_key] = result
                 else:
                     print(
                         f"    WARNING: No data for {joint_name} at threshold {threshold}"
                     )
 
-        print(f"Analysis completed. Generated {len(analysis_results)} results.")
+        print(
+            f"Analysis completed. Generated {len(analysis_results)} results.")
         return analysis_results
 
     def get_average_data_for_plotting(
@@ -193,8 +195,10 @@ class JointAnalyzer:
 
                 if metric_key in analysis_results:
                     result = analysis_results[metric_key]
-                    joint_data["joint_names"].append(joint_name.replace("_", " "))
-                    joint_data["avg_brightness"].append(result["avg_brightness"])
+                    joint_data["joint_names"].append(
+                        joint_name.replace("_", " "))
+                    joint_data["avg_brightness"].append(
+                        result["avg_brightness"])
                     joint_data["avg_pck"].append(result["avg_pck"])
 
             threshold_data[threshold] = joint_data
