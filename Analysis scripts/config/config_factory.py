@@ -30,9 +30,9 @@ class ConfigFactory:
         """Create configuration from YAML file."""
         # Get the path to the YAML config file
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(os.path.dirname(current_dir))
+        analysis_scripts_root = os.path.dirname(current_dir)
         config_path = os.path.join(
-            project_root, "config_yamls", f"{dataset_name}_config.yaml"
+            analysis_scripts_root, "config_yamls", f"{dataset_name}_config.yaml"
         )
 
         try:
