@@ -85,12 +85,28 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
                 alpha=0.8,
             )
 
+        # Get bin size from results for display
+        bin_size = results.get("bin_size", "Unknown")
+
         plt.title(
-            f"Brightness Distribution by PCK Score\n({pck_column})", fontsize=16, pad=20
+            f"Brightness Distribution by PCK Score\n({pck_column}) - Bin Size: {bin_size}",
+            fontsize=16,
+            pad=20,
         )
         plt.xlabel("Brightness Level", fontsize=14)
         plt.ylabel("Normalized Frequency", fontsize=14)
         plt.grid(True, alpha=0.3, linestyle="--")
+
+        # Add bin size information as text annotation
+        plt.text(
+            0.02,
+            0.98,
+            f"Bin Size: {bin_size}",
+            transform=plt.gca().transAxes,
+            fontsize=12,
+            verticalalignment="top",
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.8),
+        )
 
         # Customize legend
         plt.legend(
