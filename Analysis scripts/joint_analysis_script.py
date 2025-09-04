@@ -84,11 +84,8 @@ class JointAnalysisScript:
         try:
             print(f"Setting up configuration for dataset: {self.dataset_name}")
 
-            # Initialize config manager
-            config_manager = ConfigManager()
-
-            # Load dataset configuration
-            self.config = config_manager.get_dataset_config(self.dataset_name)
+            # Load dataset configuration using correct method
+            self.config = ConfigManager.load_config(self.dataset_name)
 
             if self.config is None:
                 print(
