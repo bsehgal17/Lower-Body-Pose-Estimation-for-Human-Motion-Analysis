@@ -42,6 +42,7 @@ def run_single_analysis(dataset_name: str, metrics_config: dict, analysis_config
     pipeline.run_complete_analysis(
         metrics_config=metrics_config,
         run_overall=True,
+        run_per_video=True,
         run_per_frame=True,
         per_frame_analysis_types=per_frame_analysis_types,
     )
@@ -67,6 +68,7 @@ def run_multi_analysis(dataset_name: str, metrics_config: dict, analysis_config)
     base_pipeline.run_complete_analysis(
         metrics_config=metrics_config,
         run_overall=True,
+        run_per_video=True,
         run_per_frame=True,
         per_frame_analysis_types=per_frame_analysis_types,
     )

@@ -26,9 +26,19 @@ class ScatterPlotVisualizer(BaseVisualizer):
         # Extract base path and extension
         base_path = os.path.splitext(save_path)[0]
 
+        # Determine if we're dealing with aggregated data (per-video) or per-frame data
+        is_aggregated = metric_name.startswith("avg_")
+
         # Create separate scatter plot for each PCK column
         for pck_col in self.config.pck_per_frame_score_columns:
-            if pck_col in data.columns:
+            # For aggregated data, look for avg_ prefixed columns
+            target_pck_col = f"avg_{pck_col}" if is_aggregated else pck_col
+
+            if target_pck_col in data.columns:
+                self._create_single_scatter(
+                    data, metric_name, target_pck_col, f"{base_path}_{pck_col}.svg"
+                )
+            elif pck_col in data.columns:  # Fallback to original column name
                 self._create_single_scatter(
                     data, metric_name, pck_col, f"{base_path}_{pck_col}.svg"
                 )

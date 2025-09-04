@@ -51,8 +51,7 @@ class DataProcessor(BaseDataProcessor):
             return results
 
         grouped_pck_df = pck_df.groupby(grouping_cols)
-        progress = ProgressTracker(
-            len(grouped_pck_df), "Processing overall data")
+        progress = ProgressTracker(len(grouped_pck_df), "Processing overall data")
 
         for metric_name, extractor_method in metrics_config.items():
             print(f"\nProcessing {metric_name} data...")
@@ -72,8 +71,7 @@ class DataProcessor(BaseDataProcessor):
                     video_info = ", ".join(
                         [f"{k}: {v}" for k, v in video_row_data.items()]
                     )
-                    print(
-                        f"Warning: Video not found for {video_info}. Skipping.")
+                    print(f"Warning: Video not found for {video_info}. Skipping.")
                     continue
 
                 extractor = MetricExtractorFactory.create_extractor(
@@ -89,8 +87,7 @@ class DataProcessor(BaseDataProcessor):
                     all_metric_data.extend(metric_data_sliced)
 
                     new_row = video_row_data.copy()
-                    new_row[f"avg_{metric_name}"] = pd.Series(
-                        metric_data_sliced).mean()
+                    new_row[f"avg_{metric_name}"] = pd.Series(metric_data_sliced).mean()
                     video_metrics_rows.append(new_row)
 
                 progress.update()
@@ -111,6 +108,78 @@ class DataProcessor(BaseDataProcessor):
         return results
 
     @PerformanceMonitor.timing_decorator
+    def process_per_video_data(
+        self, per_frame_df: pd.DataFrame, metrics_config: Dict[str, str]
+    ) -> Dict[str, Any]:
+        """Process per-frame data to create per-video aggregated data."""
+        results = {}
+
+        if "video_id" not in per_frame_df.columns:
+            print(
+                "Warning: No video_id column found. Cannot perform per-video analysis."
+            )
+            return results
+
+        # Get available PCK columns
+        pck_columns = []
+        if hasattr(self.config, "pck_per_frame_score_columns"):
+            pck_columns = [
+                col
+                for col in self.config.pck_per_frame_score_columns
+                if col in per_frame_df.columns
+            ]
+
+        if not pck_columns:
+            print("Warning: No PCK score columns found.")
+            return results
+
+        for metric_name, extractor_method in metrics_config.items():
+            print(f"\nProcessing per-video {metric_name} data...")
+
+            # Check if metric exists in the data
+            if metric_name not in per_frame_df.columns:
+                print(
+                    f"Warning: {metric_name} column not found in per-frame data. Skipping."
+                )
+                continue
+
+            # Group by video and calculate averages
+            video_groups = per_frame_df.groupby("video_id")
+            video_aggregated_rows = []
+
+            for video_id, video_data in video_groups:
+                # Calculate average metric value for this video
+                avg_metric = video_data[metric_name].mean()
+
+                # Calculate average PCK scores for this video
+                video_row = {"video_id": video_id, f"avg_{metric_name}": avg_metric}
+
+                for pck_col in pck_columns:
+                    if pck_col in video_data.columns:
+                        video_row[f"avg_{pck_col}"] = video_data[pck_col].mean()
+
+                # Add other useful metadata if available
+                for col in ["subject", "action", "scenario"]:
+                    if col in video_data.columns:
+                        # Take the first value (should be same for all frames in video)
+                        video_row[col] = video_data[col].iloc[0]
+
+                video_aggregated_rows.append(video_row)
+
+            if video_aggregated_rows:
+                video_aggregated_df = pd.DataFrame(video_aggregated_rows)
+                results[metric_name] = {
+                    "video_aggregated_df": video_aggregated_df,
+                }
+                print(
+                    f"Processed {len(video_aggregated_rows)} videos for {metric_name}"
+                )
+            else:
+                print(f"No video data processed for {metric_name}")
+
+        return results
+
+    @PerformanceMonitor.timing_decorator
     def process_per_frame_data(
         self, pck_df: pd.DataFrame, metrics_config: Dict[str, str]
     ) -> pd.DataFrame:
@@ -125,8 +194,7 @@ class DataProcessor(BaseDataProcessor):
             return pd.DataFrame()
 
         grouped_pck_df = pck_df.groupby(grouping_cols)
-        progress = ProgressTracker(
-            len(grouped_pck_df), "Processing per-frame data")
+        progress = ProgressTracker(len(grouped_pck_df), "Processing per-frame data")
 
         for group_name, group_data in grouped_pck_df:
             video_row_data = {

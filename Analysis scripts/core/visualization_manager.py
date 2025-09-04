@@ -107,6 +107,49 @@ class VisualizationManager:
         except Exception as e:
             print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
 
+    def create_per_video_visualizations(self, video_aggregated_df, metric_name):
+        """Create per-video visualizations using aggregated video data."""
+
+        # Scatter plot for per-video analysis
+        try:
+            scatter_viz = self.viz_factory.create_visualizer("scatter", self.config)
+            save_path = os.path.join(
+                self.config.save_folder,
+                f"per_video_{metric_name}_scatter_{self.timestamp}.svg",
+            )
+
+            # Use the aggregated dataframe for scatter plotting
+            # The dataframe should have avg_brightness and avg_pck_* columns
+            scatter_viz.create_plot(
+                video_aggregated_df, f"avg_{metric_name}", save_path
+            )
+        except Exception as e:
+            print(
+                f"Warning: Could not create per-video scatter plot for {metric_name}: {e}"
+            )
+
+        # Create histogram for video-level averages
+        try:
+            hist_viz = self.viz_factory.create_visualizer("histogram", self.config)
+            save_path = os.path.join(
+                self.config.save_folder,
+                f"per_video_{metric_name}_histogram_{self.timestamp}.svg",
+            )
+
+            # Create histogram of video averages
+            viz_data = {
+                f"avg_{metric_name}": video_aggregated_df[f"avg_{metric_name}"].tolist()
+            }
+            import pandas as pd
+
+            viz_df = pd.DataFrame(viz_data)
+
+            hist_viz.create_plot(viz_df, f"avg_{metric_name}", save_path)
+        except Exception as e:
+            print(
+                f"Warning: Could not create per-video histogram for {metric_name}: {e}"
+            )
+
     def create_pck_brightness_correlation_plot(
         self,
         combined_df,

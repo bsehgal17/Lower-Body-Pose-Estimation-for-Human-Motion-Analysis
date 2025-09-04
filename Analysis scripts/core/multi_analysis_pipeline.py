@@ -50,6 +50,7 @@ class MultiAnalysisPipeline:
                 success = pipeline.run_complete_analysis(
                     metrics_config=metrics_config,
                     run_overall=True,
+                    run_per_video=True,
                     run_per_frame=True,
                     per_frame_analysis_types=AnalyzerFactory.get_available_analyzers(),
                 )

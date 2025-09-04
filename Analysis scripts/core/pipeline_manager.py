@@ -33,6 +33,7 @@ class AnalysisPipeline:
         self,
         metrics_config: dict,
         run_overall: bool,
+        run_per_video: bool,
         run_per_frame: bool,
         per_frame_analysis_types: list,
     ):
@@ -41,6 +42,10 @@ class AnalysisPipeline:
 
         if run_overall:
             self._run_overall_analysis(metrics_config)
+            print("\n" + "=" * 50 + "\n")
+
+        if run_per_video:
+            self._run_per_video_analysis(metrics_config)
             print("\n" + "=" * 50 + "\n")
 
         if run_per_frame:
@@ -67,26 +72,49 @@ class AnalysisPipeline:
                 metric_data["merged_df"], metric_data["all_metric_data"], metric_name
             )
 
-        # Create PCK vs brightness correlation plot if per-frame data is available
-        try:
-            per_frame_df = self.data_processor.load_pck_per_frame_scores()
-            if (
-                per_frame_df is not None
-                and "brightness" in per_frame_df.columns
-                and "video_id" in per_frame_df.columns
-            ):
-                print("Creating PCK vs brightness correlation plot...")
-                self.viz_manager.create_pck_brightness_correlation_plot(
-                    per_frame_df, analysis_type="overall"
-                )
-            else:
-                print(
-                    "Skipping PCK vs brightness correlation plot - missing brightness or video_id data"
-                )
-        except Exception as e:
-            print(f"Warning: Could not create PCK vs brightness correlation plot: {e}")
-
         print(f"Overall analysis complete. Results saved to {self.config.save_folder}")
+
+    def _run_per_video_analysis(self, metrics_config: dict):
+        """Run per-video analysis with video-level aggregation."""
+        print("Running per-video analysis with video-level aggregation...")
+
+        # Load per-frame data for video-level aggregation
+        per_frame_df = self.data_processor.load_pck_per_frame_scores()
+        if per_frame_df is None:
+            print("Cannot proceed with per-video analysis without per-frame data.")
+            return
+
+        # Process the data for per-video analysis
+        per_video_results = self.data_processor.process_per_video_data(
+            per_frame_df, metrics_config
+        )
+
+        # Create per-video visualizations
+        for metric_name, metric_data in per_video_results.items():
+            self.viz_manager.create_per_video_visualizations(
+                metric_data["video_aggregated_df"], metric_name
+            )
+
+        # Create PCK vs brightness correlation plot if brightness data is available
+        if (
+            per_frame_df is not None
+            and "brightness" in per_frame_df.columns
+            and "video_id" in per_frame_df.columns
+        ):
+            print(
+                "Creating PCK vs brightness correlation plot for per-video analysis..."
+            )
+            self.viz_manager.create_pck_brightness_correlation_plot(
+                per_frame_df, analysis_type="per_video"
+            )
+        else:
+            print(
+                "Skipping PCK vs brightness correlation plot - missing brightness or video_id data"
+            )
+
+        print(
+            f"Per-video analysis complete. Results saved to {self.config.save_folder}"
+        )
 
     def _run_per_frame_analysis(self, metrics_config: dict, analysis_types: list):
         """Run per-frame analysis using separated components."""
