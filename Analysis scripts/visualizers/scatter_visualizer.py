@@ -73,7 +73,7 @@ class ScatterPlotVisualizer(BaseVisualizer):
 
         print(f"Scatter plot saved to: {save_path}")
 
-    def create_pck_brightness_correlation_plot(
+    def create_pck_brightness_correlation_plot_per_frame(
         self,
         data: pd.DataFrame,
         brightness_col: str = "brightness",
@@ -82,7 +82,8 @@ class ScatterPlotVisualizer(BaseVisualizer):
         pck_columns: list = None,
     ):
         """
-        Create scatter plot of average PCK vs average brightness for all videos.
+        Create scatter plot of average PCK vs average brightness for all videos (per-frame analysis).
+        All PCK thresholds are shown on the same plot with different colors.
 
         Args:
             data: DataFrame containing per-frame data with PCK scores, brightness, and video IDs
@@ -218,6 +219,139 @@ class ScatterPlotVisualizer(BaseVisualizer):
         print(f"PCK vs Brightness correlation plot saved to: {save_path}")
         print(
             f"Analyzed {len(avg_df['video_id'].unique())} videos across {len(available_pck_cols)} PCK thresholds"
+        )
+
+    def create_pck_brightness_correlation_plot_per_video(
+        self,
+        data: pd.DataFrame,
+        brightness_col: str = "avg_brightness",
+        video_id_col: str = "subject",
+        save_path_base: str = None,
+        pck_columns: list = None,
+    ):
+        """
+        Create separate scatter plots for each PCK threshold showing video-level data.
+        Each plot shows individual videos/subjects with grouping column as legend.
+
+        Args:
+            data: DataFrame containing video-level aggregated data
+            brightness_col: Name of the brightness column (default: "avg_brightness")
+            video_id_col: Name of the video/subject ID column (default: "subject")
+            save_path_base: Base path for saving plots (threshold will be appended)
+            pck_columns: List of PCK column names to use
+        """
+        if pck_columns is None:
+            print("Warning: No PCK columns provided for per-video analysis")
+            return
+
+        # Check required columns
+        required_cols = [brightness_col, video_id_col]
+        missing_cols = [col for col in required_cols if col not in data.columns]
+        if missing_cols:
+            print(f"Warning: Missing required columns: {missing_cols}")
+            return
+
+        # Get available PCK columns
+        available_pck_cols = [col for col in pck_columns if col in data.columns]
+
+        if not available_pck_cols:
+            print("Warning: No PCK columns found in data")
+            return
+
+        print(
+            f"Creating separate PCK vs Brightness plots for {len(available_pck_cols)} PCK thresholds"
+        )
+
+        # Create separate plot for each PCK threshold
+        for pck_col in available_pck_cols:
+            plt.figure(figsize=(10, 8))
+
+            # Create scatter plot for this threshold
+            plt.scatter(
+                data[brightness_col],
+                data[pck_col],
+                alpha=0.7,
+                s=80,
+                c=range(len(data)),
+                cmap="tab10",
+            )
+
+            # Add trend line
+            if len(data) > 1:
+                z = np.polyfit(data[brightness_col], data[pck_col], 1)
+                p = np.poly1d(z)
+                x_trend = np.linspace(
+                    data[brightness_col].min(),
+                    data[brightness_col].max(),
+                    100,
+                )
+                plt.plot(
+                    x_trend,
+                    p(x_trend),
+                    color="red",
+                    linestyle="--",
+                    alpha=0.8,
+                    linewidth=2,
+                )
+
+            # Add labels for each point (showing video/subject ID)
+            for i, (idx, row) in enumerate(data.iterrows()):
+                plt.annotate(
+                    row[video_id_col],
+                    (row[brightness_col], row[pck_col]),
+                    xytext=(5, 5),
+                    textcoords="offset points",
+                    fontsize=8,
+                    alpha=0.7,
+                )
+
+            # Calculate correlation
+            correlation = np.corrcoef(data[brightness_col], data[pck_col])[0, 1]
+
+            plt.xlabel("Average Brightness", fontsize=12)
+            plt.ylabel(f"Average {pck_col}", fontsize=12)
+            plt.title(
+                f"PCK vs Brightness Correlation - {pck_col}\n(r = {correlation:.3f})",
+                fontsize=14,
+            )
+            plt.grid(True, alpha=0.3)
+
+            # Save the plot
+            if save_path_base is None:
+                save_path = os.path.join(
+                    self.config.save_folder, f"per_video_pck_brightness_{pck_col}.svg"
+                )
+            else:
+                base_dir = os.path.dirname(save_path_base)
+                base_name = os.path.splitext(os.path.basename(save_path_base))[0]
+                save_path = os.path.join(base_dir, f"{base_name}_{pck_col}.svg")
+
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            plt.savefig(save_path, dpi=300, bbox_inches="tight", format="svg")
+            plt.close()
+
+            print(
+                f"Per-video PCK vs Brightness plot for {pck_col} saved to: {save_path}"
+            )
+
+        print(
+            f"Created {len(available_pck_cols)} separate plots for per-video analysis"
+        )
+
+    # Keep the original method name as an alias for backward compatibility
+    def create_pck_brightness_correlation_plot(
+        self,
+        data: pd.DataFrame,
+        brightness_col: str = "brightness",
+        video_id_col: str = "video_id",
+        save_path: str = None,
+        pck_columns: list = None,
+    ):
+        """
+        Backward compatibility wrapper - delegates to per-frame analysis.
+        """
+        return self.create_pck_brightness_correlation_plot_per_frame(
+            data, brightness_col, video_id_col, save_path, pck_columns
         )
 
     def _add_correlation_stats(self, avg_df: pd.DataFrame, ax):
