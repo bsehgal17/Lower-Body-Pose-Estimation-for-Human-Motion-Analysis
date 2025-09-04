@@ -94,7 +94,7 @@ class JointAnalysisScript:
                 self.output_dir = Path(OUTPUT_DIR)
             else:
                 self.output_dir = Path(
-                    f"joint_analysis_{self.dataset_name}_{self.timestamp}"
+                    f"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/MoVi/joint analysis/joint_analysis_{self.dataset_name}_{self.timestamp}"
                 )
 
             if SAVE_RESULTS:
@@ -122,7 +122,8 @@ class JointAnalysisScript:
                 print("ERROR: Could not load PCK jointwise data")
                 return None
 
-            print(f"Loaded PCK jointwise data with {len(pck_df)} subjects/records")
+            print(
+                f"Loaded PCK jointwise data with {len(pck_df)} subjects/records")
 
             # Validate that required joints exist in data
             available_joints = set()
@@ -207,7 +208,8 @@ class JointAnalysisScript:
                         else:
                             print(f"   WARNING: No data for {col_name}")
                     else:
-                        print(f"   WARNING: Column {col_name} not found in data")
+                        print(
+                            f"   WARNING: Column {col_name} not found in data")
 
             print(f"Analysis completed with {len(analysis_results)} metrics")
             return analysis_results
@@ -248,13 +250,16 @@ class JointAnalysisScript:
                 fig.suptitle(f"{joint_name} Analysis", fontsize=16)
 
                 # Plot 1: PCK scores by threshold
-                thresholds = [data["threshold"] for data in joint_metrics.values()]
+                thresholds = [data["threshold"]
+                              for data in joint_metrics.values()]
                 means = [
                     data["summary_stats"]["mean"] for data in joint_metrics.values()
                 ]
-                stds = [data["summary_stats"]["std"] for data in joint_metrics.values()]
+                stds = [data["summary_stats"]["std"]
+                        for data in joint_metrics.values()]
 
-                axes[0].errorbar(thresholds, means, yerr=stds, marker="o", capsize=5)
+                axes[0].errorbar(thresholds, means, yerr=stds,
+                                 marker="o", capsize=5)
                 axes[0].set_xlabel("PCK Threshold")
                 axes[0].set_ylabel("Mean PCK Score")
                 axes[0].set_title("Mean PCK Score by Threshold")
@@ -279,7 +284,8 @@ class JointAnalysisScript:
                 plt.tight_layout()
 
                 if SAVE_RESULTS:
-                    plot_file = self.output_dir / f"{joint_name.lower()}_analysis.png"
+                    plot_file = self.output_dir / \
+                        f"{joint_name.lower()}_analysis.png"
                     plt.savefig(plot_file, dpi=300, bbox_inches="tight")
                     print(f"   Saved plot: {plot_file}")
 
@@ -307,7 +313,8 @@ class JointAnalysisScript:
                     else:
                         means.append(0)
 
-                ax.bar(x_pos + i * width, means, width, label=f"Threshold {threshold}")
+                ax.bar(x_pos + i * width, means, width,
+                       label=f"Threshold {threshold}")
 
             ax.set_xlabel("Joints")
             ax.set_ylabel("Mean PCK Score")
