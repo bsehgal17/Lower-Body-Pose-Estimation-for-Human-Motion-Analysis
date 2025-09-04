@@ -3,18 +3,15 @@ Factory for creating analyzer instances.
 """
 
 from core.base_classes import BaseAnalyzer
-from .anova_analyzer import ANOVAAnalyzer
-from .bin_analyzer import BinAnalyzer
-from .pck_brightness_analyzer import PCKBrightnessAnalyzer
 
 
 class AnalyzerFactory:
     """Factory for creating analyzers."""
 
     _analyzers = {
-        "anova": ANOVAAnalyzer,
-        "bin_analysis": BinAnalyzer,
-        "pck_brightness": PCKBrightnessAnalyzer,
+        "anova": "analyzers.anova_analyzer.ANOVAAnalyzer",
+        "bin_analysis": "analyzers.bin_analyzer.BinAnalyzer",
+        "pck_brightness": "analyzers.pck_brightness_analyzer.PCKBrightnessAnalyzer",
     }
 
     @classmethod
@@ -27,13 +24,20 @@ class AnalyzerFactory:
                 f"Unknown analyzer type: {analyzer_type}. Available: {list(cls._analyzers.keys())}"
             )
 
+        analyzer_path = cls._analyzers[analyzer_type]
+        module_name, class_name = analyzer_path.rsplit(".", 1)
+
+        # Dynamically import the module and get the class
+        import importlib
+
+        module = importlib.import_module(module_name)
+        analyzer_class = getattr(module, class_name)
+
         # Special handling for PCK brightness analyzer with score groups
         if analyzer_type == "pck_brightness" and "score_groups" in kwargs:
-            return cls._analyzers[analyzer_type](
-                config, score_groups=kwargs["score_groups"]
-            )
+            return analyzer_class(config, score_groups=kwargs["score_groups"])
 
-        return cls._analyzers[analyzer_type](config)
+        return analyzer_class(config)
 
     @classmethod
     def register_analyzer(cls, analyzer_type: str, analyzer_class: type):
