@@ -7,7 +7,7 @@ paths:
   video_directory: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi"
   pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-08-15_17-45-58/all_cropped_videos_metrics.xlsx"
   save_folder: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/MoVi/Testing"
-  ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-08-15_17-45-58/all_cropped_videos_metrics.xlsx"  # Path to original ground truth CSV file
+  ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/MoVi_groundtruth/"  # Path to MoVi ground truth folder with .mat files
 
 columns:
   subject_column: "subject"

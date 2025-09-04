@@ -21,12 +21,17 @@ from pathlib import Path
 
 # Add Analysis scripts to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add main project path for dataset_files access
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import ConfigManager
 from analyzers.joint_brightness_analyzer import JointBrightnessAnalyzer
 from visualizers.joint_brightness_visualizer import JointBrightnessVisualizer
 from core.data_processor import DataProcessor
 from datetime import datetime
+
+# Import dataset-specific GT loaders
+from dataset_files.MoVi.movi_gt_loader import MoViGroundTruthLoader
 
 # ============================================================================
 # CONFIGURATION - MODIFY THESE VALUES AS NEEDED
@@ -110,6 +115,80 @@ class JointAnalysisScript:
         except Exception as e:
             print(f"ERROR: Configuration setup failed: {e}")
             return False
+
+    def load_ground_truth_data(self) -> Dict[str, Any]:
+        """Load ground truth data for the dataset."""
+        try:
+            print("Loading ground truth data...")
+
+            if DATASET_NAME.lower() == "movi":
+                # For MoVi, we need the ground truth folder containing .mat files
+                gt_folder = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/MoVi_groundtruth/"
+
+                if not os.path.exists(gt_folder):
+                    print(f"WARNING: Ground truth folder not found: {gt_folder}")
+                    print("Using alternative path structure...")
+                    # Try alternative paths
+                    alt_paths = [
+                        os.path.join(
+                            self.config.paths.video_directory, "MoVi_groundtruth"
+                        ),
+                        os.path.join(
+                            os.path.dirname(self.config.paths.video_directory),
+                            "MoVi_groundtruth",
+                        ),
+                    ]
+                    for alt_path in alt_paths:
+                        if os.path.exists(alt_path):
+                            gt_folder = alt_path
+                            break
+
+                print(f"Loading MoVi ground truth from: {gt_folder}")
+
+                # Find .mat files in the folder
+                mat_files = []
+                if os.path.exists(gt_folder):
+                    for file in os.listdir(gt_folder):
+                        if file.endswith(".mat"):
+                            mat_files.append(os.path.join(gt_folder, file))
+
+                if not mat_files:
+                    print("ERROR: No .mat files found in ground truth folder")
+                    return None
+
+                print(f"Found {len(mat_files)} .mat files")
+
+                # Load ground truth data from first .mat file as example
+                # In production, you'd want to match with specific videos
+                gt_loader = MoViGroundTruthLoader(mat_files[0])
+                gt_keypoints = gt_loader.get_keypoints()
+
+                print(f"Loaded ground truth keypoints: {gt_keypoints.shape}")
+                print(f"   Frames: {gt_keypoints.shape[0]}")
+                print(f"   Joints: {gt_keypoints.shape[1]}")
+                print(f"   Coordinates: {gt_keypoints.shape[2]} (x, y)")
+
+                return {
+                    "keypoints": gt_keypoints,
+                    "loader": gt_loader,
+                    "mat_files": mat_files,
+                }
+
+            elif DATASET_NAME.lower() == "humaneva":
+                # For HumanEva, implement similar logic using HumanEva GT loader
+                print("HumanEva ground truth loading not implemented yet")
+                return None
+
+            else:
+                print(f"ERROR: Unsupported dataset: {DATASET_NAME}")
+                return None
+
+        except Exception as e:
+            print(f"ERROR: Ground truth loading failed: {e}")
+            import traceback
+
+            traceback.print_exc()
+            return None
 
     def load_and_validate_data(self) -> pd.DataFrame:
         """Load and validate PCK data."""
@@ -292,6 +371,11 @@ class JointAnalysisScript:
         # Setup configuration
         if not self.setup_configuration():
             return False
+
+        # Load ground truth data
+        gt_data = self.load_ground_truth_data()
+        if gt_data is None:
+            print("WARNING: Ground truth data not available, continuing without it")
 
         # Load and validate data
         pck_data = self.load_and_validate_data()
