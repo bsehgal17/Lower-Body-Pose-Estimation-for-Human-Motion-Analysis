@@ -26,7 +26,6 @@ from config import ConfigManager
 from analyzers.joint_brightness_analyzer import JointBrightnessAnalyzer
 from visualizers.joint_brightness_visualizer import JointBrightnessVisualizer
 from core.data_processor import DataProcessor
-from utils import ProgressTracker
 from datetime import datetime
 
 # ============================================================================
@@ -180,9 +179,8 @@ class JointAnalysisScript:
             )
 
             # Run analysis
-            with ProgressTracker("Joint analysis") as tracker:
-                tracker.update("Analyzing joint brightness patterns...")
-                analysis_results = analyzer.analyze(pck_data)
+            print("Analyzing joint brightness patterns...")
+            analysis_results = analyzer.analyze(pck_data)
 
             if not analysis_results:
                 print("ERROR: Analysis returned no results")
@@ -219,26 +217,21 @@ class JointAnalysisScript:
             visualizer = JointBrightnessVisualizer(config=self.config)
 
             # Generate plots
-            with ProgressTracker("Visualization generation") as tracker:
-                tracker.update("Creating plots...")
+            print("Creating plots...")
 
-                for plot_type in PLOT_TYPES:
-                    tracker.update(f"Creating {plot_type} plots...")
+            for plot_type in PLOT_TYPES:
+                print(f"Creating {plot_type} plots...")
 
-                    if plot_type == "scatter":
-                        visualizer.create_scatter_plots(
-                            analysis_results, self.output_dir
-                        )
-                    elif plot_type == "line":
-                        visualizer.create_line_plots(analysis_results, self.output_dir)
-                    elif plot_type == "heatmap":
-                        visualizer.create_heatmap_plots(
-                            analysis_results, self.output_dir
-                        )
-                    elif plot_type == "distribution":
-                        visualizer.create_distribution_plots(
-                            analysis_results, self.output_dir
-                        )
+                if plot_type == "scatter":
+                    visualizer.create_scatter_plots(analysis_results, self.output_dir)
+                elif plot_type == "line":
+                    visualizer.create_line_plots(analysis_results, self.output_dir)
+                elif plot_type == "heatmap":
+                    visualizer.create_heatmap_plots(analysis_results, self.output_dir)
+                elif plot_type == "distribution":
+                    visualizer.create_distribution_plots(
+                        analysis_results, self.output_dir
+                    )
 
             print("Visualizations completed")
             if SAVE_RESULTS:
