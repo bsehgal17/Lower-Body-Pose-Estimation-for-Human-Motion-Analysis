@@ -54,7 +54,7 @@ class JointReportGenerator:
                 summary_data = []
 
                 for joint_name in joints_to_analyze:
-                    metric_key = f"{joint_name}_pck_{threshold:g}"
+                    metric_key = f"{joint_name}_jointwise_pck_{threshold:g}"
 
                     if metric_key not in analysis_results:
                         continue
@@ -170,7 +170,7 @@ class JointReportGenerator:
                 for threshold in pck_thresholds:
                     f.write(f"\\nThreshold {threshold}:\\n")
                     for joint_name in joints_to_analyze:
-                        metric_key = f"{joint_name}_pck_{threshold:g}"
+                        metric_key = f"{joint_name}_jointwise_pck_{threshold:g}"
                         if metric_key in analysis_results:
                             corr = analysis_results[metric_key]["correlation"]
                             f.write(f"  {joint_name}: {corr:.4f}\\n")

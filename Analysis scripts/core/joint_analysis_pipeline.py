@@ -50,7 +50,7 @@ class JointAnalysisPipeline:
 
         # Initialize components
         self.data_loader = JointDataLoader(dataset_name)
-        self.analyzer = JointAnalyzer(joints_to_analyze, pck_thresholds)
+        self.analyzer = JointAnalyzer(joints_to_analyze, pck_thresholds, dataset_name)
         self.visualizer = JointVisualizer(self.output_dir, save_results)
         self.report_generator = JointReportGenerator(
             self.output_dir, dataset_name, save_results
@@ -164,8 +164,7 @@ class JointAnalysisPipeline:
                 print("ERROR: No analysis results provided")
                 return False
 
-            plot_data = self.analyzer.get_average_data_for_plotting(
-                analysis_results)
+            plot_data = self.analyzer.get_average_data_for_plotting(analysis_results)
             self.visualizer.create_all_visualizations(plot_data)
             self.visualizer.create_summary_plot(plot_data)
 

@@ -109,65 +109,54 @@ class JointVisualizer:
             traceback.print_exc()
 
     def create_summary_plot(self, plot_data: Dict[str, Dict]) -> None:
-        """Create a summary plot showing all thresholds together.
+        """Create a summary plot showing all thresholds in a single plot.
 
         Args:
             plot_data: Data organized by threshold for plotting
         """
         try:
-            # Calculate number of subplots needed
-            num_thresholds = len(plot_data)
-            if num_thresholds == 0:
+            if not plot_data:
+                print("WARNING: No data available for summary plot")
                 return
 
-            # Create subplots
-            fig, axes = plt.subplots(1, num_thresholds, figsize=(6 * num_thresholds, 6))
-            if num_thresholds == 1:
-                axes = [axes]
-
+            # Create single plot instead of subplots
+            fig, ax = plt.subplots(1, 1, figsize=(12, 8))
             fig.suptitle("Joint Analysis Summary - All Thresholds", fontsize=16)
 
-            for i, (threshold, threshold_data) in enumerate(plot_data.items()):
-                ax = axes[i]
+            # Colors for different thresholds
+            threshold_colors = ["red", "blue", "green", "orange", "purple", "brown"]
+            threshold_markers = ["o", "s", "^", "D", "v", "<"]
 
+            for i, (threshold, threshold_data) in enumerate(plot_data.items()):
                 joint_names = threshold_data["joint_names"]
                 avg_brightness = threshold_data["avg_brightness"]
                 avg_pck = threshold_data["avg_pck"]
-                colors = threshold_data["colors"]
 
                 if not joint_names:
-                    ax.text(
-                        0.5,
-                        0.5,
-                        f"No data\nfor threshold {threshold}",
-                        ha="center",
-                        va="center",
-                        transform=ax.transAxes,
-                    )
-                    ax.set_title(f"Threshold {threshold}")
                     continue
 
-                # Create scatter plot
-                for j, (brightness, pck, label) in enumerate(
-                    zip(avg_brightness, avg_pck, joint_names)
-                ):
-                    color = colors[j % len(colors)]
-                    ax.scatter(
-                        brightness,
-                        pck,
-                        c=color,
-                        alpha=0.8,
-                        s=60,
-                        edgecolors="black",
-                        linewidths=0.5,
-                        label=label,
-                    )
+                # Use different color and marker for each threshold
+                threshold_color = threshold_colors[i % len(threshold_colors)]
+                threshold_marker = threshold_markers[i % len(threshold_markers)]
 
-                ax.set_xlabel("Avg Brightness")
-                ax.set_ylabel("Avg PCK Score")
-                ax.set_title(f"Threshold {threshold}")
-                ax.grid(True, alpha=0.3)
-                ax.legend(fontsize=8)
+                # Plot all joints for this threshold
+                ax.scatter(
+                    avg_brightness,
+                    avg_pck,
+                    c=threshold_color,
+                    marker=threshold_marker,
+                    alpha=0.8,
+                    s=80,
+                    edgecolors="black",
+                    linewidths=0.5,
+                    label=f"Threshold {threshold}",
+                )
+
+            ax.set_xlabel("Average Brightness (LAB L-channel)")
+            ax.set_ylabel("Average PCK Score")
+            ax.set_title("All Thresholds Combined")
+            ax.grid(True, alpha=0.3)
+            ax.legend(loc="best", framealpha=0.9)
 
             plt.tight_layout()
 
