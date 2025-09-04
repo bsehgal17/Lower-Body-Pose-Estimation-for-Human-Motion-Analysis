@@ -40,20 +40,26 @@ class AnalysisPipeline:
         """Run complete analysis pipeline."""
         print(f"Starting analysis pipeline for {self.dataset_name.upper()} dataset...")
 
-        if run_overall:
-            self._run_overall_analysis(metrics_config)
-            print("\n" + "=" * 50 + "\n")
+        try:
+            if run_overall:
+                self._run_overall_analysis(metrics_config)
+                print("\n" + "=" * 50 + "\n")
 
-        if run_per_video:
-            self._run_per_video_analysis(metrics_config)
-            print("\n" + "=" * 50 + "\n")
+            if run_per_video:
+                self._run_per_video_analysis(metrics_config)
+                print("\n" + "=" * 50 + "\n")
 
-        if run_per_frame:
-            self._run_per_frame_analysis(metrics_config, per_frame_analysis_types)
+            if run_per_frame:
+                self._run_per_frame_analysis(metrics_config, per_frame_analysis_types)
 
-        print(
-            f"\nComplete analysis pipeline finished for {self.dataset_name.upper()} dataset."
-        )
+            print(
+                f"\nComplete analysis pipeline finished for {self.dataset_name.upper()} dataset."
+            )
+            return True
+
+        except Exception as e:
+            print(f"[ERROR] Analysis pipeline failed: {e}")
+            return False
 
     def _run_overall_analysis(self, metrics_config: dict):
         """Run overall analysis using separated components."""
@@ -209,12 +215,12 @@ class AnalysisPipeline:
                                 combined_df, score_group, scenario_name
                             )
                             if success:
-                                print(f"  ✅ Scenario '{scenario_name}' completed")
+                                print(f"  [COMPLETED] Scenario '{scenario_name}'")
                             else:
-                                print(f"  ❌ Scenario '{scenario_name}' failed")
+                                print(f"  [FAILED] Scenario '{scenario_name}'")
                         else:
                             print(
-                                f"  ⚠️  Skipping scenario '{scenario_name}' (null score group)"
+                                f"  [SKIPPED] Scenario '{scenario_name}' (null score group)"
                             )
 
         # Create visualizations for each metric

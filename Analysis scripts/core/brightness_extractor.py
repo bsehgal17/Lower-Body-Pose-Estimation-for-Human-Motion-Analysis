@@ -44,13 +44,13 @@ class BrightnessExtractor:
             target_scores, pck_threshold
         )
         if filtered_data is None or filtered_data.empty:
-            print("❌ No data found for specified scores")
+            print("[ERROR] No data found for specified scores")
             return {}
 
         # Group by video/camera combination
         grouping_cols = self.config.get_grouping_columns()
         if not grouping_cols:
-            print("❌ No grouping columns available")
+            print("[ERROR] No grouping columns available")
             return {}
 
         brightness_by_score = {score: [] for score in target_scores}

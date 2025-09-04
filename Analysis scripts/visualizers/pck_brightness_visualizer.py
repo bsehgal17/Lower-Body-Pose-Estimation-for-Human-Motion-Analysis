@@ -50,7 +50,7 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
 
             self._create_brightness_frequency_plot(results, pck_column, save_path)
 
-        print("✅ All PCK brightness frequency plots created successfully")
+        print("[COMPLETED] All PCK brightness frequency plots created successfully")
         print("=" * 50)
 
     def _create_brightness_frequency_plot(
@@ -134,7 +134,7 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
         plt.savefig(final_path, dpi=300, bbox_inches="tight", format="svg")
         plt.close()
 
-        print(f"✅ Brightness frequency plot saved: {final_path}")
+        print(f"[SAVED] Brightness frequency plot saved: {final_path}")
 
     def create_combined_summary_plot(
         self, analysis_results: Dict[str, Any], save_path: str = None
@@ -239,4 +239,4 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
         plt.savefig(final_path, dpi=300, bbox_inches="tight", format="svg")
         plt.close()
 
-        print(f"✅ Combined summary plot saved: {final_path}")
+        print(f"[SAVED] Combined summary plot saved: {final_path}")

@@ -182,7 +182,7 @@ def load_analysis_config(
         return load_dataset_analysis_config(dataset_name)
 
     # If no dataset specified, return default config
-    print("⚠️  No dataset name specified, using default configuration")
+    print("[WARNING] No dataset name specified, using default configuration")
     return AnalysisConfigLoader.create_default_config()
 
 
@@ -221,7 +221,9 @@ def load_dataset_analysis_config(dataset_name: str) -> AnalysisConfig:
                 f"Please add analysis configuration to the dataset config file."
             )
 
-        print(f"✅ Using dataset-specific analysis config: {dataset_name}_config.yaml")
+        print(
+            f"[SUCCESS] Using dataset-specific analysis config: {dataset_name}_config.yaml"
+        )
         return AnalysisConfig(dataset_config_dict)
 
     except Exception as e:

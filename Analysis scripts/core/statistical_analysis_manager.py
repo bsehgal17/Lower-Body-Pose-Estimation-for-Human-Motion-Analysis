@@ -85,13 +85,13 @@ class StatisticalAnalysisManager:
                 pck_brightness_viz.create_plot(results, save_path)
 
                 print(
-                    f"✅ PCK brightness analysis ({scenario_name}) completed successfully"
+                    f"[COMPLETED] PCK brightness analysis ({scenario_name}) completed successfully"
                 )
                 return True
             else:
-                print(f"❌ No results from {scenario_name} analysis")
+                print(f"[ERROR] No results from {scenario_name} analysis")
                 return False
 
         except Exception as e:
-            print(f"❌ Error in {scenario_name} analysis: {e}")
+            print(f"[ERROR] Error in {scenario_name} analysis: {e}")
             return False

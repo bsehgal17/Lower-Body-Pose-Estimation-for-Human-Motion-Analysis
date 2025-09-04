@@ -62,7 +62,7 @@ class MultiAnalysisPipeline:
                 )
                 results_summary.append((scenario_name, success))
 
-            print(f"✅ {scenario_name} completed")
+            print(f"[COMPLETED] {scenario_name}")
 
         self._print_multi_analysis_summary(scenarios, results_summary)
         return results_summary
@@ -115,10 +115,14 @@ class MultiAnalysisPipeline:
                     combined_df, score_group, scenario_name
                 )
             else:
-                print(f"❌ No combined data available for {scenario_name} analysis")
+                print(
+                    f"[ERROR] No combined data available for {scenario_name} analysis"
+                )
                 return False
         else:
-            print(f"❌ No per-frame PCK data available for {scenario_name} analysis")
+            print(
+                f"[ERROR] No per-frame PCK data available for {scenario_name} analysis"
+            )
             return False
 
     def _print_multi_analysis_summary(self, scenarios, results_summary):
@@ -126,6 +130,6 @@ class MultiAnalysisPipeline:
         print("\n" + "=" * 70)
         print("Multi-Analysis Summary:")
         for i, (scenario_name, success) in enumerate(results_summary, 1):
-            status = "✅ Completed" if success else "❌ Failed"
+            status = "[COMPLETED]" if success else "[FAILED]"
             print(f"   Analysis {i} ({scenario_name}): {status}")
         print("=" * 70)
