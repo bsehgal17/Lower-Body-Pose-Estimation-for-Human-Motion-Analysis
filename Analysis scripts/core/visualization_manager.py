@@ -25,7 +25,8 @@ class VisualizationManager:
 
         # Distribution plots for aggregated metric data
         try:
-            dist_viz = self.viz_factory.create_visualizer("distribution", self.config)
+            dist_viz = self.viz_factory.create_visualizer(
+                "distribution", self.config)
             save_path = os.path.join(
                 self.config.save_folder,
                 f"overall_{metric_name}_distribution_{self.timestamp}.svg",
@@ -68,7 +69,8 @@ class VisualizationManager:
             and f"avg_{metric_name}" in merged_df.columns
         ):
             try:
-                scatter_viz = self.viz_factory.create_visualizer("scatter", self.config)
+                scatter_viz = self.viz_factory.create_visualizer(
+                    "scatter", self.config)
                 save_path = os.path.join(
                     self.config.save_folder,
                     f"overall_{metric_name}_scatter_{self.timestamp}.svg",
@@ -80,14 +82,16 @@ class VisualizationManager:
 
                 scatter_viz.create_plot(scatter_df, metric_name, save_path)
             except Exception as e:
-                print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
+                print(
+                    f"Warning: Could not create scatter plot for {metric_name}: {e}")
 
     def create_per_frame_visualizations(self, combined_df, metric_name):
         """Create per-frame visualizations using separated components."""
 
         # Distribution plots (histogram and box plot)
         try:
-            dist_viz = self.viz_factory.create_visualizer("distribution", self.config)
+            dist_viz = self.viz_factory.create_visualizer(
+                "distribution", self.config)
             save_path = os.path.join(
                 self.config.save_folder,
                 f"per_frame_{metric_name}_distribution_{self.timestamp}.svg",
@@ -100,14 +104,16 @@ class VisualizationManager:
 
         # Scatter plot
         try:
-            scatter_viz = self.viz_factory.create_visualizer("scatter", self.config)
+            scatter_viz = self.viz_factory.create_visualizer(
+                "scatter", self.config)
             save_path = os.path.join(
                 self.config.save_folder,
                 f"per_frame_{metric_name}_scatter_{self.timestamp}.svg",
             )
             scatter_viz.create_plot(combined_df, metric_name, save_path)
         except Exception as e:
-            print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
+            print(
+                f"Warning: Could not create scatter plot for {metric_name}: {e}")
 
         # Bar plot
         try:
@@ -123,7 +129,8 @@ class VisualizationManager:
     def create_pck_line_plot(self, combined_df, analysis_type="per_frame"):
         """Create PCK line plot for all thresholds using separated components."""
         try:
-            pck_viz = self.viz_factory.create_visualizer("pck_line", self.config)
+            pck_viz = self.viz_factory.create_visualizer(
+                "pck_line", self.config)
 
             # Create a modified save path that includes the analysis type
             modified_save_path = f"{analysis_type}_pck_line_{self.timestamp}"
@@ -132,7 +139,8 @@ class VisualizationManager:
             print(f"PCK line plot created for {analysis_type} analysis")
 
         except Exception as e:
-            print(f"Warning: Could not create PCK line plot for {analysis_type}: {e}")
+            print(
+                f"Warning: Could not create PCK line plot for {analysis_type}: {e}")
             import traceback
 
             traceback.print_exc()
@@ -186,7 +194,8 @@ class VisualizationManager:
                 )
 
                 os.makedirs(self.config.save_folder, exist_ok=True)
-                plt.savefig(save_path, dpi=300, bbox_inches="tight", format="svg")
+                plt.savefig(save_path, dpi=300,
+                            bbox_inches="tight", format="svg")
                 plt.close()
 
                 print(f"Individual PCK line plot saved: {save_path}")

@@ -5,6 +5,7 @@ Filters and displays specific PCK scores from the data.
 Focus: PCK score filtering and inspection only.
 """
 
+from processors.pck_data_loader import PCKDataLoader
 import sys
 import os
 import pandas as pd
@@ -13,8 +14,6 @@ from typing import List, Optional, Dict
 # Add the Analysis scripts directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from simple_pck_loader import SimplePCKDataLoader
-
 
 class PCKScoreFilter:
     """Utility for filtering and inspecting PCK scores."""
@@ -22,7 +21,7 @@ class PCKScoreFilter:
     def __init__(self, dataset_name: str):
         """Initialize with dataset name."""
         self.dataset_name = dataset_name
-        self.data_loader = SimplePCKDataLoader(dataset_name)
+        self.data_loader = PCKDataLoader(dataset_name)
 
     def get_unique_pck_scores(self, pck_threshold: str = None) -> Dict[str, List[int]]:
         """Get unique PCK scores for all or specific thresholds."""
@@ -47,7 +46,8 @@ class PCKScoreFilter:
             if threshold in per_frame_data.columns:
                 # Round to nearest integer and get unique values
                 scores = per_frame_data[threshold].round().astype(int).unique()
-                scores = sorted([score for score in scores if not pd.isna(score)])
+                scores = sorted(
+                    [score for score in scores if not pd.isna(score)])
                 unique_scores[threshold] = scores
 
                 print(f"\n{threshold}:")
@@ -154,7 +154,8 @@ class PCKScoreFilter:
                 print(f"\n{threshold} - Frame counts:")
                 for score, count in sorted(counts.items()):
                     percentage = (count / len(per_frame_data)) * 100
-                    print(f"  Score {score}: {count} frames ({percentage:.1f}%)")
+                    print(
+                        f"  Score {score}: {count} frames ({percentage:.1f}%)")
 
         return frame_counts
 
@@ -230,7 +231,8 @@ class PCKScoreFilter:
                 max_score = int(boundaries[i + 1])
 
                 # Get scores in this range
-                group_scores = [s for s in scores if min_score <= s <= max_score]
+                group_scores = [
+                    s for s in scores if min_score <= s <= max_score]
                 if group_scores:
                     groups.append(group_scores)
 
@@ -238,7 +240,8 @@ class PCKScoreFilter:
 
             print(f"\n{threshold} - Suggested groups:")
             for i, group in enumerate(groups):
-                print(f"  Group {i + 1}: {group} (range: {min(group)}-{max(group)})")
+                print(
+                    f"  Group {i + 1}: {group} (range: {min(group)}-{max(group)})")
 
         return suggestions
 
@@ -248,10 +251,13 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="PCK Score Filter")
-    parser.add_argument("dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
-    parser.add_argument("--threshold", help="Specific PCK threshold to analyze")
+    parser.add_argument(
+        "dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
+    parser.add_argument(
+        "--threshold", help="Specific PCK threshold to analyze")
 
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+    subparsers = parser.add_subparsers(
+        dest="command", help="Available commands")
 
     # Unique scores command
     subparsers.add_parser("unique", help="Show unique PCK scores")
@@ -262,7 +268,8 @@ def main():
     range_parser.add_argument("max_score", type=int, help="Maximum PCK score")
 
     # Filter specific scores command
-    scores_parser = subparsers.add_parser("scores", help="Filter by specific scores")
+    scores_parser = subparsers.add_parser(
+        "scores", help="Filter by specific scores")
     scores_parser.add_argument(
         "score_list", nargs="+", type=int, help="List of PCK scores"
     )
@@ -274,7 +281,8 @@ def main():
     subparsers.add_parser("stats", help="Show score statistics")
 
     # Suggest groups command
-    suggest_parser = subparsers.add_parser("suggest", help="Suggest score groups")
+    suggest_parser = subparsers.add_parser(
+        "suggest", help="Suggest score groups")
     suggest_parser.add_argument(
         "--groups", type=int, default=3, help="Number of groups"
     )
