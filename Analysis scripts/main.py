@@ -2,7 +2,7 @@
 Analysis pipeline using separated components.
 """
 
-from config import ConfigManager
+from config import ConfigManager, load_analysis_config
 from analyzers import AnalyzerFactory
 from visualizers import VisualizationFactory
 from data_processor import DataProcessor
@@ -343,23 +343,203 @@ def main():
     run_per_frame_analysis = True
     per_frame_analysis_types = AnalyzerFactory.get_available_analyzers()
 
+    # Load analysis configuration from YAML
+    analysis_config = load_analysis_config()
+
+    # Test YAML configuration loading first
+    print("🧪 Testing YAML-Based Dataset Configuration")
+    print("=" * 60)
+
+    datasets_to_test = ["humaneva", "movi"]
+
+    for test_dataset in datasets_to_test:
+        print(f"\n📋 Testing {test_dataset.upper()} configuration:")
+        print("-" * 40)
+
+        try:
+            config = ConfigManager.load_config(test_dataset)
+
+            print("✅ Configuration loaded successfully!")
+            print(f"   Name: {config.name}")
+            print(f"   Model: {config.model}")
+            print(f"   PCK Overall columns: {config.pck_overall_score_columns}")
+            print(f"   PCK Per-frame columns: {config.pck_per_frame_score_columns}")
+
+            # Check for dataset-specific analysis config
+            if hasattr(config, "analysis_config") and config.analysis_config:
+                pck_brightness_config = config.analysis_config.get("pck_brightness", {})
+                if pck_brightness_config:
+                    score_groups = pck_brightness_config.get("score_groups", {})
+                    default_group = pck_brightness_config.get(
+                        "default_score_group", "all"
+                    )
+                    print(f"   Available score groups: {list(score_groups.keys())}")
+                    print(f"   Default score group: {default_group}")
+
+            validation_result = config.validate()
+            print(
+                f"   Configuration validation: {'✅ Passed' if validation_result else '❌ Failed'}"
+            )
+
+        except Exception as e:
+            print(f"❌ Error loading {test_dataset} configuration: {e}")
+
     # Test the components
-    print("Testing components...")
+    print("\n" + "=" * 60)
+    print("Testing analysis components...")
     print(f"Available analyzers: {AnalyzerFactory.get_available_analyzers()}")
     print(f"Available visualizers: {VisualizationFactory.get_available_visualizers()}")
     print(f"Will run per-frame analysis types: {per_frame_analysis_types}")
+    print(
+        f"Global analysis score groups: {analysis_config.get_available_score_groups()}"
+    )
     print("Components test complete.\n")
 
     try:
-        pipeline = AnalysisPipeline(dataset_name)
-        pipeline.run_complete_analysis(
-            metrics_config=metrics_config,
-            run_overall=run_overall_analysis,
-            run_per_frame=run_per_frame_analysis,
-            per_frame_analysis_types=per_frame_analysis_types,
-        )
+        # Load dataset configuration for the main analysis
+        dataset_config = ConfigManager.load_config(dataset_name)
+
+        # Check if multi-analysis is enabled in config
+        if analysis_config.is_multi_analysis_enabled():
+            print("🚀 Running Multi-Analysis Pipeline from YAML Configuration")
+            print("=" * 70)
+
+            scenarios = analysis_config.get_multi_analysis_scenarios()
+
+            for i, scenario in enumerate(scenarios, 1):
+                scenario_name = scenario.get("name", f"scenario_{i}")
+                score_group_name = scenario.get("score_group", "all")
+                description = scenario.get("description", f"Analysis scenario {i}")
+
+                # Try to get score group from dataset-specific config first, then global config
+                score_group = None
+                if (
+                    hasattr(dataset_config, "analysis_config")
+                    and dataset_config.analysis_config
+                ):
+                    pck_brightness_config = dataset_config.analysis_config.get(
+                        "pck_brightness", {}
+                    )
+                    dataset_score_groups = pck_brightness_config.get("score_groups", {})
+                    score_group = dataset_score_groups.get(score_group_name)
+
+                # Fallback to global analysis config
+                if score_group is None:
+                    score_group = analysis_config.get_score_group(score_group_name)
+
+                print(f"\n📊 Analysis {i}: {scenario_name}")
+                print(f"Description: {description}")
+                print(f"Score Group: {score_group_name} -> {score_group}")
+                print("-" * 50)
+
+                if i == 1:
+                    # First analysis: Run complete pipeline
+                    pipeline = AnalysisPipeline(dataset_name)
+                    pipeline.run_complete_analysis(
+                        metrics_config=metrics_config,
+                        run_overall=run_overall_analysis,
+                        run_per_frame=run_per_frame_analysis,
+                        per_frame_analysis_types=per_frame_analysis_types,
+                    )
+                else:
+                    # Subsequent analyses: Focus on PCK brightness with score filtering
+                    pipeline = AnalysisPipeline(dataset_name)
+                    pipeline.timestamp = pipeline.timestamp + f"_{scenario_name}"
+
+                    # Load per-frame PCK data for filtered analysis
+                    pck_df = pipeline.data_processor.load_pck_per_frame_scores()
+                    if pck_df is not None:
+                        combined_df = pipeline.data_processor.process_per_frame_data(
+                            pck_df, metrics_config
+                        )
+
+                        if not combined_df.empty:
+                            print(
+                                f"Running PCK brightness analysis with score group: {score_group}"
+                            )
+
+                            try:
+                                # Create analyzer with specific score groups from YAML
+                                if score_group is not None:
+                                    analyzer = AnalyzerFactory.create_analyzer(
+                                        "pck_brightness",
+                                        pipeline.config,
+                                        score_groups=score_group,
+                                    )
+                                else:
+                                    analyzer = AnalyzerFactory.create_analyzer(
+                                        "pck_brightness", pipeline.config
+                                    )
+
+                                # Run analysis
+                                results = analyzer.analyze(combined_df)
+
+                                if (
+                                    results
+                                    and analysis_config.should_create_individual_plots()
+                                ):
+                                    # Create visualizations
+                                    pck_brightness_viz = (
+                                        VisualizationFactory.create_visualizer(
+                                            "pck_brightness", pipeline.config
+                                        )
+                                    )
+                                    save_path = f"per_frame_pck_brightness_{scenario_name}_{pipeline.timestamp}"
+                                    pck_brightness_viz.create_plot(results, save_path)
+
+                                    if analysis_config.should_create_combined_plots():
+                                        pck_brightness_viz.create_combined_summary_plot(
+                                            results, save_path
+                                        )
+
+                                    print(
+                                        f"✅ PCK brightness analysis ({scenario_name}) completed successfully"
+                                    )
+                                else:
+                                    print(
+                                        f"❌ No results from {scenario_name} analysis"
+                                    )
+
+                            except Exception as e:
+                                print(f"❌ Error in {scenario_name} analysis: {e}")
+                        else:
+                            print(
+                                f"❌ No combined data available for {scenario_name} analysis"
+                            )
+                    else:
+                        print(
+                            f"❌ No per-frame PCK data available for {scenario_name} analysis"
+                        )
+
+                print(f"✅ {scenario_name} completed")
+
+            print("\n" + "=" * 70)
+            print("🎯 Multi-Analysis Summary:")
+            for i, scenario in enumerate(scenarios, 1):
+                scenario_name = scenario.get("name", f"scenario_{i}")
+                print(f"   Analysis {i} ({scenario_name}): ✅ Completed")
+            print("=" * 70)
+
+        else:
+            # Single analysis mode (original behavior)
+            print("🚀 Running Single Analysis Pipeline")
+            print("=" * 70)
+
+            pipeline = AnalysisPipeline(dataset_name)
+            pipeline.run_complete_analysis(
+                metrics_config=metrics_config,
+                run_overall=run_overall_analysis,
+                run_per_frame=run_per_frame_analysis,
+                per_frame_analysis_types=per_frame_analysis_types,
+            )
+
+            print("✅ Single analysis completed")
+
     except Exception as e:
         print(f"Error during analysis: {e}")
+        import traceback
+
+        traceback.print_exc()
         raise
 
 

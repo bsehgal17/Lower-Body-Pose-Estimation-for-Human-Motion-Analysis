@@ -1,0 +1,37 @@
+# HumanEva Dataset Configuration
+dataset:
+  name: "humaneva"
+  model: "RTMW"
+  
+paths:
+  video_directory: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva"
+  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/evaluation/2025-08-21_17-21-05/detect/detect_metrics.xlsx"
+  save_folder: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/HumanEva/High_threshold"
+
+columns:
+  subject_column: "subject"
+  action_column: "action"
+  camera_column: "camera"
+
+pck_scores:
+  overall:
+    - "overall_overall_pck_0.10"
+    - "overall_overall_pck_0.20" 
+    - "overall_overall_pck_0.50"
+  
+  per_frame:
+    - "pck_per_frame_pck_0.10"
+    - "pck_per_frame_pck_0.20"
+    - "pck_per_frame_pck_0.50"
+
+# Synchronization data for frame alignment
+sync_data:
+  S1:
+    "Walking 1": [667, 667, 667]
+    "Jog 1": [49, 50, 51]
+  S2:
+    "Walking 1": [547, 547, 546] 
+    "Jog 1": [493, 491, 502]
+  S3:
+    "Walking 1": [524, 524, 524]
+    "Jog 1": [464, 462, 462]
