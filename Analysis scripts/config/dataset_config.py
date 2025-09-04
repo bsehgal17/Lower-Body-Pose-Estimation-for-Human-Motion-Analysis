@@ -22,7 +22,7 @@ class DatasetConfig:
     pck_overall_score_columns: List[str]
     pck_per_frame_score_columns: List[str]
     pck_jointwise_score_columns: List[str] = None
-    sync_data: Any
+    sync_data: Any = None
     analysis_config: Any = None  # Analysis-specific configuration
     ground_truth_file: str = None  # Path to ground truth coordinates file
 
