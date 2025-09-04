@@ -95,22 +95,30 @@ class AnalysisPipeline:
                 metric_data["merged_df"], metric_name
             )
 
-        # Create PCK vs brightness correlation plot if brightness data is available
-        if (
-            pck_df is not None
-            and "brightness" in pck_df.columns
-            and "video_id" in pck_df.columns
-        ):
-            print(
-                "Creating PCK vs brightness correlation plot for per-video analysis..."
-            )
-            self.viz_manager.create_pck_brightness_correlation_plot(
-                pck_df, analysis_type="per_video"
-            )
+        # Create PCK vs brightness correlation plot using processed data with brightness
+        # Use the first available metric_data's merged_df which should contain brightness after processing
+        if per_video_results:
+            first_metric = next(iter(per_video_results.values()))
+            merged_df = first_metric["merged_df"]
+
+            if (
+                merged_df is not None
+                and not merged_df.empty
+                and "brightness" in merged_df.columns
+                and "video_id" in merged_df.columns
+            ):
+                print(
+                    "Creating PCK vs brightness correlation plot for per-video analysis..."
+                )
+                self.viz_manager.create_pck_brightness_correlation_plot(
+                    merged_df, analysis_type="per_video"
+                )
+            else:
+                print(
+                    "Skipping PCK vs brightness correlation plot - missing brightness or video_id data in processed data"
+                )
         else:
-            print(
-                "Skipping PCK vs brightness correlation plot - missing brightness or video_id data"
-            )
+            print("No processed data available for correlation plot")
 
         print(
             f"Per-video analysis complete. Results saved to {self.config.save_folder}"

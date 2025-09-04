@@ -109,24 +109,9 @@ class VisualizationManager:
 
     def create_per_video_visualizations(self, video_aggregated_df, metric_name):
         """Create per-video visualizations using aggregated video data."""
-
-        # Scatter plot for per-video analysis (PCK vs brightness correlation)
-        try:
-            scatter_viz = self.viz_factory.create_visualizer("scatter", self.config)
-            save_path = os.path.join(
-                self.config.save_folder,
-                f"per_video_{metric_name}_scatter_{self.timestamp}.svg",
-            )
-
-            # Use the aggregated dataframe for scatter plotting
-            # The dataframe should have avg_brightness and avg_pck_* columns
-            scatter_viz.create_plot(
-                video_aggregated_df, f"avg_{metric_name}", save_path
-            )
-        except Exception as e:
-            print(
-                f"Warning: Could not create per-video scatter plot for {metric_name}: {e}"
-            )
+        # Note: Per-video scatter plots are now handled by create_pck_brightness_correlation_plot method
+        # to avoid redundancy and provide better correlation-specific visualizations
+        pass
 
     def create_pck_brightness_correlation_plot(
         self,
