@@ -262,14 +262,12 @@ class ScatterPlotVisualizer(BaseVisualizer):
         # Get available PCK columns
         available_pck_cols = [
             col for col in pck_columns if col in data.columns]
-
         if not available_pck_cols:
             print("Warning: No PCK columns found in data")
             return
 
         print(
-            f"Creating separate PCK vs Brightness plots for {len(available_pck_cols)} PCK thresholds"
-        )
+            f"Creating separate PCK vs Brightness plots for {len(available_pck_cols)} PCK thresholds")
 
         # Create separate plot for each PCK threshold
         for pck_col in available_pck_cols:
@@ -280,28 +278,19 @@ class ScatterPlotVisualizer(BaseVisualizer):
             colors = plt.cm.tab10(np.linspace(0, 1, len(unique_subjects)))
 
             # Create a color map for subjects
-            subject_color_map = {
-                subject: colors[i] for i, subject in enumerate(unique_subjects)
-            }
-
-            # Limit legend to first 4 subjects for cleaner display
-            subjects_to_show = (
-                unique_subjects[:4] if len(
-                    unique_subjects) > 4 else unique_subjects
-            )
+            subject_color_map = {subject: colors[i]
+                                 for i, subject in enumerate(unique_subjects)}
 
             # Create scatter plot for this threshold with subjects as legend
-            for i, subject in enumerate(unique_subjects):
+            for subject in unique_subjects:
                 subject_data = data[data[video_id_col] == subject]
-                # Only add to legend if it's in the first 4 subjects
-                label = subject if subject in subjects_to_show else None
                 plt.scatter(
                     subject_data[brightness_col],
                     subject_data[pck_col],
                     alpha=0.7,
                     s=80,
                     color=subject_color_map[subject],
-                    label=label,
+                    label=subject,
                 )
 
             # Add trend line for all data
@@ -309,10 +298,7 @@ class ScatterPlotVisualizer(BaseVisualizer):
                 z = np.polyfit(data[brightness_col], data[pck_col], 1)
                 p = np.poly1d(z)
                 x_trend = np.linspace(
-                    data[brightness_col].min(),
-                    data[brightness_col].max(),
-                    100,
-                )
+                    data[brightness_col].min(), data[brightness_col].max(), 100)
                 plt.plot(
                     x_trend,
                     p(x_trend),
@@ -330,21 +316,18 @@ class ScatterPlotVisualizer(BaseVisualizer):
             plt.xlabel("Average Brightness", fontsize=12)
             plt.ylabel(f"Average {pck_col}", fontsize=12)
             plt.title(
-                f"PCK vs Brightness Correlation - {pck_col}\n(r = {correlation:.3f})",
-                fontsize=14,
-            )
+                f"PCK vs Brightness Correlation - {pck_col}\n(r = {correlation:.3f})", fontsize=14)
             plt.grid(True, alpha=0.3)
 
-            # Add legend for subjects/grouping column
+            # Legend: 10 items per column
             num_subjects = len(unique_subjects)
             num_cols = (num_subjects + 9) // 10  # 10 items per column
-
             plt.legend(
                 title=video_id_col.title(),
                 loc="upper left",
                 bbox_to_anchor=(1.05, 1),
                 fontsize=10,
-                ncol=num_cols,  # Set number of columns
+                ncol=num_cols,
             )
 
             # Adjust layout to accommodate legend
@@ -367,14 +350,13 @@ class ScatterPlotVisualizer(BaseVisualizer):
             plt.close()
 
             print(
-                f"Per-video PCK vs Brightness plot for {pck_col} saved to: {save_path}"
-            )
+                f"Per-video PCK vs Brightness plot for {pck_col} saved to: {save_path}")
 
         print(
-            f"Created {len(available_pck_cols)} separate plots for per-video analysis"
-        )
+            f"Created {len(available_pck_cols)} separate plots for per-video analysis")
 
     # Keep the original method name as an alias for backward compatibility
+
     def create_pck_brightness_correlation_plot(
         self,
         data: pd.DataFrame,
