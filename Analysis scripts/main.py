@@ -9,7 +9,7 @@ from config import ConfigManager, load_dataset_analysis_config
 # from analyzers.analyzer_factory import AnalyzerFactory
 from core.pipeline_manager import AnalysisPipeline
 from core.multi_analysis_pipeline import MultiAnalysisPipeline
-from joint_analysis_runner import run_joint_analysis, run_quick_analysis
+from joint_analysis_runner import run_joint_analysis
 
 
 def run_single_analysis(dataset_name: str, metrics_config: dict, analysis_config):
@@ -53,10 +53,53 @@ def run_joint_analysis_pipeline(dataset_name: str):
     print("Running Joint Analysis Pipeline")
     print("=" * 70)
 
+    # Load analysis configuration to extract PCK thresholds and joints
+    analysis_config = load_dataset_analysis_config(dataset_name)
+
+    # Extract PCK thresholds from config
+    pck_thresholds = None
+    joints_to_analyze = None
+
+    if hasattr(analysis_config, "config_dict") and analysis_config.config_dict:
+        pck_scores_config = analysis_config.config_dict.get("pck_scores", {})
+        jointwise_columns = pck_scores_config.get("jointwise", [])
+
+        # Extract unique thresholds from jointwise column names
+        # Column names are like: 'LEFT_HIP_jointwise_pck_0.01'
+        thresholds_set = set()
+        joints_set = set()
+
+        for col in jointwise_columns:
+            if "_jointwise_pck_" in col:
+                # Extract threshold
+                threshold_str = col.split("_pck_")[-1]
+                try:
+                    threshold = float(threshold_str)
+                    thresholds_set.add(threshold)
+                except ValueError:
+                    continue
+
+                # Extract joint name (everything before '_jointwise_pck_')
+                joint_name = col.split("_jointwise_pck_")[0]
+                if joint_name:
+                    joints_set.add(joint_name)
+
+        if thresholds_set:
+            pck_thresholds = sorted(list(thresholds_set))
+            print(f"Extracted PCK thresholds from config: {pck_thresholds}")
+        else:
+            print("No PCK thresholds found in config, using defaults")
+
+        if joints_set:
+            joints_to_analyze = sorted(list(joints_set))
+            print(f"Extracted joints from config: {joints_to_analyze}")
+        else:
+            print("No joints found in config, using defaults")
+
     success = run_joint_analysis(
         dataset_name=dataset_name,
-        joints_to_analyze=None,  # Use defaults
-        pck_thresholds=None,  # Use defaults
+        joints_to_analyze=joints_to_analyze,  # Use extracted from config or defaults
+        pck_thresholds=pck_thresholds,  # Use extracted from config or defaults
         output_dir=None,  # Auto-generate
         save_results=True,
     )
