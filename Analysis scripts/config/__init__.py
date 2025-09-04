@@ -18,13 +18,13 @@ class ConfigurationTester:
 
     def test_dataset_configuration(self, dataset_name: str):
         """Test configuration for a specific dataset."""
-        print(f"\n📋 Testing {dataset_name.upper()} configuration:")
+        print(f"\nTesting {dataset_name.upper()} configuration:")
         print("-" * 40)
 
         try:
             config = ConfigManager.load_config(dataset_name)
 
-            print("✅ Configuration loaded successfully!")
+            print("Configuration loaded successfully!")
             print(f"   Name: {config.name}")
             print(f"   Model: {config.model}")
             print(f"   PCK Overall columns: {config.pck_overall_score_columns}")
@@ -43,11 +43,11 @@ class ConfigurationTester:
 
             validation_result = config.validate()
             print(
-                f"   Configuration validation: {'✅ Passed' if validation_result else '❌ Failed'}"
+                f"   Configuration validation: {'Passed' if validation_result else 'Failed'}"
             )
 
         except Exception as e:
-            print(f"❌ Error loading {dataset_name} configuration: {e}")
+            print(f"Error loading {dataset_name} configuration: {e}")
 
     def test_analysis_components(self):
         """Test analysis components availability."""

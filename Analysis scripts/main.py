@@ -8,30 +8,12 @@ from config import ConfigManager, load_dataset_analysis_config
 
 # from analyzers.analyzer_factory import AnalyzerFactory
 from core.pipeline_manager import AnalysisPipeline
-from config import ConfigurationTester
 from core.multi_analysis_pipeline import MultiAnalysisPipeline
-
-
-def run_configuration_tests():
-    """Test YAML configuration loading."""
-    print("🧪 Testing YAML-Based Dataset Configuration")
-    print("=" * 60)
-
-    config_tester = ConfigurationTester()
-    datasets_to_test = ["humaneva", "movi"]
-
-    for dataset in datasets_to_test:
-        config_tester.test_dataset_configuration(dataset)
-
-    print("\n" + "=" * 60)
-    print("Testing analysis components...")
-    config_tester.test_analysis_components()
-    print("Components test complete.\n")
 
 
 def run_single_analysis(dataset_name: str, metrics_config: dict, analysis_config):
     """Run single analysis pipeline."""
-    print("🚀 Running Single Analysis Pipeline")
+    print("Running Single Analysis Pipeline")
     print("=" * 70)
 
     pipeline = AnalysisPipeline(dataset_name)
@@ -47,7 +29,7 @@ def run_single_analysis(dataset_name: str, metrics_config: dict, analysis_config
         per_frame_analysis_types=per_frame_analysis_types,
     )
 
-    print("✅ Single analysis completed")
+    print("Single analysis completed")
 
 
 def run_multi_analysis(dataset_name: str, metrics_config: dict, analysis_config):
@@ -87,9 +69,6 @@ def main():
 
     # Load analysis configuration from dataset-specific config only
     analysis_config = load_dataset_analysis_config(dataset_name)
-
-    # Run configuration tests
-    run_configuration_tests()
 
     try:
         # Check if multi-analysis is enabled in config

@@ -35,7 +35,7 @@ class MasterGTAnalysisOrchestrator:
         self.visualization_creator = GTVisualizationCreator(dataset_name)
 
         print(
-            f"🎭 Master GT Analysis Orchestrator initialized for dataset: {dataset_name}"
+            f"Master GT Analysis Orchestrator initialized for dataset: {dataset_name}"
         )
 
     def run_complete_gt_analysis(
@@ -52,7 +52,7 @@ class MasterGTAnalysisOrchestrator:
         **gt_filter_kwargs,
     ) -> dict:
         """Run complete ground truth PCK-brightness analysis workflow."""
-        print(f"\n🚀 Starting complete GT analysis for joints: {joint_names}")
+        print(f"\nStarting complete GT analysis for joints: {joint_names}")
         print("=" * 80)
 
         start_time = time.time()
@@ -73,7 +73,7 @@ class MasterGTAnalysisOrchestrator:
 
         try:
             # Step 1: Load and inspect ground truth data
-            print("\n📋 Step 1: Loading ground truth data...")
+            print("\nStep 1: Loading ground truth data...")
             gt_summary = self.gt_loader.get_data_summary()
 
             if not gt_summary:
@@ -88,7 +88,7 @@ class MasterGTAnalysisOrchestrator:
             )
 
             # Step 2: Extract joint coordinates
-            print("\n📍 Step 2: Extracting joint coordinates...")
+            print("\nStep 2: Extracting joint coordinates...")
             joint_coordinates = self.gt_loader.extract_joint_coordinates(
                 joint_names, **gt_filter_kwargs
             )
@@ -100,7 +100,7 @@ class MasterGTAnalysisOrchestrator:
             results["analysis_summary"]["joints_extracted"] = len(joint_coordinates)
 
             # Step 3: Extract brightness at joint coordinates
-            print("\n🔆 Step 3: Extracting brightness at joint coordinates...")
+            print("\nStep 3: Extracting brightness at joint coordinates...")
             brightness_data = self.brightness_extractor.extract_brightness_for_joints(
                 joint_names=joint_names,
                 video_path=video_path,
@@ -115,7 +115,7 @@ class MasterGTAnalysisOrchestrator:
             results["analysis_summary"]["brightness_extractions"] = len(brightness_data)
 
             # Step 4: Analyze PCK-brightness correlations
-            print("\n📊 Step 4: Analyzing PCK-brightness correlations...")
+            print("\nStep 4: Analyzing PCK-brightness correlations...")
             correlation_results = self.pck_analyzer.analyze_pck_brightness_correlation(
                 joint_names=joint_names,
                 pck_threshold=pck_threshold,
@@ -133,7 +133,7 @@ class MasterGTAnalysisOrchestrator:
             )
 
             # Step 5: Calculate distributions
-            print("\n📈 Step 5: Calculating distributions...")
+            print("\nStep 5: Calculating distributions...")
             distribution_results = (
                 self.distribution_calculator.run_complete_distribution_analysis(
                     joint_names=joint_names,
@@ -154,7 +154,7 @@ class MasterGTAnalysisOrchestrator:
 
             # Step 6: Create visualizations
             if create_visualizations:
-                print("\n📊 Step 6: Creating visualizations...")
+                print("\nStep 6: Creating visualizations...")
 
                 # Create comprehensive dashboard
                 dashboard_path = self.visualization_creator.create_comprehensive_gt_analysis_dashboard(
@@ -199,7 +199,7 @@ class MasterGTAnalysisOrchestrator:
 
             # Step 7: Export data and results
             if export_data:
-                print("\n💾 Step 7: Exporting data and results...")
+                print("\nStep 7: Exporting data and results...")
 
                 # Export correlation analysis
                 corr_export_path = self.pck_analyzer.export_analysis_results(
@@ -245,9 +245,9 @@ class MasterGTAnalysisOrchestrator:
                 results["files_created"]
             )
 
-            print("\n✅ Complete GT analysis finished successfully!")
+            print("\nComplete GT analysis finished successfully!")
             print(
-                f"⏱️  Execution time: {results['analysis_summary']['execution_time_seconds']} seconds"
+                f"Execution time: {results['analysis_summary']['execution_time_seconds']} seconds"
             )
             print(
                 f"📁 Files created: {results['analysis_summary']['files_created_count']}"
