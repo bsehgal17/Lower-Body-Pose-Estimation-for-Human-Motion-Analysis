@@ -182,9 +182,11 @@ class JointBrightnessAnalyzer(BaseAnalyzer):
                 if not ret:
                     break
 
-                # Convert to grayscale
-                gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                frame_height, frame_width = gray_frame.shape
+                # Convert to LAB color space for perceptually accurate brightness
+                lab_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+                # Extract L channel (lightness/brightness)
+                brightness_frame = lab_frame[:, :, 0]
+                frame_height, frame_width = brightness_frame.shape
 
                 # Extract brightness for each joint
                 for joint_name, joint_coords in coordinates.items():
@@ -201,12 +203,12 @@ class JointBrightnessAnalyzer(BaseAnalyzer):
                         y_min = max(0, y - self.sampling_radius)
                         y_max = min(frame_height, y + self.sampling_radius + 1)
 
-                        region = gray_frame[y_min:y_max, x_min:x_max]
+                        region = brightness_frame[y_min:y_max, x_min:x_max]
 
                         if region.size > 0:
                             brightness = np.mean(region)
                         else:
-                            brightness = gray_frame[y, x]
+                            brightness = brightness_frame[y, x]
 
                         brightness_data[joint_name].append(float(brightness))
                     else:
