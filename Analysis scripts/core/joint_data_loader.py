@@ -97,7 +97,8 @@ class JointDataLoader:
             required_columns = []
             for joint in joints_to_analyze:
                 for threshold in pck_thresholds:
-                    required_columns.append(f"{joint}_pck_{threshold:g}")
+                    required_columns.append(
+                        f"{joint}_jointwise_pck_{threshold:g}")
 
             missing_columns = [
                 col for col in required_columns if col not in pck_data.columns
