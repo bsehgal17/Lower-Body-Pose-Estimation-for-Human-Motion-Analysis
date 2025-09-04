@@ -101,21 +101,43 @@ class AnalysisPipeline:
             first_metric = next(iter(per_video_results.values()))
             merged_df = first_metric["merged_df"]
 
+            # Get the grouping columns from config to determine the video identifier column
+            grouping_columns = self.config.get_grouping_columns()
+
             if (
                 merged_df is not None
                 and not merged_df.empty
-                and "brightness" in merged_df.columns
-                and "video_id" in merged_df.columns
+                and "avg_brightness" in merged_df.columns
+                and grouping_columns
+                and any(col in merged_df.columns for col in grouping_columns)
             ):
+                # Use the first available grouping column as the video identifier
+                video_id_col = next(
+                    col for col in grouping_columns if col in merged_df.columns
+                )
+
                 print(
-                    "Creating PCK vs brightness correlation plot for per-video analysis..."
+                    f"Creating PCK vs brightness correlation plot for per-video analysis using '{video_id_col}' as identifier..."
                 )
                 self.viz_manager.create_pck_brightness_correlation_plot(
-                    merged_df, analysis_type="per_video"
+                    merged_df,
+                    brightness_col="avg_brightness",
+                    video_id_col=video_id_col,
+                    analysis_type="per_video",
                 )
             else:
+                missing_items = []
+                if "avg_brightness" not in merged_df.columns:
+                    missing_items.append("avg_brightness column")
+                if not grouping_columns:
+                    missing_items.append("grouping columns in config")
+                elif not any(col in merged_df.columns for col in grouping_columns):
+                    missing_items.append(
+                        f"any of the configured grouping columns {grouping_columns}"
+                    )
+
                 print(
-                    "Skipping PCK vs brightness correlation plot - missing brightness or video_id data in processed data"
+                    f"Skipping PCK vs brightness correlation plot - missing: {', '.join(missing_items)}"
                 )
         else:
             print("No processed data available for correlation plot")
