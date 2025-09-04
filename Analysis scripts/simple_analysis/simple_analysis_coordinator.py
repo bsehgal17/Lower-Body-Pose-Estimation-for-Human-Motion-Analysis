@@ -2,7 +2,7 @@
 Simple Analysis Coordinator
 
 Coordinates all the simple analysis scripts for easy usage.
-This is the main entry point for the modular analysis system.
+This is the main entry point for the analysis system.
 """
 
 import sys
