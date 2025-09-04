@@ -2,7 +2,7 @@
 Factory for creating visualization instances.
 """
 
-from base_classes import BaseVisualizer
+from core.base_classes import BaseVisualizer
 from .distribution_visualizer import DistributionVisualizer
 from .scatter_visualizer import ScatterPlotVisualizer
 from .bar_visualizer import BarPlotVisualizer

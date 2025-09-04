@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import Dict, Any
-from base_classes import BaseVisualizer
+from core.base_classes import BaseVisualizer
 
 
 class PCKBrightnessDistributionVisualizer(BaseVisualizer):

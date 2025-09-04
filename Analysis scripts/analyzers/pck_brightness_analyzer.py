@@ -8,7 +8,7 @@ extracts brightness for those frames, and analyzes the distribution.
 import pandas as pd
 import numpy as np
 from typing import Dict, Any, List
-from base_classes import BaseAnalyzer
+from core.base_classes import BaseAnalyzer
 from extractors import MetricExtractorFactory
 from processors import VideoPathResolver, FrameSynchronizer
 from utils import ProgressTracker

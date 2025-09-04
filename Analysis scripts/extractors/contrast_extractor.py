@@ -5,7 +5,7 @@ Contrast extraction from video frames.
 import cv2
 import numpy as np
 from typing import List
-from base_classes import BaseMetricExtractor
+from core.base_classes import BaseMetricExtractor
 
 
 class ContrastExtractor(BaseMetricExtractor):

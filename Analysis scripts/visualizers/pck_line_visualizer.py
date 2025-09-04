@@ -5,7 +5,7 @@ PCK line plot visualization components.
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from base_classes import BaseVisualizer
+from core.base_classes import BaseVisualizer
 
 
 class PCKLinePlotVisualizer(BaseVisualizer):

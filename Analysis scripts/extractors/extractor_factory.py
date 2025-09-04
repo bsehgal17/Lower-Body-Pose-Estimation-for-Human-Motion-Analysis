@@ -3,7 +3,7 @@ Factory for creating metric extractor instances.
 """
 
 from typing import List
-from base_classes import BaseMetricExtractor
+from core.base_classes import BaseMetricExtractor
 from .brightness_extractor import BrightnessExtractor
 from .contrast_extractor import ContrastExtractor
 from .sharpness_extractor import SharpnessExtractor

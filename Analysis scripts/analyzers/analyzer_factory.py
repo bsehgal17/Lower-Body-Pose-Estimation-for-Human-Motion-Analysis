@@ -2,7 +2,7 @@
 Factory for creating analyzer instances.
 """
 
-from base_classes import BaseAnalyzer
+from core.base_classes import BaseAnalyzer
 from .anova_analyzer import ANOVAAnalyzer
 from .bin_analyzer import BinAnalyzer
 from .pck_brightness_analyzer import PCKBrightnessAnalyzer
