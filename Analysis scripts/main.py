@@ -43,20 +43,9 @@ def run_multi_analysis(dataset_name: str, metrics_config: dict, analysis_config)
         base_pipeline.config, base_pipeline.data_processor, base_pipeline.timestamp
     )
 
-    # Run the first complete analysis
-    from analyzers.analyzer_factory import AnalyzerFactory
-
-    per_frame_analysis_types = AnalyzerFactory.get_available_analyzers()
-    base_pipeline.run_complete_analysis(
-        metrics_config=metrics_config,
-        run_overall=True,
-        run_per_video=True,
-        run_per_frame=True,
-        per_frame_analysis_types=per_frame_analysis_types,
-    )
-
     # Run additional multi-analysis scenarios
-    multi_pipeline.run_multi_analysis(analysis_config, dataset_config, metrics_config)
+    multi_pipeline.run_multi_analysis(
+        analysis_config, dataset_config, metrics_config)
 
 
 def main():

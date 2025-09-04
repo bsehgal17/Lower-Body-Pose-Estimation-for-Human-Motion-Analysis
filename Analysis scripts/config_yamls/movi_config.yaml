@@ -30,16 +30,6 @@ analysis:
   pck_brightness:
     # Brightness analysis configuration for MoVi
     bin_size: 2  # Default bin size for MoVi dataset
-    
-    # MoVi-specific bin sizes for different analysis types
-    bin_sizes:
-      motion_analysis: 4    # Fine bins for motion sequences
-      dance_analysis: 3     # Very fine bins for dance sequences
-      general_analysis: 5   # Standard bins for general analysis
-      overview_analysis: 15 # Coarse bins for overview
-      precision_analysis: 2 # Very fine bins for precision studies
-      rapid_analysis: 20    # Very coarse bins for rapid overview
-    
     # Dataset-specific score groups for PCK brightness analysis
     score_groups:
       all: null  # Analyze all available scores
@@ -88,23 +78,3 @@ analysis:
           description: "Detailed analysis of extreme scores for motion sequences"
           create_scatter_plots: true
           
-        - name: "movi_dance_performance"
-          enabled: true
-          score_group: "high_performance"
-          bin_size: 3
-          description: "High-performance analysis for dance sequences"
-          create_scatter_plots: true
-          
-        - name: "movi_overview"
-          enabled: true
-          score_group: "all"
-          bin_size: 15
-          description: "General overview for MoVi dataset"
-          create_scatter_plots: true
-          
-        - name: "movi_custom_range"
-          enabled: true
-          score_group: "movi_custom"
-          bin_size: 5
-          description: "MoVi-specific score range analysis"
-          create_scatter_plots: true
