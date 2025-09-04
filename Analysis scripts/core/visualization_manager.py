@@ -26,7 +26,8 @@ class VisualizationManager:
 
         # Distribution plots for aggregated metric data
         try:
-            hist_viz = self.viz_factory.create_visualizer("histogram", self.config)
+            hist_viz = self.viz_factory.create_visualizer(
+                "histogram", self.config)
             save_path = os.path.join(
                 self.config.save_folder,
                 f"overall_{metric_name}_histogram_{self.timestamp}.svg",
@@ -40,7 +41,8 @@ class VisualizationManager:
 
             hist_viz.create_plot(viz_df, metric_name, save_path)
         except Exception as e:
-            print(f"Warning: Could not create histogram plots for {metric_name}: {e}")
+            print(
+                f"Warning: Could not create histogram plots for {metric_name}: {e}")
 
         # Scatter plot using merged data if available
         if (
@@ -53,7 +55,8 @@ class VisualizationManager:
                 print(f"Merged dataframe columns: {list(merged_df.columns)}")
                 print(f"Merged dataframe shape: {merged_df.shape}")
 
-                scatter_viz = self.viz_factory.create_visualizer("scatter", self.config)
+                scatter_viz = self.viz_factory.create_visualizer(
+                    "scatter", self.config)
                 save_path = os.path.join(
                     self.config.save_folder,
                     f"overall_{metric_name}_scatter_{self.timestamp}.svg",
@@ -94,7 +97,8 @@ class VisualizationManager:
                     )
 
             except Exception as e:
-                print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
+                print(
+                    f"Warning: Could not create scatter plot for {metric_name}: {e}")
                 import traceback
 
                 traceback.print_exc()
@@ -104,7 +108,8 @@ class VisualizationManager:
 
         # Scatter plot
         try:
-            scatter_viz = self.viz_factory.create_visualizer("scatter", self.config)
+            scatter_viz = self.viz_factory.create_visualizer(
+                "scatter", self.config)
             save_path = os.path.join(
                 self.config.save_folder,
                 f"per_frame_{metric_name}_scatter_{self.timestamp}.svg",
@@ -116,7 +121,8 @@ class VisualizationManager:
                 self.config.pck_per_frame_score_columns,
             )
         except Exception as e:
-            print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
+            print(
+                f"Warning: Could not create scatter plot for {metric_name}: {e}")
 
     def create_per_video_visualizations(self, video_aggregated_df, metric_name):
         """Create per-video visualizations using aggregated video data."""
@@ -133,36 +139,25 @@ class VisualizationManager:
     ):
         """Create correlation plot between average PCK and average brightness per video."""
         try:
-            scatter_viz = self.viz_factory.create_visualizer("scatter", self.config)
+            scatter_viz = self.viz_factory.create_visualizer(
+                "scatter", self.config)
+            save_path = os.path.join(
+                self.config.save_folder,
+                f"{analysis_type}_pck_brightness_correlation_{self.timestamp}.svg",
+            )
 
-            # Choose appropriate PCK columns and method based on analysis type
+            # Choose appropriate PCK columns based on analysis type
             if analysis_type == "per_video":
                 pck_columns = self.config.pck_overall_score_columns
-                save_path_base = os.path.join(
-                    self.config.save_folder,
-                    f"{analysis_type}_pck_brightness_correlation_{self.timestamp}",
-                )
-                # Use the new per-video specific function
-                scatter_viz.create_pck_brightness_correlation_plot_per_video(
-                    combined_df,
-                    brightness_col,
-                    video_id_col,
-                    save_path_base,
-                    pck_columns,
-                )
             else:  # per_frame
                 pck_columns = self.config.pck_per_frame_score_columns
-                save_path = os.path.join(
-                    self.config.save_folder,
-                    f"{analysis_type}_pck_brightness_correlation_{self.timestamp}.svg",
-                )
-                # Use the per-frame function (backward compatible)
-                scatter_viz.create_pck_brightness_correlation_plot_per_frame(
-                    combined_df, brightness_col, video_id_col, save_path, pck_columns
-                )
 
+            scatter_viz.create_pck_brightness_correlation_plot(
+                combined_df, brightness_col, video_id_col, save_path, pck_columns, "per-video"
+            )
         except Exception as e:
-            print(f"Warning: Could not create PCK vs brightness correlation plot: {e}")
+            print(
+                f"Warning: Could not create PCK vs brightness correlation plot: {e}")
             import traceback
 
             traceback.print_exc()

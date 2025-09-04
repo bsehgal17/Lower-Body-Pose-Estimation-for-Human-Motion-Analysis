@@ -103,14 +103,16 @@ class ScatterPlotVisualizer(BaseVisualizer):
 
         # Check required columns
         required_cols = [brightness_col, video_id_col]
-        missing_cols = [col for col in required_cols if col not in data.columns]
+        missing_cols = [
+            col for col in required_cols if col not in data.columns]
         if missing_cols:
             print(f"Warning: Missing required columns: {missing_cols}")
             return
 
         # Get available PCK columns - use provided columns or fall back to config
         if pck_columns is not None:
-            available_pck_cols = [col for col in pck_columns if col in data.columns]
+            available_pck_cols = [
+                col for col in pck_columns if col in data.columns]
         else:
             # Fallback to per-frame columns if no specific columns provided
             if hasattr(self.config, "pck_per_frame_score_columns"):
@@ -182,7 +184,8 @@ class ScatterPlotVisualizer(BaseVisualizer):
 
             # Add trend line
             if len(pck_data) > 1:
-                z = np.polyfit(pck_data["avg_brightness"], pck_data["avg_pck"], 1)
+                z = np.polyfit(pck_data["avg_brightness"],
+                               pck_data["avg_pck"], 1)
                 p = np.poly1d(z)
                 x_trend = np.linspace(
                     pck_data["avg_brightness"].min(),
@@ -198,7 +201,8 @@ class ScatterPlotVisualizer(BaseVisualizer):
         plt.title(
             "Average PCK vs Average Brightness Correlation (All Videos)", fontsize=14
         )
-        plt.legend(title="PCK Thresholds", bbox_to_anchor=(1.05, 1), loc="upper left")
+        plt.legend(title="PCK Thresholds",
+                   bbox_to_anchor=(1.05, 1), loc="upper left")
         plt.grid(True, alpha=0.3)
 
         # Add correlation statistics
@@ -249,13 +253,15 @@ class ScatterPlotVisualizer(BaseVisualizer):
             print("Warning: No PCK columns provided for per-video analysis")
             return  # Check required columns
         required_cols = [brightness_col, video_id_col]
-        missing_cols = [col for col in required_cols if col not in data.columns]
+        missing_cols = [
+            col for col in required_cols if col not in data.columns]
         if missing_cols:
             print(f"Warning: Missing required columns: {missing_cols}")
             return
 
         # Get available PCK columns
-        available_pck_cols = [col for col in pck_columns if col in data.columns]
+        available_pck_cols = [
+            col for col in pck_columns if col in data.columns]
 
         if not available_pck_cols:
             print("Warning: No PCK columns found in data")
@@ -310,7 +316,8 @@ class ScatterPlotVisualizer(BaseVisualizer):
                 )
 
             # Calculate correlation
-            correlation = np.corrcoef(data[brightness_col], data[pck_col])[0, 1]
+            correlation = np.corrcoef(
+                data[brightness_col], data[pck_col])[0, 1]
 
             plt.xlabel("Average Brightness", fontsize=12)
             plt.ylabel(f"Average {pck_col}", fontsize=12)
@@ -338,8 +345,10 @@ class ScatterPlotVisualizer(BaseVisualizer):
                 )
             else:
                 base_dir = os.path.dirname(save_path_base)
-                base_name = os.path.splitext(os.path.basename(save_path_base))[0]
-                save_path = os.path.join(base_dir, f"{base_name}_{pck_col}.svg")
+                base_name = os.path.splitext(
+                    os.path.basename(save_path_base))[0]
+                save_path = os.path.join(
+                    base_dir, f"{base_name}_{pck_col}.svg")
 
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
             plt.savefig(save_path, dpi=300, bbox_inches="tight", format="svg")
@@ -361,12 +370,12 @@ class ScatterPlotVisualizer(BaseVisualizer):
         video_id_col: str = "video_id",
         save_path: str = None,
         pck_columns: list = None,
-        analysis_type: str = "per_frame",
+        analysis_type: str = "per-frame",
     ):
         """
         Backward compatibility wrapper - routes to appropriate function based on analysis type.
         """
-        if analysis_type == "per_video":
+        if analysis_type == "per-video":
             # For per-video analysis, use the new function that creates separate plots
             return self.create_pck_brightness_correlation_plot_per_video(
                 data, brightness_col, video_id_col, save_path, pck_columns
