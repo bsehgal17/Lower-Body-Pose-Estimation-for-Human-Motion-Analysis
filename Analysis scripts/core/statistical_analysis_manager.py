@@ -4,7 +4,7 @@ Statistical Analysis Manager Module
 Handles the execution of statistical analyses on data.
 """
 
-from analyzers import AnalyzerFactory
+# from analyzers import AnalyzerFactory
 from visualizers import VisualizationFactory
 from utils import ProgressTracker
 
@@ -21,6 +21,8 @@ class StatisticalAnalysisManager:
         self, combined_df, metric_name, analysis_types, progress=None
     ):
         """Run statistical analyses using separated components."""
+        from analyzers import AnalyzerFactory
+
         if progress is None:
             progress = ProgressTracker(
                 len(analysis_types), "Running statistical analyses"
@@ -61,6 +63,8 @@ class StatisticalAnalysisManager:
         self, combined_df, score_group, scenario_name
     ):
         """Run PCK brightness analysis with specific score groups."""
+        from analyzers import AnalyzerFactory
+
         try:
             # Create analyzer with specific score groups from YAML
             if score_group is not None:

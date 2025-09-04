@@ -14,7 +14,8 @@ from typing import Dict, Any, Optional, List
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from config import ConfigManager
-from analyzers import AnalyzerFactory
+
+# from analyzers import AnalyzerFactory
 from simple_pck_loader import SimplePCKDataLoader
 
 
@@ -29,6 +30,8 @@ class SimpleBrightnessAnalyzer:
         self.data_loader = SimplePCKDataLoader(dataset_name)
 
         # Create analyzer with score groups if specified
+        from analyzers import AnalyzerFactory
+
         if score_groups:
             self.analyzer = AnalyzerFactory.create_analyzer(
                 "pck_brightness", self.config, score_groups=score_groups

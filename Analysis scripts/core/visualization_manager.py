@@ -6,7 +6,8 @@ Handles the creation of various visualizations for analysis results.
 
 import os
 from datetime import datetime
-from analyzers import AnalyzerFactory
+
+# from analyzers import AnalyzerFactory
 from visualizers import VisualizationFactory
 from utils import ProgressTracker
 

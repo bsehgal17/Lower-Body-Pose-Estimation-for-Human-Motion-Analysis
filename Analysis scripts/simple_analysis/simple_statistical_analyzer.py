@@ -6,7 +6,8 @@ Focus: Statistical testing only.
 """
 
 from core.data_processor import DataProcessor
-from analyzers import AnalyzerFactory
+
+# from analyzers import AnalyzerFactory
 from config import ConfigManager
 import sys
 import os
@@ -39,8 +40,9 @@ class SimpleStatisticalAnalyzer:
 
         try:
             # Create ANOVA analyzer
-            anova_analyzer = AnalyzerFactory.create_analyzer(
-                "anova", self.config)
+            from analyzers import AnalyzerFactory
+
+            anova_analyzer = AnalyzerFactory.create_analyzer("anova", self.config)
 
             # Run analysis for brightness metric
             print("Running ANOVA for brightness metric...")
@@ -71,8 +73,9 @@ class SimpleStatisticalAnalyzer:
 
         try:
             # Create bin analyzer
-            bin_analyzer = AnalyzerFactory.create_analyzer(
-                "bin_analysis", self.config)
+            from analyzers import AnalyzerFactory
+
+            bin_analyzer = AnalyzerFactory.create_analyzer("bin_analysis", self.config)
 
             # Run analysis for brightness metric
             print("Running bin analysis for brightness metric...")
@@ -111,8 +114,7 @@ class SimpleStatisticalAnalyzer:
 
         print("\n" + "=" * 60)
         print("Statistical Analysis Summary:")
-        print(
-            f"  • ANOVA: {'✅ Completed' if 'anova' in all_results else '❌ Failed'}")
+        print(f"  • ANOVA: {'✅ Completed' if 'anova' in all_results else '❌ Failed'}")
         print(
             f"  • Bin Analysis: {'✅ Completed' if 'bin_analysis' in all_results else '❌ Failed'}"
         )
@@ -233,16 +235,14 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Simple Statistical Analyzer")
-    parser.add_argument(
-        "dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
+    parser.add_argument("dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
     parser.add_argument(
         "--type",
         choices=["anova", "bin", "all"],
         default="all",
         help="Type of statistical analysis",
     )
-    parser.add_argument("--export", action="store_true",
-                        help="Export results to CSV")
+    parser.add_argument("--export", action="store_true", help="Export results to CSV")
     parser.add_argument(
         "--compare", action="store_true", help="Compare results across PCK thresholds"
     )
