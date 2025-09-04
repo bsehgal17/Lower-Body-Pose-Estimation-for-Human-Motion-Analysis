@@ -13,19 +13,18 @@ Example:
     python pck_brightness_analysis.py humaneva
 """
 
+from datetime import datetime
+import argparse
+from utils.performance_utils import PerformanceMonitor
+from core.data_processor import DataProcessor
+from visualizers.visualization_factory import VisualizationFactory
+from analyzers.analyzer_factory import AnalyzerFactory
+from config import ConfigManager
 import sys
 import os
 
 # Add the Analysis scripts directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from config import ConfigManager
-from analyzers import AnalyzerFactory
-from visualizers import VisualizationFactory
-from data_processor import DataProcessor
-from utils import PerformanceMonitor
-import argparse
-from datetime import datetime
 
 
 class PCKBrightnessAnalysisPipeline:
@@ -77,7 +76,8 @@ class PCKBrightnessAnalysisPipeline:
             return None
 
         print(f"✅ Loaded {len(per_frame_data)} per-frame records")
-        print(f"   Available PCK columns: {self.config.pck_per_frame_score_columns}")
+        print(
+            f"   Available PCK columns: {self.config.pck_per_frame_score_columns}")
         print()
 
         # Step 2: Run PCK brightness analysis
@@ -88,7 +88,8 @@ class PCKBrightnessAnalysisPipeline:
             print("❌ Error: No analysis results generated.")
             return None
 
-        print(f"✅ Analysis completed for {len(analysis_results)} PCK threshold(s)")
+        print(
+            f"✅ Analysis completed for {len(analysis_results)} PCK threshold(s)")
 
         # Print summary statistics
         self._print_analysis_summary(analysis_results)
@@ -103,7 +104,8 @@ class PCKBrightnessAnalysisPipeline:
             self.visualizer.create_plot(analysis_results, save_path)
 
             # Create combined summary plot
-            self.visualizer.create_combined_summary_plot(analysis_results, save_path)
+            self.visualizer.create_combined_summary_plot(
+                analysis_results, save_path)
 
             print("✅ All visualizations created successfully")
         else:
@@ -135,7 +137,8 @@ class PCKBrightnessAnalysisPipeline:
             print(f"\n{pck_column}:")
             print(f"  • Unique PCK scores: {unique_pck_scores}")
             print(f"  • Total frames analyzed: {total_frames}")
-            print(f"  • PCK score range: {min(pck_scores)} to {max(pck_scores)}")
+            print(
+                f"  • PCK score range: {min(pck_scores)} to {max(pck_scores)}")
 
             # Find PCK score with most frames
             max_frames_idx = frame_counts.index(max(frame_counts))
@@ -147,9 +150,12 @@ class PCKBrightnessAnalysisPipeline:
             )
 
             # Calculate average brightness across all PCK scores
-            all_brightness_means = [brightness_stats[pck]["mean"] for pck in pck_scores]
-            avg_brightness = sum(all_brightness_means) / len(all_brightness_means)
-            print(f"  • Average brightness across all PCK scores: {avg_brightness:.1f}")
+            all_brightness_means = [
+                brightness_stats[pck]["mean"] for pck in pck_scores]
+            avg_brightness = sum(all_brightness_means) / \
+                len(all_brightness_means)
+            print(
+                f"  • Average brightness across all PCK scores: {avg_brightness:.1f}")
 
     def export_results_to_csv(self, analysis_results, filename: str = None):
         """Export analysis results to CSV for further analysis."""
@@ -213,7 +219,8 @@ Examples:
         """,
     )
 
-    parser.add_argument("dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
+    parser.add_argument(
+        "dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
 
     parser.add_argument(
         "--scores",
@@ -248,7 +255,8 @@ Examples:
             pipeline_all = PCKBrightnessAnalysisPipeline(
                 args.dataset, score_groups=None
             )
-            results_all = pipeline_all.run_analysis(save_plots=not args.no_plots)
+            results_all = pipeline_all.run_analysis(
+                save_plots=not args.no_plots)
 
             if results_all and args.export_csv:
                 pipeline_all.export_results_to_csv(

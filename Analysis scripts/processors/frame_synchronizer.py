@@ -3,7 +3,7 @@ Frame synchronization utilities.
 """
 
 from typing import Dict, Any
-from base_classes import BaseDataProcessor
+from core.base_classes import BaseDataProcessor
 
 
 class FrameSynchronizer(BaseDataProcessor):
@@ -15,7 +15,8 @@ class FrameSynchronizer(BaseDataProcessor):
 
         if hasattr(self.config, "sync_data") and self.config.sync_data:
             try:
-                subject_key = str(video_row_data.get(self.config.subject_column))
+                subject_key = str(video_row_data.get(
+                    self.config.subject_column))
                 action_key = video_row_data.get(self.config.action_column)
 
                 if action_key and isinstance(action_key, str):

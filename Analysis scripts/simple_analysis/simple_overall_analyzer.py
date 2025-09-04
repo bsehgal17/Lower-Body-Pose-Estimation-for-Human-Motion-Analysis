@@ -5,6 +5,9 @@ Runs overall analysis on video-level PCK scores and metrics.
 Focus: Overall/video-level analysis only.
 """
 
+from visualizers import VisualizationFactory
+from core.data_processor import DataProcessor
+from config import ConfigManager
 import sys
 import os
 import pandas as pd
@@ -12,10 +15,6 @@ from typing import Optional, Dict, Any
 
 # Add the Analysis scripts directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from config import ConfigManager
-from data_processor import DataProcessor
-from visualizers import VisualizationFactory
 
 
 class SimpleOverallAnalyzer:
@@ -87,10 +86,12 @@ class SimpleOverallAnalyzer:
 
                 mean_val = np.mean(all_metric_data)
                 std_val = np.std(all_metric_data)
-                print(f"  • Average {metric_name}: {mean_val:.2f} ± {std_val:.2f}")
+                print(
+                    f"  • Average {metric_name}: {mean_val:.2f} ± {std_val:.2f}")
 
             # Show PCK score statistics
-            pck_columns = [col for col in merged_df.columns if col.startswith("pck")]
+            pck_columns = [
+                col for col in merged_df.columns if col.startswith("pck")]
             if pck_columns:
                 print(f"  • PCK thresholds: {len(pck_columns)}")
                 for pck_col in pck_columns[:3]:  # Show first 3
@@ -213,11 +214,13 @@ class SimpleOverallAnalyzer:
             print(f"\n{metric_name.upper()} correlations:")
 
             # Find PCK columns
-            pck_columns = [col for col in merged_df.columns if col.startswith("pck")]
+            pck_columns = [
+                col for col in merged_df.columns if col.startswith("pck")]
 
             for pck_col in pck_columns:
                 if pck_col in merged_df.columns:
-                    correlation = merged_df[pck_col].corr(merged_df[metric_col])
+                    correlation = merged_df[pck_col].corr(
+                        merged_df[metric_col])
                     if not pd.isna(correlation):
                         strength = (
                             "strong"
@@ -274,7 +277,8 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Simple Overall Analyzer")
-    parser.add_argument("dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
+    parser.add_argument(
+        "dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
     parser.add_argument(
         "--metrics",
         nargs="+",
@@ -284,7 +288,8 @@ def main():
     parser.add_argument(
         "--visualize", action="store_true", help="Create visualizations"
     )
-    parser.add_argument("--export", action="store_true", help="Export results to CSV")
+    parser.add_argument("--export", action="store_true",
+                        help="Export results to CSV")
     parser.add_argument(
         "--correlations", action="store_true", help="Analyze PCK correlations"
     )
@@ -298,7 +303,8 @@ def main():
         analyzer = SimpleOverallAnalyzer(args.dataset)
 
         # Create metrics config
-        metrics_config = {metric: f"get_{metric}_data" for metric in args.metrics}
+        metrics_config = {
+            metric: f"get_{metric}_data" for metric in args.metrics}
 
         # Run overall analysis
         results = analyzer.run_overall_analysis(metrics_config)

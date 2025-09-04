@@ -2,7 +2,7 @@
 Data processor using separated components.
 """
 
-from base_classes import BaseDataProcessor
+from core.base_classes import BaseDataProcessor
 from processors import (
     PCKDataLoader,
     VideoPathResolver,
@@ -51,7 +51,8 @@ class DataProcessor(BaseDataProcessor):
             return results
 
         grouped_pck_df = pck_df.groupby(grouping_cols)
-        progress = ProgressTracker(len(grouped_pck_df), "Processing overall data")
+        progress = ProgressTracker(
+            len(grouped_pck_df), "Processing overall data")
 
         for metric_name, extractor_method in metrics_config.items():
             print(f"\nProcessing {metric_name} data...")
@@ -71,7 +72,8 @@ class DataProcessor(BaseDataProcessor):
                     video_info = ", ".join(
                         [f"{k}: {v}" for k, v in video_row_data.items()]
                     )
-                    print(f"Warning: Video not found for {video_info}. Skipping.")
+                    print(
+                        f"Warning: Video not found for {video_info}. Skipping.")
                     continue
 
                 extractor = MetricExtractorFactory.create_extractor(
@@ -87,7 +89,8 @@ class DataProcessor(BaseDataProcessor):
                     all_metric_data.extend(metric_data_sliced)
 
                     new_row = video_row_data.copy()
-                    new_row[f"avg_{metric_name}"] = pd.Series(metric_data_sliced).mean()
+                    new_row[f"avg_{metric_name}"] = pd.Series(
+                        metric_data_sliced).mean()
                     video_metrics_rows.append(new_row)
 
                 progress.update()
@@ -122,7 +125,8 @@ class DataProcessor(BaseDataProcessor):
             return pd.DataFrame()
 
         grouped_pck_df = pck_df.groupby(grouping_cols)
-        progress = ProgressTracker(len(grouped_pck_df), "Processing per-frame data")
+        progress = ProgressTracker(
+            len(grouped_pck_df), "Processing per-frame data")
 
         for group_name, group_data in grouped_pck_df:
             video_row_data = {
