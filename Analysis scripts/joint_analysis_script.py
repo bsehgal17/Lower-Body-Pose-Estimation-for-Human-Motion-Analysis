@@ -95,7 +95,7 @@ class JointAnalysisScript:
                 self.output_dir = Path(OUTPUT_DIR)
             else:
                 self.output_dir = Path(
-                    f"joint_analysis_{self.dataset_name}_{self.timestamp}"
+                    f"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/MoVi/joint analysis/joint_analysis_{self.dataset_name}_{self.timestamp}"
                 )
 
             if SAVE_RESULTS:
