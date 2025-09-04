@@ -27,14 +27,16 @@ analysis:
     # Analysis scenarios with specific bin sizes
     scenarios:
       - name: "detailed_extremes"
+        enabled: true
         score_group: "extremes"
         bin_size: 1
         description: "Ultra-detailed analysis of extreme scores"
         
-      # - name: "overview_all"
-      #   score_group: "all" 
-      #   bin_size: 20
-      #   description: "Broad overview of all scores"
+      - name: "overview_all"
+        enabled: true
+        score_group: "all" 
+        bin_size: 20
+        description: "Broad overview of all scores"
         
       # - name: "precision_high_performance"
       #   score_group: "high_performance"

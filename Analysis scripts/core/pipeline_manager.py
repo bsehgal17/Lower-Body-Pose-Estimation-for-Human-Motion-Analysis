@@ -67,6 +67,25 @@ class AnalysisPipeline:
                 metric_data["merged_df"], metric_data["all_metric_data"], metric_name
             )
 
+        # Create PCK vs brightness correlation plot if per-frame data is available
+        try:
+            per_frame_df = self.data_processor.load_pck_per_frame_scores()
+            if (
+                per_frame_df is not None
+                and "brightness" in per_frame_df.columns
+                and "video_id" in per_frame_df.columns
+            ):
+                print("Creating PCK vs brightness correlation plot...")
+                self.viz_manager.create_pck_brightness_correlation_plot(
+                    per_frame_df, analysis_type="overall"
+                )
+            else:
+                print(
+                    "Skipping PCK vs brightness correlation plot - missing brightness or video_id data"
+                )
+        except Exception as e:
+            print(f"Warning: Could not create PCK vs brightness correlation plot: {e}")
+
         print(f"Overall analysis complete. Results saved to {self.config.save_folder}")
 
     def _run_per_frame_analysis(self, metrics_config: dict, analysis_types: list):
@@ -95,7 +114,12 @@ class AnalysisPipeline:
 
         # Create PCK vs brightness correlation plot if brightness data is available
         if "brightness" in combined_df.columns and "video_id" in combined_df.columns:
-            self.viz_manager.create_pck_brightness_correlation_plot(combined_df)
+            print(
+                "Creating PCK vs brightness correlation plot for per-frame analysis..."
+            )
+            self.viz_manager.create_pck_brightness_correlation_plot(
+                combined_df, analysis_type="per_frame"
+            )
 
         print(
             f"Per-frame analysis complete. Results saved to {self.config.save_folder}"

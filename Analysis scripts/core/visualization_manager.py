@@ -108,14 +108,18 @@ class VisualizationManager:
             print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
 
     def create_pck_brightness_correlation_plot(
-        self, combined_df, brightness_col="brightness", video_id_col="video_id"
+        self,
+        combined_df,
+        brightness_col="brightness",
+        video_id_col="video_id",
+        analysis_type="per_frame",
     ):
         """Create correlation plot between average PCK and average brightness per video."""
         try:
             scatter_viz = self.viz_factory.create_visualizer("scatter", self.config)
             save_path = os.path.join(
                 self.config.save_folder,
-                f"pck_brightness_correlation_{self.timestamp}.svg",
+                f"{analysis_type}_pck_brightness_correlation_{self.timestamp}.svg",
             )
             scatter_viz.create_pck_brightness_correlation_plot(
                 combined_df, brightness_col, video_id_col, save_path
