@@ -93,6 +93,10 @@ class AnalysisPipeline:
         for metric_name in metrics_config.keys():
             self.viz_manager.create_per_frame_visualizations(combined_df, metric_name)
 
+        # Create PCK vs brightness correlation plot if brightness data is available
+        if "brightness" in combined_df.columns and "video_id" in combined_df.columns:
+            self.viz_manager.create_pck_brightness_correlation_plot(combined_df)
+
         print(
             f"Per-frame analysis complete. Results saved to {self.config.save_folder}"
         )

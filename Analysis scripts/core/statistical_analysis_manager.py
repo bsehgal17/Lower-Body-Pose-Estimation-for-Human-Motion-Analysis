@@ -44,9 +44,6 @@ class StatisticalAnalysisManager:
                         )
                         save_path = f"per_frame_pck_brightness_{self.timestamp}"
                         pck_brightness_viz.create_plot(results, save_path)
-                        pck_brightness_viz.create_combined_summary_plot(
-                            results, save_path
-                        )
                 else:
                     # Other analyzers expect (data, metric_name)
                     analyzer.analyze(combined_df, metric_name)
@@ -86,7 +83,6 @@ class StatisticalAnalysisManager:
                 )
                 save_path = f"per_frame_pck_brightness_{scenario_name}_{self.timestamp}"
                 pck_brightness_viz.create_plot(results, save_path)
-                pck_brightness_viz.create_combined_summary_plot(results, save_path)
 
                 print(
                     f"✅ PCK brightness analysis ({scenario_name}) completed successfully"

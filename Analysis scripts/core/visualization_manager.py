@@ -26,10 +26,10 @@ class VisualizationManager:
 
         # Distribution plots for aggregated metric data
         try:
-            dist_viz = self.viz_factory.create_visualizer("distribution", self.config)
+            hist_viz = self.viz_factory.create_visualizer("histogram", self.config)
             save_path = os.path.join(
                 self.config.save_folder,
-                f"overall_{metric_name}_distribution_{self.timestamp}.svg",
+                f"overall_{metric_name}_histogram_{self.timestamp}.svg",
             )
 
             # Create a simple DataFrame for visualization
@@ -38,11 +38,9 @@ class VisualizationManager:
 
             viz_df = pd.DataFrame(viz_data)
 
-            dist_viz.create_plot(viz_df, metric_name, save_path)
+            hist_viz.create_plot(viz_df, metric_name, save_path)
         except Exception as e:
-            print(
-                f"Warning: Could not create distribution plots for {metric_name}: {e}"
-            )
+            print(f"Warning: Could not create histogram plots for {metric_name}: {e}")
 
         # Scatter plot using merged data if available
         if (
@@ -108,3 +106,22 @@ class VisualizationManager:
             scatter_viz.create_plot(combined_df, metric_name, save_path)
         except Exception as e:
             print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
+
+    def create_pck_brightness_correlation_plot(
+        self, combined_df, brightness_col="brightness", video_id_col="video_id"
+    ):
+        """Create correlation plot between average PCK and average brightness per video."""
+        try:
+            scatter_viz = self.viz_factory.create_visualizer("scatter", self.config)
+            save_path = os.path.join(
+                self.config.save_folder,
+                f"pck_brightness_correlation_{self.timestamp}.svg",
+            )
+            scatter_viz.create_pck_brightness_correlation_plot(
+                combined_df, brightness_col, video_id_col, save_path
+            )
+        except Exception as e:
+            print(f"Warning: Could not create PCK vs brightness correlation plot: {e}")
+            import traceback
+
+            traceback.print_exc()
