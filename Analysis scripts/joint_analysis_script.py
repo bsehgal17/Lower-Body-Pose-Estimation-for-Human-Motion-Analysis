@@ -245,17 +245,16 @@ class JointAnalysisScript:
             for threshold in thresholds:
                 print(f"Creating plots for threshold {threshold}...")
 
-                # Create figure with scatter and line plots
-                fig, axes = plt.subplots(
-                    2, len(JOINTS_TO_ANALYZE), figsize=(5 * len(JOINTS_TO_ANALYZE), 10)
-                )
+                # Create figure with scatter and line plots (single plots, not subplots)
+                fig, (ax_scatter, ax_line) = plt.subplots(1, 2, figsize=(16, 6))
                 fig.suptitle(
                     f"Brightness vs PCK Analysis - Threshold {threshold}", fontsize=16
                 )
 
-                if len(JOINTS_TO_ANALYZE) == 1:
-                    axes = axes.reshape(-1, 1)
+                # Colors for different joints
+                colors = ["red", "blue", "green", "orange", "purple", "brown"]
 
+                # Process each joint
                 for j, joint_name in enumerate(JOINTS_TO_ANALYZE):
                     # Find the metric for this joint and threshold
                     metric_name = f"{joint_name}_pck_{threshold:g}"
@@ -277,66 +276,33 @@ class JointAnalysisScript:
                     brightness_values += (pck_scores * 50) + correlation_noise
                     brightness_values = np.clip(brightness_values, 0, 255)
 
-                    # Create score groups similar to per-frame analysis
-                    score_groups = self._create_score_groups(
-                        pck_scores, brightness_values
+                    # Plot 1: Scatter plot - all joints combined
+                    joint_color = colors[j % len(colors)]
+                    joint_label = joint_name.replace("_", " ")
+
+                    # Plot scatter points for this joint
+                    ax_scatter.scatter(
+                        brightness_values,
+                        pck_scores,
+                        c=joint_color,
+                        alpha=0.6,
+                        label=joint_label,
+                        s=60,
                     )
 
-                    # Plot 1: Scatter plot
-                    ax_scatter = axes[0, j]
-
-                    # Plot different score groups with different colors
-                    colors = ["red", "orange", "green", "blue"]
-                    group_names = [
-                        "Low (0-25%)",
-                        "Medium-Low (25-50%)",
-                        "Medium-High (50-75%)",
-                        "High (75-100%)",
-                    ]
-
-                    for i, (group_name, color) in enumerate(zip(group_names, colors)):
-                        if group_name in score_groups:
-                            group_data = score_groups[group_name]
-                            ax_scatter.scatter(
-                                group_data["brightness"],
-                                group_data["pck"],
-                                c=color,
-                                alpha=0.6,
-                                label=group_name,
-                                s=60,
-                            )
-
-                    ax_scatter.set_xlabel("Brightness (LAB L-channel)")
-                    ax_scatter.set_ylabel("PCK Score")
-                    ax_scatter.set_title(f"{joint_name.replace('_', ' ')} - Scatter")
-                    ax_scatter.legend()
-                    ax_scatter.grid(True, alpha=0.3)
-
-                    # Add correlation line
+                    # Add correlation line for this joint
                     z = np.polyfit(brightness_values, pck_scores, 1)
                     p = np.poly1d(z)
                     ax_scatter.plot(
                         brightness_values,
                         p(brightness_values),
-                        "r--",
+                        color=joint_color,
+                        linestyle="--",
                         alpha=0.8,
                         linewidth=2,
                     )
 
-                    # Calculate correlation coefficient
-                    correlation = np.corrcoef(brightness_values, pck_scores)[0, 1]
-                    ax_scatter.text(
-                        0.05,
-                        0.95,
-                        f"r = {correlation:.3f}",
-                        transform=ax_scatter.transAxes,
-                        verticalalignment="top",
-                        bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
-                    )
-
-                    # Plot 2: Line plot showing trends
-                    ax_line = axes[1, j]
-
+                    # Plot 2: Line plot showing trends for this joint
                     # Create brightness bins and calculate mean PCK for each bin
                     brightness_bins = np.linspace(
                         brightness_values.min(), brightness_values.max(), 10
@@ -361,19 +327,35 @@ class JointAnalysisScript:
                             bin_centers,
                             bin_means,
                             yerr=bin_stds,
+                            color=joint_color,
                             marker="o",
                             capsize=5,
                             linewidth=2,
-                            markersize=8,
+                            markersize=6,
+                            label=joint_label,
                         )
                         ax_line.plot(
-                            bin_centers, bin_means, "-", alpha=0.7, linewidth=3
+                            bin_centers,
+                            bin_means,
+                            color=joint_color,
+                            linestyle="-",
+                            alpha=0.7,
+                            linewidth=2,
                         )
 
-                    ax_line.set_xlabel("Brightness (LAB L-channel)")
-                    ax_line.set_ylabel("Mean PCK Score")
-                    ax_line.set_title(f"{joint_name.replace('_', ' ')} - Trend")
-                    ax_line.grid(True, alpha=0.3)
+                # Configure scatter plot
+                ax_scatter.set_xlabel("Brightness (LAB L-channel)")
+                ax_scatter.set_ylabel("PCK Score")
+                ax_scatter.set_title("Scatter Plot - All Joints")
+                ax_scatter.legend()
+                ax_scatter.grid(True, alpha=0.3)
+
+                # Configure line plot
+                ax_line.set_xlabel("Brightness (LAB L-channel)")
+                ax_line.set_ylabel("Mean PCK Score")
+                ax_line.set_title("Trend Lines - All Joints")
+                ax_line.legend()
+                ax_line.grid(True, alpha=0.3)
 
                 plt.tight_layout()
 
