@@ -5,7 +5,12 @@ Configuration management components.
 from .dataset_config import DatasetConfig
 from .config_factory import ConfigFactory
 from .config_manager import ConfigManager
-from .analysis_config import AnalysisConfig, AnalysisConfigLoader, load_analysis_config
+from .analysis_config import (
+    AnalysisConfig,
+    AnalysisConfigLoader,
+    load_analysis_config,
+    load_dataset_analysis_config,
+)
 
 
 class ConfigurationTester:
@@ -69,5 +74,6 @@ __all__ = [
     "AnalysisConfig",
     "AnalysisConfigLoader",
     "load_analysis_config",
+    "load_dataset_analysis_config",
     "ConfigurationTester",
 ]
