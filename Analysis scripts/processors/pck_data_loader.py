@@ -22,6 +22,12 @@ class PCKDataLoader(BaseDataProcessor):
         required_cols = ["frame_idx"] + self.config.pck_per_frame_score_columns
         return self._load_excel_sheet("Per-Frame Scores", required_cols)
 
+    def load_jointwise_scores(self) -> pd.DataFrame:
+        """Load jointwise PCK scores from Excel file."""
+        return self._load_excel_sheet(
+            "Jointwise Metrics", self.config.pck_jointwise_score_columns
+        )
+
     def _load_excel_sheet(
         self, sheet_name: str, required_score_columns: List[str]
     ) -> pd.DataFrame:
@@ -48,17 +54,14 @@ class PCKDataLoader(BaseDataProcessor):
                     int
                 )
 
-            print(
-                f"Successfully loaded {len(df)} records from '{sheet_name}' sheet")
+            print(f"Successfully loaded {len(df)} records from '{sheet_name}' sheet")
             return df
 
         except FileNotFoundError:
-            print(
-                f"Error: The file {self.config.pck_file_path} was not found.")
+            print(f"Error: The file {self.config.pck_file_path} was not found.")
             return None
         except Exception as e:
-            print(
-                f"An error occurred while loading the '{sheet_name}' sheet: {e}")
+            print(f"An error occurred while loading the '{sheet_name}' sheet: {e}")
             return None
 
     def process(self, *args, **kwargs) -> pd.DataFrame:
@@ -68,5 +71,7 @@ class PCKDataLoader(BaseDataProcessor):
             return self.load_overall_scores()
         elif sheet_type == "per_frame":
             return self.load_per_frame_scores()
+        elif sheet_type == "jointwise":
+            return self.load_jointwise_scores()
         else:
             raise ValueError(f"Unknown sheet type: {sheet_type}")

@@ -63,6 +63,7 @@ class ConfigFactory:
                 camera_column=columns.get("camera_column"),
                 pck_overall_score_columns=pck_scores.get("overall", []),
                 pck_per_frame_score_columns=pck_scores.get("per_frame", []),
+                pck_jointwise_score_columns=pck_scores.get("jointwise", []),
                 sync_data=sync_data,
                 analysis_config=analysis_config,  # Pass analysis config directly
                 ground_truth_file=paths.get(

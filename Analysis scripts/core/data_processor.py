@@ -37,6 +37,11 @@ class DataProcessor(BaseDataProcessor):
         return self.pck_loader.load_per_frame_scores()
 
     @PerformanceMonitor.timing_decorator
+    def load_pck_jointwise_scores(self) -> pd.DataFrame:
+        """Load jointwise PCK scores from Excel file."""
+        return self.pck_loader.load_jointwise_scores()
+
+    @PerformanceMonitor.timing_decorator
     def process_overall_data(
         self, pck_df: pd.DataFrame, metrics_config: Dict[str, str]
     ) -> Dict[str, Any]:
@@ -168,5 +173,7 @@ class DataProcessor(BaseDataProcessor):
             return self.load_pck_scores()
         elif sheet_type == "per_frame":
             return self.load_pck_per_frame_scores()
+        elif sheet_type == "jointwise":
+            return self.load_pck_jointwise_scores()
         else:
             raise ValueError(f"Unknown sheet type: {sheet_type}")

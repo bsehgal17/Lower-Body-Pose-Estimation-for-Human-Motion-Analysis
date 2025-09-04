@@ -24,6 +24,26 @@ pck_scores:
     # - "pck_per_frame_pck_0.25"
     # - "pck_per_frame_pck_0.30"
     - "pck_per_frame_pck_0.01"
+  
+  jointwise:
+    - "LEFT_HIP_jointwise_pck_0.01"
+    - "RIGHT_HIP_jointwise_pck_0.01"
+    - "LEFT_KNEE_jointwise_pck_0.01"
+    - "RIGHT_KNEE_jointwise_pck_0.01"
+    - "LEFT_ANKLE_jointwise_pck_0.01"
+    - "RIGHT_ANKLE_jointwise_pck_0.01"
+    - "LEFT_HIP_jointwise_pck_0.02"
+    - "RIGHT_HIP_jointwise_pck_0.02"
+    - "LEFT_KNEE_jointwise_pck_0.02"
+    - "RIGHT_KNEE_jointwise_pck_0.02"
+    - "LEFT_ANKLE_jointwise_pck_0.02"
+    - "RIGHT_ANKLE_jointwise_pck_0.02"
+    - "LEFT_HIP_jointwise_pck_0.05"
+    - "RIGHT_HIP_jointwise_pck_0.05"
+    - "LEFT_KNEE_jointwise_pck_0.05"
+    - "RIGHT_KNEE_jointwise_pck_0.05"
+    - "LEFT_ANKLE_jointwise_pck_0.05"
+    - "RIGHT_ANKLE_jointwise_pck_0.05"
 
 # No synchronization data for MoVi dataset
 sync_data: null

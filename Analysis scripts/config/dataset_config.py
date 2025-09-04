@@ -21,6 +21,7 @@ class DatasetConfig:
     camera_column: str
     pck_overall_score_columns: List[str]
     pck_per_frame_score_columns: List[str]
+    pck_jointwise_score_columns: List[str] = None
     sync_data: Any
     analysis_config: Any = None  # Analysis-specific configuration
     ground_truth_file: str = None  # Path to ground truth coordinates file
@@ -62,6 +63,15 @@ class DatasetConfig:
 
         if not self.pck_per_frame_score_columns:
             errors.append("PCK per-frame score columns not specified")
+
+        # Make jointwise columns optional for backward compatibility
+        if self.pck_jointwise_score_columns is None:
+            self.pck_jointwise_score_columns = []
+            print(
+                "Warning: PCK jointwise score columns not specified, using empty list"
+            )
+        elif not self.pck_jointwise_score_columns:
+            print("Warning: PCK jointwise score columns list is empty")
 
         # Optional validation for ground truth file
         if self.ground_truth_file and not os.path.exists(self.ground_truth_file):

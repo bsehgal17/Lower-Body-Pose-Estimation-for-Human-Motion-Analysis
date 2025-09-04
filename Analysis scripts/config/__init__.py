@@ -29,6 +29,7 @@ class ConfigurationTester:
             print(f"   Model: {config.model}")
             print(f"   PCK Overall columns: {config.pck_overall_score_columns}")
             print(f"   PCK Per-frame columns: {config.pck_per_frame_score_columns}")
+            print(f"   PCK Jointwise columns: {config.pck_jointwise_score_columns}")
 
             # Check for dataset-specific analysis config
             if hasattr(config, "analysis_config") and config.analysis_config:

@@ -192,19 +192,19 @@ class JointAnalysisScript:
     def load_and_validate_data(self) -> pd.DataFrame:
         """Load and validate PCK data."""
         try:
-            print("Loading PCK data...")
+            print("Loading PCK jointwise data...")
 
             # Create data processor
             data_processor = DataProcessor(self.config)
 
-            # Load PCK per-frame scores
-            pck_df = data_processor.load_pck_per_frame_scores()
+            # Load PCK jointwise scores instead of per-frame scores
+            pck_df = data_processor.load_pck_jointwise_scores()
 
             if pck_df is None:
-                print("ERROR: Could not load PCK data")
+                print("ERROR: Could not load PCK jointwise data")
                 return None
 
-            print(f"Loaded PCK data with {len(pck_df)} frames")
+            print(f"Loaded PCK jointwise data with {len(pck_df)} subjects/records")
 
             # Validate that required joints exist in data
             available_joints = set()
