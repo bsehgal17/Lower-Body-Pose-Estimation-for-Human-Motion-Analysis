@@ -9,6 +9,7 @@ from .boxplot_visualizer import BoxPlotVisualizer
 from .scatter_visualizer import ScatterPlotVisualizer
 from .bar_visualizer import BarPlotVisualizer
 from .pck_brightness_visualizer import PCKBrightnessDistributionVisualizer
+from .joint_brightness_visualizer import JointBrightnessVisualizer
 
 
 class VisualizationFactory:
@@ -21,6 +22,7 @@ class VisualizationFactory:
         "scatter": ScatterPlotVisualizer,
         "bar": BarPlotVisualizer,
         "pck_brightness": PCKBrightnessDistributionVisualizer,
+        "joint_brightness": JointBrightnessVisualizer,
     }
 
     @classmethod

@@ -132,3 +132,63 @@ analysis:
           bin_size: 1
           description: "Detailed failure case analysis"
           create_scatter_plots: true
+
+  joint_brightness:
+    # Joint brightness analysis configuration for HumanEva
+    sampling_radius: 3  # Pixel radius around joint for brightness sampling
+    
+    # Joints to analyze (uses COCO format joint names)
+    default_joints:
+      - "LEFT_HIP"
+      - "RIGHT_HIP"
+      - "LEFT_KNEE"
+      - "RIGHT_KNEE"
+      - "LEFT_ANKLE"
+      - "RIGHT_ANKLE"
+    
+    # Additional joints that can be analyzed if available
+    extended_joints:
+      - "LEFT_HIP"
+      - "RIGHT_HIP"
+      - "LEFT_KNEE"
+      - "RIGHT_KNEE"
+      - "LEFT_ANKLE"
+      - "RIGHT_ANKLE"
+      - "LEFT_TOE"
+      - "RIGHT_TOE"
+      - "LEFT_HEEL"
+      - "RIGHT_HEEL"
+    
+    # Brightness analysis settings
+    brightness_settings:
+      frame_limit: null  # Process all frames (set to number to limit)
+      normalize_brightness: false  # Whether to normalize brightness values
+      brightness_threshold: null  # Optional threshold for brightness filtering
+    
+    # Visualization settings for joint brightness
+    visualization:
+      create_individual_plots: true
+      create_summary_plots: true
+      create_comparison_plots: true
+      create_heatmaps: true
+      create_per_frame_scatter: true  # New: per-frame scatter plots
+      create_per_frame_lines: true    # New: per-frame line plots
+      create_correlation_over_time: true  # New: correlation evolution plots
+      save_format: "svg"
+      
+      plot_settings:
+        figure_size: [15, 12]
+        alpha: 0.6
+        marker_size: 30
+        show_correlation_stats: true
+        colormap: "viridis"
+        line_width: 2
+        scatter_size: 20
+        rolling_window_size: 50  # For correlation over time analysis
+    
+    # Export settings
+    export:
+      csv_enabled: true
+      include_per_frame_data: true
+      include_summary_stats: true
+      create_summary_report: true
