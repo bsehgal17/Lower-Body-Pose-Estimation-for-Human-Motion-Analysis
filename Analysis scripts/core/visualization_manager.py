@@ -77,7 +77,13 @@ class VisualizationManager:
                     print(f"Available PCK columns: {available_pck_cols}")
 
                     if available_pck_cols:
-                        scatter_viz.create_plot(scatter_df, metric_name, save_path)
+                        # Use overall PCK columns for overall analysis
+                        scatter_viz.create_plot(
+                            scatter_df,
+                            metric_name,
+                            save_path,
+                            self.config.pck_overall_score_columns,
+                        )
                     else:
                         print(
                             f"Warning: No PCK columns found in merged data for {metric_name} scatter plot"
@@ -103,7 +109,12 @@ class VisualizationManager:
                 self.config.save_folder,
                 f"per_frame_{metric_name}_scatter_{self.timestamp}.svg",
             )
-            scatter_viz.create_plot(combined_df, metric_name, save_path)
+            scatter_viz.create_plot(
+                combined_df,
+                metric_name,
+                save_path,
+                self.config.pck_per_frame_score_columns,
+            )
         except Exception as e:
             print(f"Warning: Could not create scatter plot for {metric_name}: {e}")
 
@@ -127,8 +138,15 @@ class VisualizationManager:
                 self.config.save_folder,
                 f"{analysis_type}_pck_brightness_correlation_{self.timestamp}.svg",
             )
+
+            # Choose appropriate PCK columns based on analysis type
+            if analysis_type == "per_video":
+                pck_columns = self.config.pck_overall_score_columns
+            else:  # per_frame
+                pck_columns = self.config.pck_per_frame_score_columns
+
             scatter_viz.create_pck_brightness_correlation_plot(
-                combined_df, brightness_col, video_id_col, save_path
+                combined_df, brightness_col, video_id_col, save_path, pck_columns
             )
         except Exception as e:
             print(f"Warning: Could not create PCK vs brightness correlation plot: {e}")

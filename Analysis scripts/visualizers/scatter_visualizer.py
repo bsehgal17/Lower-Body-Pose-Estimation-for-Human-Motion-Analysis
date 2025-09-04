@@ -17,10 +17,21 @@ class ScatterPlotVisualizer(BaseVisualizer):
         """Initialize with configuration."""
         self.config = config
 
-    def create_plot(self, data: pd.DataFrame, metric_name: str, save_path: str):
+    def create_plot(
+        self,
+        data: pd.DataFrame,
+        metric_name: str,
+        save_path: str,
+        pck_columns: list = None,
+    ):
         """Create separate scatter plots for metric vs each PCK score."""
-        if not hasattr(self.config, "pck_per_frame_score_columns"):
-            print("Config missing pck_per_frame_score_columns attribute")
+        # Get PCK columns to use
+        if pck_columns is not None:
+            pck_cols_to_use = pck_columns
+        elif hasattr(self.config, "pck_per_frame_score_columns"):
+            pck_cols_to_use = self.config.pck_per_frame_score_columns
+        else:
+            print("No PCK columns available for scatter plot")
             return
 
         # Extract base path and extension
@@ -30,7 +41,7 @@ class ScatterPlotVisualizer(BaseVisualizer):
         is_aggregated = metric_name.startswith("avg_")
 
         # Create separate scatter plot for each PCK column
-        for pck_col in self.config.pck_per_frame_score_columns:
+        for pck_col in pck_cols_to_use:
             # For aggregated data, look for avg_ prefixed columns
             target_pck_col = f"avg_{pck_col}" if is_aggregated else pck_col
 
@@ -68,6 +79,7 @@ class ScatterPlotVisualizer(BaseVisualizer):
         brightness_col: str = "brightness",
         video_id_col: str = "video_id",
         save_path: str = None,
+        pck_columns: list = None,
     ):
         """
         Create scatter plot of average PCK vs average brightness for all videos.
@@ -77,9 +89,15 @@ class ScatterPlotVisualizer(BaseVisualizer):
             brightness_col: Name of the brightness column
             video_id_col: Name of the video ID column
             save_path: Path to save the plot
+            pck_columns: List of PCK column names to use. If None, uses config's per_frame columns
         """
-        if not hasattr(self.config, "pck_per_frame_score_columns"):
-            print("Config missing pck_per_frame_score_columns attribute")
+        if (
+            not hasattr(self.config, "pck_per_frame_score_columns")
+            and pck_columns is None
+        ):
+            print(
+                "No PCK columns available and config missing pck_per_frame_score_columns attribute"
+            )
             return
 
         # Check required columns
@@ -89,12 +107,19 @@ class ScatterPlotVisualizer(BaseVisualizer):
             print(f"Warning: Missing required columns: {missing_cols}")
             return
 
-        # Get available PCK columns
-        available_pck_cols = [
-            col
-            for col in self.config.pck_per_frame_score_columns
-            if col in data.columns
-        ]
+        # Get available PCK columns - use provided columns or fall back to config
+        if pck_columns is not None:
+            available_pck_cols = [col for col in pck_columns if col in data.columns]
+        else:
+            # Fallback to per-frame columns if no specific columns provided
+            if hasattr(self.config, "pck_per_frame_score_columns"):
+                available_pck_cols = [
+                    col
+                    for col in self.config.pck_per_frame_score_columns
+                    if col in data.columns
+                ]
+            else:
+                available_pck_cols = []
 
         if not available_pck_cols:
             print("Warning: No PCK columns found in data")
