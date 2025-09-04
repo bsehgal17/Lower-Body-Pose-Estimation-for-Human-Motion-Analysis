@@ -45,7 +45,8 @@ def run_multi_analysis(dataset_name: str, metrics_config: dict, analysis_config)
     )
 
     # Run additional multi-analysis scenarios
-    multi_pipeline.run_multi_analysis(analysis_config, dataset_config, metrics_config)
+    multi_pipeline.run_multi_analysis(
+        analysis_config, dataset_config, metrics_config)
 
 
 def run_joint_analysis_pipeline(dataset_name: str):
@@ -139,11 +140,11 @@ def main():
         print("\n" + "=" * 70)
         print("Running additional standard analysis...")
 
-        # Check if multi-analysis is enabled in config
-        if analysis_config.is_multi_analysis_enabled():
-            run_multi_analysis(dataset_name, metrics_config, analysis_config)
-        else:
-            run_single_analysis(dataset_name, metrics_config, analysis_config)
+        # # Check if multi-analysis is enabled in config
+        # if analysis_config.is_multi_analysis_enabled():
+        #     run_multi_analysis(dataset_name, metrics_config, analysis_config)
+        # else:
+        #     run_single_analysis(dataset_name, metrics_config, analysis_config)
 
     except Exception as e:
         print(f"Error during analysis: {e}")
