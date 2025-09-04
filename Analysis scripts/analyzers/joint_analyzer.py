@@ -4,6 +4,8 @@ Joint Analysis Analyzer
 Core analysis logic for joint-wise PCK analysis.
 """
 
+from processors import VideoPathResolver
+from utils.config_extractor import extract_analysis_paths
 import pandas as pd
 import numpy as np
 import cv2
@@ -14,9 +16,6 @@ import sys
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
-
-from utils.config_extractor import extract_analysis_paths
-from processors import VideoPathResolver
 
 
 class JointAnalyzer:
@@ -101,7 +100,8 @@ class JointAnalyzer:
             return None
 
         brightness_values = []
-        ground_truth_joint_name = self.joint_mapping.get(joint_name, joint_name)
+        ground_truth_joint_name = self.joint_mapping.get(
+            joint_name, joint_name)
 
         # Group by video file to process each video
         if "video_file" in pck_data.columns:
@@ -131,7 +131,8 @@ class JointAnalyzer:
                         import pandas as pd
 
                         video_row = pd.Series(video_row_data)
-                        video_path = self.path_resolver.find_video_for_row(video_row)
+                        video_path = self.path_resolver.find_video_for_row(
+                            video_row)
                     else:
                         # Fallback to simple path construction
                         video_path = os.path.join(
@@ -139,7 +140,8 @@ class JointAnalyzer:
                         )
                 else:
                     # Fallback to simple path construction
-                    video_path = os.path.join(self.video_directory, f"{video_name}.mp4")
+                    video_path = os.path.join(
+                        self.video_directory, f"{video_name}.mp4")
 
                 if not video_path or not os.path.exists(video_path):
                     # Try alternative extensions for fallback
@@ -152,15 +154,17 @@ class JointAnalyzer:
                                 video_path = alt_path
                                 break
                         else:
-                            print(f"WARNING: Video file not found for {video_name}")
+                            print(
+                                f"WARNING: Video file not found for {video_name}")
                             continue
                     else:
-                        print(f"WARNING: Video file not found for {video_name}")
+                        print(
+                            f"WARNING: Video file not found for {video_name}")
                         continue
 
                 # Load ground truth coordinates
                 gt_file = os.path.join(
-                    self.ground_truth_directory, f"{video_name}_gt.csv"
+                    self.ground_truth_directory, f"{video_name}", "joints2d_projected.csv"
                 )
                 if not os.path.exists(gt_file):
                     # Try alternative naming
@@ -168,7 +172,8 @@ class JointAnalyzer:
                         self.ground_truth_directory, f"{video_name}.csv"
                     )
                     if not os.path.exists(gt_file):
-                        print(f"WARNING: Ground truth file not found for {video_name}")
+                        print(
+                            f"WARNING: Ground truth file not found for {video_name}")
                         continue
 
                 # Load ground truth data
@@ -194,7 +199,8 @@ class JointAnalyzer:
                 )
 
                 if video_brightness is not None:
-                    print(f"   Extracted {len(video_brightness)} brightness values")
+                    print(
+                        f"   Extracted {len(video_brightness)} brightness values")
                     brightness_values.extend(video_brightness)
                 else:
                     print("   No brightness values extracted from this video")
@@ -236,7 +242,8 @@ class JointAnalyzer:
                 print(f"ERROR: Could not open video {video_path}")
                 return None
 
-            print(f"      Video opened successfully: {os.path.basename(video_path)}")
+            print(
+                f"      Video opened successfully: {os.path.basename(video_path)}")
             print(f"      Ground truth data shape: {gt_data.shape}")
             print(f"      Looking for columns: {x_col}, {y_col}")
 
@@ -323,7 +330,8 @@ class JointAnalyzer:
                 return None
 
         except Exception as e:
-            print(f"WARNING: Error extracting brightness at point ({x}, {y}): {e}")
+            print(
+                f"WARNING: Error extracting brightness at point ({x}, {y}): {e}")
             return None
 
     def calculate_statistics(self, values: np.ndarray) -> Dict[str, float]:
@@ -387,7 +395,8 @@ class JointAnalyzer:
             return None
 
         # Try to extract real brightness values from videos
-        brightness_values = self.extract_brightness_from_video(pck_data, joint_name)
+        brightness_values = self.extract_brightness_from_video(
+            pck_data, joint_name)
 
         # If real extraction fails, fall back to simulation with warning
         if brightness_values is None:
@@ -482,7 +491,8 @@ class JointAnalyzer:
                         f"    WARNING: No data for {joint_name} at threshold {threshold}"
                     )
 
-        print(f"Analysis completed. Generated {len(analysis_results)} results.")
+        print(
+            f"Analysis completed. Generated {len(analysis_results)} results.")
         return analysis_results
 
     def get_average_data_for_plotting(
@@ -512,8 +522,10 @@ class JointAnalyzer:
 
                 if metric_key in analysis_results:
                     result = analysis_results[metric_key]
-                    joint_data["joint_names"].append(joint_name.replace("_", " "))
-                    joint_data["avg_brightness"].append(result["avg_brightness"])
+                    joint_data["joint_names"].append(
+                        joint_name.replace("_", " "))
+                    joint_data["avg_brightness"].append(
+                        result["avg_brightness"])
                     joint_data["avg_pck"].append(result["avg_pck"])
 
             threshold_data[threshold] = joint_data
