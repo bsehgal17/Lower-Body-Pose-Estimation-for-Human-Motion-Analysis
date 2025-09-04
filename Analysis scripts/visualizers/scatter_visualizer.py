@@ -264,19 +264,30 @@ class ScatterPlotVisualizer(BaseVisualizer):
 
         # Create separate plot for each PCK threshold
         for pck_col in available_pck_cols:
-            plt.figure(figsize=(10, 8))
+            plt.figure(figsize=(12, 8))
 
-            # Create scatter plot for this threshold
-            plt.scatter(
-                data[brightness_col],
-                data[pck_col],
-                alpha=0.7,
-                s=80,
-                c=range(len(data)),
-                cmap="tab10",
-            )
+            # Get unique subjects/videos for consistent coloring
+            unique_subjects = data[video_id_col].unique()
+            colors = plt.cm.tab10(np.linspace(0, 1, len(unique_subjects)))
 
-            # Add trend line
+            # Create a color map for subjects
+            subject_color_map = {
+                subject: colors[i] for i, subject in enumerate(unique_subjects)
+            }
+
+            # Create scatter plot for this threshold with subjects as legend
+            for subject in unique_subjects:
+                subject_data = data[data[video_id_col] == subject]
+                plt.scatter(
+                    subject_data[brightness_col],
+                    subject_data[pck_col],
+                    alpha=0.7,
+                    s=80,
+                    color=subject_color_map[subject],
+                    label=subject,
+                )
+
+            # Add trend line for all data
             if len(data) > 1:
                 z = np.polyfit(data[brightness_col], data[pck_col], 1)
                 p = np.poly1d(z)
@@ -292,17 +303,7 @@ class ScatterPlotVisualizer(BaseVisualizer):
                     linestyle="--",
                     alpha=0.8,
                     linewidth=2,
-                )
-
-            # Add labels for each point (showing video/subject ID)
-            for i, (idx, row) in enumerate(data.iterrows()):
-                plt.annotate(
-                    row[video_id_col],
-                    (row[brightness_col], row[pck_col]),
-                    xytext=(5, 5),
-                    textcoords="offset points",
-                    fontsize=8,
-                    alpha=0.7,
+                    label="Trend Line",
                 )
 
             # Calculate correlation
@@ -315,6 +316,17 @@ class ScatterPlotVisualizer(BaseVisualizer):
                 fontsize=14,
             )
             plt.grid(True, alpha=0.3)
+
+            # Add legend for subjects/grouping column
+            plt.legend(
+                title=video_id_col.title(),
+                bbox_to_anchor=(1.05, 1),
+                loc="upper left",
+                fontsize=10,
+            )
+
+            # Adjust layout to accommodate legend
+            plt.tight_layout()
 
             # Save the plot
             if save_path_base is None:
