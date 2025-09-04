@@ -102,11 +102,11 @@ class AnalysisConfigLoader:
             AnalysisConfig instance
         """
         if config_path is None:
-            # Default path relative to this file
+            # Default path relative to this file - look in Analysis scripts/config_yamls
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            project_root = os.path.dirname(os.path.dirname(current_dir))
+            analysis_scripts_dir = os.path.dirname(current_dir)
             config_path = os.path.join(
-                project_root, "config_yamls", "analysis_config.yaml"
+                analysis_scripts_dir, "config_yamls", "analysis_config.yaml"
             )
 
         try:

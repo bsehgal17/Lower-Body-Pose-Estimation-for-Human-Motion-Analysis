@@ -24,3 +24,25 @@ pck_scores:
 
 # No synchronization data for MoVi dataset
 sync_data: null
+
+# Analysis-specific configurations for MoVi
+analysis:
+  pck_brightness:
+    # Dataset-specific score groups for PCK brightness analysis
+    score_groups:
+      all: null  # Analyze all available scores
+      extremes: [0, 100]  # Extreme scores (failure and perfect)
+      high_performance: [80, 85, 90, 95, 100]  # High PCK scores
+      low_performance: [0, 5, 10, 15, 20]  # Low PCK scores
+      mid_performance: [40, 45, 50, 55, 60]  # Mid-range performance
+      movi_custom: [70, 80, 90, 95]  # MoVi-specific range
+      
+      # MoVi-specific score groups:
+      motion_optimized: [75, 80, 85, 90, 95]  # Optimized for motion sequences
+      dance_optimized: [70, 75, 80, 85, 90]   # Optimized for dance sequences
+      precision_analysis: [95, 96, 97, 98, 99, 100]  # High precision analysis
+      failure_analysis: [0, 1, 2, 3, 4, 5]  # Detailed failure analysis
+      percentiles: [10, 25, 50, 75, 90]  # Percentile-based analysis
+    
+    # Default score group for this dataset  
+    default_score_group: "extremes"
