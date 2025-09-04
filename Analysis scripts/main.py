@@ -5,7 +5,8 @@ Uses modular components for clean and maintainable analysis pipeline.
 """
 
 from config import ConfigManager, load_analysis_config
-from analyzers.analyzer_factory import AnalyzerFactory
+
+# from analyzers.analyzer_factory import AnalyzerFactory
 from core.pipeline_manager import AnalysisPipeline
 from core.config_manager import ConfigurationTester
 from core.multi_analysis_pipeline import MultiAnalysisPipeline
@@ -34,6 +35,8 @@ def run_single_analysis(dataset_name: str, metrics_config: dict, analysis_config
     print("=" * 70)
 
     pipeline = AnalysisPipeline(dataset_name)
+    from analyzers.analyzer_factory import AnalyzerFactory
+
     per_frame_analysis_types = AnalyzerFactory.get_available_analyzers()
 
     pipeline.run_complete_analysis(
@@ -58,6 +61,8 @@ def run_multi_analysis(dataset_name: str, metrics_config: dict, analysis_config)
     )
 
     # Run the first complete analysis
+    from analyzers.analyzer_factory import AnalyzerFactory
+
     per_frame_analysis_types = AnalyzerFactory.get_available_analyzers()
     base_pipeline.run_complete_analysis(
         metrics_config=metrics_config,
@@ -67,8 +72,7 @@ def run_multi_analysis(dataset_name: str, metrics_config: dict, analysis_config)
     )
 
     # Run additional multi-analysis scenarios
-    multi_pipeline.run_multi_analysis(
-        analysis_config, dataset_config, metrics_config)
+    multi_pipeline.run_multi_analysis(analysis_config, dataset_config, metrics_config)
 
 
 def main():
