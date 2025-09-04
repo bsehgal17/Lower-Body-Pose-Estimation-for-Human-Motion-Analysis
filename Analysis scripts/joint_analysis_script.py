@@ -13,25 +13,24 @@ Usage:
 No command-line arguments or interactive input needed.
 """
 
-from dataset_files.MoVi.movi_gt_loader import MoViGroundTruthLoader
-from datetime import datetime
-from core.data_processor import DataProcessor
-from visualizers.joint_brightness_visualizer import JointBrightnessVisualizer
-from analyzers.joint_brightness_analyzer import JointBrightnessAnalyzer
-from config.config_manager import ConfigManager
 import sys
 import os
 from typing import Dict, Any
 import pandas as pd
 from pathlib import Path
+from datetime import datetime
 
 # Add Analysis scripts to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # Add main project path for dataset_files access
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-
-# Import dataset-specific GT loaders
+# Now import after path setup
+from dataset_files.MoVi.movi_gt_loader import MoViGroundTruthLoader
+from core.data_processor import DataProcessor
+from visualizers.joint_brightness_visualizer import JointBrightnessVisualizer
+from analyzers.joint_brightness_analyzer import JointBrightnessAnalyzer
+from config.config_manager import ConfigManager
 
 # ============================================================================
 # CONFIGURATION - MODIFY THESE VALUES AS NEEDED
@@ -126,8 +125,7 @@ class JointAnalysisScript:
                 gt_folder = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/MoVi_groundtruth/"
 
                 if not os.path.exists(gt_folder):
-                    print(
-                        f"WARNING: Ground truth folder not found: {gt_folder}")
+                    print(f"WARNING: Ground truth folder not found: {gt_folder}")
                     print("Using alternative path structure...")
                     # Try alternative paths
                     alt_paths = [
@@ -303,14 +301,11 @@ class JointAnalysisScript:
                 print(f"Creating {plot_type} plots...")
 
                 if plot_type == "scatter":
-                    visualizer.create_scatter_plots(
-                        analysis_results, self.output_dir)
+                    visualizer.create_scatter_plots(analysis_results, self.output_dir)
                 elif plot_type == "line":
-                    visualizer.create_line_plots(
-                        analysis_results, self.output_dir)
+                    visualizer.create_line_plots(analysis_results, self.output_dir)
                 elif plot_type == "heatmap":
-                    visualizer.create_heatmap_plots(
-                        analysis_results, self.output_dir)
+                    visualizer.create_heatmap_plots(analysis_results, self.output_dir)
                 elif plot_type == "distribution":
                     visualizer.create_distribution_plots(
                         analysis_results, self.output_dir
