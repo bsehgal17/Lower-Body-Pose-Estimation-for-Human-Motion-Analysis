@@ -253,7 +253,13 @@ class JointAnalysisScript:
                 # Colors for different joints
                 colors = ["red", "blue", "green", "orange", "purple", "brown"]
 
-                # Process each joint
+                # Collect average values for each joint
+                joint_avg_brightness = []
+                joint_avg_pck = []
+                joint_labels = []
+                joint_colors = []
+
+                # Process each joint to calculate averages
                 for j, joint_name in enumerate(JOINTS_TO_ANALYZE):
                     # Find the metric for this joint and threshold
                     metric_name = f"{joint_name}_pck_{threshold:g}"
@@ -266,7 +272,7 @@ class JointAnalysisScript:
 
                     # Generate simulated brightness values for demonstration
                     # In practice, you'd extract these from videos using ground truth coordinates
-                    np.random.seed(42)  # For reproducible results
+                    np.random.seed(42 + j)  # Different seed per joint for variation
                     brightness_values = np.random.normal(100, 30, len(pck_scores))
                     brightness_values = np.clip(brightness_values, 0, 255)
 
@@ -275,26 +281,58 @@ class JointAnalysisScript:
                     brightness_values += (pck_scores * 50) + correlation_noise
                     brightness_values = np.clip(brightness_values, 0, 255)
 
-                    # Plot 1: Scatter plot - all joints combined
-                    joint_color = colors[j % len(colors)]
-                    joint_label = joint_name.replace("_", " ")
+                    # Calculate averages for this joint
+                    avg_brightness = np.mean(brightness_values)
+                    avg_pck = np.mean(pck_scores)
 
-                    # Plot scatter points for this joint
-                    ax_scatter.scatter(
-                        brightness_values,
-                        pck_scores,
-                        c=joint_color,
-                        alpha=0.6,
-                        label=joint_label,
-                        s=60,
+                    # Store for plotting
+                    joint_avg_brightness.append(avg_brightness)
+                    joint_avg_pck.append(avg_pck)
+                    joint_labels.append(joint_name.replace("_", " "))
+                    joint_colors.append(colors[j % len(colors)])
+
+                # Create scatter plot with one point per joint (average values)
+                ax_scatter.scatter(
+                    joint_avg_brightness,
+                    joint_avg_pck,
+                    c=joint_colors,
+                    alpha=0.8,
+                    s=100,  # Larger points since we have fewer of them
+                    edgecolors="black",
+                    linewidths=1,
+                )
+
+                # Add labels for each point
+                for i, (brightness, pck, label) in enumerate(
+                    zip(joint_avg_brightness, joint_avg_pck, joint_labels)
+                ):
+                    ax_scatter.annotate(
+                        label,
+                        (brightness, pck),
+                        xytext=(5, 5),
+                        textcoords="offset points",
+                        fontsize=9,
+                        alpha=0.8,
                     )
 
                 # Configure scatter plot
-                ax_scatter.set_xlabel("Brightness (LAB L-channel)")
-                ax_scatter.set_ylabel("PCK Score")
-                ax_scatter.set_title("Scatter Plot - All Joints")
-                ax_scatter.legend()
+                ax_scatter.set_xlabel("Average Brightness (LAB L-channel)")
+                ax_scatter.set_ylabel("Average PCK Score")
+                ax_scatter.set_title(
+                    f"Average Brightness vs Average PCK - Threshold {threshold}"
+                )
                 ax_scatter.grid(True, alpha=0.3)
+
+                # Add some padding to the axes for better visibility
+                x_margin = (max(joint_avg_brightness) - min(joint_avg_brightness)) * 0.1
+                y_margin = (max(joint_avg_pck) - min(joint_avg_pck)) * 0.1
+                ax_scatter.set_xlim(
+                    min(joint_avg_brightness) - x_margin,
+                    max(joint_avg_brightness) + x_margin,
+                )
+                ax_scatter.set_ylim(
+                    min(joint_avg_pck) - y_margin, max(joint_avg_pck) + y_margin
+                )
 
                 plt.tight_layout()
 
@@ -336,7 +374,7 @@ class JointAnalysisScript:
                 # Prepare data for this threshold
                 summary_data = []
 
-                for joint_name in JOINTS_TO_ANALYZE:
+                for j, joint_name in enumerate(JOINTS_TO_ANALYZE):
                     # Find the metric for this joint and threshold
                     metric_name = f"{joint_name}_pck_{threshold:g}"
 
@@ -348,7 +386,7 @@ class JointAnalysisScript:
 
                     # Generate simulated brightness values (same as in visualization)
                     # In practice, you'd extract these from videos using ground truth coordinates
-                    np.random.seed(42)  # For reproducible results
+                    np.random.seed(42 + j)  # Same seed pattern as visualization
                     brightness_values = np.random.normal(100, 30, len(pck_scores))
                     brightness_values = np.clip(brightness_values, 0, 255)
 
