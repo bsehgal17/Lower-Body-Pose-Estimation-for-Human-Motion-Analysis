@@ -21,10 +21,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Now import after path setup
-from dataset_files.MoVi.movi_gt_loader import MoViGroundTruthLoader
 from core.data_processor import DataProcessor
-from visualizers.joint_brightness_visualizer import JointBrightnessVisualizer
-from analyzers.joint_brightness_analyzer import JointBrightnessAnalyzer
 from config.config_manager import ConfigManager
 
 # ============================================================================
@@ -110,81 +107,6 @@ class JointAnalysisScript:
             print(f"ERROR: Configuration setup failed: {e}")
             return False
 
-    def load_ground_truth_data(self) -> Dict[str, Any]:
-        """Load ground truth data for the dataset."""
-        try:
-            print("Loading ground truth data...")
-
-            if DATASET_NAME.lower() == "movi":
-                # For MoVi, we need the ground truth folder containing .mat files
-                gt_folder = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/MoVi_groundtruth/"
-
-                if not os.path.exists(gt_folder):
-                    print(
-                        f"WARNING: Ground truth folder not found: {gt_folder}")
-                    print("Using alternative path structure...")
-                    # Try alternative paths
-                    alt_paths = [
-                        os.path.join(
-                            self.config.paths.video_directory, "MoVi_groundtruth"
-                        ),
-                        os.path.join(
-                            os.path.dirname(self.config.paths.video_directory),
-                            "MoVi_groundtruth",
-                        ),
-                    ]
-                    for alt_path in alt_paths:
-                        if os.path.exists(alt_path):
-                            gt_folder = alt_path
-                            break
-
-                print(f"Loading MoVi ground truth from: {gt_folder}")
-
-                # Find .mat files in the folder
-                mat_files = []
-                if os.path.exists(gt_folder):
-                    for file in os.listdir(gt_folder):
-                        if file.endswith(".mat"):
-                            mat_files.append(os.path.join(gt_folder, file))
-
-                if not mat_files:
-                    print("ERROR: No .mat files found in ground truth folder")
-                    return None
-
-                print(f"Found {len(mat_files)} .mat files")
-
-                # Load ground truth data from first .mat file as example
-                # In production, you'd want to match with specific videos
-                gt_loader = MoViGroundTruthLoader(mat_files[0])
-                gt_keypoints = gt_loader.get_keypoints()
-
-                print(f"Loaded ground truth keypoints: {gt_keypoints.shape}")
-                print(f"   Frames: {gt_keypoints.shape[0]}")
-                print(f"   Joints: {gt_keypoints.shape[1]}")
-                print(f"   Coordinates: {gt_keypoints.shape[2]} (x, y)")
-
-                return {
-                    "keypoints": gt_keypoints,
-                    "loader": gt_loader,
-                    "mat_files": mat_files,
-                }
-
-            elif DATASET_NAME.lower() == "humaneva":
-                # For HumanEva, implement similar logic using HumanEva GT loader
-                print("HumanEva ground truth loading not implemented yet")
-                return None
-
-            else:
-                print(f"ERROR: Unsupported dataset: {DATASET_NAME}")
-                return None
-
-        except Exception as e:
-            print(f"ERROR: Ground truth loading failed: {e}")
-            import traceback
-
-            traceback.print_exc()
-            return None
-
     def load_and_validate_data(self) -> pd.DataFrame:
         """Load and validate PCK data."""
         try:
@@ -238,38 +160,57 @@ class JointAnalysisScript:
             return None
 
     def run_joint_analysis(self, pck_data: pd.DataFrame) -> Dict[str, Any]:
-        """Run joint brightness analysis."""
-        print(f"Running joint analysis for {len(JOINTS_TO_ANALYZE)} joints...")
+        """Run joint analysis on jointwise PCK data."""
+        print(f"Running joint analysis on {len(pck_data)} subjects/records...")
         print(f"   Joints: {', '.join(JOINTS_TO_ANALYZE)}")
         print(f"   PCK thresholds: {PCK_THRESHOLDS}")
-        print(f"   Sampling radius: {SAMPLING_RADIUS}")
 
         try:
-            # Create joint brightness analyzer
-            analyzer = JointBrightnessAnalyzer(
-                config=self.config,
-                joint_names=JOINTS_TO_ANALYZE,
-                sampling_radius=SAMPLING_RADIUS,
-            )
+            # Create simple analysis results from jointwise data
+            analysis_results = {}
 
-            # Run analysis
-            print("Analyzing joint brightness patterns...")
-            analysis_results = analyzer.analyze(pck_data)
+            # For each joint and threshold combination
+            for joint_name in JOINTS_TO_ANALYZE:
+                for threshold in PCK_THRESHOLDS:
+                    # Find the corresponding column in the data
+                    col_name = f"{joint_name}_jointwise_pck_{threshold:g}"
 
-            if not analysis_results:
-                print("ERROR: Analysis returned no results")
-                return {}
+                    if col_name in pck_data.columns:
+                        scores = pck_data[col_name].dropna()
 
-            # Filter results by requested thresholds
-            filtered_results = {}
-            for metric_name, results in analysis_results.items():
-                threshold_val = float(results.get("threshold", "0"))
+                        if len(scores) > 0:
+                            # Calculate summary statistics
+                            stats = {
+                                "mean": scores.mean(),
+                                "median": scores.median(),
+                                "std": scores.std(),
+                                "min": scores.min(),
+                                "max": scores.max(),
+                                "count": len(scores),
+                            }
 
-                if any(abs(threshold_val - t) < 0.001 for t in PCK_THRESHOLDS):
-                    filtered_results[metric_name] = results
+                            # Store the analysis result
+                            metric_name = f"{joint_name}_pck_{threshold:g}"
+                            analysis_results[metric_name] = {
+                                "joint_name": joint_name,
+                                "threshold": threshold,
+                                "summary_stats": stats,
+                                "scores": scores.tolist(),
+                                "subjects": pck_data["subject"].tolist()
+                                if "subject" in pck_data.columns
+                                else list(range(len(scores))),
+                            }
 
-            print(f"Analysis completed with {len(filtered_results)} metrics")
-            return filtered_results
+                            print(
+                                f"   {metric_name}: mean={stats['mean']:.3f}, std={stats['std']:.3f}, n={stats['count']}"
+                            )
+                        else:
+                            print(f"   WARNING: No data for {col_name}")
+                    else:
+                        print(f"   WARNING: Column {col_name} not found in data")
+
+            print(f"Analysis completed with {len(analysis_results)} metrics")
+            return analysis_results
 
         except Exception as e:
             print(f"ERROR: Error during analysis: {e}")
@@ -279,7 +220,7 @@ class JointAnalysisScript:
             return {}
 
     def create_visualizations(self, analysis_results: Dict[str, Any]) -> None:
-        """Create visualizations."""
+        """Create simple visualizations for jointwise data."""
         if not analysis_results:
             print("ERROR: No analysis results to visualize")
             return
@@ -287,32 +228,107 @@ class JointAnalysisScript:
         print("Creating visualizations...")
 
         try:
-            # Create joint brightness visualizer
-            visualizer = JointBrightnessVisualizer(config=self.config)
+            import matplotlib.pyplot as plt
+            import numpy as np
 
-            # Generate plots
-            print("Creating plots...")
+            # Create plots for each joint
+            for joint_name in JOINTS_TO_ANALYZE:
+                # Get all thresholds for this joint
+                joint_metrics = {
+                    name: data
+                    for name, data in analysis_results.items()
+                    if data["joint_name"] == joint_name
+                }
 
-            for plot_type in PLOT_TYPES:
-                print(f"Creating {plot_type} plots...")
+                if not joint_metrics:
+                    continue
 
-                if plot_type == "scatter":
-                    visualizer.create_scatter_plots(
-                        analysis_results, self.output_dir)
-                elif plot_type == "line":
-                    visualizer.create_line_plots(
-                        analysis_results, self.output_dir)
-                elif plot_type == "heatmap":
-                    visualizer.create_heatmap_plots(
-                        analysis_results, self.output_dir)
-                elif plot_type == "distribution":
-                    visualizer.create_distribution_plots(
-                        analysis_results, self.output_dir
+                # Create figure for this joint
+                fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+                fig.suptitle(f"{joint_name} Analysis", fontsize=16)
+
+                # Plot 1: PCK scores by threshold
+                thresholds = [data["threshold"] for data in joint_metrics.values()]
+                means = [
+                    data["summary_stats"]["mean"] for data in joint_metrics.values()
+                ]
+                stds = [data["summary_stats"]["std"] for data in joint_metrics.values()]
+
+                axes[0].errorbar(thresholds, means, yerr=stds, marker="o", capsize=5)
+                axes[0].set_xlabel("PCK Threshold")
+                axes[0].set_ylabel("Mean PCK Score")
+                axes[0].set_title("Mean PCK Score by Threshold")
+                axes[0].grid(True, alpha=0.3)
+
+                # Plot 2: Distribution of scores for each threshold
+                for i, (metric_name, data) in enumerate(joint_metrics.items()):
+                    scores = data["scores"]
+                    axes[1].hist(
+                        scores,
+                        bins=20,
+                        alpha=0.6,
+                        label=f"Threshold {data['threshold']}",
                     )
 
-            print("Visualizations completed")
+                axes[1].set_xlabel("PCK Score")
+                axes[1].set_ylabel("Frequency")
+                axes[1].set_title("Distribution of PCK Scores")
+                axes[1].legend()
+                axes[1].grid(True, alpha=0.3)
+
+                plt.tight_layout()
+
+                if SAVE_RESULTS:
+                    plot_file = self.output_dir / f"{joint_name.lower()}_analysis.png"
+                    plt.savefig(plot_file, dpi=300, bbox_inches="tight")
+                    print(f"   Saved plot: {plot_file}")
+
+                plt.close()
+
+            # Create summary plot for all joints
+            fig, ax = plt.subplots(figsize=(12, 8))
+
+            # For each threshold, create a bar plot showing mean scores across joints
+            thresholds = sorted(
+                set(data["threshold"] for data in analysis_results.values())
+            )
+            x_pos = np.arange(len(JOINTS_TO_ANALYZE))
+            width = 0.25
+
+            for i, threshold in enumerate(thresholds):
+                means = []
+                for joint_name in JOINTS_TO_ANALYZE:
+                    # Find the metric for this joint and threshold
+                    metric_name = f"{joint_name}_pck_{threshold:g}"
+                    if metric_name in analysis_results:
+                        means.append(
+                            analysis_results[metric_name]["summary_stats"]["mean"]
+                        )
+                    else:
+                        means.append(0)
+
+                ax.bar(x_pos + i * width, means, width, label=f"Threshold {threshold}")
+
+            ax.set_xlabel("Joints")
+            ax.set_ylabel("Mean PCK Score")
+            ax.set_title("Mean PCK Scores Across Joints and Thresholds")
+            ax.set_xticks(x_pos + width)
+            ax.set_xticklabels(
+                [joint.replace("_", " ") for joint in JOINTS_TO_ANALYZE], rotation=45
+            )
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+
+            plt.tight_layout()
+
             if SAVE_RESULTS:
-                print(f"Plots saved to: {self.output_dir}")
+                summary_file = self.output_dir / "summary_analysis.png"
+                plt.savefig(summary_file, dpi=300, bbox_inches="tight")
+                print(f"   Saved summary plot: {summary_file}")
+
+            plt.close()
+
+            print("Visualizations completed")
 
         except Exception as e:
             print(f"ERROR: Error creating visualizations: {e}")
@@ -369,11 +385,6 @@ class JointAnalysisScript:
         # Setup configuration
         if not self.setup_configuration():
             return False
-
-        # Load ground truth data
-        gt_data = self.load_ground_truth_data()
-        if gt_data is None:
-            print("WARNING: Ground truth data not available, continuing without it")
 
         # Load and validate data
         pck_data = self.load_and_validate_data()

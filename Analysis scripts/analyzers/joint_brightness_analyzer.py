@@ -87,23 +87,18 @@ class JointBrightnessAnalyzer(BaseAnalyzer):
         print("Loading ground truth coordinates...")
 
         try:
-            # Import enhanced ground truth loader
+            # Import ground truth loader
             import sys
 
             sys.path.append(
                 os.path.join(os.path.dirname(__file__), "..", "ground_truth_analysis")
             )
-            from enhanced_gt_loader import GroundTruthDataLoader
+            from gt_data_loader import GroundTruthDataLoader
 
-            # Get dataset name and ground truth file from config
+            # Get dataset name from config
             dataset_name = getattr(self.config, "name", "humaneva")
-            gt_file_path = getattr(self.config, "ground_truth_file", None)
 
-            if not gt_file_path:
-                print("❌ No ground truth file specified in config")
-                return {}
-
-            gt_loader = GroundTruthDataLoader(dataset_name, gt_file_path)
+            gt_loader = GroundTruthDataLoader(dataset_name)
 
             # Extract coordinates for our joints
             coordinates = gt_loader.extract_joint_coordinates(self.joint_names)
