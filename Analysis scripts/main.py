@@ -9,6 +9,7 @@ from config import ConfigManager, load_dataset_analysis_config
 # from analyzers.analyzer_factory import AnalyzerFactory
 from core.pipeline_manager import AnalysisPipeline
 from core.multi_analysis_pipeline import MultiAnalysisPipeline
+from joint_analysis_runner import run_joint_analysis, run_quick_analysis
 
 
 def run_single_analysis(dataset_name: str, metrics_config: dict, analysis_config):
@@ -44,8 +45,28 @@ def run_multi_analysis(dataset_name: str, metrics_config: dict, analysis_config)
     )
 
     # Run additional multi-analysis scenarios
-    multi_pipeline.run_multi_analysis(
-        analysis_config, dataset_config, metrics_config)
+    multi_pipeline.run_multi_analysis(analysis_config, dataset_config, metrics_config)
+
+
+def run_joint_analysis_pipeline(dataset_name: str):
+    """Run joint analysis pipeline."""
+    print("Running Joint Analysis Pipeline")
+    print("=" * 70)
+
+    success = run_joint_analysis(
+        dataset_name=dataset_name,
+        joints_to_analyze=None,  # Use defaults
+        pck_thresholds=None,  # Use defaults
+        output_dir=None,  # Auto-generate
+        save_results=True,
+    )
+
+    if success:
+        print("Joint analysis pipeline completed successfully")
+    else:
+        print("Joint analysis pipeline failed")
+
+    return success
 
 
 def main():
@@ -60,6 +81,21 @@ def main():
     analysis_config = load_dataset_analysis_config(dataset_name)
 
     try:
+        # For now, let's run the joint analysis by default
+        # You can modify this to add command line options or config-based selection
+
+        print("Available Analysis Options:")
+        print("1. Joint Analysis (New Modular)")
+        print("2. Standard Analysis Pipeline")
+        print("3. Multi-Analysis Pipeline")
+        print()
+
+        # Run joint analysis by default (can be made configurable)
+        run_joint_analysis_pipeline(dataset_name)
+
+        print("\n" + "=" * 70)
+        print("Running additional standard analysis...")
+
         # Check if multi-analysis is enabled in config
         if analysis_config.is_multi_analysis_enabled():
             run_multi_analysis(dataset_name, metrics_config, analysis_config)
