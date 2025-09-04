@@ -284,16 +284,24 @@ class ScatterPlotVisualizer(BaseVisualizer):
                 subject: colors[i] for i, subject in enumerate(unique_subjects)
             }
 
+            # Limit legend to first 4 subjects for cleaner display
+            subjects_to_show = (
+                unique_subjects[:4] if len(
+                    unique_subjects) > 4 else unique_subjects
+            )
+
             # Create scatter plot for this threshold with subjects as legend
-            for subject in unique_subjects:
+            for i, subject in enumerate(unique_subjects):
                 subject_data = data[data[video_id_col] == subject]
+                # Only add to legend if it's in the first 4 subjects
+                label = subject if subject in subjects_to_show else None
                 plt.scatter(
                     subject_data[brightness_col],
                     subject_data[pck_col],
                     alpha=0.7,
                     s=80,
                     color=subject_color_map[subject],
-                    label=subject,
+                    label=label,
                 )
 
             # Add trend line for all data
