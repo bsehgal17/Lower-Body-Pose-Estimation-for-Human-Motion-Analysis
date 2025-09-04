@@ -44,7 +44,7 @@ class MultiAnalysisPipeline:
             if i == 1:
                 # First analysis: Run complete pipeline
                 from analyzers import AnalyzerFactory
-                from .analysis_pipeline import AnalysisPipeline
+                from .pipeline_manager import AnalysisPipeline
 
                 pipeline = AnalysisPipeline(self.config.name)
                 success = pipeline.run_complete_analysis(
@@ -90,7 +90,7 @@ class MultiAnalysisPipeline:
     def _run_filtered_pck_analysis(self, scenario_name, score_group, metrics_config):
         """Run PCK brightness analysis with score filtering."""
         # Create a new pipeline instance with modified timestamp
-        from .analysis_pipeline import AnalysisPipeline
+        from .pipeline_manager import AnalysisPipeline
 
         pipeline = AnalysisPipeline(self.config.name)
         pipeline.timestamp = pipeline.timestamp + f"_{scenario_name}"
