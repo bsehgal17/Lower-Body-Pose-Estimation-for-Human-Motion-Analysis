@@ -39,21 +39,32 @@ sync_data:
 # Analysis-specific configurations for HumanEva
 analysis:
   pck_brightness:
-    # Dataset-specific score groups for PCK brightness analysis
-    score_groups:
-      all: null  # Analyze all available scores
-      extremes: [0, 100]  # Extreme scores (failure and perfect)
-      high_performance: [85, 90, 95, 100]  # High PCK scores
-      low_performance: [0, 5, 10, 15, 20]  # Low PCK scores  
-      mid_performance: [45, 50, 55, 60]  # Mid-range performance
-      humaneva_custom: [60, 70, 80, 90]  # HumanEva-specific range
-      
-      # HumanEva-specific score groups:
-      walking_optimized: [75, 80, 85, 90, 95]  # Optimized for walking sequences
-      jogging_optimized: [70, 75, 80, 85, 90]  # Optimized for jogging sequences
-      precision_analysis: [95, 96, 97, 98, 99, 100]  # High precision analysis
-      failure_analysis: [0, 1, 2, 3, 4, 5]  # Detailed failure analysis
-      quartiles: [25, 50, 75, 100]  # Quartile-based analysis
+    # Brightness analysis configuration for HumanEva
+    bin_size: 2  # Default bin size for HumanEva dataset
     
-    # Default score group for this dataset
-    default_score_group: "extremes"
+    # # HumanEva-specific bin sizes for different analysis types
+    # bin_sizes:
+    #   walking_analysis: 3   # Fine bins for walking sequences
+    #   jogging_analysis: 5   # Standard bins for jogging sequences  
+    #   precision_analysis: 2 # Very fine bins for high precision analysis
+    #   overview_analysis: 10 # Coarse bins for general overview
+    #   detailed_analysis: 1  # Ultra fine bins for detailed studies
+    
+    # # Dataset-specific score groups for PCK brightness analysis
+    # score_groups:
+    #   all: null  # Analyze all available scores
+    #   extremes: [0, 100]  # Extreme scores (failure and perfect)
+    #   high_performance: [85, 90, 95, 100]  # High PCK scores
+    #   low_performance: [0, 5, 10, 15, 20]  # Low PCK scores  
+    #   mid_performance: [45, 50, 55, 60]  # Mid-range performance
+    #   humaneva_custom: [60, 70, 80, 90]  # HumanEva-specific range
+      
+    #   # HumanEva-specific score groups:
+    #   walking_optimized: [75, 80, 85, 90, 95]  # Optimized for walking sequences
+    #   jogging_optimized: [70, 75, 80, 85, 90]  # Optimized for jogging sequences
+    #   precision_analysis: [95, 96, 97, 98, 99, 100]  # High precision analysis
+    #   failure_analysis: [0, 1, 2, 3, 4, 5]  # Detailed failure analysis
+    #   quartiles: [25, 50, 75, 100]  # Quartile-based analysis
+    
+    # # Default score group for this dataset
+    # default_score_group: "extremes"

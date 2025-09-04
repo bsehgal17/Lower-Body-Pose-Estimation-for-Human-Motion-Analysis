@@ -67,13 +67,10 @@ class AnalysisPipeline:
                 metric_data["merged_df"], metric_data["all_metric_data"], metric_name
             )
 
-        # Create PCK line plots if data is available
+        # Create individual PCK plots if data is available
         if results:
             first_result = next(iter(results.values()))
             if "merged_df" in first_result and first_result["merged_df"] is not None:
-                self.viz_manager.create_pck_line_plot(
-                    first_result["merged_df"], analysis_type="overall"
-                )
                 self.viz_manager.create_individual_pck_plots(
                     first_result["merged_df"], analysis_type="overall"
                 )
@@ -104,8 +101,7 @@ class AnalysisPipeline:
         for metric_name in metrics_config.keys():
             self.viz_manager.create_per_frame_visualizations(combined_df, metric_name)
 
-        # Create PCK plots
-        self.viz_manager.create_pck_line_plot(combined_df, analysis_type="per_frame")
+        # Create individual PCK plots
         self.viz_manager.create_individual_pck_plots(
             combined_df, analysis_type="per_frame"
         )

@@ -8,7 +8,7 @@ from config import ConfigManager, load_analysis_config
 
 # from analyzers.analyzer_factory import AnalyzerFactory
 from core.pipeline_manager import AnalysisPipeline
-from core.config_manager import ConfigurationTester
+from config import ConfigurationTester
 from core.multi_analysis_pipeline import MultiAnalysisPipeline
 
 

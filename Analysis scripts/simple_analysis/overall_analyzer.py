@@ -1,5 +1,5 @@
 """
-Simple Overall Analysis Script
+Overall Analysis Script
 
 Runs overall analysis on video-level PCK scores and metrics.
 Focus: Overall/video-level analysis only.
@@ -17,8 +17,8 @@ from typing import Optional, Dict, Any
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
-class SimpleOverallAnalyzer:
-    """Simple overall analyzer for video-level PCK data."""
+class OverallAnalyzer:
+    """Overall analyzer for video-level PCK data."""
 
     def __init__(self, dataset_name: str):
         """Initialize with dataset name."""
@@ -86,12 +86,10 @@ class SimpleOverallAnalyzer:
 
                 mean_val = np.mean(all_metric_data)
                 std_val = np.std(all_metric_data)
-                print(
-                    f"  • Average {metric_name}: {mean_val:.2f} ± {std_val:.2f}")
+                print(f"  • Average {metric_name}: {mean_val:.2f} ± {std_val:.2f}")
 
             # Show PCK score statistics
-            pck_columns = [
-                col for col in merged_df.columns if col.startswith("pck")]
+            pck_columns = [col for col in merged_df.columns if col.startswith("pck")]
             if pck_columns:
                 print(f"  • PCK thresholds: {len(pck_columns)}")
                 for pck_col in pck_columns[:3]:  # Show first 3
@@ -214,13 +212,11 @@ class SimpleOverallAnalyzer:
             print(f"\n{metric_name.upper()} correlations:")
 
             # Find PCK columns
-            pck_columns = [
-                col for col in merged_df.columns if col.startswith("pck")]
+            pck_columns = [col for col in merged_df.columns if col.startswith("pck")]
 
             for pck_col in pck_columns:
                 if pck_col in merged_df.columns:
-                    correlation = merged_df[pck_col].corr(
-                        merged_df[metric_col])
+                    correlation = merged_df[pck_col].corr(merged_df[metric_col])
                     if not pd.isna(correlation):
                         strength = (
                             "strong"
@@ -270,70 +266,3 @@ class SimpleOverallAnalyzer:
                         print(
                             f"    {group_name}: {row['mean']:.2f} ± {row['std']:.2f} (n={row['count']})"
                         )
-
-
-def main():
-    """Main function for command-line usage."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Simple Overall Analyzer")
-    parser.add_argument(
-        "dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
-    parser.add_argument(
-        "--metrics",
-        nargs="+",
-        default=["brightness"],
-        help="Metrics to analyze (default: brightness)",
-    )
-    parser.add_argument(
-        "--visualize", action="store_true", help="Create visualizations"
-    )
-    parser.add_argument("--export", action="store_true",
-                        help="Export results to CSV")
-    parser.add_argument(
-        "--correlations", action="store_true", help="Analyze PCK correlations"
-    )
-    parser.add_argument(
-        "--compare-groups", action="store_true", help="Compare across subjects/actions"
-    )
-
-    args = parser.parse_args()
-
-    try:
-        analyzer = SimpleOverallAnalyzer(args.dataset)
-
-        # Create metrics config
-        metrics_config = {
-            metric: f"get_{metric}_data" for metric in args.metrics}
-
-        # Run overall analysis
-        results = analyzer.run_overall_analysis(metrics_config)
-
-        if not results:
-            print("❌ Overall analysis failed")
-            sys.exit(1)
-
-        # Additional analyses
-        if args.correlations:
-            analyzer.analyze_pck_correlations(results)
-
-        if args.compare_groups:
-            analyzer.compare_subjects_or_actions(results)
-
-        # Export and visualization
-        if args.export:
-            analyzer.export_overall_results(results)
-
-        if args.visualize:
-            analyzer.create_overall_visualizations(results)
-
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        import traceback
-
-        traceback.print_exc()
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()

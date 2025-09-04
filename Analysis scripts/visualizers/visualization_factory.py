@@ -4,9 +4,10 @@ Factory for creating visualization instances.
 
 from core.base_classes import BaseVisualizer
 from .distribution_visualizer import DistributionVisualizer
+from .histogram_visualizer import HistogramVisualizer
+from .boxplot_visualizer import BoxPlotVisualizer
 from .scatter_visualizer import ScatterPlotVisualizer
 from .bar_visualizer import BarPlotVisualizer
-from .pck_line_visualizer import PCKLinePlotVisualizer
 from .pck_brightness_visualizer import PCKBrightnessDistributionVisualizer
 
 
@@ -15,9 +16,10 @@ class VisualizationFactory:
 
     _visualizers = {
         "distribution": DistributionVisualizer,
+        "histogram": HistogramVisualizer,
+        "boxplot": BoxPlotVisualizer,
         "scatter": ScatterPlotVisualizer,
         "bar": BarPlotVisualizer,
-        "pck_line": PCKLinePlotVisualizer,
         "pck_brightness": PCKBrightnessDistributionVisualizer,
     }
 

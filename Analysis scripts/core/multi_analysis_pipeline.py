@@ -20,7 +20,7 @@ class MultiAnalysisPipeline:
 
     def run_multi_analysis(self, analysis_config, dataset_config, metrics_config):
         """Run multi-analysis pipeline from YAML configuration."""
-        print("🚀 Running Multi-Analysis Pipeline from YAML Configuration")
+        print("Running Multi-Analysis Pipeline from YAML Configuration")
         print("=" * 70)
 
         scenarios = analysis_config.get_multi_analysis_scenarios()
@@ -36,7 +36,7 @@ class MultiAnalysisPipeline:
                 dataset_config, analysis_config, score_group_name
             )
 
-            print(f"\n📊 Analysis {i}: {scenario_name}")
+            print(f"\nAnalysis {i}: {scenario_name}")
             print(f"Description: {description}")
             print(f"Score Group: {score_group_name} -> {score_group}")
             print("-" * 50)
@@ -120,7 +120,7 @@ class MultiAnalysisPipeline:
     def _print_multi_analysis_summary(self, scenarios, results_summary):
         """Print summary of multi-analysis results."""
         print("\n" + "=" * 70)
-        print("🎯 Multi-Analysis Summary:")
+        print("Multi-Analysis Summary:")
         for i, (scenario_name, success) in enumerate(results_summary, 1):
             status = "✅ Completed" if success else "❌ Failed"
             print(f"   Analysis {i} ({scenario_name}): {status}")

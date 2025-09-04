@@ -22,10 +22,29 @@ class DatasetConfig:
     pck_overall_score_columns: List[str]
     pck_per_frame_score_columns: List[str]
     sync_data: Any
+    analysis_config: Any = None  # Analysis-specific configuration
 
     def __post_init__(self):
         """Validate configuration after initialization."""
         self.validate()
+
+    def get_analysis_bin_size(
+        self, analysis_type: str = "pck_brightness", default: int = 5
+    ) -> int:
+        """Get bin size for analysis from configuration."""
+        if not self.analysis_config:
+            return default
+
+        analysis_section = self.analysis_config.get(analysis_type, {})
+        return analysis_section.get("bin_size", default)
+
+    def get_analysis_score_groups(self, analysis_type: str = "pck_brightness") -> dict:
+        """Get score groups for analysis from configuration."""
+        if not self.analysis_config:
+            return {}
+
+        analysis_section = self.analysis_config.get(analysis_type, {})
+        return analysis_section.get("score_groups", {})
 
     def validate(self) -> bool:
         """Validate the configuration."""

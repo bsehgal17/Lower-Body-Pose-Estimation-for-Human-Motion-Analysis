@@ -1,8 +1,7 @@
 """
-PCK Score Filter Script
+PCK Score Filter Module
 
-Filters and displays specific PCK scores from the data.
-Focus: PCK score filtering and inspection only.
+Provides the PCKScoreFilter class for filtering and inspecting PCK scores from data.
 """
 
 from processors.pck_data_loader import PCKDataLoader
@@ -46,8 +45,7 @@ class PCKScoreFilter:
             if threshold in per_frame_data.columns:
                 # Round to nearest integer and get unique values
                 scores = per_frame_data[threshold].round().astype(int).unique()
-                scores = sorted(
-                    [score for score in scores if not pd.isna(score)])
+                scores = sorted([score for score in scores if not pd.isna(score)])
                 unique_scores[threshold] = scores
 
                 print(f"\n{threshold}:")
@@ -154,8 +152,7 @@ class PCKScoreFilter:
                 print(f"\n{threshold} - Frame counts:")
                 for score, count in sorted(counts.items()):
                     percentage = (count / len(per_frame_data)) * 100
-                    print(
-                        f"  Score {score}: {count} frames ({percentage:.1f}%)")
+                    print(f"  Score {score}: {count} frames ({percentage:.1f}%)")
 
         return frame_counts
 
@@ -231,8 +228,7 @@ class PCKScoreFilter:
                 max_score = int(boundaries[i + 1])
 
                 # Get scores in this range
-                group_scores = [
-                    s for s in scores if min_score <= s <= max_score]
+                group_scores = [s for s in scores if min_score <= s <= max_score]
                 if group_scores:
                     groups.append(group_scores)
 
@@ -240,95 +236,6 @@ class PCKScoreFilter:
 
             print(f"\n{threshold} - Suggested groups:")
             for i, group in enumerate(groups):
-                print(
-                    f"  Group {i + 1}: {group} (range: {min(group)}-{max(group)})")
+                print(f"  Group {i + 1}: {group} (range: {min(group)}-{max(group)})")
 
         return suggestions
-
-
-def main():
-    """Main function for command-line usage."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description="PCK Score Filter")
-    parser.add_argument(
-        "dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
-    parser.add_argument(
-        "--threshold", help="Specific PCK threshold to analyze")
-
-    subparsers = parser.add_subparsers(
-        dest="command", help="Available commands")
-
-    # Unique scores command
-    subparsers.add_parser("unique", help="Show unique PCK scores")
-
-    # Filter range command
-    range_parser = subparsers.add_parser("range", help="Filter by score range")
-    range_parser.add_argument("min_score", type=int, help="Minimum PCK score")
-    range_parser.add_argument("max_score", type=int, help="Maximum PCK score")
-
-    # Filter specific scores command
-    scores_parser = subparsers.add_parser(
-        "scores", help="Filter by specific scores")
-    scores_parser.add_argument(
-        "score_list", nargs="+", type=int, help="List of PCK scores"
-    )
-
-    # Count frames command
-    subparsers.add_parser("count", help="Count frames per score")
-
-    # Statistics command
-    subparsers.add_parser("stats", help="Show score statistics")
-
-    # Suggest groups command
-    suggest_parser = subparsers.add_parser(
-        "suggest", help="Suggest score groups")
-    suggest_parser.add_argument(
-        "--groups", type=int, default=3, help="Number of groups"
-    )
-
-    args = parser.parse_args()
-
-    if not args.command:
-        parser.print_help()
-        return
-
-    try:
-        filter_tool = PCKScoreFilter(args.dataset)
-
-        if args.command == "unique":
-            filter_tool.get_unique_pck_scores(args.threshold)
-
-        elif args.command == "range":
-            filtered_data = filter_tool.filter_by_score_range(
-                args.min_score, args.max_score, args.threshold
-            )
-            if filtered_data is not None:
-                print(f"Filtered data shape: {filtered_data.shape}")
-
-        elif args.command == "scores":
-            filtered_data = filter_tool.filter_by_specific_scores(
-                args.score_list, args.threshold
-            )
-            if filtered_data is not None:
-                print(f"Filtered data shape: {filtered_data.shape}")
-
-        elif args.command == "count":
-            filter_tool.count_frames_per_score(args.threshold)
-
-        elif args.command == "stats":
-            filter_tool.get_score_statistics(args.threshold)
-
-        elif args.command == "suggest":
-            filter_tool.suggest_score_groups(args.groups)
-
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        import traceback
-
-        traceback.print_exc()
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()

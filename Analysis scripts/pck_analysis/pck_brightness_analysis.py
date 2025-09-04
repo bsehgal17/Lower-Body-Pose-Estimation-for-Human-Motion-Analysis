@@ -1,20 +1,11 @@
 """
-Standalone script for PCK Brightness Distribution Analysis.
+PCK Brightness Distribution Analysis Pipeline.
 
-This script analyzes the relationship between PCK scores and brightness distribution
-from per-frame data, creating line plots for each PCK score showing brightness
-vs normalized frequency.
-
-Usage:
-    python pck_brightness_analysis.py [dataset_name]
-
-Example:
-    python pck_brightness_analysis.py movi
-    python pck_brightness_analysis.py humaneva
+This module provides the PCKBrightnessAnalysisPipeline class for analyzing
+the relationship between PCK scores and brightness distribution from per-frame data.
 """
 
 from datetime import datetime
-import argparse
 from utils.performance_utils import PerformanceMonitor
 from core.data_processor import DataProcessor
 from visualizers.visualization_factory import VisualizationFactory
@@ -31,12 +22,19 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 class PCKBrightnessAnalysisPipeline:
     """Pipeline for PCK brightness distribution analysis."""
 
-    def __init__(self, dataset_name: str, score_groups: list = None):
+    def __init__(
+        self, dataset_name: str, score_groups: list = None, bin_size: int = None
+    ):
         """Initialize the analysis pipeline."""
         self.dataset_name = dataset_name
         self.score_groups = score_groups
         self.config = ConfigManager.load_config(dataset_name)
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Get bin size from config if not provided
+        if bin_size is None:
+            bin_size = self.config.get_analysis_bin_size("pck_brightness", default=5)
+        self.bin_size = bin_size
 
         # Create save folder
         os.makedirs(self.config.save_folder, exist_ok=True)
@@ -44,17 +42,15 @@ class PCKBrightnessAnalysisPipeline:
         # Initialize components
         self.data_processor = DataProcessor(self.config)
 
-        # Create analyzer with score groups if specified
+        # Create analyzer with score groups and bin size
         from analyzers.analyzer_factory import AnalyzerFactory
 
-        if score_groups:
-            self.analyzer = AnalyzerFactory.create_analyzer(
-                "pck_brightness", self.config, score_groups=score_groups
-            )
-        else:
-            self.analyzer = AnalyzerFactory.create_analyzer(
-                "pck_brightness", self.config
-            )
+        self.analyzer = AnalyzerFactory.create_analyzer(
+            "pck_brightness",
+            self.config,
+            score_groups=score_groups,
+            bin_size=self.bin_size,
+        )
 
         self.visualizer = VisualizationFactory.create_visualizer(
             "pck_brightness", self.config
@@ -68,6 +64,7 @@ class PCKBrightnessAnalysisPipeline:
         )
         print(f"Timestamp: {self.timestamp}")
         print(f"Save folder: {self.config.save_folder}")
+        print(f"Bin size: {self.bin_size}")
         print("=" * 80)
 
         # Step 1: Load per-frame PCK data
@@ -196,115 +193,3 @@ class PCKBrightnessAnalysisPipeline:
         else:
             print("❌ No data to export")
             return None
-
-
-def main():
-    """Main function for command-line usage."""
-    parser = argparse.ArgumentParser(
-        description="PCK Brightness Distribution Analysis",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-    python pck_brightness_analysis.py movi
-    python pck_brightness_analysis.py humaneva --no-plots
-    python pck_brightness_analysis.py movi --export-csv
-    python pck_brightness_analysis.py movi --scores 85 90 95
-    python pck_brightness_analysis.py humaneva --scores 80 85 90 --no-plots
-    python pck_brightness_analysis.py movi --demo
-    python pck_brightness_analysis.py humaneva --demo --export-csv
-        """,
-    )
-
-    parser.add_argument("dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
-
-    parser.add_argument(
-        "--scores",
-        nargs="+",
-        type=int,
-        help="Specific PCK scores to analyze (e.g., --scores 85 90 95)",
-    )
-
-    parser.add_argument(
-        "--no-plots", action="store_true", help="Skip creating plots (analysis only)"
-    )
-
-    parser.add_argument(
-        "--export-csv", action="store_true", help="Export results to CSV file"
-    )
-
-    parser.add_argument(
-        "--demo", action="store_true", help="Run demo with different score groups"
-    )
-
-    args = parser.parse_args()
-
-    try:
-        if args.demo:
-            # Demo mode: Run analysis with different score groups
-            print("🚀 Running PCK Brightness Analysis Demo")
-            print("=" * 60)
-
-            # Analysis 1: All scores (no filtering)
-            print("\n📊 Analysis 1: All PCK scores")
-            print("-" * 40)
-            pipeline_all = PCKBrightnessAnalysisPipeline(
-                args.dataset, score_groups=None
-            )
-            results_all = pipeline_all.run_analysis(save_plots=not args.no_plots)
-
-            if results_all and args.export_csv:
-                pipeline_all.export_results_to_csv(
-                    results_all, "all_scores_analysis.csv"
-                )
-
-            # Analysis 2: Only scores 0 and 100
-            print("\n📊 Analysis 2: PCK scores 0 and 100 only")
-            print("-" * 40)
-            pipeline_filtered = PCKBrightnessAnalysisPipeline(
-                args.dataset, score_groups=[0, 100]
-            )
-            results_filtered = pipeline_filtered.run_analysis(
-                save_plots=not args.no_plots
-            )
-
-            if results_filtered and args.export_csv:
-                pipeline_filtered.export_results_to_csv(
-                    results_filtered, "scores_0_100_analysis.csv"
-                )
-
-            print("\n" + "=" * 60)
-            print("🎯 Demo Summary:")
-            print(
-                f"   Analysis 1 (All scores): {'✅ Completed' if results_all else '❌ Failed'}"
-            )
-            print(
-                f"   Analysis 2 (Scores 0,100): {'✅ Completed' if results_filtered else '❌ Failed'}"
-            )
-            print("=" * 60)
-
-        else:
-            # Regular mode: Use command line arguments
-            pipeline = PCKBrightnessAnalysisPipeline(args.dataset, args.scores)
-            results = pipeline.run_analysis(save_plots=not args.no_plots)
-
-            if results and args.export_csv:
-                pipeline.export_results_to_csv(results)
-
-        print("\n✅ Script completed successfully!")
-
-    except FileNotFoundError as e:
-        print(f"❌ Error: Required file not found - {e}")
-        sys.exit(1)
-    except ValueError as e:
-        print(f"❌ Error: Configuration issue - {e}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"❌ Unexpected error occurred: {e}")
-        import traceback
-
-        traceback.print_exc()
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()

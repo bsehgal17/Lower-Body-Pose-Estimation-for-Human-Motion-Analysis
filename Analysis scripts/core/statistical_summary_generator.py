@@ -15,7 +15,7 @@ from scipy import stats
 # Add the Analysis scripts directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from distribution_calculator import DistributionCalculator
+from core.distribution_calculator import DistributionCalculator
 
 
 class StatisticalSummaryGenerator:

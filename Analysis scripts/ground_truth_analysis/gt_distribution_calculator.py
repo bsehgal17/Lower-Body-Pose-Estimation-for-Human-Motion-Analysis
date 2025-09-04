@@ -26,7 +26,7 @@ class GTDistributionCalculator:
         self.analyzer = GTPCKBrightnessAnalyzer(dataset_name)
 
     def calculate_brightness_distributions_by_pck(
-        self, analysis_results: Dict, bin_size: int = 5, joint_name: str = None
+        self, analysis_results: Dict, bin_size: int = 2, joint_name: str = None
     ) -> Dict:
         """Calculate brightness distributions for each PCK score."""
         if "pck_data" not in analysis_results:

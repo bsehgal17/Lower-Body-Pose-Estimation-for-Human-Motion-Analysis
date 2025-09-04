@@ -18,12 +18,13 @@ import os
 class PCKBrightnessAnalyzer(BaseAnalyzer):
     """Analyzer for PCK score vs brightness distribution."""
 
-    def __init__(self, config, score_groups=None):
+    def __init__(self, config, score_groups=None, bin_size=5):
         """Initialize analyzer with configuration."""
         super().__init__(config)
         self.path_resolver = VideoPathResolver(config)
         self.frame_sync = FrameSynchronizer(config)
         self.score_groups = score_groups  # List of specific PCK scores to analyze
+        self.bin_size = bin_size  # Configurable bin size for brightness histogram
 
     def analyze(self, data: pd.DataFrame) -> Dict[str, Any]:
         """
@@ -160,13 +161,42 @@ class PCKBrightnessAnalyzer(BaseAnalyzer):
             "frame_counts": [],
             "brightness_stats": {},
             "raw_data": pck_brightness_data,
+            "bin_size": self.bin_size,
         }
 
-        # Define brightness bins (0-255 in steps of 5)
-        brightness_bins = np.arange(0, 256, 5)
+        # Find the extreme brightness values in the data
+        all_brightness_values = []
+        for brightness_list in pck_brightness_data.values():
+            all_brightness_values.extend(brightness_list)
+
+        if not all_brightness_values:
+            print(f"Warning: No brightness values found for {pck_column}")
+            return analysis_results
+
+        min_brightness = min(all_brightness_values)
+        max_brightness = max(all_brightness_values)
+
+        # Extend range to extreme values beyond the data range
+        # Add padding of 20% on each side to capture extreme values
+        brightness_range = max_brightness - min_brightness
+        padding = max(brightness_range * 0.2, 50)  # At least 50 units padding
+
+        extended_min = max(0, min_brightness - padding)  # Don't go below 0
+        extended_max = min(
+            500, max_brightness + padding
+        )  # Cap at 500 for extreme brightness
+
+        # Create brightness bins using configurable bin size
+        brightness_bins = np.arange(
+            extended_min, extended_max + self.bin_size, self.bin_size
+        )
 
         print(f"\nAnalyzing brightness distribution for {pck_column}:")
         print(f"Found {len(pck_brightness_data)} unique PCK scores")
+        print(f"Brightness range: {min_brightness:.1f} - {max_brightness:.1f}")
+        print(f"Extended range: {extended_min:.1f} - {extended_max:.1f}")
+        print(f"Bin size: {self.bin_size}")
+        print(f"Number of bins: {len(brightness_bins) - 1}")
 
         for pck_score in sorted(pck_brightness_data.keys()):
             brightness_values = pck_brightness_data[pck_score]

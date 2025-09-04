@@ -1,5 +1,5 @@
 """
-Simple Statistical Analysis Script
+Statistical Analysis Script
 
 Runs statistical analyses (ANOVA, bin analysis) on PCK and brightness data.
 Focus: Statistical testing only.
@@ -18,8 +18,8 @@ from typing import Optional, Dict, Any
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
-class SimpleStatisticalAnalyzer:
-    """Simple statistical analyzer for PCK data."""
+class StatisticalAnalyzer:
+    """Statistical analyzer for PCK data."""
 
     def __init__(self, dataset_name: str):
         """Initialize with dataset name."""
@@ -60,39 +60,6 @@ class SimpleStatisticalAnalyzer:
             print(f"❌ Error in ANOVA analysis: {e}")
             return None
 
-    def run_bin_analysis(self) -> Optional[Dict[str, Any]]:
-        """Run bin analysis on per-frame data."""
-        print(f"Running bin analysis for {self.dataset_name}...")
-        print("=" * 50)
-
-        # Load per-frame data
-        per_frame_data = self.data_processor.load_pck_per_frame_scores()
-        if per_frame_data is None:
-            print("❌ Cannot load per-frame data")
-            return None
-
-        try:
-            # Create bin analyzer
-            from analyzers import AnalyzerFactory
-
-            bin_analyzer = AnalyzerFactory.create_analyzer("bin_analysis", self.config)
-
-            # Run analysis for brightness metric
-            print("Running bin analysis for brightness metric...")
-            results = bin_analyzer.analyze(per_frame_data, "brightness")
-
-            if results:
-                print("✅ Bin analysis completed")
-                self._print_bin_summary(results)
-            else:
-                print("❌ Bin analysis failed")
-
-            return results
-
-        except Exception as e:
-            print(f"❌ Error in bin analysis: {e}")
-            return None
-
     def run_all_statistical_analyses(self) -> Dict[str, Any]:
         """Run all available statistical analyses."""
         print(f"Running all statistical analyses for {self.dataset_name}...")
@@ -105,19 +72,9 @@ class SimpleStatisticalAnalyzer:
         if anova_results:
             all_results["anova"] = anova_results
 
-        print("\n" + "-" * 60 + "\n")
-
-        # Run bin analysis
-        bin_results = self.run_bin_analysis()
-        if bin_results:
-            all_results["bin_analysis"] = bin_results
-
         print("\n" + "=" * 60)
         print("Statistical Analysis Summary:")
         print(f"  • ANOVA: {'✅ Completed' if 'anova' in all_results else '❌ Failed'}")
-        print(
-            f"  • Bin Analysis: {'✅ Completed' if 'bin_analysis' in all_results else '❌ Failed'}"
-        )
 
         return all_results
 
@@ -135,21 +92,6 @@ class SimpleStatisticalAnalyzer:
             print("\n  F-statistics:")
             for pck_col, f_stat in results["f_statistics"].items():
                 print(f"    {pck_col}: F = {f_stat:.4f}")
-
-    def _print_bin_summary(self, results: Dict[str, Any]):
-        """Print bin analysis summary."""
-        print("\n📊 Bin Analysis Summary:")
-        print("-" * 40)
-
-        if "chi2_stats" in results:
-            for pck_col, chi2_stat in results["chi2_stats"].items():
-                print(f"  {pck_col}: Chi-square = {chi2_stat:.4f}")
-
-        if "p_values" in results:
-            print("\n  P-values:")
-            for pck_col, p_value in results["p_values"].items():
-                significance = "significant" if p_value < 0.05 else "not significant"
-                print(f"    {pck_col}: p = {p_value:.6f} ({significance})")
 
     def export_statistical_results(self, results: Dict[str, Any], filename: str = None):
         """Export statistical results to CSV."""
@@ -228,53 +170,3 @@ class SimpleStatisticalAnalyzer:
                     else "ns"
                 )
                 print(f"  {pck_col}: p = {p_value:.6f} {significance}")
-
-
-def main():
-    """Main function for command-line usage."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Simple Statistical Analyzer")
-    parser.add_argument("dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
-    parser.add_argument(
-        "--type",
-        choices=["anova", "bin", "all"],
-        default="all",
-        help="Type of statistical analysis",
-    )
-    parser.add_argument("--export", action="store_true", help="Export results to CSV")
-    parser.add_argument(
-        "--compare", action="store_true", help="Compare results across PCK thresholds"
-    )
-
-    args = parser.parse_args()
-
-    try:
-        analyzer = SimpleStatisticalAnalyzer(args.dataset)
-
-        # Run analyses based on type
-        if args.type == "anova":
-            results = {"anova": analyzer.run_anova_analysis()}
-        elif args.type == "bin":
-            results = {"bin_analysis": analyzer.run_bin_analysis()}
-        else:  # all
-            results = analyzer.run_all_statistical_analyses()
-
-        # Export if requested
-        if args.export and results:
-            analyzer.export_statistical_results(results)
-
-        # Compare thresholds if requested
-        if args.compare and results:
-            analyzer.compare_pck_thresholds(results)
-
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        import traceback
-
-        traceback.print_exc()
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()

@@ -10,7 +10,6 @@ class AnalyzerFactory:
 
     _analyzers = {
         "anova": "analyzers.anova_analyzer.ANOVAAnalyzer",
-        "bin_analysis": "analyzers.bin_analyzer.BinAnalyzer",
         "pck_brightness": "analyzers.pck_brightness_analyzer.PCKBrightnessAnalyzer",
     }
 
@@ -33,9 +32,11 @@ class AnalyzerFactory:
         module = importlib.import_module(module_name)
         analyzer_class = getattr(module, class_name)
 
-        # Special handling for PCK brightness analyzer with score groups
-        if analyzer_type == "pck_brightness" and "score_groups" in kwargs:
-            return analyzer_class(config, score_groups=kwargs["score_groups"])
+        # Special handling for PCK brightness analyzer with score groups and bin size
+        if analyzer_type == "pck_brightness":
+            score_groups = kwargs.get("score_groups", None)
+            bin_size = kwargs.get("bin_size", 5)  # Default bin size
+            return analyzer_class(config, score_groups=score_groups, bin_size=bin_size)
 
         return analyzer_class(config)
 

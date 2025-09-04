@@ -1,5 +1,5 @@
 """
-Simple Brightness Analyzer Script
+Brightness Analyzer Script
 
 Analyzes brightness distribution for specific PCK scores.
 Focus: PCK brightness analysis only.
@@ -16,36 +16,45 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from config import ConfigManager
 
 # from analyzers import AnalyzerFactory
-from simple_pck_loader import SimplePCKDataLoader
+from pck_loader import PCKDataLoader
 
 
-class SimpleBrightnessAnalyzer:
-    """Simple brightness analyzer for PCK scores."""
+class BrightnessAnalyzer:
+    """Brightness analyzer for PCK scores."""
 
-    def __init__(self, dataset_name: str, score_groups: Optional[List[int]] = None):
+    def __init__(
+        self,
+        dataset_name: str,
+        score_groups: Optional[List[int]] = None,
+        bin_size: int = None,
+    ):
         """Initialize with dataset name and optional score groups."""
         self.dataset_name = dataset_name
         self.score_groups = score_groups
         self.config = ConfigManager.load_config(dataset_name)
-        self.data_loader = SimplePCKDataLoader(dataset_name)
+        self.data_loader = PCKDataLoader(dataset_name)
 
-        # Create analyzer with score groups if specified
+        # Get bin size from config if not provided
+        if bin_size is None:
+            bin_size = self.config.get_analysis_bin_size("pck_brightness", default=5)
+        self.bin_size = bin_size
+
+        # Create analyzer with score groups and bin size
         from analyzers import AnalyzerFactory
 
-        if score_groups:
-            self.analyzer = AnalyzerFactory.create_analyzer(
-                "pck_brightness", self.config, score_groups=score_groups
-            )
-        else:
-            self.analyzer = AnalyzerFactory.create_analyzer(
-                "pck_brightness", self.config
-            )
+        self.analyzer = AnalyzerFactory.create_analyzer(
+            "pck_brightness",
+            self.config,
+            score_groups=score_groups,
+            bin_size=self.bin_size,
+        )
 
     def analyze_brightness_distribution(self) -> Optional[Dict[str, Any]]:
         """Run brightness distribution analysis."""
         print(f"Analyzing brightness distribution for {self.dataset_name}...")
         if self.score_groups:
             print(f"Filtering to PCK scores: {self.score_groups}")
+        print(f"Using bin size: {self.bin_size}")
         print("=" * 60)
 
         # Load per-frame data
@@ -169,49 +178,3 @@ class SimpleBrightnessAnalyzer:
         os.makedirs(self.config.save_folder, exist_ok=True)
         df.to_csv(output_path, index=False)
         print(f"✅ Summary exported to: {output_path}")
-
-
-def main():
-    """Main function for command-line usage."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Simple Brightness Analyzer")
-    parser.add_argument("dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
-    parser.add_argument("--pck-score", type=int, help="Analyze specific PCK score")
-    parser.add_argument("--pck-column", help="Specific PCK column to analyze")
-    parser.add_argument(
-        "--score-groups",
-        nargs="+",
-        type=int,
-        help="Specific PCK scores to include in analysis (e.g., --score-groups 0 25 50 75 100)",
-    )
-    parser.add_argument("--export", action="store_true", help="Export summary to CSV")
-
-    args = parser.parse_args()
-
-    try:
-        # Create analyzer with optional score groups
-        analyzer = SimpleBrightnessAnalyzer(
-            args.dataset, score_groups=args.score_groups
-        )
-
-        if args.pck_score is not None:
-            # Analyze specific PCK score
-            analyzer.analyze_specific_pck_score(args.pck_score, args.pck_column)
-        else:
-            # Run full analysis
-            results = analyzer.analyze_brightness_distribution()
-
-            if results and args.export:
-                analyzer.export_summary_to_csv(results)
-
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        import traceback
-
-        traceback.print_exc()
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()

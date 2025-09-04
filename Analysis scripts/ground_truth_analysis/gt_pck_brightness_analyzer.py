@@ -15,8 +15,8 @@ from typing import List, Dict
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from gt_data_loader import GroundTruthDataLoader
-from joint_brightness_extractor import JointBrightnessExtractor
-from simple_pck_loader import SimplePCKDataLoader
+from joint_analysis.joint_brightness_extractor import JointBrightnessExtractor
+from simple_analysis.pck_loader import PCKDataLoader
 
 
 class GTPCKBrightnessAnalyzer:
@@ -27,7 +27,7 @@ class GTPCKBrightnessAnalyzer:
         self.dataset_name = dataset_name
         self.gt_loader = GroundTruthDataLoader(dataset_name)
         self.brightness_extractor = JointBrightnessExtractor(dataset_name)
-        self.pck_loader = SimplePCKDataLoader(dataset_name)
+        self.pck_loader = PCKDataLoader(dataset_name)
 
     def analyze_pck_brightness_correlation(
         self,

@@ -12,12 +12,6 @@ def _get_anova_analyzer():
     return ANOVAAnalyzer
 
 
-def _get_bin_analyzer():
-    from .bin_analyzer import BinAnalyzer
-
-    return BinAnalyzer
-
-
 def _get_pck_brightness_analyzer():
     from .pck_brightness_analyzer import PCKBrightnessAnalyzer
 
@@ -37,8 +31,6 @@ module = sys.modules[__name__]
 def __getattr__(name):
     if name == "ANOVAAnalyzer":
         return _get_anova_analyzer()
-    elif name == "BinAnalyzer":
-        return _get_bin_analyzer()
     elif name == "PCKBrightnessAnalyzer":
         return _get_pck_brightness_analyzer()
     elif name == "AnalyzerFactory":
@@ -49,7 +41,6 @@ def __getattr__(name):
 
 __all__ = [
     "ANOVAAnalyzer",
-    "BinAnalyzer",
     "PCKBrightnessAnalyzer",
     "AnalyzerFactory",
 ]

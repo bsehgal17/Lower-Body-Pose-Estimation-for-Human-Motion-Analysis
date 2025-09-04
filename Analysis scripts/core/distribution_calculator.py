@@ -1,8 +1,8 @@
 """
-Distribution Calculator Script
+Distribution Calculator Module
 
-Calculates normalized frequency distributions for brightness values.
-Focus: Statistical distribution calculations only.
+Provides the DistributionCalculator class for calculating normalized frequency
+distributions for brightness values across different PCK scores.
 """
 
 import sys
@@ -14,7 +14,7 @@ from typing import List, Dict
 # Add the Analysis scripts directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from brightness_extractor import BrightnessExtractor
+from core.brightness_extractor import BrightnessExtractor
 
 
 class DistributionCalculator:
@@ -274,58 +274,3 @@ class DistributionCalculator:
 
         print(f"✅ Distributions exported to: {output_path}")
         return output_path
-
-
-def main():
-    """Main function for command-line usage."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Distribution Calculator")
-    parser.add_argument("dataset", help="Dataset name (e.g., 'movi', 'humaneva')")
-    parser.add_argument("scores", nargs="+", type=int, help="PCK scores to analyze")
-    parser.add_argument("--threshold", help="Specific PCK threshold to analyze")
-    parser.add_argument("--bin-size", type=int, default=5, help="Brightness bin size")
-    parser.add_argument(
-        "--export", action="store_true", help="Export distributions to CSV"
-    )
-    parser.add_argument("--compare", action="store_true", help="Compare distributions")
-    parser.add_argument("--table", action="store_true", help="Show distribution table")
-
-    args = parser.parse_args()
-
-    try:
-        calculator = DistributionCalculator(args.dataset)
-
-        # Calculate distributions
-        distributions = calculator.calculate_distributions_for_scores(
-            args.scores, args.threshold, args.bin_size
-        )
-
-        if not distributions:
-            print("❌ No distributions calculated")
-            sys.exit(1)
-
-        # Compare distributions
-        if args.compare:
-            calculator.compare_distributions(distributions)
-
-        # Show distribution table
-        if args.table:
-            table = calculator.create_distribution_table(distributions)
-            print("\n📋 Distribution Summary Table:")
-            print(table.to_string(index=False, float_format="%.2f"))
-
-        # Export distributions
-        if args.export:
-            calculator.export_distributions(distributions)
-
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        import traceback
-
-        traceback.print_exc()
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()

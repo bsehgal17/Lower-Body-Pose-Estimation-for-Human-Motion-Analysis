@@ -45,7 +45,6 @@ project_root/
 │   ├── ground_truth_analysis/ # GT data analysis
 │   ├── simple_analysis/    # Simple analysis workflows
 │   ├── pck_analysis/       # PCK-specific analysis
-│   ├── plotting/           # Plot creation utilities
 │   ├── config_yamls/       # YAML configurations
 │   └── analysis_main.py    # Analysis pipeline entry point
 ├── cli.py                  # CLI parser
@@ -104,7 +103,6 @@ The `Analysis scripts/` directory contains a well-organized, modular analysis sy
 - `anova_analyzer.py` - ANOVA statistical testing
 - `bin_analyzer.py` - Bin-based statistical analysis
 - `pck_brightness_analyzer.py` - PCK-brightness correlation analysis
-- `pck_frame_count_analyzer.py` - PCK score frame counting
 - `analyzer_factory.py` - Factory for creating analyzers
 
 **Visualizers (`visualizers/`)**
@@ -132,14 +130,12 @@ The `Analysis scripts/` directory contains a well-organized, modular analysis sy
 **Orchestrators (`orchestrators/`)**
 - `joint_analysis_orchestrator.py` - Coordinates joint-specific analysis workflows
 - `master_gt_orchestrator.py` - Master ground truth analysis coordinator
-- `master_orchestrator.py` - General master workflow coordinator
 
 **Specialized Analysis (`joint_analysis/`, `ground_truth_analysis/`, etc.)**
 - **Joint Analysis** - Joint-specific brightness extraction and analysis
 - **Ground Truth Analysis** - GT data loading, distribution calculation, and visualization
 - **Simple Analysis** - Simplified analysis workflows for quick results
 - **PCK Analysis** - PCK-specific analysis and filtering tools
-- **Plotting** - Specialized plotting utilities and distribution calculators
 
 #### **Configuration and Utils**
 

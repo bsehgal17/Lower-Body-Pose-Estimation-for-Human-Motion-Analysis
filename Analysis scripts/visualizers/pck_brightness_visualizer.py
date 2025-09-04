@@ -28,7 +28,7 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
         self, analysis_results: Dict[str, Any], save_path: str = None, **kwargs
     ):
         """
-        Create line plots for PCK brightness distribution.
+        Create brightness frequency plots for PCK brightness distribution.
 
         Args:
             analysis_results: Results from PCKBrightnessAnalyzer
@@ -36,23 +36,21 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
             **kwargs: Additional plotting parameters
         """
         print("\n" + "=" * 50)
-        print("Creating PCK Brightness Distribution Plots...")
+        print("Creating PCK Brightness Frequency Plots...")
 
         if not analysis_results:
             print("No analysis results provided for visualization.")
             return
 
-        # Create plots for each PCK threshold
+        # Create brightness frequency plots for each PCK threshold
         for pck_column, results in analysis_results.items():
             if not results or "pck_scores" not in results:
                 print(f"Skipping {pck_column} - no valid results")
                 continue
 
             self._create_brightness_frequency_plot(results, pck_column, save_path)
-            self._create_brightness_statistics_plot(results, pck_column, save_path)
-            self._create_frame_count_plot(results, pck_column, save_path)
 
-        print("✅ All PCK brightness distribution plots created successfully")
+        print("✅ All PCK brightness frequency plots created successfully")
         print("=" * 50)
 
     def _create_brightness_frequency_plot(
@@ -121,136 +119,6 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
         plt.close()
 
         print(f"✅ Brightness frequency plot saved: {final_path}")
-
-    def _create_brightness_statistics_plot(
-        self, results: Dict[str, Any], pck_column: str, save_path: str
-    ):
-        """Create plot showing brightness statistics (mean, std) for each PCK score."""
-        pck_scores = results["pck_scores"]
-        brightness_stats = results["brightness_stats"]
-
-        if not pck_scores or not brightness_stats:
-            return
-
-        # Extract statistics
-        means = [brightness_stats[pck]["mean"] for pck in pck_scores]
-        stds = [brightness_stats[pck]["std"] for pck in pck_scores]
-        medians = [brightness_stats[pck]["median"] for pck in pck_scores]
-
-        plt.figure(figsize=(12, 8))
-
-        # Create subplot
-        plt.subplot(2, 1, 1)
-        plt.plot(
-            pck_scores,
-            means,
-            "o-",
-            linewidth=2,
-            markersize=6,
-            label="Mean",
-            color="blue",
-        )
-        plt.plot(
-            pck_scores,
-            medians,
-            "s-",
-            linewidth=2,
-            markersize=6,
-            label="Median",
-            color="red",
-        )
-        plt.fill_between(
-            pck_scores,
-            [m - s for m, s in zip(means, stds)],
-            [m + s for m, s in zip(means, stds)],
-            alpha=0.2,
-            color="blue",
-            label="±1 Std Dev",
-        )
-        plt.title(f"Brightness Statistics by PCK Score\n({pck_column})", fontsize=14)
-        plt.xlabel("PCK Score", fontsize=12)
-        plt.ylabel("Brightness Level", fontsize=12)
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-
-        # Second subplot for standard deviation
-        plt.subplot(2, 1, 2)
-        plt.plot(pck_scores, stds, "o-", linewidth=2, markersize=6, color="green")
-        plt.title("Brightness Standard Deviation by PCK Score", fontsize=14)
-        plt.xlabel("PCK Score", fontsize=12)
-        plt.ylabel("Standard Deviation", fontsize=12)
-        plt.grid(True, alpha=0.3)
-
-        plt.tight_layout()
-
-        # Save plot
-        if save_path:
-            final_path = os.path.join(
-                self.config.save_folder,
-                f"{save_path}_{pck_column}_brightness_stats.svg",
-            )
-        else:
-            final_path = os.path.join(
-                self.config.save_folder, f"{pck_column}_brightness_stats.svg"
-            )
-
-        plt.savefig(final_path, dpi=300, bbox_inches="tight", format="svg")
-        plt.close()
-
-        print(f"✅ Brightness statistics plot saved: {final_path}")
-
-    def _create_frame_count_plot(
-        self, results: Dict[str, Any], pck_column: str, save_path: str
-    ):
-        """Create plot showing frame counts for each PCK score."""
-        pck_scores = results["pck_scores"]
-        frame_counts = results["frame_counts"]
-
-        if not pck_scores or not frame_counts:
-            return
-
-        plt.figure(figsize=(12, 6))
-
-        # Create bar plot
-        bars = plt.bar(
-            pck_scores, frame_counts, alpha=0.7, color="skyblue", edgecolor="navy"
-        )
-
-        # Add value labels on bars
-        for bar, count in zip(bars, frame_counts):
-            plt.text(
-                bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + max(frame_counts) * 0.01,
-                str(count),
-                ha="center",
-                va="bottom",
-                fontsize=10,
-            )
-
-        plt.title(f"Frame Count Distribution by PCK Score\n({pck_column})", fontsize=14)
-        plt.xlabel("PCK Score", fontsize=12)
-        plt.ylabel("Number of Frames", fontsize=12)
-        plt.grid(True, alpha=0.3, axis="y")
-
-        # Set x-axis to show all PCK scores
-        plt.xticks(pck_scores)
-
-        plt.tight_layout()
-
-        # Save plot
-        if save_path:
-            final_path = os.path.join(
-                self.config.save_folder, f"{save_path}_{pck_column}_frame_counts.svg"
-            )
-        else:
-            final_path = os.path.join(
-                self.config.save_folder, f"{pck_column}_frame_counts.svg"
-            )
-
-        plt.savefig(final_path, dpi=300, bbox_inches="tight", format="svg")
-        plt.close()
-
-        print(f"✅ Frame count plot saved: {final_path}")
 
     def create_combined_summary_plot(
         self, analysis_results: Dict[str, Any], save_path: str = None
