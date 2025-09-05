@@ -28,7 +28,7 @@ enhancement:
   clahe:
     clip_limit: 4.0  # Higher clip limit for stronger contrast enhancement
     tile_grid_size: [16, 16]  # Larger grid for more localized adaptation
-    color_space: LAB  # Options: LAB, RGB, HSV
+    color_space: HSV  # Options: LAB, RGB, HSV
   
   # Processing settings
   processing:

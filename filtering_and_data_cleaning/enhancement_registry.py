@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 
 from .clahe_enhancement import CLAHEEnhancer
+from .gamma_enhancement import GammaEnhancer
 
 logger = logging.getLogger(__name__)
 
@@ -227,12 +228,42 @@ def apply_brightness_adjustment(
         return False
 
 
+def apply_gamma_correction(
+    video_path: Union[str, Path], output_path: Union[str, Path], **kwargs
+) -> bool:
+    """
+    Apply gamma correction to a video file.
+
+    Args:
+        video_path: Path to input video
+        output_path: Path to output enhanced video
+        **kwargs: gamma parameters (gamma, color_space)
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    gamma = kwargs.get("gamma")
+    color_space = kwargs.get("color_space", "BGR")
+
+    if gamma is None:
+        raise ValueError("Gamma correction requires gamma parameter")
+
+    enhancer = GammaEnhancer(gamma=gamma)
+
+    return enhancer.enhance_video(
+        input_path=Path(video_path),
+        output_path=Path(output_path),
+        color_space=color_space,
+    )
+
+
 # Enhancement function registry
 ENHANCEMENT_FN_MAP: Dict[str, Callable] = {
     "clahe": apply_clahe_enhancement,
     "histogram_eq": apply_histogram_equalization,
     "gaussian_blur": apply_gaussian_blur,
     "brightness_adjustment": apply_brightness_adjustment,
+    "gamma_correction": apply_gamma_correction,
 }
 
 

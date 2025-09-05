@@ -55,7 +55,7 @@ class EnhancementPipeline:
         Args:
             input_dir: Directory containing input videos
             output_dir: Directory to save enhanced videos
-            enhancement_type: Type of enhancement ('clahe', 'histogram_eq', etc.)
+            enhancement_type: Type of enhancement ('clahe', 'histogram_eq', 'gamma_correction', etc.)
 
         Returns:
             bool: True if processing successful, False otherwise
@@ -171,6 +171,17 @@ class EnhancementPipeline:
             else:
                 raise ValueError(
                     "Gaussian blur requires 'blur' section in configuration"
+                )
+
+        elif enhancement_type == "gamma_correction":
+            if hasattr(self.enhancement_config, "gamma"):
+                params["gamma"] = self.enhancement_config.gamma.gamma
+                params["color_space"] = getattr(
+                    self.enhancement_config.gamma, "color_space", "BGR"
+                )
+            else:
+                raise ValueError(
+                    "Gamma correction requires 'gamma' section in configuration"
                 )
 
         # histogram_eq doesn't need parameters
@@ -602,7 +613,7 @@ def run_enhancement_pipeline(
         global_config: Global configuration
         input_dir: Input directory containing videos
         output_dir: Output directory for enhanced videos
-        enhancement_type: Type of enhancement ('clahe', 'histogram_eq')
+        enhancement_type: Type of enhancement ('clahe', 'histogram_eq', 'gamma_correction')
         dataset_structure: Whether to process as structured dataset
         create_comparison_images: Whether to create before/after comparison images
 

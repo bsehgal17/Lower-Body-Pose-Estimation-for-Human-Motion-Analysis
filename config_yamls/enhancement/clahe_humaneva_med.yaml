@@ -28,7 +28,7 @@ enhancement:
   clahe:
     clip_limit: 2.8  # Moderate-high clip limit for detailed enhancement
     tile_grid_size: [20, 20]  # Ultra fine 20x20 grid for maximum local detail
-    color_space: LAB  # LAB color space for perceptually uniform enhancement
+    color_space: HSV  # LAB color space for perceptually uniform enhancement
   
   # Processing settings
   processing:

@@ -77,6 +77,7 @@ class PipelineConfig:
             CLAHEConfig,
             BrightnessConfig,
             BlurConfig,
+            GammaConfig,
             EnhancementProcessingConfig,
         )
 
@@ -93,6 +94,10 @@ class PipelineConfig:
         if "blur" in enhancement_data:
             blur = BlurConfig(**enhancement_data["blur"])
 
+        gamma = None
+        if "gamma" in enhancement_data:
+            gamma = GammaConfig(**enhancement_data["gamma"])
+
         processing = None
         if "processing" in enhancement_data:
             processing = EnhancementProcessingConfig(**enhancement_data["processing"])
@@ -102,6 +107,7 @@ class PipelineConfig:
             clahe=clahe,
             brightness=brightness,
             blur=blur,
+            gamma=gamma,
             processing=processing,
         )
 

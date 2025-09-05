@@ -28,6 +28,21 @@ class BlurConfig:
 
 
 @dataclass
+class GammaConfig:
+    """Configuration for gamma correction enhancement."""
+
+    gamma: float
+    color_space: str = "BGR"
+    input_dir: Optional[str] = None
+    output_dir: Optional[str] = None
+    file_extensions: List[str] = None
+
+    def __post_init__(self):
+        if self.file_extensions is None:
+            self.file_extensions = [".mp4", ".avi", ".mov", ".mkv"]
+
+
+@dataclass
 class EnhancementProcessingConfig:
     """Configuration for enhancement processing settings."""
 
@@ -44,4 +59,5 @@ class EnhancementConfig:
     clahe: Optional[CLAHEConfig] = None
     brightness: Optional[BrightnessConfig] = None
     blur: Optional[BlurConfig] = None
+    gamma: Optional[GammaConfig] = None
     processing: Optional[EnhancementProcessingConfig] = None

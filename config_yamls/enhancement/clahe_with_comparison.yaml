@@ -29,7 +29,7 @@ enhancement:
   clahe:
     clip_limit: 2.0  # Contrast limit for adaptive histogram equalization
     tile_grid_size: [8, 8]  # Grid size for local histogram equalization
-    color_space: LAB  # Color space: LAB (recommended), RGB, HSV
+    color_space: HSV  # Color space: LAB (recommended), RGB, HSV
   
   # Processing settings
   processing:

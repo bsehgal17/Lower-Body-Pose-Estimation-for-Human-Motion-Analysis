@@ -28,7 +28,7 @@ enhancement:
   clahe:
     clip_limit: 1.5  # Lower clip limit for more conservative enhancement
     tile_grid_size: [4, 4]  # Smaller grid for broader local adaptation
-    color_space: LAB  # Options: LAB, RGB, HSV
+    color_space: HSV  # Options: LAB, RGB, HSV
   
   # Brightness adjustment settings (required when type is brightness_adjustment)
   # brightness:

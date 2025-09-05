@@ -82,7 +82,7 @@ def parse_main_args(argv: Optional[List[str]] = None):
     parser_enhance = subparsers.add_parser(
         "enhance",
         parents=[common_parser],
-        help="Apply video enhancement (CLAHE, histogram equalization, etc.)",
+        help="Apply video enhancement (CLAHE, histogram equalization, gamma correction, etc.)",
     )
     parser_enhance.add_argument(
         "--input_folder",
@@ -97,7 +97,13 @@ def parse_main_args(argv: Optional[List[str]] = None):
     parser_enhance.add_argument(
         "--type",
         type=str,
-        choices=["clahe", "histogram_eq", "gaussian_blur", "brightness_adjustment"],
+        choices=[
+            "clahe",
+            "histogram_eq",
+            "gaussian_blur",
+            "brightness_adjustment",
+            "gamma_correction",
+        ],
         required=False,
         help="Type of enhancement to apply (optional if specified in config)",
     )
