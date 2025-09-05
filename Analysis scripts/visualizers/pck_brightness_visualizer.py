@@ -21,8 +21,17 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
         super().__init__(config)
 
         # Set style for better plots
-        plt.style.use("seaborn-v0_8")
-        sns.set_palette("husl")
+        try:
+            plt.style.use("seaborn-v0_8")
+        except Exception:
+            # Fallback to default style if seaborn style is not available
+            print("Warning: seaborn-v0_8 style not available, using default style")
+            plt.style.use("default")
+        
+        try:
+            sns.set_palette("husl")
+        except Exception:
+            print("Warning: Could not set seaborn palette")
 
     def create_plot(
         self, analysis_results: Dict[str, Any], save_path: str = None, **kwargs
@@ -44,10 +53,16 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
 
         # Create brightness frequency plots for each PCK threshold
         for pck_column, results in analysis_results.items():
+            print(f"Processing {pck_column}...")
             if not results or "pck_scores" not in results:
                 print(f"Skipping {pck_column} - no valid results")
+                print(f"   Results: {results}")
                 continue
 
+            print(f"Found valid results for {pck_column}")
+            print(f"   PCK scores: {results.get('pck_scores', [])}")
+            print(f"   Bin size: {results.get('bin_size', 'not found')}")
+            
             self._create_brightness_frequency_plot(
                 results, pck_column, save_path)
 
@@ -64,6 +79,8 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
 
         if not pck_scores:
             print(f"No PCK scores found for {pck_column}")
+            print(f"   Results keys: {list(results.keys())}")
+            print(f"   Results content: {results}")
             return
 
         plt.figure(figsize=(14, 8))
@@ -121,21 +138,25 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
         plt.tight_layout()
 
         # Save plot
-        if save_path:
-            final_path = os.path.join(
-                self.config.save_folder,
-                f"{save_path}_{pck_column}_brightness_frequency.svg",
-            )
-        else:
-            final_path = os.path.join(
-                self.config.save_folder, f"{pck_column}_brightness_frequency.svg"
-            )
+        try:
+            if save_path:
+                final_path = os.path.join(
+                    self.config.save_folder,
+                    f"{save_path}_{pck_column}_brightness_frequency.svg",
+                )
+            else:
+                final_path = os.path.join(
+                    self.config.save_folder, f"{pck_column}_brightness_frequency.svg"
+                )
 
-        os.makedirs(self.config.save_folder, exist_ok=True)
-        plt.savefig(final_path, dpi=300, bbox_inches="tight", format="svg")
-        plt.close()
+            os.makedirs(self.config.save_folder, exist_ok=True)
+            plt.savefig(final_path, dpi=300, bbox_inches="tight", format="svg")
+            plt.close()
 
-        print(f"[SAVED] Brightness frequency plot saved: {final_path}")
+            print(f"[SAVED] Brightness frequency plot saved: {final_path}")
+        except Exception as e:
+            print(f"❌ Error saving plot for {pck_column}: {e}")
+            plt.close()  # Still close the figure to prevent memory leaks
 
     def create_combined_summary_plot(
         self, analysis_results: Dict[str, Any], save_path: str = None

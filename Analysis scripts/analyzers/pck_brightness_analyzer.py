@@ -193,10 +193,16 @@ class PCKBrightnessAnalyzer(BaseAnalyzer):
 
         print(f"\nAnalyzing brightness distribution for {pck_column}:")
         print(f"Found {len(pck_brightness_data)} unique PCK scores")
+
+        if not pck_brightness_data:
+            print("No PCK brightness data available")
+            return analysis_results
+
         print(f"Brightness range: {min_brightness:.1f} - {max_brightness:.1f}")
         print(f"Extended range: {extended_min:.1f} - {extended_max:.1f}")
         print(f"Bin size: {self.bin_size}")
         print(f"Number of bins: {len(brightness_bins) - 1}")
+        print(f"Available PCK scores: {sorted(pck_brightness_data.keys())}")
 
         for pck_score in sorted(pck_brightness_data.keys()):
             brightness_values = pck_brightness_data[pck_score]
@@ -266,6 +272,7 @@ class PCKBrightnessAnalyzer(BaseAnalyzer):
             "frame_counts": [],
             "brightness_stats": {},
             "raw_data": {},
+            "bin_size": analysis_results.get("bin_size", self.bin_size),
         }
 
         print(f"Filtering to include only PCK scores: {target_scores}")
