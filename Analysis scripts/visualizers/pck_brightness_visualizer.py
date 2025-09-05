@@ -27,7 +27,7 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
             # Fallback to default style if seaborn style is not available
             print("Warning: seaborn-v0_8 style not available, using default style")
             plt.style.use("default")
-        
+
         try:
             sns.set_palette("husl")
         except Exception:
@@ -62,9 +62,8 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
             print(f"Found valid results for {pck_column}")
             print(f"   PCK scores: {results.get('pck_scores', [])}")
             print(f"   Bin size: {results.get('bin_size', 'not found')}")
-            
-            self._create_brightness_frequency_plot(
-                results, pck_column, save_path)
+
+            self._create_brightness_frequency_plot(results, pck_column, save_path)
 
         print("[COMPLETED] All PCK brightness frequency plots created successfully")
         print("=" * 50)
@@ -175,8 +174,7 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
                 continue
 
             pck_scores = results["pck_scores"]
-            means = [results["brightness_stats"][pck]["mean"]
-                     for pck in pck_scores]
+            means = [results["brightness_stats"][pck]["mean"] for pck in pck_scores]
 
             ax1.plot(pck_scores, means, "o-", linewidth=2, label=pck_column)
 
@@ -195,8 +193,7 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
             pck_scores = results["pck_scores"]
             frame_counts = results["frame_counts"]
 
-            ax2.plot(pck_scores, frame_counts, "o-",
-                     linewidth=2, label=pck_column)
+            ax2.plot(pck_scores, frame_counts, "o-", linewidth=2, label=pck_column)
 
         ax2.set_title("Frame Counts by PCK Score")
         ax2.set_xlabel("PCK Score")
@@ -211,8 +208,7 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
                 continue
 
             pck_scores = results["pck_scores"]
-            stds = [results["brightness_stats"][pck]["std"]
-                    for pck in pck_scores]
+            stds = [results["brightness_stats"][pck]["std"] for pck in pck_scores]
 
             ax3.plot(pck_scores, stds, "o-", linewidth=2, label=pck_column)
 
