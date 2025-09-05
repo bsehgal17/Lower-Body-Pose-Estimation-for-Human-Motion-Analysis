@@ -48,7 +48,8 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
                 print(f"Skipping {pck_column} - no valid results")
                 continue
 
-            self._create_brightness_frequency_plot(results, pck_column, save_path)
+            self._create_brightness_frequency_plot(
+                results, pck_column, save_path)
 
         print("[COMPLETED] All PCK brightness frequency plots created successfully")
         print("=" * 50)
@@ -86,7 +87,7 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
             )
 
         # Get bin size from results for display
-        bin_size = results.get("bin_size", "Unknown")
+        bin_size = results.get("bin_size", 2)
 
         plt.title(
             f"Brightness Distribution by PCK Score\n({pck_column}) - Bin Size: {bin_size}",
@@ -153,7 +154,8 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
                 continue
 
             pck_scores = results["pck_scores"]
-            means = [results["brightness_stats"][pck]["mean"] for pck in pck_scores]
+            means = [results["brightness_stats"][pck]["mean"]
+                     for pck in pck_scores]
 
             ax1.plot(pck_scores, means, "o-", linewidth=2, label=pck_column)
 
@@ -172,7 +174,8 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
             pck_scores = results["pck_scores"]
             frame_counts = results["frame_counts"]
 
-            ax2.plot(pck_scores, frame_counts, "o-", linewidth=2, label=pck_column)
+            ax2.plot(pck_scores, frame_counts, "o-",
+                     linewidth=2, label=pck_column)
 
         ax2.set_title("Frame Counts by PCK Score")
         ax2.set_xlabel("PCK Score")
@@ -187,7 +190,8 @@ class PCKBrightnessDistributionVisualizer(BaseVisualizer):
                 continue
 
             pck_scores = results["pck_scores"]
-            stds = [results["brightness_stats"][pck]["std"] for pck in pck_scores]
+            stds = [results["brightness_stats"][pck]["std"]
+                    for pck in pck_scores]
 
             ax3.plot(pck_scores, stds, "o-", linewidth=2, label=pck_column)
 

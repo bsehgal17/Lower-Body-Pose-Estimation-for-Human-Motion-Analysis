@@ -177,8 +177,9 @@ Examples:
         # Default: run joint analysis
         print("No analysis type specified. Running joint analysis by default.")
         print("Use --help to see all options.")
-        success = run_analysis_by_type(args.dataset, "joint")
         success = run_analysis_by_type(args.dataset, "multi")
+        success = run_analysis_by_type(args.dataset, "joint")
+
         if not success:
             sys.exit(1)
 
