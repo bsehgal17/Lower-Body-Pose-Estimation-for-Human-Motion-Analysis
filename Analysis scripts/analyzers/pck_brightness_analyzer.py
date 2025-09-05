@@ -18,7 +18,7 @@ import os
 class PCKBrightnessAnalyzer(BaseAnalyzer):
     """Analyzer for PCK score vs brightness distribution."""
 
-    def __init__(self, config, score_groups=None, bin_size=5):
+    def __init__(self, config, score_groups=None, bin_size=2):
         """Initialize analyzer with configuration."""
         super().__init__(config)
         self.path_resolver = VideoPathResolver(config)

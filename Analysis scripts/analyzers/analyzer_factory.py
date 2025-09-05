@@ -36,7 +36,7 @@ class AnalyzerFactory:
         # Special handling for PCK brightness analyzer with score groups and bin size
         if analyzer_type == "pck_brightness":
             score_groups = kwargs.get("score_groups", None)
-            bin_size = kwargs.get("bin_size", 5)  # Default bin size
+            bin_size = kwargs.get("bin_size")  # Default bin size
             return analyzer_class(config, score_groups=score_groups, bin_size=bin_size)
 
         # Special handling for joint brightness analyzer

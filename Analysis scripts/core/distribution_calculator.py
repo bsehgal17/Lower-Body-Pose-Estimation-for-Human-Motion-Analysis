@@ -26,7 +26,7 @@ class DistributionCalculator:
         self.brightness_extractor = BrightnessExtractor(dataset_name)
 
     def calculate_brightness_distribution(
-        self, brightness_values: List[float], bin_size: int = 5
+        self, brightness_values: List[float], bin_size: int
     ) -> Dict[str, any]:
         """Calculate normalized frequency distribution for brightness values."""
         if not brightness_values:
