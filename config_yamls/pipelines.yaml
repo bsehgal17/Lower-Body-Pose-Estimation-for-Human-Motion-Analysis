@@ -19,269 +19,54 @@ pipelines:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: clahe_hsv_10_8x8_humaneva
+
+  HumanEva Gamma Correction Study Pipelines - Different gamma configurations (COMMENTED OUT)
+  - name: gamma_conservative_humaneva
     steps:
       - command: enhance
-        config_file: "config_yamls/enhancement/clahe_hsv_10_8x8.yaml"
+        config_file: "config_yamls/enhancement/gamma_humaneva_conservative.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: clahe_hsv_10_16x16_humaneva
+  - name: gamma_moderate_humaneva
     steps:
       - command: enhance
-        config_file: "config_yamls/enhancement/clahe_hsv_10_16x16.yaml"
+        config_file: "config_yamls/enhancement/gamma_humaneva_moderate.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: clahe_hsv_15_8x8_humaneva
+  - name: gamma_aggressive_humaneva
     steps:
       - command: enhance
-        config_file: "config_yamls/enhancement/clahe_hsv_15_8x8.yaml"
+        config_file: "config_yamls/enhancement/gamma_humaneva_aggressive.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: clahe_hsv_15_16x16_humaneva
+  - name: gamma_darkening_humaneva
     steps:
       - command: enhance
-        config_file: "config_yamls/enhancement/clahe_hsv_15_16x16.yaml"
+        config_file: "config_yamls/enhancement/gamma_humaneva_darkening.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: clahe_hsv_20_16x16_humaneva
+  - name: gamma_fine_tuned_humaneva
     steps:
       - command: enhance
-        config_file: "config_yamls/enhancement/clahe_hsv_20_16x16.yaml"
+        config_file: "config_yamls/enhancement/gamma_humaneva_fine_tuned.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # New CLAHE Study Pipelines - YUV Color Space configurations
-  - name: clahe_yuv_05_8x8_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/clahe_yuv_05_8x8.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: clahe_yuv_05_16x16_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/clahe_yuv_05_16x16.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: clahe_yuv_10_8x8_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/clahe_yuv_10_8x8.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: clahe_yuv_10_16x16_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/clahe_yuv_10_16x16.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: clahe_yuv_15_8x8_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/clahe_yuv_15_8x8.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: clahe_yuv_15_16x16_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/clahe_yuv_15_16x16.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: clahe_yuv_20_16x16_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/clahe_yuv_20_16x16.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # HumanEva Gamma Correction Study Pipelines - Different gamma configurations (COMMENTED OUT)
-  # - name: gamma_conservative_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_conservative.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: gamma_moderate_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_moderate.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: gamma_aggressive_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_aggressive.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: gamma_darkening_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_darkening.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: gamma_fine_tuned_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_fine_tuned.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: clahe_rtmw_eval_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/clahe_with_comparison.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # HumanEva CLAHE Study Pipelines - Different CLAHE configurations (COMMENTED OUT)
-  # - name: clahe_conservative_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/clahe_humaneva_conservative.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: clahe_aggressive_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/clahe_humaneva_aggressive.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml" 
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: clahe_ultra_fine_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/clahe_humaneva_med.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: clahe_hsv_fine_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/clahe_humaneva_hsv_fine.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-
-  # - name: savgol_filter_pipeline_9_3(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_savgol_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  
-  # - name: savgol_filter_pipeline_15_2(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_savgol_11_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: savgol_filter_pipeline_13_5(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_savgol_31_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-
-  # - name: gaussian_filter_pipeline_3(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_gaussian_3_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: gaussian_filter_pipeline_1point5(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_gaussian_1_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: gaussian_filter_pipeline_2point5(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_gaussian_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: butterworth_2nd_order_4hz_pipeline(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_4th_8hz_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: butterworth_3th_order_6hz_pipeline(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_3nd_5hz_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: butterworth_5th_order_5hz_pipeline(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_2nd_1hz_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: gvcspl_filter_pipeline(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_gvcspl_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: fdf_pipeline(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_fdf_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: kalman_filter(20)
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_with_kalman_20.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+ 
 
   # - name: savgol_filter_pipeline_9_3(40)
   #   steps:
