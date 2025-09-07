@@ -41,14 +41,14 @@ class CLAHEEnhancer:
             f"tile_grid_size={tile_grid_size}"
         )
 
-    def enhance_frame(self, frame: np.ndarray, color_space: str = "LAB") -> np.ndarray:
+    def enhance_frame(self, frame: np.ndarray, color_space: str = "HSV") -> np.ndarray:
         """
         Apply CLAHE enhancement to a single frame.
 
         Args:
             frame (np.ndarray): Input frame in BGR color space
             color_space (str): Color space for CLAHE application ('LAB', 'HSV', 'YUV', 'GRAY')
-                              Default: 'LAB' (recommended for most cases)
+                              Default: 'HSV' (recommended for most cases)
 
         Returns:
             np.ndarray: Enhanced frame in BGR color space
@@ -232,7 +232,7 @@ def apply_clahe_to_frame(
     frame: np.ndarray,
     clip_limit: float = 2.0,
     tile_grid_size: Tuple[int, int] = (8, 8),
-    color_space: str = "LAB",
+    color_space: str = "HSV",
 ) -> np.ndarray:
     """
     Convenience function to apply CLAHE to a single frame.
@@ -255,7 +255,7 @@ def batch_enhance_videos(
     output_dir: Union[str, Path],
     clip_limit: float = 2.0,
     tile_grid_size: Tuple[int, int] = (8, 8),
-    color_space: str = "LAB",
+    color_space: str = "HSV",
     file_extensions: Tuple[str, ...] = (".mp4", ".avi", ".mov"),
 ):
     """

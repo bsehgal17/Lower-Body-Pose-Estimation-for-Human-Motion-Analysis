@@ -50,14 +50,14 @@ class GammaEnhancer:
             [((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]
         ).astype("uint8")
 
-    def enhance_frame(self, frame: np.ndarray, color_space: str = "BGR") -> np.ndarray:
+    def enhance_frame(self, frame: np.ndarray, color_space: str = "HSV") -> np.ndarray:
         """
         Apply gamma correction to a single frame.
 
         Args:
             frame (np.ndarray): Input frame in BGR color space
             color_space (str): Color space for gamma application ('BGR', 'LAB', 'HSV', 'YUV', 'GRAY')
-                              Default: 'BGR' (applies gamma to all channels)
+                              Default: 'HSV' (recommended for most cases)
 
         Returns:
             np.ndarray: Gamma-corrected frame in BGR color space
@@ -71,7 +71,19 @@ class GammaEnhancer:
             return cv2.LUT(frame, self.lookup_table)
 
         # Handle color images based on color space
-        if color_space.upper() == "BGR":
+        if color_space.upper() == "HSV":
+            # Convert to HSV and apply gamma to V channel
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            h_channel, s_channel, v_channel = cv2.split(hsv)
+
+            # Apply gamma correction to V channel (value/brightness)
+            v_channel_gamma = cv2.LUT(v_channel, self.lookup_table)
+
+            # Merge channels back
+            hsv_gamma = cv2.merge((h_channel, s_channel, v_channel_gamma))
+            return cv2.cvtColor(hsv_gamma, cv2.COLOR_HSV2BGR)
+
+        elif color_space.upper() == "BGR":
             # Apply gamma correction to all channels
             return cv2.LUT(frame, self.lookup_table)
 
@@ -86,18 +98,6 @@ class GammaEnhancer:
             # Merge channels back
             lab_gamma = cv2.merge((l_channel_gamma, a_channel, b_channel))
             return cv2.cvtColor(lab_gamma, cv2.COLOR_LAB2BGR)
-
-        elif color_space.upper() == "HSV":
-            # Convert to HSV and apply gamma to V channel
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            h_channel, s_channel, v_channel = cv2.split(hsv)
-
-            # Apply gamma correction to V channel (value/brightness)
-            v_channel_gamma = cv2.LUT(v_channel, self.lookup_table)
-
-            # Merge channels back
-            hsv_gamma = cv2.merge((h_channel, s_channel, v_channel_gamma))
-            return cv2.cvtColor(hsv_gamma, cv2.COLOR_HSV2BGR)
 
         elif color_space.upper() == "YUV":
             # Convert to YUV and apply gamma to Y channel
@@ -118,7 +118,7 @@ class GammaEnhancer:
             return cv2.cvtColor(gamma_gray, cv2.COLOR_GRAY2BGR)
 
         else:
-            logger.warning(f"Unsupported color space: {color_space}. Using BGR.")
+            logger.warning(f"Unsupported color space: {color_space}. Using HSV.")
             return cv2.LUT(frame, self.lookup_table)
 
     def enhance_video(
@@ -229,7 +229,7 @@ class GammaEnhancer:
 def apply_gamma_to_frame(
     frame: np.ndarray,
     gamma: float = 1.0,
-    color_space: str = "BGR",
+    color_space: str = "HSV",
 ) -> np.ndarray:
     """
     Convenience function to apply gamma correction to a single frame.
@@ -250,7 +250,7 @@ def batch_enhance_videos(
     input_dir: Union[str, Path],
     output_dir: Union[str, Path],
     gamma: float = 1.0,
-    color_space: str = "BGR",
+    color_space: str = "HSV",
     file_extensions: Tuple[str, ...] = (".mp4", ".avi", ".mov", ".mkv"),
     progress_callback: Optional[callable] = None,
 ) -> bool:

@@ -148,11 +148,89 @@ class EnhancementPipeline:
                 params["clip_limit"] = self.enhancement_config.clahe.clip_limit
                 params["tile_grid_size"] = self.enhancement_config.clahe.tile_grid_size
                 params["color_space"] = getattr(
-                    self.enhancement_config.clahe, "color_space", "LAB"
+                    self.enhancement_config.clahe, "color_space", "HSV"
                 )
             else:
                 raise ValueError(
                     "CLAHE enhancement requires 'clahe' section in configuration"
+                )
+
+        elif enhancement_type == "filtered_clahe":
+            if hasattr(self.enhancement_config, "clahe"):
+                params["clip_limit"] = self.enhancement_config.clahe.clip_limit
+                params["tile_grid_size"] = self.enhancement_config.clahe.tile_grid_size
+                params["color_space"] = getattr(
+                    self.enhancement_config.clahe, "color_space", "HSV"
+                )
+
+                # Add filter parameters
+                if hasattr(self.enhancement_config, "filters"):
+                    params["filters"] = getattr(
+                        self.enhancement_config.filters, "types", ["bilateral"]
+                    )
+
+                    filter_params = {}
+                    if hasattr(self.enhancement_config.filters, "bilateral"):
+                        filter_params["bilateral"] = {
+                            "d": getattr(
+                                self.enhancement_config.filters.bilateral, "d", 9
+                            ),
+                            "sigma_color": getattr(
+                                self.enhancement_config.filters.bilateral,
+                                "sigma_color",
+                                75.0,
+                            ),
+                            "sigma_space": getattr(
+                                self.enhancement_config.filters.bilateral,
+                                "sigma_space",
+                                75.0,
+                            ),
+                        }
+                    if hasattr(self.enhancement_config.filters, "non_local_means"):
+                        filter_params["non_local_means"] = {
+                            "h": getattr(
+                                self.enhancement_config.filters.non_local_means,
+                                "h",
+                                10.0,
+                            ),
+                            "template_window_size": getattr(
+                                self.enhancement_config.filters.non_local_means,
+                                "template_window_size",
+                                7,
+                            ),
+                            "search_window_size": getattr(
+                                self.enhancement_config.filters.non_local_means,
+                                "search_window_size",
+                                21,
+                            ),
+                        }
+                    if hasattr(self.enhancement_config.filters, "gaussian"):
+                        filter_params["gaussian"] = {
+                            "kernel_size": getattr(
+                                self.enhancement_config.filters.gaussian,
+                                "kernel_size",
+                                (5, 5),
+                            ),
+                            "sigma_x": getattr(
+                                self.enhancement_config.filters.gaussian, "sigma_x", 0.0
+                            ),
+                            "sigma_y": getattr(
+                                self.enhancement_config.filters.gaussian, "sigma_y", 0.0
+                            ),
+                        }
+                    if hasattr(self.enhancement_config.filters, "median"):
+                        filter_params["median"] = {
+                            "kernel_size": getattr(
+                                self.enhancement_config.filters.median, "kernel_size", 5
+                            )
+                        }
+                    params["filter_params"] = filter_params
+                else:
+                    params["filters"] = ["bilateral"]
+                    params["filter_params"] = {}
+            else:
+                raise ValueError(
+                    "Filtered CLAHE enhancement requires 'clahe' section in configuration"
                 )
 
         elif enhancement_type == "brightness_adjustment":
@@ -177,11 +255,88 @@ class EnhancementPipeline:
             if hasattr(self.enhancement_config, "gamma"):
                 params["gamma"] = self.enhancement_config.gamma.gamma
                 params["color_space"] = getattr(
-                    self.enhancement_config.gamma, "color_space", "BGR"
+                    self.enhancement_config.gamma, "color_space", "HSV"
                 )
             else:
                 raise ValueError(
                     "Gamma correction requires 'gamma' section in configuration"
+                )
+
+        elif enhancement_type == "filtered_gamma":
+            if hasattr(self.enhancement_config, "gamma"):
+                params["gamma"] = self.enhancement_config.gamma.gamma
+                params["color_space"] = getattr(
+                    self.enhancement_config.gamma, "color_space", "HSV"
+                )
+
+                # Add filter parameters
+                if hasattr(self.enhancement_config, "filters"):
+                    params["filters"] = getattr(
+                        self.enhancement_config.filters, "types", ["bilateral"]
+                    )
+
+                    filter_params = {}
+                    if hasattr(self.enhancement_config.filters, "bilateral"):
+                        filter_params["bilateral"] = {
+                            "d": getattr(
+                                self.enhancement_config.filters.bilateral, "d", 9
+                            ),
+                            "sigma_color": getattr(
+                                self.enhancement_config.filters.bilateral,
+                                "sigma_color",
+                                75.0,
+                            ),
+                            "sigma_space": getattr(
+                                self.enhancement_config.filters.bilateral,
+                                "sigma_space",
+                                75.0,
+                            ),
+                        }
+                    if hasattr(self.enhancement_config.filters, "non_local_means"):
+                        filter_params["non_local_means"] = {
+                            "h": getattr(
+                                self.enhancement_config.filters.non_local_means,
+                                "h",
+                                10.0,
+                            ),
+                            "template_window_size": getattr(
+                                self.enhancement_config.filters.non_local_means,
+                                "template_window_size",
+                                7,
+                            ),
+                            "search_window_size": getattr(
+                                self.enhancement_config.filters.non_local_means,
+                                "search_window_size",
+                                21,
+                            ),
+                        }
+                    if hasattr(self.enhancement_config.filters, "gaussian"):
+                        filter_params["gaussian"] = {
+                            "kernel_size": getattr(
+                                self.enhancement_config.filters.gaussian,
+                                "kernel_size",
+                                (5, 5),
+                            ),
+                            "sigma_x": getattr(
+                                self.enhancement_config.filters.gaussian, "sigma_x", 0.0
+                            ),
+                            "sigma_y": getattr(
+                                self.enhancement_config.filters.gaussian, "sigma_y", 0.0
+                            ),
+                        }
+                    if hasattr(self.enhancement_config.filters, "median"):
+                        filter_params["median"] = {
+                            "kernel_size": getattr(
+                                self.enhancement_config.filters.median, "kernel_size", 5
+                            )
+                        }
+                    params["filter_params"] = filter_params
+                else:
+                    params["filters"] = ["bilateral"]
+                    params["filter_params"] = {}
+            else:
+                raise ValueError(
+                    "Filtered gamma correction requires 'gamma' section in configuration"
                 )
 
         # histogram_eq doesn't need parameters

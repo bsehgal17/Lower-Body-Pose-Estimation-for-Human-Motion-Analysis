@@ -13,6 +13,7 @@ import numpy as np
 
 from .clahe_enhancement import CLAHEEnhancer
 from .gamma_enhancement import GammaEnhancer
+from .image_filter import FilteredCLAHEEnhancer, FilteredGammaEnhancer
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def apply_clahe_enhancement(
     """
     clip_limit = kwargs.get("clip_limit")
     tile_grid_size = kwargs.get("tile_grid_size")
-    color_space = kwargs.get("color_space", "LAB")
+    color_space = kwargs.get("color_space", "HSV")  # Changed default to HSV
 
     if clip_limit is None or tile_grid_size is None:
         raise ValueError(
@@ -243,7 +244,7 @@ def apply_gamma_correction(
         bool: True if successful, False otherwise
     """
     gamma = kwargs.get("gamma")
-    color_space = kwargs.get("color_space", "BGR")
+    color_space = kwargs.get("color_space", "HSV")  # Changed default to HSV
 
     if gamma is None:
         raise ValueError("Gamma correction requires gamma parameter")
@@ -257,6 +258,150 @@ def apply_gamma_correction(
     )
 
 
+def apply_filtered_clahe_enhancement(
+    video_path: Union[str, Path], output_path: Union[str, Path], **kwargs
+) -> bool:
+    """
+    Apply CLAHE enhancement with image filtering to a video file.
+
+    Args:
+        video_path: Path to input video
+        output_path: Path to output enhanced video
+        **kwargs: CLAHE and filter parameters
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    clip_limit = kwargs.get("clip_limit")
+    tile_grid_size = kwargs.get("tile_grid_size")
+    color_space = kwargs.get("color_space", "HSV")
+    filters = kwargs.get("filters", ["bilateral"])
+    filter_params = kwargs.get("filter_params", {})
+
+    if clip_limit is None or tile_grid_size is None:
+        raise ValueError(
+            "Filtered CLAHE enhancement requires clip_limit and tile_grid_size parameters"
+        )
+
+    enhancer = FilteredCLAHEEnhancer(
+        clip_limit=clip_limit,
+        tile_grid_size=tuple(tile_grid_size),
+        filters=filters,
+        filter_params=filter_params,
+    )
+
+    try:
+        cap = cv2.VideoCapture(str(video_path))
+        if not cap.isOpened():
+            logger.error(f"Could not open video: {video_path}")
+            return False
+
+        # Get video properties
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        # Setup video writer
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        out = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
+
+        if not out.isOpened():
+            logger.error(f"Could not create output video: {output_path}")
+            cap.release()
+            return False
+
+        frame_count = 0
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Apply filtered CLAHE enhancement
+            enhanced_frame = enhancer.enhance_frame(frame, color_space)
+            out.write(enhanced_frame)
+            frame_count += 1
+
+        cap.release()
+        out.release()
+
+        logger.debug(f"Processed {frame_count} frames for {Path(video_path).name}")
+        return True
+
+    except Exception as e:
+        logger.error(f"Filtered CLAHE enhancement failed for {video_path}: {e}")
+        return False
+
+
+def apply_filtered_gamma_correction(
+    video_path: Union[str, Path], output_path: Union[str, Path], **kwargs
+) -> bool:
+    """
+    Apply gamma correction with image filtering to a video file.
+
+    Args:
+        video_path: Path to input video
+        output_path: Path to output enhanced video
+        **kwargs: gamma and filter parameters
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    gamma = kwargs.get("gamma")
+    color_space = kwargs.get("color_space", "HSV")
+    filters = kwargs.get("filters", ["bilateral"])
+    filter_params = kwargs.get("filter_params", {})
+
+    if gamma is None:
+        raise ValueError("Filtered gamma correction requires gamma parameter")
+
+    enhancer = FilteredGammaEnhancer(
+        gamma=gamma, filters=filters, filter_params=filter_params
+    )
+
+    try:
+        cap = cv2.VideoCapture(str(video_path))
+        if not cap.isOpened():
+            logger.error(f"Could not open video: {video_path}")
+            return False
+
+        # Get video properties
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        # Setup video writer
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        out = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
+
+        if not out.isOpened():
+            logger.error(f"Could not create output video: {output_path}")
+            cap.release()
+            return False
+
+        frame_count = 0
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Apply filtered gamma correction
+            enhanced_frame = enhancer.enhance_frame(frame, color_space)
+            out.write(enhanced_frame)
+            frame_count += 1
+
+        cap.release()
+        out.release()
+
+        logger.debug(f"Processed {frame_count} frames for {Path(video_path).name}")
+        return True
+
+    except Exception as e:
+        logger.error(f"Filtered gamma correction failed for {video_path}: {e}")
+        return False
+
+
 # Enhancement function registry
 ENHANCEMENT_FN_MAP: Dict[str, Callable] = {
     "clahe": apply_clahe_enhancement,
@@ -264,6 +409,8 @@ ENHANCEMENT_FN_MAP: Dict[str, Callable] = {
     "gaussian_blur": apply_gaussian_blur,
     "brightness_adjustment": apply_brightness_adjustment,
     "gamma_correction": apply_gamma_correction,
+    "filtered_clahe": apply_filtered_clahe_enhancement,
+    "filtered_gamma": apply_filtered_gamma_correction,
 }
 
 
