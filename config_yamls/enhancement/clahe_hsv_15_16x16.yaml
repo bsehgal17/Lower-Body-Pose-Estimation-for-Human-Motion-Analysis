@@ -1,0 +1,46 @@
+# CLAHE Enhancement Pipeline Configuration - HSV Color Space
+# Clip limit: 1.5, Tile grid: 16x16
+
+# Dataset and path configuration
+paths:
+  dataset: HumanEva
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
+models:
+  detector: rtmw
+  det_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/demo/mmdetection_cfg/faster_rcnn_r50_fpn_coco.py
+  det_checkpoint: https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
+  pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-x_8xb320-270e_cocktail14-384x288.py
+  pose_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/rtmw-x_simcc-cocktail14_pt-ucoco_270e-384x288-f840f204_20231122.pth
+
+processing:
+  device: cuda:0
+  nms_threshold: 0.5
+  detection_threshold: 0.3
+  kpt_threshold: 0.3
+
+# Enhancement configuration
+enhancement:
+  # Type of enhancement to apply (required)
+  type: clahe  # Options: clahe, histogram_eq, gaussian_blur, brightness_adjustment
+  
+  # Comparison images setting
+  create_comparison_images: true  # Generate before/after comparison images for first frames
+  
+  # CLAHE specific settings - HSV COLOR SPACE
+  clahe:
+    clip_limit: 1.5  # Moderate-high clip limit for HSV processing
+    tile_grid_size: [16, 16]  # 16x16 grid for local adaptation
+    color_space: HSV  # HSV color space - enhances value channel (brightness)
+  
+  # Processing settings
+  processing:
+    batch_size: 8  # Batch size for processing
+    dataset_structure: true  # Whether videos are organized in subject/action structure
+    generate_report: true  # Generate enhancement comparison report
+
+# Output settings
+output:
+  prefix: clahe_hsv_15_16x16_  # Prefix for enhanced video files
+  format: mp4  # Output video format
+  quality: high  # Options: low, medium, high
+  preserve_structure: true  # Maintain directory structure in output
