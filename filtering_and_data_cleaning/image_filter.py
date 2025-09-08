@@ -236,7 +236,29 @@ class FilteredCLAHEEnhancer:
         """
         self.clip_limit = clip_limit
         self.tile_grid_size = tile_grid_size
+
+        # Validate parameters before creating CLAHE object
+        if clip_limit is None or clip_limit <= 0:
+            raise ValueError(
+                f"Invalid clip_limit: {clip_limit}. Must be a positive number."
+            )
+
+        if (
+            tile_grid_size is None
+            or len(tile_grid_size) != 2
+            or any(x <= 0 for x in tile_grid_size)
+        ):
+            raise ValueError(
+                f"Invalid tile_grid_size: {tile_grid_size}. Must be a tuple of two positive integers."
+            )
+
+        # Create CLAHE object
         self.clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+
+        if self.clahe is None:
+            raise RuntimeError(
+                f"Failed to create CLAHE object with clip_limit={clip_limit}, tile_grid_size={tile_grid_size}"
+            )
 
         self.filters = filters if filters is not None else []
         self.filter_params = filter_params if filter_params is not None else {}

@@ -32,9 +32,29 @@ class CLAHEEnhancer:
             tile_grid_size (Tuple[int, int]): Size of the grid for local histogram equalization.
                                             Each tile is processed independently. Default: (8, 8)
         """
+        # Validate parameters before creating CLAHE object
+        if clip_limit is None or clip_limit <= 0:
+            raise ValueError(
+                f"Invalid clip_limit: {clip_limit}. Must be a positive number."
+            )
+
+        if (
+            tile_grid_size is None
+            or len(tile_grid_size) != 2
+            or any(x <= 0 for x in tile_grid_size)
+        ):
+            raise ValueError(
+                f"Invalid tile_grid_size: {tile_grid_size}. Must be a tuple of two positive integers."
+            )
+
         self.clip_limit = clip_limit
         self.tile_grid_size = tile_grid_size
         self.clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+
+        if self.clahe is None:
+            raise RuntimeError(
+                f"Failed to create CLAHE object with clip_limit={clip_limit}, tile_grid_size={tile_grid_size}"
+            )
 
         logger.info(
             f"CLAHE enhancer initialized with clip_limit={clip_limit}, "
