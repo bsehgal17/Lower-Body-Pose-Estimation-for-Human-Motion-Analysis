@@ -75,9 +75,11 @@ class PipelineConfig:
         from .enhancement_config import (
             EnhancementConfig,
             CLAHEConfig,
+            FilteredCLAHEConfig,
             BrightnessConfig,
             BlurConfig,
             GammaConfig,
+            FilteredGammaConfig,
             EnhancementProcessingConfig,
         )
 
@@ -85,6 +87,10 @@ class PipelineConfig:
         clahe = None
         if "clahe" in enhancement_data:
             clahe = CLAHEConfig(**enhancement_data["clahe"])
+
+        filtered_clahe = None
+        if "filtered_clahe" in enhancement_data:
+            filtered_clahe = FilteredCLAHEConfig(**enhancement_data["filtered_clahe"])
 
         brightness = None
         if "brightness" in enhancement_data:
@@ -98,6 +104,10 @@ class PipelineConfig:
         if "gamma" in enhancement_data:
             gamma = GammaConfig(**enhancement_data["gamma"])
 
+        filtered_gamma = None
+        if "filtered_gamma" in enhancement_data:
+            filtered_gamma = FilteredGammaConfig(**enhancement_data["filtered_gamma"])
+
         processing = None
         if "processing" in enhancement_data:
             processing = EnhancementProcessingConfig(**enhancement_data["processing"])
@@ -105,10 +115,13 @@ class PipelineConfig:
         return EnhancementConfig(
             type=enhancement_data.get("type"),
             clahe=clahe,
+            filtered_clahe=filtered_clahe,
             brightness=brightness,
             blur=blur,
             gamma=gamma,
+            filtered_gamma=filtered_gamma,
             processing=processing,
+            create_comparison_images=enhancement_data.get("create_comparison_images"),
         )
 
     def to_yaml(self, yaml_path: str):
