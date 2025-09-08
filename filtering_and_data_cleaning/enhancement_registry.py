@@ -272,11 +272,14 @@ def apply_filtered_clahe_enhancement(
     Returns:
         bool: True if successful, False otherwise
     """
-    clip_limit = kwargs.get("clip_limit")
-    tile_grid_size = kwargs.get("tile_grid_size")
-    color_space = kwargs.get("color_space", "HSV")
-    filters = kwargs.get("filters", ["bilateral"])
-    filter_params = kwargs.get("filter_params", {})
+    # Extract filtered_clahe parameters if they exist, otherwise use direct kwargs
+    filtered_clahe_params = kwargs.get("filtered_clahe", kwargs)
+
+    clip_limit = filtered_clahe_params.get("clip_limit")
+    tile_grid_size = filtered_clahe_params.get("tile_grid_size")
+    color_space = filtered_clahe_params.get("color_space", "HSV")
+    filters = filtered_clahe_params.get("filters", ["bilateral"])
+    filter_params = filtered_clahe_params.get("filter_params", {})
 
     if clip_limit is None or tile_grid_size is None:
         raise ValueError(
@@ -300,7 +303,6 @@ def apply_filtered_clahe_enhancement(
         fps = cap.get(cv2.CAP_PROP_FPS)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
         # Setup video writer
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
@@ -347,10 +349,13 @@ def apply_filtered_gamma_correction(
     Returns:
         bool: True if successful, False otherwise
     """
-    gamma = kwargs.get("gamma")
-    color_space = kwargs.get("color_space", "HSV")
-    filters = kwargs.get("filters", ["bilateral"])
-    filter_params = kwargs.get("filter_params", {})
+    # Extract filtered_gamma parameters if they exist, otherwise use direct kwargs
+    filtered_gamma_params = kwargs.get("filtered_gamma", kwargs)
+
+    gamma = filtered_gamma_params.get("gamma")
+    color_space = filtered_gamma_params.get("color_space", "HSV")
+    filters = filtered_gamma_params.get("filters", ["bilateral"])
+    filter_params = filtered_gamma_params.get("filter_params", {})
 
     if gamma is None:
         raise ValueError("Filtered gamma correction requires gamma parameter")
@@ -369,7 +374,6 @@ def apply_filtered_gamma_correction(
         fps = cap.get(cv2.CAP_PROP_FPS)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
         # Setup video writer
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
