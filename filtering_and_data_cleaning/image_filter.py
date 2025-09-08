@@ -375,6 +375,334 @@ class FilteredGammaEnhancer:
             f"filters={self.filters}"
         )
 
+
+class FlexibleFilteredCLAHEEnhancer:
+    """
+    Enhanced CLAHE class that supports filtering before, after, or both CLAHE enhancement.
+    """
+
+    def __init__(
+        self,
+        clip_limit: float,
+        tile_grid_size: Tuple[int, int],
+        pre_filters: list = None,
+        post_filters: list = None,
+        pre_filter_params: dict = None,
+        post_filter_params: dict = None,
+        filter_mode: str = "post",
+    ):
+        """
+        Initialize the flexible filtered CLAHE enhancer.
+
+        Args:
+            clip_limit (float): CLAHE clip limit
+            tile_grid_size (Tuple[int, int]): CLAHE tile grid size
+            pre_filters (list): List of filters to apply before CLAHE
+            post_filters (list): List of filters to apply after CLAHE
+            pre_filter_params (dict): Parameters for pre-enhancement filters
+            post_filter_params (dict): Parameters for post-enhancement filters
+            filter_mode (str): When to apply filters - "before", "after", or "both"
+        """
+        self.clip_limit = clip_limit
+        self.tile_grid_size = tile_grid_size
+        self.filter_mode = filter_mode.lower()
+
+        # Validate parameters before creating CLAHE object
+        if clip_limit is None or clip_limit <= 0:
+            raise ValueError(
+                f"Invalid clip_limit: {clip_limit}. Must be a positive number."
+            )
+
+        if (
+            tile_grid_size is None
+            or len(tile_grid_size) != 2
+            or any(x <= 0 for x in tile_grid_size)
+        ):
+            raise ValueError(
+                f"Invalid tile_grid_size: {tile_grid_size}. Must be a tuple of two positive integers."
+            )
+
+        if self.filter_mode not in ["before", "after", "both"]:
+            raise ValueError(
+                f"Invalid filter_mode: {filter_mode}. Must be 'before', 'after', or 'both'."
+            )
+
+        # Create CLAHE object
+        self.clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+
+        if self.clahe is None:
+            raise RuntimeError(
+                f"Failed to create CLAHE object with clip_limit={clip_limit}, tile_grid_size={tile_grid_size}"
+            )
+
+        # Set up filters based on mode
+        self.pre_filters = pre_filters if pre_filters is not None else []
+        self.post_filters = post_filters if post_filters is not None else []
+        self.pre_filter_params = (
+            pre_filter_params if pre_filter_params is not None else {}
+        )
+        self.post_filter_params = (
+            post_filter_params if post_filter_params is not None else {}
+        )
+
+        # Adjust filter lists based on mode
+        if self.filter_mode == "before":
+            self.post_filters = []
+        elif self.filter_mode == "after":
+            self.pre_filters = []
+        # For "both" mode, keep both lists as they are
+
+        logger.info(
+            f"Flexible Filtered CLAHE enhancer initialized with clip_limit={clip_limit}, "
+            f"tile_grid_size={tile_grid_size}, filter_mode={self.filter_mode}, "
+            f"pre_filters={self.pre_filters}, post_filters={self.post_filters}"
+        )
+
+    def enhance_frame(self, frame: np.ndarray, color_space: str = "HSV") -> np.ndarray:
+        """
+        Apply filtering and CLAHE enhancement to a single frame based on filter mode.
+
+        Args:
+            frame (np.ndarray): Input frame in BGR color space
+            color_space (str): Color space for CLAHE application (default: HSV)
+
+        Returns:
+            np.ndarray: Enhanced and filtered frame in BGR color space
+        """
+        if frame is None or frame.size == 0:
+            logger.warning("Empty or None frame provided to enhance_frame")
+            return frame
+
+        processed_frame = frame.copy()
+
+        # Step 1: Apply pre-enhancement filters if specified
+        if self.pre_filters and self.filter_mode in ["before", "both"]:
+            processed_frame = ImageFilter.apply_combined_filters(
+                processed_frame, self.pre_filters, self.pre_filter_params
+            )
+
+        # Step 2: Apply CLAHE enhancement
+        processed_frame = self._apply_clahe(processed_frame, color_space)
+
+        # Step 3: Apply post-enhancement filters if specified
+        if self.post_filters and self.filter_mode in ["after", "both"]:
+            processed_frame = ImageFilter.apply_combined_filters(
+                processed_frame, self.post_filters, self.post_filter_params
+            )
+
+        return processed_frame
+
+    def _apply_clahe(self, frame: np.ndarray, color_space: str) -> np.ndarray:
+        """Apply CLAHE enhancement to frame."""
+        # Handle grayscale images
+        if len(frame.shape) == 2:
+            return self.clahe.apply(frame)
+
+        # Handle color images based on color space
+        if color_space.upper() == "HSV":
+            # Convert to HSV and apply CLAHE to V channel
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            h_channel, s_channel, v_channel = cv2.split(hsv)
+
+            # Apply CLAHE to V channel (value/brightness)
+            v_channel_clahe = self.clahe.apply(v_channel)
+
+            # Merge channels back
+            hsv_clahe = cv2.merge((h_channel, s_channel, v_channel_clahe))
+            return cv2.cvtColor(hsv_clahe, cv2.COLOR_HSV2BGR)
+
+        elif color_space.upper() == "LAB":
+            # Convert to LAB and apply CLAHE to L channel
+            lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+            l_channel, a_channel, b_channel = cv2.split(lab)
+
+            # Apply CLAHE to L channel (luminance)
+            l_channel_clahe = self.clahe.apply(l_channel)
+
+            # Merge channels back
+            lab_clahe = cv2.merge((l_channel_clahe, a_channel, b_channel))
+            return cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
+
+        elif color_space.upper() == "YUV":
+            # Convert to YUV and apply CLAHE to Y channel
+            yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
+            y_channel, u_channel, v_channel = cv2.split(yuv)
+
+            # Apply CLAHE to Y channel (luminance)
+            y_channel_clahe = self.clahe.apply(y_channel)
+
+            # Merge channels back
+            yuv_clahe = cv2.merge((y_channel_clahe, u_channel, v_channel))
+            return cv2.cvtColor(yuv_clahe, cv2.COLOR_YUV2BGR)
+
+        elif color_space.upper() == "GRAY":
+            # Convert to grayscale, apply CLAHE, then back to BGR
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            gray_clahe = self.clahe.apply(gray)
+            return cv2.cvtColor(gray_clahe, cv2.COLOR_GRAY2BGR)
+
+        else:
+            logger.error(f"Unsupported color space: {color_space}")
+            return frame
+
+
+class FlexibleFilteredGammaEnhancer:
+    """
+    Enhanced Gamma correction class that supports filtering before, after, or both gamma enhancement.
+    """
+
+    def __init__(
+        self,
+        gamma: float,
+        pre_filters: list = None,
+        post_filters: list = None,
+        pre_filter_params: dict = None,
+        post_filter_params: dict = None,
+        filter_mode: str = "post",
+    ):
+        """
+        Initialize the flexible filtered gamma enhancer.
+
+        Args:
+            gamma (float): Gamma correction value
+            pre_filters (list): List of filters to apply before gamma correction
+            post_filters (list): List of filters to apply after gamma correction
+            pre_filter_params (dict): Parameters for pre-enhancement filters
+            post_filter_params (dict): Parameters for post-enhancement filters
+            filter_mode (str): When to apply filters - "before", "after", or "both"
+        """
+        self.gamma = gamma
+        self.filter_mode = filter_mode.lower()
+
+        if self.filter_mode not in ["before", "after", "both"]:
+            raise ValueError(
+                f"Invalid filter_mode: {filter_mode}. Must be 'before', 'after', or 'both'."
+            )
+
+        # Set up filters based on mode
+        self.pre_filters = pre_filters if pre_filters is not None else []
+        self.post_filters = post_filters if post_filters is not None else []
+        self.pre_filter_params = (
+            pre_filter_params if pre_filter_params is not None else {}
+        )
+        self.post_filter_params = (
+            post_filter_params if post_filter_params is not None else {}
+        )
+
+        # Adjust filter lists based on mode
+        if self.filter_mode == "before":
+            self.post_filters = []
+        elif self.filter_mode == "after":
+            self.pre_filters = []
+        # For "both" mode, keep both lists as they are
+
+        # Pre-compute the lookup table for efficiency
+        self._build_lookup_table()
+
+        logger.info(
+            f"Flexible Filtered Gamma enhancer initialized with gamma={gamma}, "
+            f"filter_mode={self.filter_mode}, pre_filters={self.pre_filters}, "
+            f"post_filters={self.post_filters}"
+        )
+
+    def _build_lookup_table(self):
+        """Build a lookup table for gamma correction to improve performance."""
+        inv_gamma = 1.0 / self.gamma
+        self.lookup_table = np.array(
+            [((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]
+        ).astype("uint8")
+
+    def enhance_frame(self, frame: np.ndarray, color_space: str = "HSV") -> np.ndarray:
+        """
+        Apply filtering and gamma correction to a single frame based on filter mode.
+
+        Args:
+            frame (np.ndarray): Input frame in BGR color space
+            color_space (str): Color space for gamma application (default: HSV)
+
+        Returns:
+            np.ndarray: Enhanced and filtered frame in BGR color space
+        """
+        if frame is None or frame.size == 0:
+            logger.warning("Empty or None frame provided to enhance_frame")
+            return frame
+
+        processed_frame = frame.copy()
+
+        # Step 1: Apply pre-enhancement filters if specified
+        if self.pre_filters and self.filter_mode in ["before", "both"]:
+            processed_frame = ImageFilter.apply_combined_filters(
+                processed_frame, self.pre_filters, self.pre_filter_params
+            )
+
+        # Step 2: Apply gamma correction
+        processed_frame = self._apply_gamma(processed_frame, color_space)
+
+        # Step 3: Apply post-enhancement filters if specified
+        if self.post_filters and self.filter_mode in ["after", "both"]:
+            processed_frame = ImageFilter.apply_combined_filters(
+                processed_frame, self.post_filters, self.post_filter_params
+            )
+
+        return processed_frame
+
+    def _apply_gamma(self, frame: np.ndarray, color_space: str) -> np.ndarray:
+        """Apply gamma correction to frame."""
+        # Handle grayscale images
+        if len(frame.shape) == 2:
+            return cv2.LUT(frame, self.lookup_table)
+
+        # Handle color images based on color space
+        if color_space.upper() == "HSV":
+            # Convert to HSV and apply gamma to V channel
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            h_channel, s_channel, v_channel = cv2.split(hsv)
+
+            # Apply gamma correction to V channel (value/brightness)
+            v_channel_gamma = cv2.LUT(v_channel, self.lookup_table)
+
+            # Merge channels back
+            hsv_gamma = cv2.merge((h_channel, s_channel, v_channel_gamma))
+            return cv2.cvtColor(hsv_gamma, cv2.COLOR_HSV2BGR)
+
+        elif color_space.upper() == "BGR":
+            # Apply gamma correction to all channels
+            return cv2.LUT(frame, self.lookup_table)
+
+        elif color_space.upper() == "LAB":
+            # Convert to LAB and apply gamma to L channel only
+            lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+            l_channel, a_channel, b_channel = cv2.split(lab)
+
+            # Apply gamma correction to L channel (luminance)
+            l_channel_gamma = cv2.LUT(l_channel, self.lookup_table)
+
+            # Merge channels back
+            lab_gamma = cv2.merge((l_channel_gamma, a_channel, b_channel))
+            return cv2.cvtColor(lab_gamma, cv2.COLOR_LAB2BGR)
+
+        elif color_space.upper() == "YUV":
+            # Convert to YUV and apply gamma to Y channel
+            yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
+            y_channel, u_channel, v_channel = cv2.split(yuv)
+
+            # Apply gamma correction to Y channel (luminance)
+            y_channel_gamma = cv2.LUT(y_channel, self.lookup_table)
+
+            # Merge channels back
+            yuv_gamma = cv2.merge((y_channel_gamma, u_channel, v_channel))
+            return cv2.cvtColor(yuv_gamma, cv2.COLOR_YUV2BGR)
+
+        elif color_space.upper() == "GRAY":
+            # Convert to grayscale, apply gamma, then back to BGR
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            gamma_gray = cv2.LUT(gray, self.lookup_table)
+            return cv2.cvtColor(gamma_gray, cv2.COLOR_GRAY2BGR)
+
+        else:
+            logger.warning(f"Unsupported color space: {color_space}. Using HSV.")
+            return self._apply_gamma(frame, "HSV")
+
     def _build_lookup_table(self):
         """Build a lookup table for gamma correction to improve performance."""
         inv_gamma = 1.0 / self.gamma

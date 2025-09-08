@@ -1,5 +1,6 @@
-# Filtered CLAHE Enhancement Pipeline Configuration
-# CLAHE (clip_limit: 2.0, tile_grid_size: 8x8) + Combined Filters (Bilateral + Non-Local Means)
+# Flexible Filtered Gamma Enhancement Pipeline Configuration
+# Gamma correction with filtering BEFORE enhancement only
+# This applies denoising before gamma correction
 
 # Dataset and path configuration
 paths:
@@ -19,26 +20,32 @@ processing:
   detection_threshold: 0.3
   kpt_threshold: 0.3
 
-# Enhancement configuration
+# Enhancement configuration with flexible filtering
 enhancement:
-  type: filtered_clahe
+  type: flexible_filtered_gamma
   create_comparison_images: true
   
-  # Filtered CLAHE specific settings
-  filtered_clahe:
-    clip_limit: 2.0
-    tile_grid_size: [8, 8]
+  # Flexible Filtered Gamma specific settings
+  flexible_filtered_gamma:
+    gamma: 0.8
     color_space: HSV
-    filters: ["bilateral", "non_local_means"]
-    filter_params:
+    filter_mode: before  # Apply filters BEFORE gamma correction
+    
+    # Pre-enhancement filters (noise reduction before gamma correction)
+    pre_filters: ["bilateral"]
+    pre_filter_params:
+      non_local_means:
+        h: 10.0
+        template_window_size: 7
+        search_window_size: 21
       bilateral:
         d: 9
         sigma_color: 75.0
         sigma_space: 75.0
-      non_local_means:
-        h: 8.0
-        template_window_size: 7
-        search_window_size: 21
+    
+    # Post-enhancement filters (empty for 'before' mode)
+    post_filters: []
+    post_filter_params: {}
   
   processing:
     batch_size: 8
@@ -47,7 +54,7 @@ enhancement:
 
 # Output settings
 output:
-  prefix: filtered_clahe_20_8x8_bil_nlm_
+  prefix: flexible_gamma_before_filter_
   format: mp4
   quality: high
   preserve_structure: true
@@ -55,28 +62,6 @@ output:
 evaluation:
   metrics:
     - name: overall_pck
-      params:
-        threshold: 0.25
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-
-    - name: overall_pck
-      params:
-        threshold: 0.3
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-
-    - name: per_frame_pck
       params:
         threshold: 0.25
         joints_to_evaluate:

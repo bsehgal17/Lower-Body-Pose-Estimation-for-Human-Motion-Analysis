@@ -1,5 +1,6 @@
-# Filtered Gamma Enhancement Pipeline Configuration
-# Gamma (0.75) + Bilateral Filter
+# Flexible Filtered CLAHE Enhancement Pipeline Configuration
+# CLAHE with filtering BEFORE enhancement only
+# This applies bilateral filter before CLAHE to pre-smooth the image
 
 # Dataset and path configuration
 paths:
@@ -19,21 +20,29 @@ processing:
   detection_threshold: 0.3
   kpt_threshold: 0.3
 
-# Enhancement configuration
+# Enhancement configuration with flexible filtering
 enhancement:
-  type: filtered_gamma
+  type: flexible_filtered_clahe
   create_comparison_images: true
   
-  # Filtered Gamma specific settings
-  filtered_gamma:
-    gamma: 0.75
+  # Flexible Filtered CLAHE specific settings
+  flexible_filtered_clahe:
+    clip_limit: 0.5
+    tile_grid_size: [8, 8]
     color_space: HSV
-    filters: ["bilateral"]
-    filter_params:
+    filter_mode: before  # Apply filters BEFORE CLAHE enhancement
+    
+    # Pre-enhancement filters (applied before CLAHE)
+    pre_filters: ["bilateral"]
+    pre_filter_params:
       bilateral:
         d: 9
         sigma_color: 75.0
         sigma_space: 75.0
+    
+    # Post-enhancement filters (empty for 'before' mode)
+    post_filters: []
+    post_filter_params: {}
   
   processing:
     batch_size: 8
@@ -42,7 +51,7 @@ enhancement:
 
 # Output settings
 output:
-  prefix: filtered_gamma_075_bilateral_
+  prefix: flexible_clahe_before_filter_
   format: mp4
   quality: high
   preserve_structure: true
@@ -63,17 +72,6 @@ evaluation:
     - name: overall_pck
       params:
         threshold: 0.3
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-
-    - name: per_frame_pck
-      params:
-        threshold: 0.25
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP

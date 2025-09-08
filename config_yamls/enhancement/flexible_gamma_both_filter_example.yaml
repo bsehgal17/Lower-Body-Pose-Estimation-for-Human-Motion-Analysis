@@ -1,5 +1,6 @@
-# Filtered Gamma Enhancement Pipeline Configuration
-# Gamma (0.75) + Median Filter
+# Flexible Filtered Gamma Enhancement Pipeline Configuration
+# Gamma correction with filtering BOTH before and after enhancement
+# This applies comprehensive filtering pipeline
 
 # Dataset and path configuration
 paths:
@@ -19,19 +20,34 @@ processing:
   detection_threshold: 0.3
   kpt_threshold: 0.3
 
-# Enhancement configuration
+# Enhancement configuration with flexible filtering
 enhancement:
-  type: filtered_gamma
+  type: flexible_filtered_gamma
   create_comparison_images: true
   
-  # Filtered Gamma specific settings
-  filtered_gamma:
-    gamma: 0.75
+  # Flexible Filtered Gamma specific settings
+  flexible_filtered_gamma:
+    gamma: 0.8
     color_space: HSV
-    filters: ["median"]
-    filter_params:
+    filter_mode: both  # Apply filters BOTH before and after gamma correction
+    
+    # Pre-enhancement filters (prepare image for gamma correction)
+    pre_filters: ["gaussian"]
+    pre_filter_params:
+      gaussian:
+        kernel_size: [3, 3]
+        sigma_x: 0.8
+        sigma_y: 0.8
+    
+    # Post-enhancement filters (refine after gamma correction)
+    post_filters: ["bilateral"]
+    post_filter_params:
+      bilateral:
+        d: 9
+        sigma_color: 75.0
+        sigma_space: 75.0
       median:
-        kernel_size: 5
+        kernel_size: 3
   
   processing:
     batch_size: 8
@@ -40,7 +56,7 @@ enhancement:
 
 # Output settings
 output:
-  prefix: filtered_gamma_075_median_
+  prefix: flexible_gamma_both_filter_
   format: mp4
   quality: high
   preserve_structure: true
@@ -61,17 +77,6 @@ evaluation:
     - name: overall_pck
       params:
         threshold: 0.3
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-
-    - name: per_frame_pck
-      params:
-        threshold: 0.25
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP

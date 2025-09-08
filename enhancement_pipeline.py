@@ -217,6 +217,57 @@ class EnhancementPipeline:
                     "Filtered gamma correction requires 'filtered_gamma' section in configuration"
                 )
 
+        elif enhancement_type == "flexible_filtered_clahe":
+            if hasattr(self.enhancement_config, "flexible_filtered_clahe"):
+                flexible_clahe_config = self.enhancement_config.flexible_filtered_clahe
+                params["flexible_filtered_clahe"] = {
+                    "clip_limit": flexible_clahe_config.clip_limit,
+                    "tile_grid_size": flexible_clahe_config.tile_grid_size,
+                    "color_space": getattr(flexible_clahe_config, "color_space", "HSV"),
+                    "filter_mode": getattr(
+                        flexible_clahe_config, "filter_mode", "after"
+                    ),
+                    "pre_filters": getattr(flexible_clahe_config, "pre_filters", []),
+                    "post_filters": getattr(
+                        flexible_clahe_config, "post_filters", ["bilateral"]
+                    ),
+                    "pre_filter_params": getattr(
+                        flexible_clahe_config, "pre_filter_params", {}
+                    ),
+                    "post_filter_params": getattr(
+                        flexible_clahe_config, "post_filter_params", {}
+                    ),
+                }
+            else:
+                raise ValueError(
+                    "Flexible filtered CLAHE enhancement requires 'flexible_filtered_clahe' section in configuration"
+                )
+
+        elif enhancement_type == "flexible_filtered_gamma":
+            if hasattr(self.enhancement_config, "flexible_filtered_gamma"):
+                flexible_gamma_config = self.enhancement_config.flexible_filtered_gamma
+                params["flexible_filtered_gamma"] = {
+                    "gamma": flexible_gamma_config.gamma,
+                    "color_space": getattr(flexible_gamma_config, "color_space", "HSV"),
+                    "filter_mode": getattr(
+                        flexible_gamma_config, "filter_mode", "after"
+                    ),
+                    "pre_filters": getattr(flexible_gamma_config, "pre_filters", []),
+                    "post_filters": getattr(
+                        flexible_gamma_config, "post_filters", ["bilateral"]
+                    ),
+                    "pre_filter_params": getattr(
+                        flexible_gamma_config, "pre_filter_params", {}
+                    ),
+                    "post_filter_params": getattr(
+                        flexible_gamma_config, "post_filter_params", {}
+                    ),
+                }
+            else:
+                raise ValueError(
+                    "Flexible filtered gamma correction requires 'flexible_filtered_gamma' section in configuration"
+                )
+
         # histogram_eq doesn't need parameters
 
         return params

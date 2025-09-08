@@ -20,62 +20,40 @@ pipelines:
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # Enhanced CLAHE with Image Filtering Pipelines - CLAHE 0.5 8x8
-  - name: filtered_clahe_05_8x8_bilateral_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_bilateral.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filtered_clahe_05_8x8_bilateral_humaneva
+  #   steps:
+  #     - command: enhance
+  #       config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_bilateral.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filtered_clahe_05_8x8_nlm_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_nlm.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filtered_clahe_05_8x8_nlm_humaneva
+  #   steps:
+  #     - command: enhance
+  #       config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_nlm.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filtered_clahe_05_8x8_gaussian_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_gaussian.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filtered_clahe_05_8x8_gaussian_humaneva
+  #   steps:
+  #     - command: enhance
+  #       config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_gaussian.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filtered_clahe_05_8x8_median_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_median.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filtered_clahe_05_8x8_median_humaneva
+  #   steps:
+  #     - command: enhance
+  #       config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_median.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filtered_clahe_05_8x8_combined_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_combined.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # Enhanced CLAHE with Image Filtering Pipelines - CLAHE 2.0 8x8
-  - name: filtered_clahe_20_8x8_bilateral_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/filtered_clahe_20_8x8_bilateral.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filtered_clahe_20_8x8_nlm_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/filtered_clahe_20_8x8_nlm.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filtered_clahe_20_8x8_combined_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/filtered_clahe_20_8x8_combined.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filtered_clahe_05_8x8_combined_humaneva
+  #   steps:
+  #     - command: enhance
+  #       config_file: "config_yamls/enhancement/filtered_clahe_05_8x8_combined.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # Enhanced Gamma Correction with Image Filtering Pipelines - Gamma 0.8
   - name: filtered_gamma_08_bilateral_humaneva
@@ -106,25 +84,37 @@ pipelines:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # Enhanced Gamma Correction with Image Filtering Pipelines - Gamma 0.75
-  - name: filtered_gamma_075_bilateral_humaneva
+  # Flexible Filtering Enhancement Pipelines - New filtering modes (before, after, both)
+  
+  # Flexible CLAHE with filtering BEFORE enhancement
+  - name: flexible_clahe_before_filter_humaneva
     steps:
       - command: enhance
-        config_file: "config_yamls/enhancement/filtered_gamma_075_bilateral.yaml"
+        config_file: "config_yamls/enhancement/flexible_clahe_before_filter_example.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filtered_gamma_075_median_humaneva
+  # Flexible CLAHE with filtering BOTH before and after enhancement
+  - name: flexible_clahe_both_filter_humaneva
     steps:
       - command: enhance
-        config_file: "config_yamls/enhancement/filtered_gamma_075_median.yaml"
+        config_file: "config_yamls/enhancement/flexible_clahe_both_filter_example.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filtered_gamma_075_combined_humaneva
+  # Flexible Gamma correction with filtering BEFORE enhancement
+  - name: flexible_gamma_before_filter_humaneva
     steps:
       - command: enhance
-        config_file: "config_yamls/enhancement/filtered_gamma_075_combined.yaml"
+        config_file: "config_yamls/enhancement/flexible_gamma_before_filter_example.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # Flexible Gamma correction with filtering BOTH before and after enhancement
+  - name: flexible_gamma_both_filter_humaneva
+    steps:
+      - command: enhance
+        config_file: "config_yamls/enhancement/flexible_gamma_both_filter_example.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
