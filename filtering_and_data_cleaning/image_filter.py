@@ -375,6 +375,98 @@ class FilteredGammaEnhancer:
             f"filters={self.filters}"
         )
 
+    def _build_lookup_table(self):
+        """Build a lookup table for gamma correction to improve performance."""
+        # Create a lookup table mapping each pixel value [0, 255] to its gamma-corrected value
+        inv_gamma = 1.0 / self.gamma
+        self.lookup_table = np.array(
+            [((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]
+        ).astype("uint8")
+
+    def enhance_frame(self, frame: np.ndarray, color_space: str = "HSV") -> np.ndarray:
+        """
+        Apply gamma correction and filtering to a single frame.
+
+        Args:
+            frame (np.ndarray): Input frame in BGR color space
+            color_space (str): Color space for gamma application (default: HSV)
+
+        Returns:
+            np.ndarray: Enhanced and filtered frame in BGR color space
+        """
+        if frame is None or frame.size == 0:
+            logger.warning("Empty or None frame provided to enhance_frame")
+            return frame
+
+        # Step 1: Apply gamma correction
+        gamma_frame = self._apply_gamma(frame, color_space)
+
+        # Step 2: Apply filters if specified
+        if self.filters:
+            filtered_frame = ImageFilter.apply_combined_filters(
+                gamma_frame, self.filters, self.filter_params
+            )
+            return filtered_frame
+
+        return gamma_frame
+
+    def _apply_gamma(self, frame: np.ndarray, color_space: str) -> np.ndarray:
+        """Apply gamma correction to frame."""
+        # Handle grayscale images
+        if len(frame.shape) == 2:
+            return cv2.LUT(frame, self.lookup_table)
+
+        # Handle color images based on color space
+        if color_space.upper() == "HSV":
+            # Convert to HSV and apply gamma to V channel
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            h_channel, s_channel, v_channel = cv2.split(hsv)
+
+            # Apply gamma correction to V channel (value/brightness)
+            v_channel_gamma = cv2.LUT(v_channel, self.lookup_table)
+
+            # Merge channels back
+            hsv_gamma = cv2.merge((h_channel, s_channel, v_channel_gamma))
+            return cv2.cvtColor(hsv_gamma, cv2.COLOR_HSV2BGR)
+
+        elif color_space.upper() == "BGR":
+            # Apply gamma correction to all channels
+            return cv2.LUT(frame, self.lookup_table)
+
+        elif color_space.upper() == "LAB":
+            # Convert to LAB and apply gamma to L channel only
+            lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+            l_channel, a_channel, b_channel = cv2.split(lab)
+
+            # Apply gamma correction to L channel (luminance)
+            l_channel_gamma = cv2.LUT(l_channel, self.lookup_table)
+
+            # Merge channels back
+            lab_gamma = cv2.merge((l_channel_gamma, a_channel, b_channel))
+            return cv2.cvtColor(lab_gamma, cv2.COLOR_LAB2BGR)
+
+        elif color_space.upper() == "YUV":
+            # Convert to YUV and apply gamma to Y channel
+            yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
+            y_channel, u_channel, v_channel = cv2.split(yuv)
+
+            # Apply gamma correction to Y channel (luminance)
+            y_channel_gamma = cv2.LUT(y_channel, self.lookup_table)
+
+            # Merge channels back
+            yuv_gamma = cv2.merge((y_channel_gamma, u_channel, v_channel))
+            return cv2.cvtColor(yuv_gamma, cv2.COLOR_YUV2BGR)
+
+        elif color_space.upper() == "GRAY":
+            # Convert to grayscale, apply gamma, then back to BGR
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            gamma_gray = cv2.LUT(gray, self.lookup_table)
+            return cv2.cvtColor(gamma_gray, cv2.COLOR_GRAY2BGR)
+
+        else:
+            logger.warning(f"Unsupported color space: {color_space}. Using HSV.")
+            return cv2.LUT(frame, self.lookup_table)
+
 
 class FlexibleFilteredCLAHEEnhancer:
     """

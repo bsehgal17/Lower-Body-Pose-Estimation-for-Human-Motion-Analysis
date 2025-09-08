@@ -4,11 +4,12 @@ from datetime import datetime
 from pathlib import Path
 import logging
 import yaml  # Needed for saving config objects
+from typing import Tuple
 
 logger = logging.getLogger(__name__)
 
 
-def get_pipeline_io_paths(global_paths, dataset: str) -> tuple[Path, Path]:
+def get_pipeline_io_paths(global_paths, dataset: str) -> Tuple[Path, Path]:
     """
     Constructs full input and output paths for a specific dataset.
 
@@ -26,8 +27,14 @@ def get_pipeline_io_paths(global_paths, dataset: str) -> tuple[Path, Path]:
     return input_path, output_path
 
 
-def make_run_dir(base_out: str, pipeline_name: str, step_name: str, cfg_path: str,
-                 global_config_obj=None, pipeline_config_obj=None) -> Path:
+def make_run_dir(
+    base_out: str,
+    pipeline_name: str,
+    step_name: str,
+    cfg_path: str,
+    global_config_obj=None,
+    pipeline_config_obj=None,
+) -> Path:
     """
     Creates a timestamped directory for the pipeline run and optionally saves configs.
 
@@ -56,8 +63,7 @@ def make_run_dir(base_out: str, pipeline_name: str, step_name: str, cfg_path: st
     if global_config_obj and hasattr(global_config_obj, "to_yaml"):
         global_config_obj.to_yaml(run_dir / "global_config.yaml")
     if pipeline_config_obj and hasattr(pipeline_config_obj, "to_yaml"):
-        pipeline_config_obj.to_yaml(
-            run_dir / "pipeline_config_structured.yaml")
+        pipeline_config_obj.to_yaml(run_dir / "pipeline_config_structured.yaml")
 
     logger.info(f"Pipeline outputs will be saved under: {run_dir}")
     return run_dir
