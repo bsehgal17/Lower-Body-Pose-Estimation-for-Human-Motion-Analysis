@@ -226,7 +226,9 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         # Customize the legend with multiple columns (10 videos per column)
         num_videos = len(videos)
         num_cols = max(1, (num_videos + 9) // 10)  # Calculate number of columns needed
-        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=10, ncol=num_cols)
+        plt.legend(
+            bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=10, ncol=num_cols
+        )
         plt.grid(True, alpha=0.3)
 
         # Set reasonable axis limits with some padding
