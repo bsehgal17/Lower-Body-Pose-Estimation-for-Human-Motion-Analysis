@@ -137,11 +137,14 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             return
 
         df = pd.DataFrame(plot_data)
-        plt.figure(figsize=(10, 7))  # a bit smaller, better balance
+        plt.figure(figsize=(12, 8))  # slightly larger
 
         videos = df["video"].unique()
-        # Use tab20 or HSV for unique colors
-        colors = plt.cm.tab20(np.linspace(0, 1, len(videos)))
+
+        # ✅ Use seaborn husl palette for distinct colors
+        import seaborn as sns
+
+        colors = sns.color_palette("husl", n_colors=len(videos))
 
         for i, video in enumerate(videos):
             vdata = df[df["video"] == video].iloc[0]
@@ -150,13 +153,13 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 vdata["avg_pck"],
                 label=video,
                 color=colors[i],
-                alpha=0.8,
+                alpha=0.9,
                 s=120,
                 edgecolors="black",
                 linewidth=0.7,
             )
 
-        # Trend line
+        # Add a simple trend line (optional)
         if len(df) > 2:
             z = np.polyfit(df["avg_brightness"], df["avg_pck"], 1)
             p = np.poly1d(z)
@@ -171,8 +174,16 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         plt.ylabel("Average PCK Score", fontsize=12)
         plt.title("Average PCK vs Brightness Per Video", fontsize=14, fontweight="bold")
 
-        # Cleaner legend inside plot
-        plt.legend(fontsize=8, loc="lower right", frameon=True)
+        # ✅ Legend: 10 videos per column
+        num_cols = max(1, (len(videos) + 9) // 10)
+        plt.legend(
+            bbox_to_anchor=(1.05, 1),
+            loc="upper left",
+            fontsize=8,
+            ncol=num_cols,
+            frameon=True,
+        )
+
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
 
