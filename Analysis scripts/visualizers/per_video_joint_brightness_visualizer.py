@@ -63,8 +63,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             return
 
         # Debug: Print analysis results structure
-        print(
-            f"   Debug: Received analysis results for {len(analysis_results)} videos")
+        print(f"   Debug: Received analysis results for {len(analysis_results)} videos")
         for i, (video_name, video_data) in enumerate(analysis_results.items()):
             if i < 2:  # Show first 2 videos
                 print(f"   Video '{video_name}' structure:")
@@ -73,8 +72,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                         has_pck_scores = "pck_scores" in value
                         has_brightness = "brightness_values" in value
                         pck_len = (
-                            len(value.get("pck_scores", [])
-                                ) if has_pck_scores else 0
+                            len(value.get("pck_scores", [])) if has_pck_scores else 0
                         )
                         brightness_len = (
                             len(value.get("brightness_values", []))
@@ -174,8 +172,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
         plt.xlabel("Average Brightness", fontsize=12)
         plt.ylabel("Average PCK Score", fontsize=12)
-        plt.title("Average PCK vs Brightness Per Video",
-                  fontsize=14, fontweight="bold")
+        plt.title("Average PCK vs Brightness Per Video", fontsize=14, fontweight="bold")
 
         # ✅ Legend: 10 videos per column
         num_cols = max(1, (len(videos) + 9) // 10)
@@ -184,8 +181,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             loc="upper right",
             ncol=num_cols,
             frameon=True,
-            facecolor="none",   # transparent background
-            edgecolor="black"   # keep legend border visible
+            facecolor="none",  # transparent background
+            edgecolor="black",  # keep legend border visible
         )
 
         plt.grid(True, alpha=0.3)
@@ -266,8 +263,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 fig, ax = plt.subplots(figsize=(12, 8))
                 axes = [ax]
             else:
-                fig, axes = plt.subplots(
-                    1, n_thresholds, figsize=(6 * n_thresholds, 8))
+                fig, axes = plt.subplots(1, n_thresholds, figsize=(6 * n_thresholds, 8))
                 if n_thresholds == 1:
                     axes = [axes]
 
@@ -311,11 +307,9 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                             ),
                         )
 
-                ax.set_xlabel(
-                    "Brightness (from GT Joint Location)", fontsize=12)
+                ax.set_xlabel("Brightness (from GT Joint Location)", fontsize=12)
                 ax.set_ylabel("PCK Score", fontsize=12)
-                ax.set_title(
-                    f"PCK vs Brightness - Threshold {threshold}", fontsize=14)
+                ax.set_title(f"PCK vs Brightness - Threshold {threshold}", fontsize=14)
                 ax.grid(True, alpha=0.3)
                 ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
 
@@ -331,12 +325,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             # Save the plot
             if self.save_plots and self.output_dir:
                 # Clean video name for filename
-                clean_video_name = (
-                    str(video_name)
-                    .replace("/", "_")
-                    .replace("\\", "_")
-                    .replace(":", "_")
-                )
+                clean_video_name = self._clean_video_name_for_filename(video_name)
                 filename = os.path.join(
                     self.output_dir, f"pck_brightness_scatter_{clean_video_name}.png"
                 )
@@ -359,13 +348,11 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         plt.ioff()  # Turn off interactive mode initially
 
         # Debug: Print structure of analysis results
-        print(
-            f"   Debug: Analysis results contains {len(analysis_results)} videos")
+        print(f"   Debug: Analysis results contains {len(analysis_results)} videos")
         for vid_name, vid_data in list(analysis_results.items())[
             :1
         ]:  # Show first video structure
-            print(
-                f"   Debug: Video '{vid_name}' has keys: {list(vid_data.keys())}")
+            print(f"   Debug: Video '{vid_name}' has keys: {list(vid_data.keys())}")
             for key, value in vid_data.items():
                 if key not in [
                     "video_name",
@@ -436,8 +423,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             fig, ax = plt.subplots(figsize=(14, 10))
             axes = [ax]
         else:
-            fig, axes = plt.subplots(
-                1, n_thresholds, figsize=(7 * n_thresholds, 10))
+            fig, axes = plt.subplots(1, n_thresholds, figsize=(7 * n_thresholds, 10))
             if n_thresholds == 1:
                 axes = [axes]
 
@@ -487,8 +473,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
             # Add trend line
             if len(threshold_data) > 10:  # Only if we have enough points
-                z = np.polyfit(
-                    threshold_data["brightness"], threshold_data["pck"], 1)
+                z = np.polyfit(threshold_data["brightness"], threshold_data["pck"], 1)
                 p = np.poly1d(z)
                 x_trend = np.linspace(
                     threshold_data["brightness"].min(),
@@ -582,8 +567,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             video_summaries.append(video_summary)
 
         video_df = pd.DataFrame(video_summaries)
-        video_csv_path = os.path.join(
-            self.output_dir, "video_brightness_summary.csv")
+        video_csv_path = os.path.join(self.output_dir, "video_brightness_summary.csv")
         video_df.to_csv(video_csv_path, index=False)
         print(f"   Saved video summary: {video_csv_path}")
 
@@ -633,3 +617,19 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         print(f"   Saved detailed results: {detailed_csv_path}")
 
         print("✅ CSV export completed")
+
+    def _clean_video_name_for_filename(self, video_name: str) -> str:
+        """Clean video name to make it suitable for filenames.
+
+        Handles special cases like HumanEva format S1_Walking_(C1).
+        """
+        clean_name = (
+            str(video_name)
+            .replace("/", "_")
+            .replace("\\", "_")
+            .replace(":", "_")
+            .replace("(", "")
+            .replace(")", "")
+            .replace(" ", "_")
+        )
+        return clean_name

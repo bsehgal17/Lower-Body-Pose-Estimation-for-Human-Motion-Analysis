@@ -25,6 +25,8 @@ class DatasetConfig:
     sync_data: Any = None
     analysis_config: Any = None  # Analysis-specific configuration
     ground_truth_file: str = None  # Path to ground truth coordinates file
+    grouping_columns: List[str] = None  # Columns to use for video grouping
+    video_name_format: str = "{subject}"  # Format for creating video names
 
     def __post_init__(self):
         """Validate configuration after initialization."""
@@ -86,8 +88,49 @@ class DatasetConfig:
 
     def get_grouping_columns(self) -> List[str]:
         """Get the columns used for grouping video data."""
+        # Use the explicitly defined grouping columns if available
+        if self.grouping_columns:
+            return self.grouping_columns
+
+        # Fallback to the old logic for backward compatibility
         return [
             col
             for col in [self.subject_column, self.action_column, self.camera_column]
             if col is not None
         ]
+
+    def create_video_name(self, group_key, grouping_cols: List[str]) -> str:
+        """Create a video name using the configured format.
+
+        Args:
+            group_key: The values for the grouping columns (single value or tuple)
+            grouping_cols: List of column names used for grouping
+
+        Returns:
+            Formatted video name string
+        """
+        try:
+            # If single grouping column, group_key is a single value
+            if len(grouping_cols) == 1:
+                format_dict = {grouping_cols[0]: str(group_key)}
+            else:
+                # Multiple grouping columns - group_key is a tuple
+                format_dict = {}
+                for i, col in enumerate(grouping_cols):
+                    if i < len(group_key):
+                        format_dict[col] = str(group_key[i])
+                    else:
+                        format_dict[col] = "Unknown"
+
+            # Use the configured format string
+            return self.video_name_format.format(**format_dict)
+
+        except (KeyError, IndexError, AttributeError) as e:
+            # Fallback to simple string representation if formatting fails
+            print(
+                f"Warning: Failed to format video name with {self.video_name_format}: {e}"
+            )
+            if len(grouping_cols) == 1:
+                return str(group_key)
+            else:
+                return "_".join(str(val) for val in group_key)

@@ -85,7 +85,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         Returns:
             Dict containing analysis results for each video with all joints
         """
-        print(f"Starting per-video joint brightness analysis...")
+        print("Starting per-video joint brightness analysis...")
         print(f"Analyzing {len(self.joint_names)} joints across videos")
 
         # Group data by video
@@ -99,25 +99,48 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
     def _analyze_by_video(self, per_frame_data: pd.DataFrame) -> Dict[str, Any]:
         """Analyze brightness for all joints in each video."""
 
-        # Determine grouping column
-        if "video_file" in per_frame_data.columns:
-            grouping_col = "video_file"
-        elif "subject" in per_frame_data.columns:
-            grouping_col = "subject"
-        else:
-            print("❌ No video grouping column found (video_file or subject)")
+        # Get grouping columns from config
+        grouping_cols = self.config.get_grouping_columns()
+
+        if not grouping_cols:
+            print("❌ No video grouping columns found in configuration")
             return {}
 
-        print(f"Grouping analysis by: {grouping_col}")
-        video_groups = per_frame_data.groupby(grouping_col)
+        # Verify that the required columns exist in the data
+        missing_cols = [
+            col for col in grouping_cols if col not in per_frame_data.columns
+        ]
+        if missing_cols:
+            print(f"❌ Missing grouping columns in data: {missing_cols}")
+            available_cols = [
+                col for col in grouping_cols if col in per_frame_data.columns
+            ]
+            if available_cols:
+                print(f"   Using available columns: {available_cols}")
+                grouping_cols = available_cols
+            else:
+                print("   No valid grouping columns found")
+                return {}
+
+        print(f"Grouping analysis by: {grouping_cols}")
+
+        # Group by all available grouping columns
+        if len(grouping_cols) == 1:
+            video_groups = per_frame_data.groupby(grouping_cols[0])
+        else:
+            video_groups = per_frame_data.groupby(grouping_cols)
 
         video_results = {}
 
-        for video_name, video_data in video_groups:
+        for group_key, video_data in video_groups:
+            # Create proper video name using config format
+            video_name = self.config.create_video_name(group_key, grouping_cols)
             print(f"\n--- Processing Video: {video_name} ---")
 
             # Analyze all joints for this video
-            video_result = self._analyze_video_joints(video_name, video_data)
+            video_result = self._analyze_video_joints(
+                video_name, video_data, group_key, grouping_cols
+            )
 
             if video_result:
                 video_results[str(video_name)] = video_result
@@ -128,32 +151,38 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         return video_results
 
     def _analyze_video_joints(
-        self, video_name: str, video_data: pd.DataFrame
+        self,
+        video_name: str,
+        video_data: pd.DataFrame,
+        group_key=None,
+        grouping_cols: List[str] = None,
     ) -> Dict[str, Any]:
         """Analyze brightness for all joints in a single video."""
 
         # Load ground truth coordinates for this video
-        gt_coordinates = self._load_video_ground_truth(video_name, video_data)
+        gt_coordinates = self._load_video_ground_truth(
+            video_name, video_data, group_key, grouping_cols
+        )
         if not gt_coordinates:
             print(f"   No ground truth coordinates found for {video_name}")
             return {}
 
         # Load video file and extract brightness
-        video_path = self._find_video_path(video_name, video_data)
+        video_path = self._find_video_path(
+            video_name, video_data, group_key, grouping_cols
+        )
         if not video_path or not os.path.exists(video_path):
             print(f"   Video file not found for {video_name}")
             return {}
 
         # Extract brightness for all joints
-        brightness_data = self._extract_video_brightness(
-            video_path, gt_coordinates)
+        brightness_data = self._extract_video_brightness(video_path, gt_coordinates)
         if not brightness_data:
             print(f"   No brightness data extracted for {video_name}")
             return {}
 
         # Analyze jointwise PCK scores with brightness for this video
-        video_analysis = self._analyze_video_pck_brightness(
-            video_data, brightness_data)
+        video_analysis = self._analyze_video_pck_brightness(video_data, brightness_data)
 
         # Add video metadata
         video_analysis["video_name"] = str(video_name)
@@ -166,7 +195,11 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         return video_analysis
 
     def _load_video_ground_truth(
-        self, video_name: str, video_data: pd.DataFrame
+        self,
+        video_name: str,
+        video_data: pd.DataFrame,
+        group_key=None,
+        grouping_cols: List[str] = None,
     ) -> Dict[str, np.ndarray]:
         """Load ground truth joint coordinates for a specific video."""
 
@@ -184,23 +217,39 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                 )
                 if not os.path.exists(gt_file):
                     gt_file = os.path.join(gt_directory, f"{video_name}.csv")
+
+                if not os.path.exists(gt_file):
+                    print(f"   Ground truth file not found: {gt_file}")
+                    return {}
+
+                print(f"   Loading GT from: {os.path.basename(gt_file)}")
+
+                # Load coordinates based on dataset format
+                coordinates = {}
+                for joint_name in self.joint_names:
+                    joint_coords = self._extract_joint_coordinates(
+                        gt_file, joint_name, None, None
+                    )
+                    if joint_coords is not None:
+                        coordinates[joint_name] = joint_coords
+
             else:  # humaneva
                 gt_file = gt_directory
 
-            if not os.path.exists(gt_file):
-                print(f"   Ground truth file not found: {gt_file}")
-                return {}
+                if not os.path.exists(gt_file):
+                    print(f"   Ground truth file not found: {gt_file}")
+                    return {}
 
-            print(f"   Loading GT from: {os.path.basename(gt_file)}")
+                print(f"   Loading GT from: {os.path.basename(gt_file)}")
 
-            # Load coordinates based on dataset format
-            coordinates = {}
-
-            for joint_name in self.joint_names:
-                joint_coords = self._extract_joint_coordinates(
-                    gt_file, joint_name)
-                if joint_coords is not None:
-                    coordinates[joint_name] = joint_coords
+                # For HumanEva, we need to filter the combined GT file by group_key
+                coordinates = {}
+                for joint_name in self.joint_names:
+                    joint_coords = self._extract_joint_coordinates(
+                        gt_file, joint_name, group_key, grouping_cols
+                    )
+                    if joint_coords is not None:
+                        coordinates[joint_name] = joint_coords
 
             print(f"   Loaded coordinates for {len(coordinates)} joints")
             return coordinates
@@ -210,7 +259,11 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             return {}
 
     def _extract_joint_coordinates(
-        self, gt_file: str, joint_name: str
+        self,
+        gt_file: str,
+        joint_name: str,
+        group_key=None,
+        grouping_cols: List[str] = None,
     ) -> Optional[np.ndarray]:
         """Extract coordinates for a specific joint from ground truth file."""
 
@@ -238,6 +291,24 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             else:  # humaneva
                 # HumanEva format: traditional CSV with column names
                 gt_data = pd.read_csv(gt_file)
+
+                # Filter data by group_key if provided
+                if group_key is not None and grouping_cols is not None:
+                    filter_conditions = []
+                    for i, col in enumerate(grouping_cols):
+                        if i < len(group_key) and col in gt_data.columns:
+                            filter_conditions.append(gt_data[col] == group_key[i])
+
+                    if filter_conditions:
+                        combined_condition = filter_conditions[0]
+                        for condition in filter_conditions[1:]:
+                            combined_condition = combined_condition & condition
+                        gt_data = gt_data[combined_condition]
+
+                        if gt_data.empty:
+                            print(f"   No ground truth data found for {group_key}")
+                            return None
+
                 x_col = f"x{joint_number}"
                 y_col = f"y{joint_number}"
 
@@ -258,7 +329,11 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             return None
 
     def _find_video_path(
-        self, video_name: str, video_data: pd.DataFrame
+        self,
+        video_name: str,
+        video_data: pd.DataFrame,
+        group_key=None,
+        grouping_cols: List[str] = None,
     ) -> Optional[str]:
         """Find the path to the video file."""
 
@@ -272,10 +347,53 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             # Try different video extensions
             video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".wmv"]
 
+            # For HumanEva, try to construct the original video filename from group_key
+            if (
+                self.dataset_name == "humaneva"
+                and group_key is not None
+                and grouping_cols is not None
+            ):
+                # Extract components from group_key
+                if len(grouping_cols) >= 3 and len(group_key) >= 3:
+                    subject = str(group_key[0])  # e.g., "S1"
+                    action = str(group_key[1])  # e.g., "Walking"
+                    camera = str(group_key[2])  # e.g., "C1"
+
+                    # Try different possible filename formats for HumanEva
+                    possible_names = [
+                        f"{subject}_{action}_{camera}",
+                        f"{subject}_{action}_({camera})",  # The format we use for display
+                        f"{subject}_{action.replace(' ', '_')}_{camera}",
+                        f"{subject}_{action.lower()}_{camera}",
+                        f"{subject}_{action.lower().replace(' ', '_')}_{camera}",
+                    ]
+
+                    for base_name in possible_names:
+                        for ext in video_extensions:
+                            video_path = os.path.join(
+                                video_directory, f"{base_name}{ext}"
+                            )
+                            if os.path.exists(video_path):
+                                return video_path
+
+                # Also try the display name format
+                for ext in video_extensions:
+                    video_path = os.path.join(video_directory, f"{video_name}{ext}")
+                    if os.path.exists(video_path):
+                        return video_path
+
+            # For MoVi, try the original format
+            elif self.dataset_name == "movi":
+                for ext in video_extensions:
+                    video_path = os.path.join(
+                        video_directory, f"{video_name}_walking_cropped{ext}"
+                    )
+                    if os.path.exists(video_path):
+                        return video_path
+
+            # General fallback: try the video_name directly
             for ext in video_extensions:
-                video_path = os.path.join(
-                    video_directory, f"{video_name}_walking_cropped{ext}"
-                )
+                video_path = os.path.join(video_directory, f"{video_name}{ext}")
                 if os.path.exists(video_path):
                     return video_path
 
@@ -283,8 +401,22 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             for root, dirs, files in os.walk(video_directory):
                 for file in files:
                     name, ext = os.path.splitext(file)
-                    if name == str(video_name) and ext.lower() in video_extensions:
-                        return os.path.join(root, file)
+                    if ext.lower() in video_extensions:
+                        # Check if the filename contains our video components
+                        if (
+                            self.dataset_name == "humaneva"
+                            and group_key is not None
+                            and len(group_key) >= 2
+                        ):
+                            subject = str(group_key[0])
+                            action = str(group_key[1])
+                            if (
+                                subject.lower() in name.lower()
+                                and action.lower().replace(" ", "_") in name.lower()
+                            ):
+                                return os.path.join(root, file)
+                        elif str(video_name) in name:
+                            return os.path.join(root, file)
 
             return None
 
@@ -300,8 +432,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         try:
             cap = cv2.VideoCapture(video_path)
             if not cap.isOpened():
-                print(
-                    f"   Failed to open video: {os.path.basename(video_path)}")
+                print(f"   Failed to open video: {os.path.basename(video_path)}")
                 return {}
 
             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -348,8 +479,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                     print(f"   Processed {frame_idx}/{total_frames} frames")
 
             cap.release()
-            print(
-                f"   ✅ Extracted brightness for {len(brightness_data)} joints")
+            print(f"   ✅ Extracted brightness for {len(brightness_data)} joints")
             return brightness_data
 
         except Exception as e:
@@ -390,7 +520,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         ]
 
         if not jointwise_pck_columns:
-            print(f"   No jointwise PCK columns found in video data")
+            print("   No jointwise PCK columns found in video data")
             print(f"   Available columns: {list(video_data.columns)}")
             return {}
 
@@ -409,8 +539,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             )
 
             if joint_name not in brightness_data:
-                print(
-                    f"      ❌ Joint {joint_name} not found in brightness data")
+                print(f"      ❌ Joint {joint_name} not found in brightness data")
                 continue
 
             # Get PCK scores and brightness values for this joint
@@ -423,7 +552,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             # Align data lengths
             min_length = min(len(pck_scores), len(joint_brightness))
             if min_length == 0:
-                print(f"      ❌ No data to align (min_length = 0)")
+                print("      ❌ No data to align (min_length = 0)")
                 continue
 
             pck_scores = pck_scores.iloc[:min_length]
@@ -433,11 +562,10 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             valid_mask = ~(pd.isna(pck_scores) | pd.isna(joint_brightness))
             pck_scores_clean = np.array(pck_scores)[valid_mask]
             joint_brightness_clean = np.array(joint_brightness)[valid_mask]
-            print(
-                f"      After cleaning: {len(pck_scores_clean)} valid data points")
+            print(f"      After cleaning: {len(pck_scores_clean)} valid data points")
 
             if len(pck_scores_clean) == 0:
-                print(f"      ❌ No valid data after cleaning")
+                print("      ❌ No valid data after cleaning")
                 continue
 
             # Perform analysis
@@ -593,12 +721,11 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                 pck_idx = parts.index("pck")
                 joint_parts = (
                     parts[: pck_idx - 1]
-                    if "jointwise" in parts[pck_idx - 1: pck_idx]
+                    if "jointwise" in parts[pck_idx - 1 : pck_idx]
                     else parts[:pck_idx]
                 )
                 joint_name = "_".join(joint_parts)
-                threshold = parts[-1] if len(parts) > pck_idx + \
-                    1 else "unknown"
+                threshold = parts[-1] if len(parts) > pck_idx + 1 else "unknown"
                 return joint_name, threshold
 
         return "unknown_joint", "unknown_threshold"

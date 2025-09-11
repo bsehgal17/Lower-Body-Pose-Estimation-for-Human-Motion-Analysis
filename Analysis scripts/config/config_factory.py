@@ -69,6 +69,12 @@ class ConfigFactory:
                 ground_truth_file=paths.get(
                     "ground_truth_file"
                 ),  # Add ground truth file
+                grouping_columns=columns.get(
+                    "grouping_columns", []
+                ),  # Add grouping columns
+                video_name_format=columns.get(
+                    "video_name_format", "{subject}"
+                ),  # Add video name format
             )
 
         except FileNotFoundError:
