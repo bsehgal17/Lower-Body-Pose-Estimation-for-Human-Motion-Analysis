@@ -729,3 +729,124 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                 return joint_name, threshold
 
         return "unknown_joint", "unknown_threshold"
+
+    def _extract_joint_coordinates(
+        self,
+        gt_file: str,
+        joint_name: str,
+        group_key=None,
+        grouping_cols: List[str] = None,
+    ) -> Optional[np.ndarray]:
+        """Extract coordinates for a specific joint from ground truth file.
+
+        Handles both single joint indices and tuple joint indices (for averaging).
+        """
+
+        try:
+            # Get joint number(s) from enum
+            joint_enum_value = self.joint_enum[joint_name].value
+
+            if self.dataset_name == "movi":
+                # MoVi format: CSV without headers, reshape to (frames, joints, 2)
+                df = pd.read_csv(gt_file, header=None, skiprows=1)
+                num_joints = df.shape[1] // 2
+                gt_keypoints_np = df.values.reshape((-1, num_joints, 2))
+
+                if isinstance(joint_enum_value, tuple):
+                    # Handle tuple joints (e.g., LEFT_KNEE = (12, 13))
+                    joint_coords_list = []
+                    for joint_idx in joint_enum_value:
+                        if joint_idx >= num_joints:
+                            print(
+                                f"   Joint index {joint_idx} out of range (max: {num_joints - 1})"
+                            )
+                            continue
+                        joint_coords_list.append(gt_keypoints_np[:, joint_idx, :])
+
+                    if not joint_coords_list:
+                        return None
+
+                    # Average the coordinates from multiple joints
+                    joint_coords = np.mean(joint_coords_list, axis=0)
+                    return joint_coords
+                else:
+                    # Single joint index
+                    joint_number = joint_enum_value
+                    if joint_number >= num_joints:
+                        print(
+                            f"   Joint index {joint_number} out of range (max: {num_joints - 1})"
+                        )
+                        return None
+
+                    # Get x and y coordinates for all frames for this joint
+                    # Shape: (frames, 2)
+                    joint_coords = gt_keypoints_np[:, joint_number, :]
+                    return joint_coords
+
+            else:  # humaneva
+                # HumanEva format: traditional CSV with column names
+                gt_data = pd.read_csv(gt_file)
+
+                # Filter data by group_key if provided
+                if group_key is not None and grouping_cols is not None:
+                    filter_conditions = []
+                    for i, col in enumerate(grouping_cols):
+                        if i < len(group_key) and col in gt_data.columns:
+                            filter_conditions.append(gt_data[col] == group_key[i])
+
+                    if filter_conditions:
+                        combined_condition = filter_conditions[0]
+                        for condition in filter_conditions[1:]:
+                            combined_condition = combined_condition & condition
+                        gt_data = gt_data[combined_condition]
+
+                        if gt_data.empty:
+                            print(f"   No ground truth data found for {group_key}")
+                            return None
+
+                if isinstance(joint_enum_value, tuple):
+                    # Handle tuple joints (e.g., LEFT_KNEE = (12, 13))
+                    joint_coords_list = []
+                    for joint_idx in joint_enum_value:
+                        x_col = f"x{joint_idx}"
+                        y_col = f"y{joint_idx}"
+
+                        if x_col not in gt_data.columns or y_col not in gt_data.columns:
+                            print(
+                                f"   Joint coordinates not found for joint {joint_idx} in tuple {joint_name}"
+                            )
+                            continue
+
+                        # Extract coordinates as numpy array
+                        x_coords = gt_data[x_col].values
+                        y_coords = gt_data[y_col].values
+                        joint_coords = np.column_stack([x_coords, y_coords])
+                        joint_coords_list.append(joint_coords)
+
+                    if not joint_coords_list:
+                        return None
+
+                    # Average the coordinates from multiple joints
+                    averaged_coords = np.mean(joint_coords_list, axis=0)
+                    return averaged_coords
+                else:
+                    # Single joint index
+                    joint_number = joint_enum_value
+                    x_col = f"x{joint_number}"
+                    y_col = f"y{joint_number}"
+
+                    if x_col not in gt_data.columns or y_col not in gt_data.columns:
+                        print(
+                            f"   Joint coordinates not found for joint {joint_number} ({joint_name})"
+                        )
+                        return None
+
+                    # Extract coordinates as numpy array
+                    x_coords = gt_data[x_col].values
+                    y_coords = gt_data[y_col].values
+                    joint_coords = np.column_stack([x_coords, y_coords])
+                    return joint_coords
+
+        except Exception as e:
+            print(f"   Error extracting coordinates for {joint_name}: {e}")
+            return None
