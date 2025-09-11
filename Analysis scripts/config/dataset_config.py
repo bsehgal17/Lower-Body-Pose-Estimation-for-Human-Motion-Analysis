@@ -112,18 +112,21 @@ class DatasetConfig:
         try:
             # If single grouping column, group_key is a single value
             if len(grouping_cols) == 1:
-                format_dict = {grouping_cols[0]: str(group_key)}
+                format_dict = {grouping_cols[0]: group_key}
             else:
                 # Multiple grouping columns - group_key is a tuple
                 format_dict = {}
                 for i, col in enumerate(grouping_cols):
                     if i < len(group_key):
-                        format_dict[col] = str(group_key[i])
+                        format_dict[col] = group_key[i]
                     else:
                         format_dict[col] = "Unknown"
 
-            # Use the configured format string
-            return self.video_name_format.format(**format_dict)
+            # Handle special formatting cases
+            formatted_name = self._apply_custom_formatting(
+                self.video_name_format, format_dict
+            )
+            return formatted_name
 
         except (KeyError, IndexError, AttributeError) as e:
             # Fallback to simple string representation if formatting fails
@@ -134,3 +137,78 @@ class DatasetConfig:
                 return str(group_key)
             else:
                 return "_".join(str(val) for val in group_key)
+
+    def _apply_custom_formatting(self, format_string: str, format_dict: dict) -> str:
+        """Apply custom formatting that supports arithmetic and type conversions.
+
+        Handles cases like:
+        - {camera+1} - arithmetic on integer values
+        - C{camera+1} - prefix/suffix with arithmetic
+        """
+        import re
+
+        # Handle arithmetic expressions like {camera+1}, {camera-1}, etc.
+        def replace_arithmetic(match):
+            expression = match.group(1)
+
+            # Check for arithmetic operations
+            if "+" in expression:
+                var_name, add_value = expression.split("+", 1)
+                var_name = var_name.strip()
+                add_value = add_value.strip()
+                try:
+                    base_value = format_dict.get(var_name, 0)
+                    # Convert to int if it's a string representation of a number
+                    if isinstance(base_value, str) and base_value.isdigit():
+                        base_value = int(base_value)
+                    elif isinstance(base_value, str):
+                        # Try to extract number from string like "C1" -> 1
+                        number_match = re.search(r"\d+", base_value)
+                        if number_match:
+                            base_value = int(number_match.group())
+                        else:
+                            base_value = 0
+
+                    result = int(base_value) + int(add_value)
+                    return str(result)
+                except (ValueError, TypeError):
+                    return expression  # Return original if can't process
+
+            elif "-" in expression:
+                var_name, sub_value = expression.split("-", 1)
+                var_name = var_name.strip()
+                sub_value = sub_value.strip()
+                try:
+                    base_value = format_dict.get(var_name, 0)
+                    # Convert to int if it's a string representation of a number
+                    if isinstance(base_value, str) and base_value.isdigit():
+                        base_value = int(base_value)
+                    elif isinstance(base_value, str):
+                        # Try to extract number from string like "C1" -> 1
+                        number_match = re.search(r"\d+", base_value)
+                        if number_match:
+                            base_value = int(number_match.group())
+                        else:
+                            base_value = 0
+
+                    result = int(base_value) - int(sub_value)
+                    return str(result)
+                except (ValueError, TypeError):
+                    return expression  # Return original if can't process
+            else:
+                # No arithmetic, just return the variable value
+                var_value = format_dict.get(expression, expression)
+                return str(var_value)
+
+        # Find and replace arithmetic expressions
+        arithmetic_pattern = r"\{([^}]+[\+\-][^}]+)\}"
+        processed_string = re.sub(arithmetic_pattern, replace_arithmetic, format_string)
+
+        # Now handle regular formatting
+        try:
+            return processed_string.format(**format_dict)
+        except KeyError:
+            # If some variables are still missing, do a safer replacement
+            for key, value in format_dict.items():
+                processed_string = processed_string.replace(f"{{{key}}}", str(value))
+            return processed_string
