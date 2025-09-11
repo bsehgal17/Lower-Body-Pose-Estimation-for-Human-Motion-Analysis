@@ -185,7 +185,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                 if not os.path.exists(gt_file):
                     gt_file = os.path.join(gt_directory, f"{video_name}.csv")
             else:  # humaneva
-                gt_file = os.path.join(gt_directory, f"{video_name}.csv")
+                gt_file = gt_directory
 
             if not os.path.exists(gt_file):
                 print(f"   Ground truth file not found: {gt_file}")

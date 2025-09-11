@@ -7,7 +7,7 @@ paths:
   video_directory: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva"
   pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/evaluation/2025-08-21_17-21-05/detect/detect_metrics.xlsx"
   save_folder: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/HumanEva/High_threshold"
-  ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva/combined_humaneva_data.csv"  # Path to combined ground truth CSV file
+  ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv"  # Path to combined ground truth CSV file
 
 columns:
   subject_column: "subject"
@@ -26,24 +26,25 @@ pck_scores:
     - "pck_per_frame_pck_0.50"
   
   jointwise:
-    - "LEFT_HIP_jointwise_pck_0.01"
-    - "RIGHT_HIP_jointwise_pck_0.01"
-    - "LEFT_KNEE_jointwise_pck_0.01"
-    - "RIGHT_KNEE_jointwise_pck_0.01"
-    - "LEFT_ANKLE_jointwise_pck_0.01"
-    - "RIGHT_ANKLE_jointwise_pck_0.01"
-    - "LEFT_HIP_jointwise_pck_0.02"
-    - "RIGHT_HIP_jointwise_pck_0.02"
-    - "LEFT_KNEE_jointwise_pck_0.02"
-    - "RIGHT_KNEE_jointwise_pck_0.02"
-    - "LEFT_ANKLE_jointwise_pck_0.02"
-    - "RIGHT_ANKLE_jointwise_pck_0.02"
-    - "LEFT_HIP_jointwise_pck_0.05"
-    - "RIGHT_HIP_jointwise_pck_0.05"
-    - "LEFT_KNEE_jointwise_pck_0.05"
-    - "RIGHT_KNEE_jointwise_pck_0.05"
-    - "LEFT_ANKLE_jointwise_pck_0.05"
-    - "RIGHT_ANKLE_jointwise_pck_0.05"
+    - "LEFT_HIP_jointwise_pck_0.10"
+    - "RIGHT_HIP_jointwise_pck_0.10"
+    - "LEFT_KNEE_jointwise_pck_0.10"
+    - "RIGHT_KNEE_jointwise_pck_0.10"
+    - "LEFT_ANKLE_jointwise_pck_0.10"
+    - "RIGHT_ANKLE_jointwise_pck_0.10"
+    - "LEFT_HIP_jointwise_pck_0.20"
+    - "RIGHT_HIP_jointwise_pck_0.20"
+    - "LEFT_KNEE_jointwise_pck_0.20"
+    - "RIGHT_KNEE_jointwise_pck_0.20"
+    - "LEFT_ANKLE_jointwise_pck_0.20"
+    - "RIGHT_ANKLE_jointwise_pck_0.20"
+    - "LEFT_HIP_jointwise_pck_0.50"
+    - "RIGHT_HIP_jointwise_pck_0.50"
+    - "LEFT_KNEE_jointwise_pck_0.50"
+    - "RIGHT_KNEE_jointwise_pck_0.50"
+    - "LEFT_ANKLE_jointwise_pck_0.50"
+    - "RIGHT_ANKLE_jointwise_pck_0.50"
+
 
 # Synchronization data for frame alignment
 sync_data:

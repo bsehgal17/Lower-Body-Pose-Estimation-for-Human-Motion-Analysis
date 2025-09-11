@@ -162,7 +162,7 @@ Examples:
     try:
         # List available analyses
         if args.list_available:
-            orchestrator = AnalysisOrchestrator(args.dataset)
+            orchestrator = AnalysisOrchestrator("humaneva")
             available = orchestrator.get_available_analyses()
             print(f"\nAvailable analyses for {args.dataset}:")
             for analysis in available:
@@ -176,7 +176,7 @@ Examples:
 
         # Direct analysis type
         if args.type:
-            success = run_analysis_by_type(args.dataset, args.type)
+            success = run_analysis_by_type("humaneva", args.type)
             if not success:
                 sys.exit(1)
             return
@@ -185,7 +185,7 @@ Examples:
         print("No analysis type specified. Running joint analysis by default.")
         print("Use --help to see all options.")
         # success = run_analysis_by_type(args.dataset, "multi")
-        success = run_analysis_by_type(args.dataset, "per_video")
+        success = run_analysis_by_type("humaneva", "per_video")
 
         if not success:
             sys.exit(1)
