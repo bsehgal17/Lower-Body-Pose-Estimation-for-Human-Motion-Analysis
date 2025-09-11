@@ -62,6 +62,32 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             print("❌ No analysis results to visualize")
             return
 
+        # Debug: Print analysis results structure
+        print(f"   Debug: Received analysis results for {len(analysis_results)} videos")
+        for i, (video_name, video_data) in enumerate(analysis_results.items()):
+            if i < 2:  # Show first 2 videos
+                print(f"   Video '{video_name}' structure:")
+                for key, value in video_data.items():
+                    if isinstance(value, dict) and key not in ["brightness_summary"]:
+                        has_pck_scores = "pck_scores" in value
+                        has_brightness = "brightness_values" in value
+                        pck_len = (
+                            len(value.get("pck_scores", [])) if has_pck_scores else 0
+                        )
+                        brightness_len = (
+                            len(value.get("brightness_values", []))
+                            if has_brightness
+                            else 0
+                        )
+                        print(
+                            f"      {key}: pck_scores={pck_len}, brightness_values={brightness_len}"
+                        )
+                    else:
+                        print(f"      {key}: {type(value)}")
+            elif i == 2:
+                print("   ... (more videos)")
+                break
+
         # Create combined scatter plot showing all videos and joints together (MAIN PLOT)
         self.create_combined_scatter_plot(analysis_results)
 
@@ -335,11 +361,31 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         """
         print("Creating combined scatter plot (all videos and joints together)...")
 
-        # Set matplotlib backend to ensure plots are displayed
-        import matplotlib
+        # Ensure we can display plots
+        plt.ioff()  # Turn off interactive mode initially
 
-        matplotlib.use("TkAgg")  # Use TkAgg backend for interactive plots
-        plt.ion()  # Enable interactive mode
+        # Debug: Print structure of analysis results
+        print(f"   Debug: Analysis results contains {len(analysis_results)} videos")
+        for vid_name, vid_data in list(analysis_results.items())[
+            :1
+        ]:  # Show first video structure
+            print(f"   Debug: Video '{vid_name}' has keys: {list(vid_data.keys())}")
+            for key, value in vid_data.items():
+                if key not in [
+                    "video_name",
+                    "total_frames",
+                    "joints_analyzed",
+                    "brightness_summary",
+                ]:
+                    print(
+                        f"      PCK column '{key}': {type(value)} with keys: {list(value.keys()) if isinstance(value, dict) else 'Not a dict'}"
+                    )
+                    if isinstance(value, dict):
+                        pck_scores = value.get("pck_scores", [])
+                        brightness_vals = value.get("brightness_values", [])
+                        print(
+                            f"         pck_scores length: {len(pck_scores)}, brightness_values length: {len(brightness_vals)}"
+                        )
 
         # Collect all frame-by-frame data from all videos
         all_data = []
