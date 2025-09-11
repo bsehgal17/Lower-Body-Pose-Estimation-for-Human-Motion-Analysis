@@ -145,13 +145,15 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             return {}
 
         # Extract brightness for all joints
-        brightness_data = self._extract_video_brightness(video_path, gt_coordinates)
+        brightness_data = self._extract_video_brightness(
+            video_path, gt_coordinates)
         if not brightness_data:
             print(f"   No brightness data extracted for {video_name}")
             return {}
 
         # Analyze jointwise PCK scores with brightness for this video
-        video_analysis = self._analyze_video_pck_brightness(video_data, brightness_data)
+        video_analysis = self._analyze_video_pck_brightness(
+            video_data, brightness_data)
 
         # Add video metadata
         video_analysis["video_name"] = str(video_name)
@@ -195,7 +197,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             coordinates = {}
 
             for joint_name in self.joint_names:
-                joint_coords = self._extract_joint_coordinates(gt_file, joint_name)
+                joint_coords = self._extract_joint_coordinates(
+                    gt_file, joint_name)
                 if joint_coords is not None:
                     coordinates[joint_name] = joint_coords
 
@@ -297,7 +300,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         try:
             cap = cv2.VideoCapture(video_path)
             if not cap.isOpened():
-                print(f"   Failed to open video: {os.path.basename(video_path)}")
+                print(
+                    f"   Failed to open video: {os.path.basename(video_path)}")
                 return {}
 
             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -344,7 +348,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                     print(f"   Processed {frame_idx}/{total_frames} frames")
 
             cap.release()
-            print(f"   ✅ Extracted brightness for {len(brightness_data)} joints")
+            print(
+                f"   ✅ Extracted brightness for {len(brightness_data)} joints")
             return brightness_data
 
         except Exception as e:
@@ -404,7 +409,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             )
 
             if joint_name not in brightness_data:
-                print(f"      ❌ Joint {joint_name} not found in brightness data")
+                print(
+                    f"      ❌ Joint {joint_name} not found in brightness data")
                 continue
 
             # Get PCK scores and brightness values for this joint
@@ -427,7 +433,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             valid_mask = ~(pd.isna(pck_scores) | pd.isna(joint_brightness))
             pck_scores_clean = np.array(pck_scores)[valid_mask]
             joint_brightness_clean = np.array(joint_brightness)[valid_mask]
-            print(f"      After cleaning: {len(pck_scores_clean)} valid data points")
+            print(
+                f"      After cleaning: {len(pck_scores_clean)} valid data points")
 
             if len(pck_scores_clean) == 0:
                 print(f"      ❌ No valid data after cleaning")
@@ -568,7 +575,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         """Parse joint name and threshold from PCK column name."""
 
         # Example: "left_ankle_jointwise_pck_0.05" -> ("left_ankle", "0.05")
-        parts = column_name.lower().split("_")
+        parts = column_name.split("_")
 
         # Find 'jointwise' index
         if "jointwise" in parts:
@@ -586,11 +593,12 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                 pck_idx = parts.index("pck")
                 joint_parts = (
                     parts[: pck_idx - 1]
-                    if "jointwise" in parts[pck_idx - 1 : pck_idx]
+                    if "jointwise" in parts[pck_idx - 1: pck_idx]
                     else parts[:pck_idx]
                 )
                 joint_name = "_".join(joint_parts)
-                threshold = parts[-1] if len(parts) > pck_idx + 1 else "unknown"
+                threshold = parts[-1] if len(parts) > pck_idx + \
+                    1 else "unknown"
                 return joint_name, threshold
 
         return "unknown_joint", "unknown_threshold"
