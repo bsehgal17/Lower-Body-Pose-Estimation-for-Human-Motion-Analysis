@@ -78,7 +78,8 @@ def interactive_mode(dataset_name: str):
                 analysis_idx = int(choice) - 1
                 analysis_type = available_analyses[analysis_idx]
 
-                print(f"\nRunning {analysis_type.replace('_', ' ').title()}...")
+                print(
+                    f"\nRunning {analysis_type.replace('_', ' ').title()}...")
 
                 if analysis_type == "joint_analysis":
                     success = orchestrator.run_joint_analysis()
@@ -184,7 +185,7 @@ Examples:
         print("No analysis type specified. Running joint analysis by default.")
         print("Use --help to see all options.")
         # success = run_analysis_by_type(args.dataset, "multi")
-        success = run_analysis_by_type(args.dataset, "joint")
+        success = run_analysis_by_type(args.dataset, "per_video")
 
         if not success:
             sys.exit(1)
