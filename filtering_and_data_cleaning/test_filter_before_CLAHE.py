@@ -17,27 +17,29 @@ def apply_filter_then_clahe(input_path, output_dir):
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
-    # Define CLAHE
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    # Define CLAHE with moderate clip limit
+    clahe = cv2.createCLAHE(clipLimit=1.5, tileGridSize=(8, 8))
 
-    # Filters to test (single filters only)
+    # Filters with softer parameters
     filters = {
         "original": lambda x: x,
-        "bilateral": lambda x: cv2.bilateralFilter(x, 9, 75, 75),
-        "nlm": lambda x: cv2.fastNlMeansDenoisingColored(x, None, 10, 10, 7, 21),
-        "gaussian": lambda x: cv2.GaussianBlur(x, (5, 5), 0),
+        "bilateral": lambda x: cv2.bilateralFilter(
+            x, d=7, sigmaColor=50, sigmaSpace=50
+        ),
+        "nlm": lambda x: cv2.fastNlMeansDenoisingColored(x, None, 7, 7, 5, 21),
+        "gaussian": lambda x: cv2.GaussianBlur(x, (3, 3), 0),
         "laplacian_sharp": lambda x: cv2.addWeighted(
-            x, 1.5, cv2.Laplacian(x, cv2.CV_64F).astype(np.uint8), -0.5, 0
+            x, 1.2, cv2.Laplacian(x, cv2.CV_64F).astype(np.uint8), -0.2, 0
         ),
         "cubic_resize": lambda x: cv2.resize(
-            cv2.resize(x, (0, 0), fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC),
+            cv2.resize(x, (0, 0), fx=0.7, fy=0.7, interpolation=cv2.INTER_CUBIC),
             (x.shape[1], x.shape[0]),
             interpolation=cv2.INTER_CUBIC,
         ),
-        "median": lambda x: cv2.medianBlur(x, 5),  # good for salt & pepper noise
+        "median": lambda x: cv2.medianBlur(x, 3),
         "gaussian_sharp": lambda x: cv2.addWeighted(
-            x, 1.5, cv2.GaussianBlur(x, (5, 5), 0), -0.5, 0
-        ),  # sharpening
+            x, 1.2, cv2.GaussianBlur(x, (3, 3), 0), -0.2, 0
+        ),
     }
 
     # Create writers
@@ -75,5 +77,5 @@ def apply_filter_then_clahe(input_path, output_dir):
 # Example usage
 if __name__ == "__main__":
     input_video = r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\dataset\HumanEvaFull\S3\Image_Data\Walking_2_(C3).avi"
-    output_dir = r"C:\Users\BhavyaSehgal\Downloads\output_filters_clahe"
+    output_dir = r"C:\Users\BhavyaSehgal\Downloads\output_filters_clahe_soft"
     apply_filter_then_clahe(input_video, output_dir)

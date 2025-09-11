@@ -31,6 +31,9 @@ def run_analysis_by_type(dataset_name: str, analysis_type: str) -> bool:
         return orchestrator.run_standard_analysis()
     elif analysis_type == "multi":
         return orchestrator.run_multi_analysis()
+    elif analysis_type == "per_video":
+        # Run per-video joint brightness analysis
+        return orchestrator.run_per_video_analysis()
     elif analysis_type == "all":
         results = orchestrator.run_complete_analysis_suite()
         return any(results.values())
@@ -75,8 +78,7 @@ def interactive_mode(dataset_name: str):
                 analysis_idx = int(choice) - 1
                 analysis_type = available_analyses[analysis_idx]
 
-                print(
-                    f"\nRunning {analysis_type.replace('_', ' ').title()}...")
+                print(f"\nRunning {analysis_type.replace('_', ' ').title()}...")
 
                 if analysis_type == "joint_analysis":
                     success = orchestrator.run_joint_analysis()
@@ -84,6 +86,8 @@ def interactive_mode(dataset_name: str):
                     success = orchestrator.run_standard_analysis()
                 elif analysis_type == "multi_analysis":
                     success = orchestrator.run_multi_analysis()
+                elif analysis_type == "per_video_analysis":
+                    success = orchestrator.run_per_video_analysis()
 
                 if success:
                     print(
@@ -112,10 +116,12 @@ Analysis Types:
   joint      - Joint-wise pose estimation analysis
   standard   - Standard single analysis pipeline  
   multi      - Multi-analysis pipeline with scenarios
+  per_video  - Per-video joint brightness analysis (NEW)
   all        - Complete analysis suite (runs all)
 
 Examples:
   python main.py --dataset movi --type joint
+  python main.py --dataset movi --type per_video
   python main.py --dataset humaneva --interactive
   python main.py --dataset movi --type all
         """,
@@ -132,7 +138,7 @@ Examples:
     parser.add_argument(
         "--type",
         "-t",
-        choices=["joint", "standard", "multi", "all"],
+        choices=["joint", "standard", "multi", "per_video", "all"],
         help="Type of analysis to run",
     )
 

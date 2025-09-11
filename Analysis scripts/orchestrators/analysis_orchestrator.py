@@ -16,6 +16,7 @@ from utils.config_extractor import extract_joint_analysis_config, get_analysis_s
 from runners.single_analysis_runner import run_single_analysis
 from runners.multi_analysis_runner import run_multi_analysis
 from joint_analysis_runner import run_joint_analysis
+from per_video_joint_analysis_runner import run_per_video_analysis
 
 
 class AnalysisOrchestrator:
@@ -121,6 +122,41 @@ class AnalysisOrchestrator:
             analysis_config=self.analysis_config,
         )
 
+    def run_per_video_analysis(
+        self,
+        custom_joints: Optional[list] = None,
+        output_dir: Optional[str] = None,
+        sampling_radius: int = 3,
+    ) -> bool:
+        """Run per-video joint brightness analysis pipeline.
+
+        Args:
+            custom_joints: Custom list of joints (uses default if None)
+            output_dir: Custom output directory
+            sampling_radius: Radius for brightness sampling around joints
+
+        Returns:
+            bool: True if analysis completed successfully
+        """
+        print("=== PER-VIDEO JOINT BRIGHTNESS ANALYSIS ===")
+
+        # Extract from config if not provided
+        if custom_joints is None:
+            config_joints, _ = extract_joint_analysis_config(self.dataset_name)
+            joints_to_analyze = config_joints
+        else:
+            joints_to_analyze = custom_joints
+
+        results = run_per_video_analysis(
+            dataset_name=self.dataset_name,
+            joint_names=joints_to_analyze,
+            output_dir=output_dir,
+            save_results=self.settings.get("save_results", True),
+            sampling_radius=sampling_radius,
+        )
+
+        return bool(results)
+
     def run_complete_analysis_suite(self, include_multi: bool = None) -> dict:
         """Run complete analysis suite with all pipelines.
 
@@ -136,6 +172,7 @@ class AnalysisOrchestrator:
             "joint_analysis": False,
             "standard_analysis": False,
             "multi_analysis": False,
+            "per_video_analysis": False,
         }
 
         # Run joint analysis
@@ -149,6 +186,12 @@ class AnalysisOrchestrator:
             results["standard_analysis"] = self.run_standard_analysis()
         except Exception as e:
             print(f"Standard analysis failed: {e}")
+
+        # Run per-video analysis
+        try:
+            results["per_video_analysis"] = self.run_per_video_analysis()
+        except Exception as e:
+            print(f"Per-video analysis failed: {e}")
 
         # Determine if multi-analysis should be run
         if include_multi is None:
@@ -196,7 +239,7 @@ class AnalysisOrchestrator:
         Returns:
             list: List of available analysis types
         """
-        analyses = ["joint_analysis", "standard_analysis"]
+        analyses = ["joint_analysis", "standard_analysis", "per_video_analysis"]
 
         if self.analysis_config and self.analysis_config.is_multi_analysis_enabled():
             analyses.append("multi_analysis")
