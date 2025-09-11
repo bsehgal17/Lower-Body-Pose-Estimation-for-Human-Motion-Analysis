@@ -23,12 +23,26 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             output_dir: Directory to save plots (optional)
             save_plots: Whether to save plots to files
         """
-        super().__init__()
+        super().__init__(config=None)  # Pass None as config to satisfy base class
         self.output_dir = output_dir
         self.save_plots = save_plots
 
         if self.output_dir:
             os.makedirs(self.output_dir, exist_ok=True)
+
+    def create_plot(self, data: pd.DataFrame, **kwargs) -> None:
+        """Create a plot from the given data (required by BaseVisualizer).
+        
+        This method delegates to create_all_visualizations for compatibility.
+        """
+        # Convert DataFrame to analysis_results format if needed
+        if isinstance(data, dict):
+            analysis_results = data
+        else:
+            # For compatibility, if called with DataFrame, create minimal structure
+            analysis_results = {"default_video": {"brightness_summary": {}}}
+        
+        self.create_all_visualizations(analysis_results)
 
     def create_all_visualizations(self, analysis_results: Dict[str, Any]) -> None:
         """Create all visualization types for per-video analysis results.
@@ -141,7 +155,6 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         print("Creating joint brightness heatmap...")
 
         # Prepare data
-        brightness_data = {}
         videos = list(analysis_results.keys())
 
         # Get all joint names
