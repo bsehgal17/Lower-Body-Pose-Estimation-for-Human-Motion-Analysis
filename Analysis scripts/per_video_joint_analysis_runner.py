@@ -226,8 +226,6 @@ class PerVideoJointAnalysisRunner:
         print(f"   🎬 Total frames processed: {total_frames}")
 
         if correlations:
-            import numpy as np
-
             print("   📊 Correlation statistics:")
             print(f"      - Mean correlation: {np.mean(correlations):.3f}")
             print(f"      - Std correlation: {np.std(correlations):.3f}")
