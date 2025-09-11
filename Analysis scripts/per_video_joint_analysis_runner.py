@@ -20,8 +20,9 @@ from visualizers.per_video_joint_brightness_visualizer import (
     PerVideoJointBrightnessVisualizer,
 )
 
-# Import existing data loader
+# Import existing data loader and config extractor
 from core.joint_data_loader import JointDataLoader
+from utils.config_extractor import extract_joint_analysis_config
 
 
 class PerVideoJointAnalysisRunner:
@@ -45,7 +46,12 @@ class PerVideoJointAnalysisRunner:
             sampling_radius: Radius for brightness sampling around joints
         """
         self.dataset_name = dataset_name
-        self.joint_names = joint_names or self._get_default_joints()
+        
+        # Get joints from config or use provided/default joints
+        config_joints, config_pck_thresholds = extract_joint_analysis_config(dataset_name)
+        self.joint_names = joint_names or config_joints or self._get_default_joints()
+        self.pck_thresholds = config_pck_thresholds or [0.01, 0.02, 0.05]
+        
         self.save_results = save_results
         self.sampling_radius = sampling_radius
 
@@ -62,21 +68,22 @@ class PerVideoJointAnalysisRunner:
         if self.save_results:
             self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        print(f"Per-Video Joint Analysis Runner")
+        print("Per-Video Joint Analysis Runner")
         print(f"Dataset: {self.dataset_name}")
         print(f"Joints: {', '.join(self.joint_names)}")
+        print(f"PCK Thresholds: {self.pck_thresholds}")
         if self.save_results:
             print(f"Output: {self.output_dir}")
 
     def _get_default_joints(self) -> list:
-        """Get default lower body joints."""
+        """Get default lower body joints (matching MoVi config format)."""
         return [
-            "left_hip",
-            "right_hip",
-            "left_knee",
-            "right_knee",
-            "left_ankle",
-            "right_ankle",
+            "LEFT_HIP",
+            "RIGHT_HIP", 
+            "LEFT_KNEE",
+            "RIGHT_KNEE",
+            "LEFT_ANKLE",
+            "RIGHT_ANKLE",
         ]
 
     def run_analysis(self) -> Dict[str, Any]:
@@ -94,10 +101,14 @@ class PerVideoJointAnalysisRunner:
             print("\\n1. Loading and validating data...")
             data_loader = JointDataLoader(self.dataset_name)
 
-            # Get PCK thresholds from config (use default if not available)
-            pck_thresholds = [0.05, 0.10, 0.15, 0.20]  # Default thresholds
+            # Setup configuration and load PCK data
+            if not data_loader.setup_configuration():
+                print("❌ Failed to load configuration")
+                return {}
 
-            pck_data = data_loader.load_and_validate(self.joint_names, pck_thresholds)
+            # Load PCK data - this will load all available PCK columns from the Excel file
+            # including all jointwise PCK columns with their thresholds (0.01, 0.02, 0.05)
+            pck_data = data_loader.load_pck_data()
 
             if pck_data is None:
                 print("❌ Failed to load data")
@@ -120,8 +131,8 @@ class PerVideoJointAnalysisRunner:
             # Step 2: Initialize analyzer
             print("\\n2. Initializing per-video analyzer...")
 
-            # Load config (create dummy config if needed)
-            config = self._create_config()
+            # Use the loaded configuration from data_loader
+            config = data_loader.config
 
             analyzer = PerVideoJointBrightnessAnalyzer(
                 config=config,
@@ -170,24 +181,7 @@ class PerVideoJointAnalysisRunner:
             traceback.print_exc()
             return {}
 
-    def _create_config(self):
-        """Create a configuration object with necessary paths."""
 
-        class Config:
-            def __init__(self):
-                # Set paths based on dataset
-                if self.dataset_name == "movi":
-                    self.video_directory = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset_files/MoVi/videos"
-                    self.ground_truth_directory = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset_files/MoVi/gt_pose_data"
-                else:  # humaneva
-                    self.video_directory = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset_files/HumanEva/videos"
-                    self.ground_truth_directory = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/dataset_files/HumanEva/gt_pose_data"
-
-                self.name = self.dataset_name
-
-        config = Config()
-        config.dataset_name = self.dataset_name
-        return config
 
     def _print_summary(self, analysis_results: Dict[str, Any]) -> None:
         """Print a summary of the analysis results."""
@@ -232,7 +226,7 @@ class PerVideoJointAnalysisRunner:
         if correlations:
             import numpy as np
 
-            print(f"   📊 Correlation statistics:")
+            print("   📊 Correlation statistics:")
             print(f"      - Mean correlation: {np.mean(correlations):.3f}")
             print(f"      - Std correlation: {np.std(correlations):.3f}")
             print(

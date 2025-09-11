@@ -64,15 +64,15 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             raise ValueError(f"Unsupported dataset: {self.dataset_name}")
 
     def _get_default_joint_names(self) -> List[str]:
-        """Get default joint names for lower body joints."""
-        # Default lower body joints for both datasets
+        """Get default joint names for lower body joints (matching config format)."""
+        # Default lower body joints matching MoVi config format
         return [
-            "left_hip",
-            "right_hip",
-            "left_knee",
-            "right_knee",
-            "left_ankle",
-            "right_ankle",
+            "LEFT_HIP",
+            "RIGHT_HIP", 
+            "LEFT_KNEE",
+            "RIGHT_KNEE",
+            "LEFT_ANKLE",
+            "RIGHT_ANKLE",
         ]
 
     def analyze(self, per_frame_data: pd.DataFrame) -> Dict[str, Any]:
