@@ -121,9 +121,9 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
 
             if video_result:
                 video_results[str(video_name)] = video_result
-                print(f"✅ Completed analysis for {video_name}")
+                print(f"Completed analysis for {video_name}")
             else:
-                print(f"❌ Failed analysis for {video_name}")
+                print(f"Failed analysis for {video_name}")
 
         return video_results
 
@@ -238,8 +238,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             else:  # humaneva
                 # HumanEva format: traditional CSV with column names
                 gt_data = pd.read_csv(gt_file)
-                x_col = f"{joint_number}_x"
-                y_col = f"{joint_number}_y"
+                x_col = f"x{joint_number}"
+                y_col = f"y{joint_number}"
 
                 if x_col not in gt_data.columns or y_col not in gt_data.columns:
                     print(
