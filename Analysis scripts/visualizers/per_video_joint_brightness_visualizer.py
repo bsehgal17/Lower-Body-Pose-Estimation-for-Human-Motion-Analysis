@@ -199,32 +199,6 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 linewidth=1,
             )
 
-            # Add video label next to the point
-            plt.annotate(
-                video,
-                (video_data["avg_brightness"], video_data["avg_pck"]),
-                xytext=(8, 8),
-                textcoords="offset points",
-                fontsize=9,
-                fontweight="bold",
-                alpha=0.9,
-                bbox=dict(boxstyle="round,pad=0.3", facecolor=colors[i], alpha=0.3),
-            )
-
-        # Calculate and display overall correlation
-        if len(df) > 1:
-            correlation = np.corrcoef(df["avg_brightness"], df["avg_pck"])[0, 1]
-            if not np.isnan(correlation):
-                plt.text(
-                    0.05,
-                    0.95,
-                    f"Overall Correlation: r = {correlation:.3f}",
-                    transform=plt.gca().transAxes,
-                    fontsize=14,
-                    fontweight="bold",
-                    bbox=dict(boxstyle="round,pad=0.5", facecolor="yellow", alpha=0.8),
-                )
-
         # Add trend line if we have enough data points
         if len(df) > 2:
             z = np.polyfit(df["avg_brightness"], df["avg_pck"], 1)
@@ -249,8 +223,10 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             pad=20,
         )
 
-        # Customize the legend
-        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=10)
+        # Customize the legend with multiple columns (10 videos per column)
+        num_videos = len(videos)
+        num_cols = max(1, (num_videos + 9) // 10)  # Calculate number of columns needed
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=10, ncol=num_cols)
         plt.grid(True, alpha=0.3)
 
         # Set reasonable axis limits with some padding
