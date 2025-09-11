@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any
+import numpy as np
+import pandas as pd
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent))
@@ -46,12 +48,14 @@ class PerVideoJointAnalysisRunner:
             sampling_radius: Radius for brightness sampling around joints
         """
         self.dataset_name = dataset_name
-        
+
         # Get joints from config or use provided/default joints
-        config_joints, config_pck_thresholds = extract_joint_analysis_config(dataset_name)
+        config_joints, config_pck_thresholds = extract_joint_analysis_config(
+            dataset_name
+        )
         self.joint_names = joint_names or config_joints or self._get_default_joints()
         self.pck_thresholds = config_pck_thresholds or [0.01, 0.02, 0.05]
-        
+
         self.save_results = save_results
         self.sampling_radius = sampling_radius
 
@@ -79,7 +83,7 @@ class PerVideoJointAnalysisRunner:
         """Get default lower body joints (matching MoVi config format)."""
         return [
             "LEFT_HIP",
-            "RIGHT_HIP", 
+            "RIGHT_HIP",
             "LEFT_KNEE",
             "RIGHT_KNEE",
             "LEFT_ANKLE",
@@ -180,8 +184,6 @@ class PerVideoJointAnalysisRunner:
 
             traceback.print_exc()
             return {}
-
-
 
     def _print_summary(self, analysis_results: Dict[str, Any]) -> None:
         """Print a summary of the analysis results."""

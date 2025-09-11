@@ -5,7 +5,6 @@ Analyzes brightness values at all joint coordinates per video basis.
 Takes all six joints in each video and analyzes brightness on those GT joints.
 """
 
-from utils.joint_enum import GTJointsHumanEVa, GTJointsMoVi
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Any, Tuple, Optional
@@ -17,6 +16,7 @@ import sys
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
+from utils.joint_enum import GTJointsHumanEVa, GTJointsMoVi
 
 
 class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
@@ -145,15 +145,13 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             return {}
 
         # Extract brightness for all joints
-        brightness_data = self._extract_video_brightness(
-            video_path, gt_coordinates)
+        brightness_data = self._extract_video_brightness(video_path, gt_coordinates)
         if not brightness_data:
             print(f"   No brightness data extracted for {video_name}")
             return {}
 
         # Analyze jointwise PCK scores with brightness for this video
-        video_analysis = self._analyze_video_pck_brightness(
-            video_data, brightness_data)
+        video_analysis = self._analyze_video_pck_brightness(video_data, brightness_data)
 
         # Add video metadata
         video_analysis["video_name"] = str(video_name)
@@ -172,7 +170,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
 
         try:
             # Get ground truth directory from config
-            gt_directory = getattr(self.config, "ground_truth_file", None)
+            gt_directory = getattr(self.config, "ground_truth_directory", None)
             if not gt_directory or not os.path.exists(gt_directory):
                 print(f"   Ground truth directory not found: {gt_directory}")
                 return {}
@@ -197,8 +195,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             coordinates = {}
 
             for joint_name in self.joint_names:
-                joint_coords = self._extract_joint_coordinates(
-                    gt_file, joint_name)
+                joint_coords = self._extract_joint_coordinates(gt_file, joint_name)
                 if joint_coords is not None:
                     coordinates[joint_name] = joint_coords
 
@@ -231,8 +228,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                     return None
 
                 # Get x and y coordinates for all frames for this joint
-                # Shape: (frames, 2)
-                joint_coords = gt_keypoints_np[:, joint_number, :]
+                joint_coords = gt_keypoints_np[:, joint_number, :]  # Shape: (frames, 2)
                 return joint_coords
 
             else:  # humaneva
@@ -273,8 +269,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             video_extensions = [".mp4", ".avi", ".mov", ".mkv", ".wmv"]
 
             for ext in video_extensions:
-                video_path = os.path.join(
-                    video_directory, f"{video_name}_walking_cropped{ext}")
+                video_path = os.path.join(video_directory, f"{video_name}{ext}")
                 if os.path.exists(video_path):
                     return video_path
 
@@ -299,8 +294,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         try:
             cap = cv2.VideoCapture(video_path)
             if not cap.isOpened():
-                print(
-                    f"   Failed to open video: {os.path.basename(video_path)}")
+                print(f"   Failed to open video: {os.path.basename(video_path)}")
                 return {}
 
             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -347,8 +341,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                     print(f"   Processed {frame_idx}/{total_frames} frames")
 
             cap.release()
-            print(
-                f"   ✅ Extracted brightness for {len(brightness_data)} joints")
+            print(f"   ✅ Extracted brightness for {len(brightness_data)} joints")
             return brightness_data
 
         except Exception as e:
@@ -571,12 +564,11 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                 pck_idx = parts.index("pck")
                 joint_parts = (
                     parts[: pck_idx - 1]
-                    if "jointwise" in parts[pck_idx - 1: pck_idx]
+                    if "jointwise" in parts[pck_idx - 1 : pck_idx]
                     else parts[:pck_idx]
                 )
                 joint_name = "_".join(joint_parts)
-                threshold = parts[-1] if len(parts) > pck_idx + \
-                    1 else "unknown"
+                threshold = parts[-1] if len(parts) > pck_idx + 1 else "unknown"
                 return joint_name, threshold
 
         return "unknown_joint", "unknown_threshold"
