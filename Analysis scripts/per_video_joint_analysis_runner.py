@@ -159,7 +159,9 @@ class PerVideoJointAnalysisRunner:
             if self.save_results:
                 print("\\n4. Creating visualizations...")
                 visualizer = PerVideoJointBrightnessVisualizer(
-                    output_dir=str(self.output_dir), save_plots=True
+                    output_dir=str(self.output_dir),
+                    save_plots=True,
+                    create_individual_plots=False,  # Focus on combined plot
                 )
 
                 visualizer.create_all_visualizations(analysis_results)
