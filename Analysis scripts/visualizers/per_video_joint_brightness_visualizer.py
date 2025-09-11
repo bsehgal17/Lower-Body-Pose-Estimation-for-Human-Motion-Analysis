@@ -88,11 +88,12 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 print("   ... (more videos)")
                 break
 
-        # Create combined scatter plot showing all videos and joints together (MAIN PLOT)
-        self.create_combined_scatter_plot(analysis_results)
-
-        # Create aggregated plot: average PCK vs brightness per video for joints
+        # Create the main requested plot: average PCK vs brightness per video (color-coded by video)
         self.create_pck_brightness_plot(analysis_results)
+
+        # Create combined scatter plot showing all videos and joints together (detailed plot)
+        if self.create_individual_plots:
+            self.create_combined_scatter_plot(analysis_results)
 
         # Create individual scatter plots for each video (optional)
         if self.create_individual_plots:
@@ -101,20 +102,22 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         print("✅ Per-video visualization completed")
 
     def create_pck_brightness_plot(self, analysis_results: Dict[str, Any]) -> None:
-        """Create single plot showing average PCK vs brightness per video for joints."""
+        """Create single plot showing average PCK vs brightness per video, color-coded by video."""
 
-        print("Creating PCK vs brightness plot...")
+        print("Creating combined average PCK vs brightness plot per video...")
 
-        # Prepare data for plotting
+        # Prepare data for plotting - combine all joints per video
         plot_data = []
 
         for video_name, video_results in analysis_results.items():
             # Get brightness summary for this video
             brightness_summary = video_results.get("brightness_summary", {})
 
-            # Get PCK data for this video and calculate averages per joint
-            pck_by_joint = {}
+            # Get PCK data for this video and calculate averages across all joints
+            all_pck_scores = []
+            all_brightness_values = []
 
+            # Collect all PCK scores and brightness values for all joints in this video
             for pck_column, pck_results in video_results.items():
                 if pck_column in [
                     "video_name",
@@ -127,75 +130,166 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 joint_name = pck_results.get("joint_name", "unknown")
                 pck_scores = pck_results.get("pck_scores", [])
 
-                if pck_scores and joint_name != "unknown":
-                    if joint_name not in pck_by_joint:
-                        pck_by_joint[joint_name] = []
-                    pck_by_joint[joint_name].extend(pck_scores)
+                if (
+                    pck_scores
+                    and joint_name != "unknown"
+                    and joint_name in brightness_summary
+                ):
+                    # Add all PCK scores for this joint
+                    all_pck_scores.extend(pck_scores)
 
-            # Create data points for each joint in this video
-            for joint_name in brightness_summary.keys():
-                brightness_mean = brightness_summary[joint_name]["mean"]
+                    # Add corresponding brightness values
+                    brightness_values = pck_results.get("brightness_values", [])
+                    if brightness_values:
+                        all_brightness_values.extend(brightness_values)
 
-                if joint_name in pck_by_joint and brightness_mean > 0:
-                    pck_mean = np.mean(pck_by_joint[joint_name])
+            # Also include average brightness across all joints
+            if brightness_summary:
+                joint_brightness_averages = [
+                    stats["mean"]
+                    for stats in brightness_summary.values()
+                    if stats["mean"] > 0
+                ]
+                if joint_brightness_averages:
+                    avg_brightness_all_joints = np.mean(joint_brightness_averages)
+                else:
+                    avg_brightness_all_joints = 0
 
-                    plot_data.append(
-                        {
-                            "video": video_name,
-                            "joint": joint_name,
-                            "avg_brightness": brightness_mean,
-                            "avg_pck": pck_mean,
-                        }
-                    )
+            # Calculate overall averages for this video
+            if all_pck_scores and all_brightness_values:
+                avg_pck = np.mean(all_pck_scores)
+                avg_brightness_from_frames = np.mean(all_brightness_values)
+
+                plot_data.append(
+                    {
+                        "video": str(video_name),
+                        "avg_pck": avg_pck,
+                        "avg_brightness": avg_brightness_from_frames,
+                        "avg_brightness_joints": avg_brightness_all_joints,
+                        "total_data_points": len(all_pck_scores),
+                        "num_joints": len(brightness_summary),
+                    }
+                )
 
         if not plot_data:
             print("❌ No PCK-brightness data found for plotting")
             return
 
         df = pd.DataFrame(plot_data)
+        print(f"   Created plot data for {len(df)} videos")
 
         # Create the plot
-        plt.figure(figsize=(12, 8))
+        plt.figure(figsize=(14, 10))
 
-        # Create scatter plot with different colors for each joint
-        joints = df["joint"].unique()
-        colors = plt.cm.tab10(np.linspace(0, 1, len(joints)))
+        # Create scatter plot with different colors for each video
+        videos = df["video"].unique()
+        colors = plt.cm.Set3(np.linspace(0, 1, len(videos)))
 
-        for i, joint in enumerate(joints):
-            joint_data = df[df["joint"] == joint]
+        for i, video in enumerate(videos):
+            video_data = df[df["video"] == video].iloc[0]
+
             plt.scatter(
-                joint_data["avg_brightness"],
-                joint_data["avg_pck"],
-                label=joint,
+                video_data["avg_brightness"],
+                video_data["avg_pck"],
+                label=video,
                 color=colors[i],
-                alpha=0.7,
-                s=100,
+                alpha=0.8,
+                s=150,
+                edgecolors="black",
+                linewidth=1,
             )
 
-            # Add video labels for each point
-            for _, row in joint_data.iterrows():
-                plt.annotate(
-                    row["video"],
-                    (row["avg_brightness"], row["avg_pck"]),
-                    xytext=(5, 5),
-                    textcoords="offset points",
-                    fontsize=8,
-                    alpha=0.8,
+            # Add video label next to the point
+            plt.annotate(
+                video,
+                (video_data["avg_brightness"], video_data["avg_pck"]),
+                xytext=(8, 8),
+                textcoords="offset points",
+                fontsize=9,
+                fontweight="bold",
+                alpha=0.9,
+                bbox=dict(boxstyle="round,pad=0.3", facecolor=colors[i], alpha=0.3),
+            )
+
+        # Calculate and display overall correlation
+        if len(df) > 1:
+            correlation = np.corrcoef(df["avg_brightness"], df["avg_pck"])[0, 1]
+            if not np.isnan(correlation):
+                plt.text(
+                    0.05,
+                    0.95,
+                    f"Overall Correlation: r = {correlation:.3f}",
+                    transform=plt.gca().transAxes,
+                    fontsize=14,
+                    fontweight="bold",
+                    bbox=dict(boxstyle="round,pad=0.5", facecolor="yellow", alpha=0.8),
                 )
 
-        plt.xlabel("Average Brightness", fontsize=12)
-        plt.ylabel("Average PCK Score", fontsize=12)
-        plt.title(
-            "Average PCK vs Brightness per Video for Joints",
-            fontsize=14,
-            fontweight="bold",
+        # Add trend line if we have enough data points
+        if len(df) > 2:
+            z = np.polyfit(df["avg_brightness"], df["avg_pck"], 1)
+            p = np.poly1d(z)
+            x_trend = np.linspace(
+                df["avg_brightness"].min(), df["avg_brightness"].max(), 100
+            )
+            plt.plot(
+                x_trend, p(x_trend), "r--", alpha=0.8, linewidth=2, label="Trend line"
+            )
+
+        plt.xlabel(
+            "Average Brightness (Combined All Joints)", fontsize=14, fontweight="bold"
         )
-        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+        plt.ylabel(
+            "Average PCK Score (Combined All Joints)", fontsize=14, fontweight="bold"
+        )
+        plt.title(
+            f"Average PCK vs Brightness Per Video\n(Combined across all 6 joints: {len(df)} videos)",
+            fontsize=16,
+            fontweight="bold",
+            pad=20,
+        )
+
+        # Customize the legend
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=10)
         plt.grid(True, alpha=0.3)
+
+        # Set reasonable axis limits with some padding
+        x_range = df["avg_brightness"].max() - df["avg_brightness"].min()
+        y_range = df["avg_pck"].max() - df["avg_pck"].min()
+
+        plt.xlim(
+            df["avg_brightness"].min() - 0.05 * x_range,
+            df["avg_brightness"].max() + 0.05 * x_range,
+        )
+        plt.ylim(
+            max(0, df["avg_pck"].min() - 0.05 * y_range),
+            min(1, df["avg_pck"].max() + 0.05 * y_range),
+        )
+
         plt.tight_layout()
 
+        # Add summary statistics as text
+        stats_text = "Statistics:\n"
+        stats_text += f"Videos: {len(df)}\n"
+        stats_text += (
+            f"Avg PCK Range: {df['avg_pck'].min():.3f} - {df['avg_pck'].max():.3f}\n"
+        )
+        stats_text += f"Avg Brightness Range: {df['avg_brightness'].min():.1f} - {df['avg_brightness'].max():.1f}"
+
+        plt.text(
+            0.05,
+            0.05,
+            stats_text,
+            transform=plt.gca().transAxes,
+            fontsize=10,
+            bbox=dict(boxstyle="round,pad=0.5", facecolor="lightblue", alpha=0.8),
+            verticalalignment="bottom",
+        )
+
         if self.save_plots and self.output_dir:
-            filename = os.path.join(self.output_dir, "pck_vs_brightness_plot.png")
+            filename = os.path.join(
+                self.output_dir, "combined_avg_pck_brightness_per_video.png"
+            )
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print(f"   ✅ Saved: {filename}")
         else:
@@ -203,11 +297,11 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
         try:
             plt.show(block=False)
-            print("   ✅ Aggregated plot displayed successfully")
+            print("   ✅ Combined average plot displayed successfully")
         except Exception as e:
-            print(f"   ⚠️  Could not display aggregated plot: {e}")
+            print(f"   ⚠️  Could not display combined average plot: {e}")
 
-        plt.pause(1)
+        plt.pause(2)
         plt.close()
 
     def create_per_video_scatter_plots(self, analysis_results: Dict[str, Any]) -> None:
