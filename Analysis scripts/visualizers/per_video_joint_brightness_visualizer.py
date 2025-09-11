@@ -63,7 +63,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             return
 
         # Debug: Print analysis results structure
-        print(f"   Debug: Received analysis results for {len(analysis_results)} videos")
+        print(
+            f"   Debug: Received analysis results for {len(analysis_results)} videos")
         for i, (video_name, video_data) in enumerate(analysis_results.items()):
             if i < 2:  # Show first 2 videos
                 print(f"   Video '{video_name}' structure:")
@@ -72,7 +73,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                         has_pck_scores = "pck_scores" in value
                         has_brightness = "brightness_values" in value
                         pck_len = (
-                            len(value.get("pck_scores", [])) if has_pck_scores else 0
+                            len(value.get("pck_scores", [])
+                                ) if has_pck_scores else 0
                         )
                         brightness_len = (
                             len(value.get("brightness_values", []))
@@ -106,16 +108,9 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
         plot_data = []
         for video_name, video_results in analysis_results.items():
-            brightness_summary = video_results.get("brightness_summary", {})
             all_pck_scores, all_brightness_values = [], []
-
             for pck_column, pck_results in video_results.items():
-                if pck_column in [
-                    "video_name",
-                    "total_frames",
-                    "joints_analyzed",
-                    "brightness_summary",
-                ]:
+                if pck_column in ["video_name", "total_frames", "joints_analyzed", "brightness_summary"]:
                     continue
                 pck_scores = pck_results.get("pck_scores", [])
                 brightness_values = pck_results.get("brightness_values", [])
@@ -124,31 +119,27 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                     all_brightness_values.extend(brightness_values)
 
             if all_pck_scores and all_brightness_values:
-                plot_data.append(
-                    {
-                        "video": str(video_name),
-                        "avg_pck": np.mean(all_pck_scores),
-                        "avg_brightness": np.mean(all_brightness_values),
-                    }
-                )
+                plot_data.append({
+                    "video": str(video_name),
+                    "avg_pck": np.mean(all_pck_scores),
+                    "avg_brightness": np.mean(all_brightness_values),
+                })
 
         if not plot_data:
             print("❌ No PCK-brightness data found for plotting")
             return
 
         df = pd.DataFrame(plot_data)
-        plt.figure(figsize=(12, 8))  # slightly larger
+        fig, ax = plt.subplots(figsize=(12, 8), constrained_layout=True)
 
         videos = df["video"].unique()
 
-        # ✅ Use seaborn husl palette for distinct colors
         import seaborn as sns
-
         colors = sns.color_palette("husl", n_colors=len(videos))
 
         for i, video in enumerate(videos):
             vdata = df[df["video"] == video].iloc[0]
-            plt.scatter(
+            ax.scatter(
                 vdata["avg_brightness"],
                 vdata["avg_pck"],
                 label=video,
@@ -159,39 +150,36 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 linewidth=0.7,
             )
 
-        # Add a simple trend line (optional)
+        # Trend line
         if len(df) > 2:
             z = np.polyfit(df["avg_brightness"], df["avg_pck"], 1)
             p = np.poly1d(z)
             x_trend = np.linspace(
-                df["avg_brightness"].min(), df["avg_brightness"].max(), 100
-            )
-            plt.plot(
-                x_trend, p(x_trend), "r--", alpha=0.7, linewidth=2, label="Trend line"
-            )
+                df["avg_brightness"].min(), df["avg_brightness"].max(), 100)
+            ax.plot(x_trend, p(x_trend), "r--", alpha=0.7,
+                    linewidth=2, label="Trend line")
 
-        plt.xlabel("Average Brightness", fontsize=12)
-        plt.ylabel("Average PCK Score", fontsize=12)
-        plt.title("Average PCK vs Brightness Per Video", fontsize=14, fontweight="bold")
+        ax.set_xlabel("Average Brightness", fontsize=12)
+        ax.set_ylabel("Average PCK Score", fontsize=12)
+        ax.set_title("Average PCK vs Brightness Per Video",
+                     fontsize=14, fontweight="bold")
 
-        # ✅ Legend: 10 videos per column
+        # ✅ Legend outside, no plot shrinking
         num_cols = max(1, (len(videos) + 9) // 10)
-        plt.legend(
+        ax.legend(
+            bbox_to_anchor=(1.02, 1),  # place legend fully outside plot
+            loc="upper left",
             fontsize=8,
-            loc="upper right",
             ncol=num_cols,
-            frameon=True,
-            facecolor="none",  # transparent background
-            edgecolor="black",  # keep legend border visible
+            frameon=True
         )
 
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
+        plt.subplots_adjust(right=0.8)  # leave room on right for legend
+        ax.grid(True, alpha=0.3)
 
         if self.save_plots and self.output_dir:
             filename = os.path.join(
-                self.output_dir, "combined_avg_pck_brightness_per_video.png"
-            )
+                self.output_dir, "combined_avg_pck_brightness_per_video.png")
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print(f"   ✅ Saved: {filename}")
 
@@ -263,7 +251,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 fig, ax = plt.subplots(figsize=(12, 8))
                 axes = [ax]
             else:
-                fig, axes = plt.subplots(1, n_thresholds, figsize=(6 * n_thresholds, 8))
+                fig, axes = plt.subplots(
+                    1, n_thresholds, figsize=(6 * n_thresholds, 8))
                 if n_thresholds == 1:
                     axes = [axes]
 
@@ -307,9 +296,11 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                             ),
                         )
 
-                ax.set_xlabel("Brightness (from GT Joint Location)", fontsize=12)
+                ax.set_xlabel(
+                    "Brightness (from GT Joint Location)", fontsize=12)
                 ax.set_ylabel("PCK Score", fontsize=12)
-                ax.set_title(f"PCK vs Brightness - Threshold {threshold}", fontsize=14)
+                ax.set_title(
+                    f"PCK vs Brightness - Threshold {threshold}", fontsize=14)
                 ax.grid(True, alpha=0.3)
                 ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
 
@@ -325,7 +316,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             # Save the plot
             if self.save_plots and self.output_dir:
                 # Clean video name for filename
-                clean_video_name = self._clean_video_name_for_filename(video_name)
+                clean_video_name = self._clean_video_name_for_filename(
+                    video_name)
                 filename = os.path.join(
                     self.output_dir, f"pck_brightness_scatter_{clean_video_name}.png"
                 )
@@ -348,11 +340,13 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         plt.ioff()  # Turn off interactive mode initially
 
         # Debug: Print structure of analysis results
-        print(f"   Debug: Analysis results contains {len(analysis_results)} videos")
+        print(
+            f"   Debug: Analysis results contains {len(analysis_results)} videos")
         for vid_name, vid_data in list(analysis_results.items())[
             :1
         ]:  # Show first video structure
-            print(f"   Debug: Video '{vid_name}' has keys: {list(vid_data.keys())}")
+            print(
+                f"   Debug: Video '{vid_name}' has keys: {list(vid_data.keys())}")
             for key, value in vid_data.items():
                 if key not in [
                     "video_name",
@@ -423,7 +417,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             fig, ax = plt.subplots(figsize=(14, 10))
             axes = [ax]
         else:
-            fig, axes = plt.subplots(1, n_thresholds, figsize=(7 * n_thresholds, 10))
+            fig, axes = plt.subplots(
+                1, n_thresholds, figsize=(7 * n_thresholds, 10))
             if n_thresholds == 1:
                 axes = [axes]
 
@@ -473,7 +468,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
             # Add trend line
             if len(threshold_data) > 10:  # Only if we have enough points
-                z = np.polyfit(threshold_data["brightness"], threshold_data["pck"], 1)
+                z = np.polyfit(
+                    threshold_data["brightness"], threshold_data["pck"], 1)
                 p = np.poly1d(z)
                 x_trend = np.linspace(
                     threshold_data["brightness"].min(),
@@ -567,7 +563,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             video_summaries.append(video_summary)
 
         video_df = pd.DataFrame(video_summaries)
-        video_csv_path = os.path.join(self.output_dir, "video_brightness_summary.csv")
+        video_csv_path = os.path.join(
+            self.output_dir, "video_brightness_summary.csv")
         video_df.to_csv(video_csv_path, index=False)
         print(f"   Saved video summary: {video_csv_path}")
 
