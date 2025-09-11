@@ -171,9 +171,18 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         if self.save_plots and self.output_dir:
             filename = os.path.join(self.output_dir, "pck_vs_brightness_plot.png")
             plt.savefig(filename, dpi=300, bbox_inches="tight")
-            print(f"   Saved: {filename}")
+            print(f"   ✅ Saved: {filename}")
+        else:
+            print("   ⚠️  Plot saving disabled or no output directory specified")
 
-        plt.show()
+        try:
+            plt.show(block=False)
+            print("   ✅ Aggregated plot displayed successfully")
+        except Exception as e:
+            print(f"   ⚠️  Could not display aggregated plot: {e}")
+
+        plt.pause(1)
+        plt.close()
 
     def create_per_video_scatter_plots(self, analysis_results: Dict[str, Any]) -> None:
         """Create individual scatter plots for each video showing frame-by-frame PCK vs brightness for all joints.
@@ -326,8 +335,11 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         """
         print("Creating combined scatter plot (all videos and joints together)...")
 
-        # Ensure matplotlib is in interactive mode for plot display
-        plt.ion()
+        # Set matplotlib backend to ensure plots are displayed
+        import matplotlib
+
+        matplotlib.use("TkAgg")  # Use TkAgg backend for interactive plots
+        plt.ion()  # Enable interactive mode
 
         # Collect all frame-by-frame data from all videos
         all_data = []
@@ -480,9 +492,19 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 self.output_dir, "combined_pck_brightness_scatter.png"
             )
             plt.savefig(filename, dpi=300, bbox_inches="tight")
-            print(f"   Saved combined plot: {filename}")
+            print(f"   ✅ Saved combined plot: {filename}")
+        else:
+            print("   ⚠️  Plot saving disabled or no output directory specified")
 
-        plt.show()
+        # Force display of the plot
+        try:
+            plt.show(block=False)  # Non-blocking show
+            print("   ✅ Plot displayed successfully")
+        except Exception as e:
+            print(f"   ⚠️  Could not display plot: {e}")
+
+        # Keep the plot open for a bit
+        plt.pause(2)
         plt.close()
 
         print("✅ Combined scatter plot completed")
