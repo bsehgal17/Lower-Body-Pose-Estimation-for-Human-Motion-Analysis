@@ -5,7 +5,7 @@ dataset:
 
 paths:
   video_directory: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/all_cropped_videos/"
-  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-08-15_17-45-58/all_cropped_videos_metrics.xlsx"
+  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-09-11_21-43-17/2025-09-11_21-43-17_metrics.xlsx"
   save_folder: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/MoVi/Testing"
   ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/MoVi_groundtruth/"
 
@@ -30,24 +30,35 @@ pck_scores:
     - "pck_per_frame_pck_0.01"
   
   jointwise:
-    - "LEFT_HIP_jointwise_pck_0.01"
-    - "RIGHT_HIP_jointwise_pck_0.01"
-    - "LEFT_KNEE_jointwise_pck_0.01"
-    - "RIGHT_KNEE_jointwise_pck_0.01"
-    - "LEFT_ANKLE_jointwise_pck_0.01"
-    - "RIGHT_ANKLE_jointwise_pck_0.01"
-    - "LEFT_HIP_jointwise_pck_0.02"
-    - "RIGHT_HIP_jointwise_pck_0.02"
-    - "LEFT_KNEE_jointwise_pck_0.02"
-    - "RIGHT_KNEE_jointwise_pck_0.02"
-    - "LEFT_ANKLE_jointwise_pck_0.02"
-    - "RIGHT_ANKLE_jointwise_pck_0.02"
-    - "LEFT_HIP_jointwise_pck_0.05"
-    - "RIGHT_HIP_jointwise_pck_0.05"
-    - "LEFT_KNEE_jointwise_pck_0.05"
-    - "RIGHT_KNEE_jointwise_pck_0.05"
-    - "LEFT_ANKLE_jointwise_pck_0.05"
-    - "RIGHT_ANKLE_jointwise_pck_0.05"
+    - "pck_per_frame_pck_0.10"
+    - "pck_per_frame_pck_0.20"
+    - "pck_per_frame_pck_0.50"
+  
+  jointwise:
+    - "LEFT_HIP_jointwise_pck_0.25"
+    - "RIGHT_HIP_jointwise_pck_0.25"
+    - "LEFT_KNEE_jointwise_pck_0.25"
+    - "RIGHT_KNEE_jointwise_pck_0.25"
+    - "LEFT_ANKLE_jointwise_pck_0.25"
+    - "RIGHT_ANKLE_jointwise_pck_0.25"
+    - "LEFT_HIP_jointwise_pck_0.30"
+    - "RIGHT_HIP_jointwise_pck_0.30"
+    - "LEFT_KNEE_jointwise_pck_0.30"
+    - "RIGHT_KNEE_jointwise_pck_0.30"
+    - "LEFT_ANKLE_jointwise_pck_0.30"
+    - "RIGHT_ANKLE_jointwise_pck_0.30"
+    - "LEFT_HIP_jointwise_pck_0.35"
+    - "RIGHT_HIP_jointwise_pck_0.35"
+    - "LEFT_KNEE_jointwise_pck_0.35"
+    - "RIGHT_KNEE_jointwise_pck_0.35"
+    - "LEFT_ANKLE_jointwise_pck_0.35"
+    - "RIGHT_ANKLE_jointwise_pck_0.35"
+    - "LEFT_HIP_jointwise_pck_0.40"
+    - "RIGHT_HIP_jointwise_pck_0.40"
+    - "LEFT_KNEE_jointwise_pck_0.40"
+    - "RIGHT_KNEE_jointwise_pck_0.40"
+    - "LEFT_ANKLE_jointwise_pck_0.40"
+    - "RIGHT_ANKLE_jointwise_pck_0.40"
 
 # No synchronization data for MoVi dataset
 sync_data: null
