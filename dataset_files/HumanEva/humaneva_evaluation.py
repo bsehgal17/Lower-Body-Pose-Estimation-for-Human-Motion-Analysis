@@ -28,7 +28,7 @@ def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_
             return None
 
         subject, action, camera_str = metadata["subject"], metadata["action"], metadata["camera"]
-        camera_idx = int(camera_str[1:]) - 1
+        camera_idx = int(camera_str[1:])
         safe_action_name = action.replace(" ", "_")
 
         # --- GT Loading Logic (HumanEva specific) ---
