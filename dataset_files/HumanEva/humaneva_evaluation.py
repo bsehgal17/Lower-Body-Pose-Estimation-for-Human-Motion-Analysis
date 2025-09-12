@@ -44,10 +44,16 @@ def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_
         gt_pkl_path = os.path.join(gt_pkl_folder, gt_pkl_name)
 
         if not os.path.exists(gt_pkl_path):
-            logger.info(f"Generating ground truth PKL: {gt_pkl_path}")
             loader = GroundTruthLoader(csv_file_path)
             keypoints = loader.get_keypoints(
                 subject, action, camera_idx, chunk="chunk0")
+
+            if keypoints is None or len(keypoints) == 0:
+                logger.warning(
+                    f"Skipping {subject} {action} camera {camera_idx}: no GT in CSV")
+                return None
+
+            os.makedirs(gt_pkl_folder, exist_ok=True)
             with open(gt_pkl_path, "wb") as f:
                 pickle.dump({"keypoints": keypoints}, f)
 
@@ -132,11 +138,30 @@ def humaneva_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_
                             coords[3] * scale_y
                         ]
         try:
-            sync_start = pipeline_config.dataset.sync_data["data"][subject][action][camera_idx]
+
+            # Check if sync data exists
+            if subject not in pipeline_config.dataset.sync_data["data"] \
+                    or action not in pipeline_config.dataset.sync_data["data"][subject]:
+                logger.warning(
+                    f"Skipping {subject} {action}: sync_data missing")
+                return None
+
+            sync_list = pipeline_config.dataset.sync_data["data"][subject][action]
+
+            # camera_index = 0,1,2 etc. for first/second/third camera
+            if camera_idx - 1 >= len(sync_list):
+                logger.warning(
+                    f"Skipping {subject} {action} camera {camera_idx}: sync_data missing")
+                return None
+
+            sync_start = sync_list[camera_idx - 1]
+
             if sync_start >= len(pred_keypoints):
                 logger.warning(
-                    f"Sync index {sync_start} exceeds prediction length {len(pred_keypoints)}")
+                    f"Sync index {sync_start} exceeds prediction length {len(pred_keypoints)}"
+                )
                 return None
+
         except KeyError:
             logger.warning(
                 f"No sync index for {subject} | {action} | {camera_str}")
