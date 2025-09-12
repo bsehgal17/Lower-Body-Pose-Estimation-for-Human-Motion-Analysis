@@ -2,32 +2,70 @@ import numpy as np
 import pandas as pd
 import os
 
-# Path to your .npy file
-npy_file = r"C:\Users\BhavyaSehgal\Downloads\positions_3d.npy"
+npz_file = r"C:\Users\BhavyaSehgal\Downloads\data_2d_humaneva20_gt.npz"
 output_folder = r"C:\Users\BhavyaSehgal\Downloads\output_csvs"
 os.makedirs(output_folder, exist_ok=True)
 
-# Load .npy file
-data = np.load(npy_file, allow_pickle=True)
-data_dict = data.item()  # extract dictionary
+data = np.load(npz_file, allow_pickle=True)
+data_dict = data["positions_2d"].item()  # unwrap dictionary
 
 for subject, chunks in data_dict.items():
     subject_folder = os.path.join(output_folder, subject.replace("/", "_"))
     os.makedirs(subject_folder, exist_ok=True)
 
-    for chunk_name, array_3d in chunks.items():
-        frames, joints, coords = array_3d.shape
+    for chunk_name, array_list in chunks.items():
+        array_list = np.array(array_list)  # convert list to np.array if needed
+        combined_rows = []
 
-        # Flatten joints to x1,y1,x2,y2,... format
-        flattened = array_3d.reshape(frames, joints * coords)
-        # Create columns: x1,y1,x2,y2,...
-        columns = []
-        for j in range(joints):
-            columns += [f"x{j + 1}", f"y{j + 1}"]  # only x and y
-        df_xy = pd.DataFrame(flattened[:, : joints * 2], columns=columns)
+        # Determine number of cameras
+        if array_list.ndim == 4 or isinstance(array_list, list):
+            num_cameras = (
+                len(array_list) if isinstance(array_list, list) else array_list.shape[0]
+            )
 
-        # Add Subject, Action, Camera columns
-        df_xy.insert(0, "Camera", 0)
+            for cam_idx in range(num_cameras):
+                cam_array = (
+                    array_list[cam_idx]
+                    if isinstance(array_list, list)
+                    else array_list[cam_idx]
+                )
+
+                if cam_array.ndim != 3:
+                    print(
+                        f"⚠️ Skipping {chunk_name} in {subject}, unexpected shape: {cam_array.shape}"
+                    )
+                    continue
+
+                frames, joints, coords = cam_array.shape
+                flattened = cam_array.reshape(frames, joints * coords)
+
+                # Add Camera column
+                camera_col = np.full((frames, 1), cam_idx + 1)
+                combined_rows.append(
+                    np.hstack([camera_col, flattened[:, : joints * 2]])
+                )
+
+        elif array_list.ndim == 3:  # single camera
+            frames, joints, coords = array_list.shape
+            flattened = array_list.reshape(frames, joints * coords)
+            camera_col = np.ones((frames, 1))
+            combined_rows.append(np.hstack([camera_col, flattened[:, : joints * 2]]))
+        else:
+            print(
+                f"⚠️ Skipping {chunk_name} in {subject}, unexpected shape: {array_list.shape}"
+            )
+            continue
+
+        # Combine all camera rows
+        all_data = np.vstack(combined_rows)
+        columns = (
+            ["Camera"]
+            + [f"x{j + 1}" for j in range(joints)]
+            + [f"y{j + 1}" for j in range(joints)]
+        )
+        df_xy = pd.DataFrame(all_data, columns=columns)
+
+        # Add Subject and Action columns
         df_xy.insert(0, "Action", chunk_name)
         df_xy.insert(0, "Subject", subject)
 
