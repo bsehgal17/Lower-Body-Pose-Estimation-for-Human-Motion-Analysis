@@ -39,14 +39,24 @@ class FrameProcessor:
                 # Use frame-based person ID for now (will be properly tracked later)
                 temp_person_id = f"frame_{frame_idx}_person_{person_idx}"
 
+                # Extract only the specific fields we need immediately to save memory
+                keypoints = pose_result.pred_instances.keypoints.tolist()
+                keypoints_visible = (
+                    pose_result.pred_instances.keypoints_visible.tolist()
+                )
+                bboxes = pose_result.pred_instances.bboxes.tolist()
+                bbox_scores = pose_result.pred_instances.bbox_scores.tolist()
+
                 self.frame_buffer.append(
                     {
                         "frame_idx": frame_idx,
                         "temp_person_id": temp_person_id,
                         "bbox": bbox,
                         "score": score,
-                        "pose_result": pose_result,
-                        "frame": frame,
+                        "keypoints": keypoints,
+                        "keypoints_visible": keypoints_visible,
+                        "pose_bboxes": bboxes,
+                        "bbox_scores": bbox_scores,
                     }
                 )
 
@@ -105,16 +115,13 @@ class FrameProcessor:
                     frame_idx, detection_item["bbox"], detection_item["score"], label=0
                 )
 
-                # Add pose data
-                pose_result = detection_item["pose_result"]
-                keypoints = pose_result.pred_instances.keypoints.tolist()
-                keypoints_visible = (
-                    pose_result.pred_instances.keypoints_visible.tolist()
-                )
-                bboxes = pose_result.pred_instances.bboxes.tolist()
-                bbox_scores = pose_result.pred_instances.bbox_scores.tolist()
+                # Add pose data using the extracted fields
                 person.add_pose(
-                    frame_idx, keypoints, keypoints_visible, bboxes, bbox_scores
+                    frame_idx,
+                    detection_item["keypoints"],
+                    detection_item["keypoints_visible"],
+                    detection_item["pose_bboxes"],
+                    detection_item["bbox_scores"],
                 )
 
         # Clear buffer
