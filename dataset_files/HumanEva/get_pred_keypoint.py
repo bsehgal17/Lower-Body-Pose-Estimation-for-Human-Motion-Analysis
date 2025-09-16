@@ -178,8 +178,166 @@ class PredictionLoader:
         Extract keypoints, bboxes, and scores from raw prediction data.
         Now includes filtering for multiple skeletons based on confidence scores.
 
+        Handles both legacy format (keypoints per frame) and new format (persons with frame data).
+
         Args:
             pred_data (dict): Raw prediction data
+
+        Returns:
+            tuple: (pred_keypoints, pred_bboxes, pred_scores) lists
+        """
+        # Check if this is the new person-centric format
+        if "persons" in pred_data:
+            return self._extract_keypoints_from_persons_format(pred_data)
+        else:
+            # Legacy format - keep existing logic
+            return self._extract_keypoints_from_legacy_format(pred_data)
+
+    def _extract_keypoints_from_persons_format(self, pred_data):
+        """
+        Extract keypoints from person-centric data format.
+
+        Args:
+            pred_data (dict): Raw prediction data with 'persons' structure
+
+        Returns:
+            tuple: (pred_keypoints, pred_bboxes, pred_scores) lists
+        """
+        # First, determine the total number of frames
+        max_frame_idx = 0
+        for person in pred_data["persons"]:
+            for pose in person["poses"]:
+                max_frame_idx = max(max_frame_idx, pose["frame_idx"])
+
+        total_frames = max_frame_idx + 1
+
+        # Initialize lists for all frames
+        pred_keypoints = [None] * total_frames
+        pred_bboxes = [None] * total_frames
+        pred_scores = [None] * total_frames
+
+        # Group data by frame_idx
+        frames_data = {}
+        for frame_idx in range(total_frames):
+            frames_data[frame_idx] = []
+
+        # Collect all person data for each frame
+        for person in pred_data["persons"]:
+            person_id = person["person_id"]
+
+            # Create lookup for detections by frame_idx
+            detections_by_frame = {
+                det["frame_idx"]: det for det in person["detections"]
+            }
+
+            # Process poses
+            for pose in person["poses"]:
+                frame_idx = pose["frame_idx"]
+
+                # Get corresponding detection data
+                detection = detections_by_frame.get(frame_idx, {})
+
+                # Create person data in expected format for _select_best_skeleton
+                person_data = {
+                    "keypoints": pose[
+                        "keypoints"
+                    ],  # This is already a list of keypoint arrays
+                    "bboxes": pose[
+                        "bbox"
+                    ],  # Use pose bbox (more accurate than detection bbox)
+                    "scores": detection.get(
+                        "score",
+                        pose.get("bbox_scores", [0.0])[0]
+                        if pose.get("bbox_scores")
+                        else 0.0,
+                    ),
+                    "person_id": person_id,
+                    "keypoints_visible": pose.get("keypoints_visible", None),
+                }
+
+                frames_data[frame_idx].append(person_data)
+
+        # Process each frame
+        for frame_idx in range(total_frames):
+            people = frames_data[frame_idx]
+
+            if not people:
+                # No predictions for this frame
+                continue
+
+            # Select best skeleton from multiple detections using confidence filtering
+            best_person = self._select_best_skeleton(people)
+
+            if best_person is None:
+                # No skeleton meets confidence criteria
+                logger.debug(
+                    f"Frame {frame_idx}: No skeleton meets confidence criteria"
+                )
+                continue
+
+            # Extract keypoints, bbox, and score from best skeleton
+            kpts_raw = best_person.get("keypoints", [])
+
+            # Handle nested list structure for keypoints
+            if (
+                isinstance(kpts_raw, list)
+                and len(kpts_raw) > 0
+                and isinstance(kpts_raw[0], (list, np.ndarray))
+            ):
+                # Convert to numpy array and handle different nested structures
+                if isinstance(kpts_raw[0], list):
+                    # If it's a list of lists, convert to numpy
+                    kpts = np.array(kpts_raw[0])
+                else:
+                    # If it's already numpy arrays
+                    kpts = kpts_raw[0]
+            else:
+                kpts = np.array(kpts_raw)
+
+            # Handle any extra dimensions on the resulting array
+            if kpts.ndim == 3 and kpts.shape[0] == 1:
+                kpts = np.squeeze(kpts, axis=0)
+            elif kpts.ndim > 2:
+                logger.warning(
+                    f"Unexpected keypoints shape: {kpts.shape}, attempting to squeeze"
+                )
+                kpts = np.squeeze(kpts)
+
+            # Ensure we have the right format: [num_keypoints, 3] for (x, y, confidence)
+            if kpts.ndim == 2 and kpts.shape[1] == 2:
+                # Add confidence scores if missing - use keypoints_visible if available
+                if best_person.get("keypoints_visible") is not None:
+                    visibility = np.array(best_person["keypoints_visible"])
+                    if visibility.ndim == 2:
+                        visibility = visibility[0]  # Take first element if nested
+                    confidence = visibility.reshape(-1, 1)
+                else:
+                    confidence = np.ones((kpts.shape[0], 1))  # Default confidence
+                kpts = np.concatenate([kpts, confidence], axis=1)
+
+            bbox = best_person.get("bboxes", [0, 0, 0, 0])
+            score = best_person.get("scores", 0.0)
+
+            pred_keypoints[frame_idx] = kpts
+            pred_bboxes[frame_idx] = bbox
+            pred_scores[frame_idx] = score
+
+        # Log filtering statistics
+        valid_frames = sum(1 for kpts in pred_keypoints if kpts is not None)
+        total_frames = len(pred_keypoints)
+        logger.info(
+            f"Skeleton filtering results: {valid_frames}/{total_frames} frames with valid skeletons "
+            f"(bbox_conf >= {self.min_bbox_confidence}, kpt_conf >= {self.min_keypoint_confidence})"
+        )
+
+        return pred_keypoints, pred_bboxes, pred_scores
+
+    def _extract_keypoints_from_legacy_format(self, pred_data):
+        """
+        Extract keypoints from legacy frame-centric data format (original implementation).
+
+        Args:
+            pred_data (dict): Raw prediction data with 'keypoints' structure
 
         Returns:
             tuple: (pred_keypoints, pred_bboxes, pred_scores) lists
@@ -295,8 +453,114 @@ class PredictionLoader:
         """
         Get statistics about skeleton filtering without processing the data.
 
+        Handles both legacy format (keypoints per frame) and new format (persons with frame data).
+
         Args:
             pred_data (dict): Raw prediction data
+
+        Returns:
+            dict: Statistics about filtering results
+        """
+        # Check if this is the new person-centric format
+        if "persons" in pred_data:
+            return self._get_filtering_stats_from_persons_format(pred_data)
+        else:
+            # Legacy format
+            return self._get_filtering_stats_from_legacy_format(pred_data)
+
+    def _get_filtering_stats_from_persons_format(self, pred_data):
+        """
+        Get filtering statistics from person-centric data format.
+
+        Args:
+            pred_data (dict): Raw prediction data with 'persons' structure
+
+        Returns:
+            dict: Statistics about filtering results
+        """
+        stats = {
+            "total_frames": 0,
+            "frames_with_detections": 0,
+            "frames_with_multiple_skeletons": 0,
+            "frames_after_filtering": 0,
+            "avg_skeletons_per_frame": 0.0,
+        }
+
+        # First, determine the total number of frames
+        max_frame_idx = 0
+        for person in pred_data["persons"]:
+            for pose in person["poses"]:
+                max_frame_idx = max(max_frame_idx, pose["frame_idx"])
+
+        stats["total_frames"] = max_frame_idx + 1
+
+        # Group data by frame_idx
+        frames_data = {}
+        for frame_idx in range(stats["total_frames"]):
+            frames_data[frame_idx] = []
+
+        # Collect all person data for each frame
+        total_detections = 0
+        for person in pred_data["persons"]:
+            person_id = person["person_id"]
+
+            # Create lookup for detections by frame_idx
+            detections_by_frame = {
+                det["frame_idx"]: det for det in person["detections"]
+            }
+
+            # Process poses
+            for pose in person["poses"]:
+                frame_idx = pose["frame_idx"]
+
+                # Get corresponding detection data
+                detection = detections_by_frame.get(frame_idx, {})
+
+                # Create person data in expected format for _select_best_skeleton
+                person_data = {
+                    "keypoints": pose["keypoints"],
+                    "bboxes": pose["bbox"],
+                    "scores": detection.get(
+                        "score",
+                        pose.get("bbox_scores", [0.0])[0]
+                        if pose.get("bbox_scores")
+                        else 0.0,
+                    ),
+                    "person_id": person_id,
+                    "keypoints_visible": pose.get("keypoints_visible", None),
+                }
+
+                frames_data[frame_idx].append(person_data)
+                total_detections += 1
+
+        # Analyze each frame
+        for frame_idx in range(stats["total_frames"]):
+            people = frames_data[frame_idx]
+
+            if people:
+                stats["frames_with_detections"] += 1
+
+                if len(people) > 1:
+                    stats["frames_with_multiple_skeletons"] += 1
+
+                # Check if any skeleton would pass filtering
+                best_person = self._select_best_skeleton(people)
+                if best_person is not None:
+                    stats["frames_after_filtering"] += 1
+
+        if stats["frames_with_detections"] > 0:
+            stats["avg_skeletons_per_frame"] = (
+                total_detections / stats["frames_with_detections"]
+            )
+
+        return stats
+
+    def _get_filtering_stats_from_legacy_format(self, pred_data):
+        """
+        Get filtering statistics from legacy frame-centric data format.
+
+        Args:
+            pred_data (dict): Raw prediction data with 'keypoints' structure
 
         Returns:
             dict: Statistics about filtering results
@@ -502,10 +766,38 @@ raw_data = loader.load_raw_predictions()
 stats = loader.get_filtering_stats(raw_data)
 print(f"Filtering stats: {stats}")
 
-# Process with filtering
+# Process with filtering - works with both formats:
+# 1. New person-centric format:
+#    pred_data = {
+#        "video_name": "Walking_1_(C3)",
+#        "persons": [
+#            {
+#                "person_id": 0,
+#                "detections": [{"frame_idx": 0, "bbox": [...], "score": 0.996, "label": 0}, ...],
+#                "poses": [{"frame_idx": 0, "keypoints": [[...]], "keypoints_visible": [[...]], 
+#                          "bbox": [...], "bbox_scores": [...]}, ...]
+#            },
+#            ...
+#        ],
+#        "detection_config": {...}
+#    }
+# 
+# 2. Legacy frame-centric format:
+#    pred_data = {
+#        "keypoints": [
+#            {"keypoints": [person1_data, person2_data, ...]},  # frame 0
+#            {"keypoints": [person1_data, person2_data, ...]},  # frame 1
+#            ...
+#        ]
+#    }
+
 pred_keypoints, pred_bboxes, pred_scores = loader.extract_keypoints_data(raw_data)
 
 # Adjust thresholds and weights on the fly if needed
 loader.set_confidence_thresholds(min_bbox_confidence=0.4, min_keypoint_confidence=0.25)
 loader.set_confidence_weights(bbox_weight=0.2, keypoint_weight=0.8)  # Prioritize keypoints more
+
+# For new format, keypoints will be automatically converted from the nested structure:
+# Input: pose["keypoints"] = [[[x1,y1], [x2,y2], ...]]  with pose["keypoints_visible"] = [[conf1, conf2, ...]]
+# Output: keypoints = [[x1,y1,conf1], [x2,y2,conf2], ...]  (standard format for downstream processing)
 """
