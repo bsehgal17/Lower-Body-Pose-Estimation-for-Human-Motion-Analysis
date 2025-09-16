@@ -19,7 +19,6 @@ class PoseData:
 
     frame_idx: int
     keypoints: List[List[float]]  # (J, 2) - x, y coordinates
-    keypoint_scores: List[float]  # Confidence scores for each keypoint
     keypoints_visible: List[float]  # Visibility scores for each keypoint
     bbox: List[float]  # [x1, y1, x2, y2] - bbox from pose estimation
     bbox_scores: List[float]  # Bbox confidence scores from pose estimation
@@ -52,7 +51,6 @@ class Person:
         pose = PoseData(
             frame_idx=frame_idx,
             keypoints=keypoints,
-            keypoint_scores=keypoints_visible,  # Use visibility as scores when scores not available
             keypoints_visible=keypoints_visible,
             bbox=bbox,
             bbox_scores=bbox_scores,
@@ -156,7 +154,6 @@ class VideoData:
                         {
                             "frame_idx": pose.frame_idx,
                             "keypoints": pose.keypoints,
-                            "keypoint_scores": pose.keypoint_scores,
                             "keypoints_visible": pose.keypoints_visible,
                             "bbox": pose.bbox,
                             "bbox_scores": pose.bbox_scores,

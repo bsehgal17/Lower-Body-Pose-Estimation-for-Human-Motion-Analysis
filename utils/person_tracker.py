@@ -153,5 +153,10 @@ class PersonTracker:
             if i < len(pose_results):
                 pose_result = pose_results[i]
                 keypoints = pose_result.pred_instances.keypoints.tolist()
-                keypoint_scores = pose_result.pred_instances.keypoint_scores.tolist()
-                person.add_pose(frame_idx, keypoints, keypoint_scores, bbox)
+                keypoints_visible = (
+                    pose_result.pred_instances.keypoints_visible.tolist()
+                )
+                bbox_scores = pose_result.pred_instances.bbox_scores.tolist()
+                person.add_pose(
+                    frame_idx, keypoints, keypoints_visible, bbox, bbox_scores
+                )

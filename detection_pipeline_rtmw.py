@@ -75,45 +75,7 @@ def run_detection_pipeline(
         detector_config_dict = asdict(pipeline_config.processing)
         video_data.detection_config = detector_config_dict
 
-        # Save results for each person separately
-        for person in video_data.persons:
-            person_output_dir = os.path.join(
-                current_save_dir, f"person_{person.person_id}"
-            )
-            os.makedirs(person_output_dir, exist_ok=True)
-
-            # Create person-specific data (without all detections per frame)
-            person_video_data = VideoData(
-                video_name=f"{video_name}_person_{person.person_id}",
-                detection_config=detector_config_dict,
-            )
-            person_video_data.persons = [person]  # Only this person
-
-            # Save person-specific JSON and pickle
-            person_json_file = os.path.join(
-                person_output_dir, f"{video_name}_person_{person.person_id}.json"
-            )
-            person_pkl_file = os.path.join(
-                person_output_dir, f"{video_name}_person_{person.person_id}.pkl"
-            )
-
-            save_keypoints_to_json(
-                person_video_data,
-                person_output_dir,
-                f"{video_name}_person_{person.person_id}",
-                detector_config=detector_config_dict,
-            )
-
-            # Save as pickle for compatibility
-            person_bundle = person_video_data.to_dict()
-            with open(person_pkl_file, "wb") as f:
-                pickle.dump(person_bundle, f)
-
-            logger.info(
-                f"Person {person.person_id} data saved to {person_json_file} and {person_pkl_file}"
-            )
-
-        # Also save complete video data (all persons together) - optional
+        # Save complete video data (all persons together)
         save_keypoints_to_json(
             video_data,
             current_save_dir,
@@ -129,5 +91,4 @@ def run_detection_pipeline(
         logger.info(
             f"Complete video data saved to {output_json_file} and {output_pkl_file}"
         )
-        logger.info("Individual person data saved in separate subdirectories")
         logger.info(f"Output video saved to {output_video_file}")
