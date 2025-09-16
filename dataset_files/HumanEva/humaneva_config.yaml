@@ -15,6 +15,22 @@ processing:
   nms_threshold: 0.3
   detection_threshold: 0.3
   kpt_threshold: 0.3
+
+# Confidence filtering for multiple skeleton detection
+confidence_filtering:
+  # Minimum confidence thresholds for skeleton filtering
+  min_bbox_confidence: 0.3      # Minimum bounding box confidence threshold
+  min_keypoint_confidence: 0.2  # Minimum keypoint confidence threshold
+  
+  # Weights for overall confidence score calculation (should sum to 1.0)
+  bbox_weight: 0.3              # Weight for bbox confidence in overall score
+  keypoint_weight: 0.7          # Weight for keypoint confidence in overall score
+  
+  # Minimum number of valid keypoints required for a skeleton to be considered
+  min_valid_keypoints: 3        # At least 3 keypoints must be above threshold
+  
+  # Enable/disable confidence filtering
+  enabled: true                 # Set to false to disable confidence filtering
   
 noise:
   apply_poisson_noise: true

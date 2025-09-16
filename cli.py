@@ -76,6 +76,16 @@ def parse_main_args(argv: Optional[List[str]] = None):
     parser_assess = subparsers.add_parser(
         "evaluation", parents=[common_parser], help="Run pose accuracy evaluation"
     )
+    parser_assess.add_argument(
+        "--min_bbox_confidence",
+        type=float,
+        help="Minimum bounding box confidence threshold for skeleton filtering",
+    )
+    parser_assess.add_argument(
+        "--min_keypoint_confidence",
+        type=float,
+        help="Minimum keypoint confidence threshold for skeleton filtering",
+    )
     parser_assess.set_defaults(func=_handle_assess_command)
 
     # Subcommand: enhance
