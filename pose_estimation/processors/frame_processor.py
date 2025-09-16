@@ -126,7 +126,7 @@ class FrameProcessor:
                     frame_idx,
                     detection_item["keypoints"],
                     detection_item["keypoints_visible"],
-                    detection_item["pose_bboxes"],
+                    detection_item["pose_bboxes"][0],  # Use first bbox
                     detection_item["bbox_scores"],
                 )
 

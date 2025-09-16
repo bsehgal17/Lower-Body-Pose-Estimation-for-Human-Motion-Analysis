@@ -45,15 +45,16 @@ class Person:
         frame_idx: int,
         keypoints: List[List[float]],
         keypoints_visible: List[float],
-        bboxes: List[float],
+        bbox: List[float],
         bbox_scores: List[float],
     ):
         """Add pose data for this person in a specific frame."""
         pose = PoseData(
             frame_idx=frame_idx,
             keypoints=keypoints,
+            keypoint_scores=keypoints_visible,  # Use visibility as scores when scores not available
             keypoints_visible=keypoints_visible,
-            bboxes=bboxes,
+            bbox=bbox,
             bbox_scores=bbox_scores,
         )
         self.poses.append(pose)
@@ -155,8 +156,9 @@ class VideoData:
                         {
                             "frame_idx": pose.frame_idx,
                             "keypoints": pose.keypoints,
+                            "keypoint_scores": pose.keypoint_scores,
                             "keypoints_visible": pose.keypoints_visible,
-                            "bboxes": pose.bboxes,
+                            "bbox": pose.bbox,
                             "bbox_scores": pose.bbox_scores,
                         }
                         for pose in person.poses
@@ -205,7 +207,7 @@ class VideoData:
                     pose_data["frame_idx"],
                     pose_data["keypoints"],
                     pose_data["keypoints_visible"],
-                    pose_data["bboxes"],
+                    pose_data["bbox"],
                     pose_data["bbox_scores"],
                 )
 
