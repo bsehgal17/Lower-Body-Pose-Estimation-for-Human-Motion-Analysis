@@ -44,19 +44,20 @@ class FrameProcessor:
                 keypoints_visible = (
                     pose_result.pred_instances.keypoints_visible.tolist()
                 )
-                bboxes = pose_result.pred_instances.bboxes.tolist()
+                pose_bboxes = pose_result.pred_instances.bboxes.tolist()
                 bbox_scores = pose_result.pred_instances.bbox_scores.tolist()
 
                 self.frame_buffer.append(
                     {
                         "frame_idx": frame_idx,
                         "temp_person_id": temp_person_id,
-                        "bbox": bbox,
-                        "score": score,
+                        # Use pose estimation bbox (more accurate for pose analysis)
+                        "pose_bboxes": pose_bboxes,
+                        "bbox_scores": bbox_scores,
                         "keypoints": keypoints,
                         "keypoints_visible": keypoints_visible,
-                        "pose_bboxes": bboxes,
-                        "bbox_scores": bbox_scores,
+                        # Keep detection score for tracking quality
+                        "detection_score": score,
                     }
                 )
 
@@ -81,14 +82,17 @@ class FrameProcessor:
         # Sort frames by index
         sorted_frame_indices = sorted(frames_data.keys())
 
-        # Extract data for person tracking
+        # Extract data for person tracking (using pose bboxes)
         human_bboxes_per_frame = []
         human_scores_per_frame = []
 
         for frame_idx in sorted_frame_indices:
             frame_detections = frames_data[frame_idx]
-            frame_bboxes = [item["bbox"] for item in frame_detections]
-            frame_scores = [item["score"] for item in frame_detections]
+            # Use pose bboxes for tracking (more accurate)
+            frame_bboxes = [
+                item["pose_bboxes"][0] for item in frame_detections
+            ]  # First bbox from pose
+            frame_scores = [item["detection_score"] for item in frame_detections]
             human_bboxes_per_frame.append(frame_bboxes)
             human_scores_per_frame.append(frame_scores)
 
@@ -110,10 +114,12 @@ class FrameProcessor:
                 # Get or create person
                 person = video_data.get_or_create_person(person_id)
 
-                # Add detection data
-                person.add_detection(
-                    frame_idx, detection_item["bbox"], detection_item["score"], label=0
-                )
+                # Add detection data using pose bbox (more accurate)
+                pose_bbox = detection_item["pose_bboxes"][
+                    0
+                ]  # First bbox from pose estimation
+                detection_score = detection_item["detection_score"]
+                person.add_detection(frame_idx, pose_bbox, detection_score, label=0)
 
                 # Add pose data using the extracted fields
                 person.add_pose(
