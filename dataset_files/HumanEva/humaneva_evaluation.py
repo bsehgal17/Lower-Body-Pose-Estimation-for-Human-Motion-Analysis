@@ -100,10 +100,7 @@ def humaneva_data_loader(
                     "Confidence filtering parameters must be provided either via config file "
                     "(enabled confidence_filtering section) or CLI arguments"
                 )
-            final_bbox_conf = min_bbox_confidence
-            final_keypoint_conf = min_keypoint_confidence
-            final_bbox_weight = 0.3
-            final_keypoint_weight = 0.7
+
             if confidence_config:
                 logger.info(
                     f"Config filtering disabled, using function arguments: bbox >= {final_bbox_conf}, keypoint >= {final_keypoint_conf}"
@@ -171,8 +168,10 @@ def run_humaneva_assessment(
         min_bbox_confidence (float or None): Minimum bounding box confidence threshold for filtering
         min_keypoint_confidence (float or None): Minimum keypoint confidence threshold for filtering
     """
-    gt_enum_class = import_class_from_string(pipeline_config.dataset.joint_enum_module)
-    pred_enum_class = import_class_from_string(pipeline_config.dataset.keypoint_format)
+    gt_enum_class = import_class_from_string(
+        pipeline_config.dataset.joint_enum_module)
+    pred_enum_class = import_class_from_string(
+        pipeline_config.dataset.keypoint_format)
 
     # Use config values if CLI arguments are None
     bbox_threshold = (
