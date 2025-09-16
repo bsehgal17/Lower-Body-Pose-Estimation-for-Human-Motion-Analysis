@@ -17,7 +17,7 @@ columns:
   grouping_columns: ["subject", "action", "camera"]
   # Video naming format for display (uses Python string formatting)
   # For HumanEva: S1_Walking_(C1)
-  video_name_format: "{subject}/Image_Data/{action}_(C{camera+1})"
+  video_name_format: "{subject}/Image_Data/{action}_(C{camera})"
 
 pck_scores:
   overall:

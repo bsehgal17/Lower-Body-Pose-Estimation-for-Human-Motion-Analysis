@@ -61,7 +61,6 @@ def humaneva_data_loader(
         gt_pkl_path = os.path.join(gt_pkl_folder, gt_pkl_name)
 
         if not os.path.exists(gt_pkl_path):
-            logger.info(f"Generating ground truth PKL: {gt_pkl_path}")
             loader = GroundTruthLoader(csv_file_path)
             keypoints = loader.get_keypoints(
                 subject, action, camera_idx, chunk="chunk0"
