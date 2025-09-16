@@ -67,12 +67,16 @@ def save_keypoints_to_json(
 
                 if "keypoints" in person_data:
                     keypoints = person_data["keypoints"]
-                    keypoint_scores = person_data.get("scores", [])
-                    bbox = person_data.get("bboxes", [])
+                    keypoints_visible = person_data.get("keypoints_visible", [])
+                    bboxes = person_data.get("bboxes", [])
+                    bbox_scores = person_data.get("bbox_scores", [])
+                    legacy_bbox = person_data.get("bbox", [])
 
-                    if bbox:
-                        person.add_detection(frame_idx, bbox, 1.0, label=0)
-                        person.add_pose(frame_idx, keypoints, keypoint_scores, bbox)
+                    if legacy_bbox:
+                        person.add_detection(frame_idx, legacy_bbox, 1.0, label=0)
+                        person.add_pose(
+                            frame_idx, keypoints, keypoints_visible, bboxes, bbox_scores
+                        )
 
         save_video_data_to_json(legacy_video_data, save_dir, video_name)
 
@@ -100,8 +104,8 @@ def unpack_prediction_pkl(pkl_path, person_idx=0):
 
         keypoints_list = []
         for pose in poses:
-            # Convert (J, 3) to (J, 2) by taking only x, y coordinates
-            kpts = np.array(pose.keypoints)[:, :2]  # Remove confidence/visibility
+            # keypoints are already (J, 2) format
+            kpts = np.array(pose.keypoints)
             keypoints_list.append(kpts)
 
         return np.stack(keypoints_list, axis=0) if keypoints_list else np.array([])

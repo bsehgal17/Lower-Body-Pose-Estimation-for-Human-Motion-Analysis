@@ -18,9 +18,11 @@ class PoseData:
     """Pose estimation data for a single frame."""
 
     frame_idx: int
-    keypoints: List[List[float]]  # (J, 3) - x, y, visibility/confidence
+    keypoints: List[List[float]]  # (J, 2) - x, y coordinates
     keypoint_scores: List[float]  # Confidence scores for each keypoint
-    bbox: List[float]  # [x1, y1, x2, y2] - bbox used for pose estimation
+    keypoints_visible: List[float]  # Visibility scores for each keypoint
+    bbox: List[float]  # [x1, y1, x2, y2] - bbox from pose estimation
+    bbox_scores: List[float]  # Bbox confidence scores from pose estimation
 
 
 @dataclass
@@ -42,15 +44,17 @@ class Person:
         self,
         frame_idx: int,
         keypoints: List[List[float]],
-        keypoint_scores: List[float],
-        bbox: List[float],
+        keypoints_visible: List[float],
+        bboxes: List[float],
+        bbox_scores: List[float],
     ):
         """Add pose data for this person in a specific frame."""
         pose = PoseData(
             frame_idx=frame_idx,
             keypoints=keypoints,
-            keypoint_scores=keypoint_scores,
-            bbox=bbox,
+            keypoints_visible=keypoints_visible,
+            bboxes=bboxes,
+            bbox_scores=bbox_scores,
         )
         self.poses.append(pose)
 
@@ -151,8 +155,9 @@ class VideoData:
                         {
                             "frame_idx": pose.frame_idx,
                             "keypoints": pose.keypoints,
-                            "keypoint_scores": pose.keypoint_scores,
-                            "bbox": pose.bbox,
+                            "keypoints_visible": pose.keypoints_visible,
+                            "bboxes": pose.bboxes,
+                            "bbox_scores": pose.bbox_scores,
                         }
                         for pose in person.poses
                     ],
@@ -199,8 +204,9 @@ class VideoData:
                 person.add_pose(
                     pose_data["frame_idx"],
                     pose_data["keypoints"],
-                    pose_data["keypoint_scores"],
-                    pose_data["bbox"],
+                    pose_data["keypoints_visible"],
+                    pose_data["bboxes"],
+                    pose_data["bbox_scores"],
                 )
 
         # Load all detections per frame

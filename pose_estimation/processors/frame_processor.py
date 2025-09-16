@@ -108,9 +108,13 @@ class FrameProcessor:
                 # Add pose data
                 pose_result = detection_item["pose_result"]
                 keypoints = pose_result.pred_instances.keypoints.tolist()
-                keypoint_scores = pose_result.pred_instances.keypoint_scores.tolist()
+                keypoints_visible = (
+                    pose_result.pred_instances.keypoints_visible.tolist()
+                )
+                bboxes = pose_result.pred_instances.bboxes.tolist()
+                bbox_scores = pose_result.pred_instances.bbox_scores.tolist()
                 person.add_pose(
-                    frame_idx, keypoints, keypoint_scores, detection_item["bbox"]
+                    frame_idx, keypoints, keypoints_visible, bboxes, bbox_scores
                 )
 
         # Clear buffer
