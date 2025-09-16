@@ -13,6 +13,9 @@ from .noise_config import NoiseConfig
 from .evaluation_config import EvaluationConfig
 from .dataset_config import DatasetConfig  # <- new import
 from .enhancement_config import EnhancementConfig  # <- enhancement import
+from .confidence_config import (
+    ConfidenceFilteringConfig,
+)  # <- confidence filtering import
 
 
 logging.basicConfig(
@@ -31,6 +34,7 @@ class PipelineConfig:
     evaluation: Optional[EvaluationConfig] = None
     dataset: Optional[DatasetConfig] = None
     enhancement: Optional[EnhancementConfig] = None
+    confidence_filtering: Optional[ConfidenceFilteringConfig] = None
 
     # ------------------------------------------------------------------
     # YAML (de)serialization helpers
@@ -63,6 +67,11 @@ class PipelineConfig:
             else None,
             enhancement=cls._parse_enhancement_config(raw_config.get("enhancement"))
             if "enhancement" in raw_config
+            else None,
+            confidence_filtering=ConfidenceFilteringConfig(
+                **raw_config["confidence_filtering"]
+            )
+            if "confidence_filtering" in raw_config
             else None,
         )
 

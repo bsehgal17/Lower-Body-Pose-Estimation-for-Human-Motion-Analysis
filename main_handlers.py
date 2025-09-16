@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 def _handle_detect_command(
     args, pipeline_config: PipelineConfig, global_config: GlobalConfig
 ):
-    run_detection_pipeline = _get_detection_pipeline_fn(
-        pipeline_config.models.detector)
+    run_detection_pipeline = _get_detection_pipeline_fn(pipeline_config.models.detector)
 
     input_dir, base_pipeline_out = get_pipeline_io_paths(
         global_config.paths, pipeline_config.paths.dataset
@@ -122,19 +121,15 @@ def _handle_filter_command(
     pipeline_config.paths.output_dir = str(step_out)
 
     if not pipeline_config.filter.input_dir:
-        noise_dir = os.path.join(
-            base_pipeline_out, args.pipeline_name, "noise")
-        detect_dir = os.path.join(
-            base_pipeline_out, args.pipeline_name, "detect")
+        noise_dir = os.path.join(base_pipeline_out, args.pipeline_name, "noise")
+        detect_dir = os.path.join(base_pipeline_out, args.pipeline_name, "detect")
 
         if os.path.exists(noise_dir):
             pipeline_config.filter.input_dir = noise_dir
-            logger.info(
-                f"Auto-selected input_dir from noise step: {noise_dir}")
+            logger.info(f"Auto-selected input_dir from noise step: {noise_dir}")
         elif os.path.exists(detect_dir):
             pipeline_config.filter.input_dir = detect_dir
-            logger.info(
-                f"Auto-selected input_dir from detect step: {detect_dir}")
+            logger.info(f"Auto-selected input_dir from detect step: {detect_dir}")
         else:
             logger.warning("Could not auto-resolve input_dir for filter.")
 
@@ -166,6 +161,43 @@ def _handle_assess_command(
     step_out = run_dir
     step_out.mkdir(parents=True, exist_ok=True)
 
+    # Get confidence filtering parameters - prioritize config file, then command line
+    cmd_bbox_confidence = args.min_bbox_confidence
+    cmd_keypoint_confidence = args.min_keypoint_confidence
+
+    # Check if config file has confidence filtering settings
+    if (
+        pipeline_config.confidence_filtering
+        and pipeline_config.confidence_filtering.enabled
+    ):
+        # Use config file values
+        min_bbox_confidence = pipeline_config.confidence_filtering.min_bbox_confidence
+        min_keypoint_confidence = (
+            pipeline_config.confidence_filtering.min_keypoint_confidence
+        )
+        logger.info(
+            f"Using confidence filtering from config file: "
+            f"bbox >= {min_bbox_confidence}, keypoint >= {min_keypoint_confidence}"
+        )
+    elif cmd_bbox_confidence is not None and cmd_keypoint_confidence is not None:
+        # Use command line values
+        min_bbox_confidence = cmd_bbox_confidence
+        min_keypoint_confidence = cmd_keypoint_confidence
+        logger.info(
+            f"Using confidence filtering from command line: "
+            f"bbox >= {min_bbox_confidence}, keypoint >= {min_keypoint_confidence}"
+        )
+    else:
+        # No configuration provided
+        logger.error("No confidence filtering configuration found. Please either:")
+        logger.error("1. Add confidence_filtering section to your config file, or")
+        logger.error(
+            "2. Provide --min_bbox_confidence and --min_keypoint_confidence arguments"
+        )
+        raise ValueError(
+            "Confidence filtering parameters are required but not provided"
+        )
+
     if pipeline_config.evaluation.input_dir:
         logger.info(
             f"Using manually specified input_dir: {pipeline_config.evaluation.input_dir}"
@@ -175,6 +207,8 @@ def _handle_assess_command(
             global_config,
             output_dir=step_out,
             input_dir=pipeline_config.evaluation.input_dir,
+            min_bbox_confidence=min_bbox_confidence,
+            min_keypoint_confidence=min_keypoint_confidence,
         )
         return
 
@@ -196,6 +230,8 @@ def _handle_assess_command(
                 global_config,
                 output_dir=step_eval_dir,
                 input_dir=step_dir,
+                min_bbox_confidence=min_bbox_confidence,
+                min_keypoint_confidence=min_keypoint_confidence,
             )
         else:
             logger.warning(
@@ -219,6 +255,8 @@ def _handle_assess_command(
             global_config,
             output_dir=step_eval_dir,
             input_dir=enhanced_step_dir,
+            min_bbox_confidence=min_bbox_confidence,
+            min_keypoint_confidence=min_keypoint_confidence,
         )
 
 
@@ -261,12 +299,10 @@ def _handle_enhance_command(
         enhancement_type = pipeline_config.enhancement.type
     if hasattr(args, "type") and args.type:
         enhancement_type = args.type
-        logger.info(
-            f"Using enhancement type from command line: {enhancement_type}")
+        logger.info(f"Using enhancement type from command line: {enhancement_type}")
 
     if not enhancement_type:
-        raise ValueError(
-            "Enhancement type must be specified in config or command line")
+        raise ValueError("Enhancement type must be specified in config or command line")
 
     # Determine if we should create comparison images (default: True, unless --no_comparison_images is set)
     create_comparison_images = True
@@ -319,10 +355,8 @@ def _handle_enhance_command(
             detect_out_dir = enhanced_run_dir
             detect_out_dir.mkdir(parents=True, exist_ok=True)
 
-            logger.info(
-                f"Running detection on enhanced videos from: {output_folder}")
-            logger.info(
-                f"Detection results will be saved to: {detect_out_dir}")
+            logger.info(f"Running detection on enhanced videos from: {output_folder}")
+            logger.info(f"Detection results will be saved to: {detect_out_dir}")
 
             run_detection_pipeline(
                 pipeline_config=pipeline_config,
@@ -331,8 +365,7 @@ def _handle_enhance_command(
                 output_dir=str(detect_out_dir),
             )
         else:
-            logger.info(
-                "No detection model configured; skipping detection step.")
+            logger.info("No detection model configured; skipping detection step.")
 
         return True
     else:
