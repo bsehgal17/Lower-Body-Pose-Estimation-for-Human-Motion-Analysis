@@ -118,7 +118,7 @@ def humaneva_data_loader(
             bbox_weight=final_bbox_weight,
             keypoint_weight=final_keypoint_weight,
         )
-        pred_keypoints, pred_bboxes, pred_scores = pred_loader.get_predictions(
+        pred_keypoints, pred_bboxes, pred_scores = pred_loader.get_filtered_predictions(
             subject, action, camera_idx, original_video_path
         )
         min_len = min(len(gt_keypoints), len(pred_keypoints))

@@ -74,7 +74,7 @@ filter:
 
 
 evaluation:
-  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/CLAHE_enhanced_humaneva/detect/2025-09-10_14-23-28/
+  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/CLAHE_enhanced_humaneva/detect/2025-09-16_14-25-24
   metrics:
     - name: overall_pck
       params:

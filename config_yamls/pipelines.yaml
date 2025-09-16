@@ -3,12 +3,12 @@ orchestrator:
   default_device: "cuda:0"
 
 pipelines:
-  # - name: CLAHE_enhanced_humaneva
-  #   steps:
-  #     - command: detect
-  #       config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: CLAHE_enhanced_humaneva
+    steps:
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # New CLAHE Study Pipelines - HSV Color Space configurations (COMMENTED OUT FOR FILTERED TESTS)
   # - name: clahe_hsv_05_8x8_humaneva
@@ -518,16 +518,16 @@ pipelines:
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
-  - name: detect_RTMW_X
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detect_and_filter.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/map_testing.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: detect_RTMW_X
+  #   steps:
+  #     - command: detect
+  #       config_file: "config_yamls/detect_and_filter.yaml"
+  #     # - command: evaluation
+  #     #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+  #     # - command: evaluation
+  #     #   config_file: "config_yamls/map_testing.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
   
   # - name: Perturbed_RTMW_X
   #   steps:
