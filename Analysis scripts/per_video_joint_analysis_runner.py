@@ -4,6 +4,14 @@ Per-Video Joint Analysis Runner
 Runner for per-video joint brightness analysis that analyzes all joints for each video.
 """
 
+from utils.config_extractor import extract_joint_analysis_config
+from core.joint_data_loader import JointDataLoader
+from visualizers.per_video_joint_brightness_visualizer import (
+    PerVideoJointBrightnessVisualizer,
+)
+from analyzers.per_video_joint_brightness_analyzer import (
+    PerVideoJointBrightnessAnalyzer,
+)
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -15,16 +23,8 @@ import pandas as pd
 sys.path.append(str(Path(__file__).parent))
 
 # Import the per-video analyzer and visualizer
-from analyzers.per_video_joint_brightness_analyzer import (
-    PerVideoJointBrightnessAnalyzer,
-)
-from visualizers.per_video_joint_brightness_visualizer import (
-    PerVideoJointBrightnessVisualizer,
-)
 
 # Import existing data loader and config extractor
-from core.joint_data_loader import JointDataLoader
-from utils.config_extractor import extract_joint_analysis_config
 
 
 class PerVideoJointAnalysisRunner:
@@ -107,7 +107,7 @@ class PerVideoJointAnalysisRunner:
 
             # Setup configuration and load PCK data
             if not data_loader.setup_configuration():
-                print("❌ Failed to load configuration")
+                print("Failed to load configuration")
                 return {}
 
             # Load PCK data - this will load all available PCK columns from the Excel file
@@ -115,10 +115,10 @@ class PerVideoJointAnalysisRunner:
             pck_data = data_loader.load_pck_data()
 
             if pck_data is None:
-                print("❌ Failed to load data")
+                print("Failed to load data")
                 return {}
 
-            print(f"✅ Loaded data with {len(pck_data)} rows")
+            print(f"Loaded data with {len(pck_data)} rows")
             print(f"   Columns: {list(pck_data.columns)}")
 
             # Check if we have video grouping columns
@@ -133,7 +133,7 @@ class PerVideoJointAnalysisRunner:
                 return {}
 
             # Step 2: Initialize analyzer
-            print("\\n2. Initializing per-video analyzer...")
+            print("\n 2. Initializing per-video analyzer...")
 
             # Use the loaded configuration from data_loader
             config = data_loader.config
@@ -256,8 +256,10 @@ class PerVideoJointAnalysisRunner:
                 brightness_averages[video_name] = avg_brightness
 
         if brightness_averages:
-            brightest_video = max(brightness_averages, key=brightness_averages.get)
-            darkest_video = min(brightness_averages, key=brightness_averages.get)
+            brightest_video = max(brightness_averages,
+                                  key=brightness_averages.get)
+            darkest_video = min(brightness_averages,
+                                key=brightness_averages.get)
             print(
                 f"   💡 Brightest video: {brightest_video} ({brightness_averages[brightest_video]:.2f})"
             )

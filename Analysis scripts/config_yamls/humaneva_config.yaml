@@ -5,7 +5,7 @@ dataset:
   
 paths:
   video_directory: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva"
-  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/evaluation/2025-09-11_21-34-25/2025-09-11_21-34-25_metrics.xlsx"
+  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/clahe_hsv_05_8x8_humaneva/evaluation/2025-09-17_06-54-10/detect/detect_metrics.xlsx"
   save_folder: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/HumanEva/High_threshold"
   ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv"  # Path to combined ground truth CSV file
 
@@ -31,43 +31,49 @@ pck_scores:
     - "pck_per_frame_pck_0.50"
   
   jointwise:
+    - "LEFT_HIP_jointwise_pck_0.10"
+    - "RIGHT_HIP_jointwise_pck_0.10"
+    - "LEFT_KNEE_jointwise_pck_0.10"
+    - "RIGHT_KNEE_jointwise_pck_0.10"
+    - "LEFT_ANKLE_jointwise_pck_0.10"
+    - "RIGHT_ANKLE_jointwise_pck_0.10"
+    - "LEFT_HIP_jointwise_pck_0.15"
+    - "RIGHT_HIP_jointwise_pck_0.15"
+    - "LEFT_KNEE_jointwise_pck_0.15"
+    - "RIGHT_KNEE_jointwise_pck_0.15"
+    - "LEFT_ANKLE_jointwise_pck_0.15"
+    - "RIGHT_ANKLE_jointwise_pck_0.15"
+    - "LEFT_HIP_jointwise_pck_0.20"
+    - "RIGHT_HIP_jointwise_pck_0.20"
+    - "LEFT_KNEE_jointwise_pck_0.20"
+    - "RIGHT_KNEE_jointwise_pck_0.20"
+    - "LEFT_ANKLE_jointwise_pck_0.20"
+    - "RIGHT_ANKLE_jointwise_pck_0.20"
     - "LEFT_HIP_jointwise_pck_0.25"
     - "RIGHT_HIP_jointwise_pck_0.25"
     - "LEFT_KNEE_jointwise_pck_0.25"
     - "RIGHT_KNEE_jointwise_pck_0.25"
     - "LEFT_ANKLE_jointwise_pck_0.25"
     - "RIGHT_ANKLE_jointwise_pck_0.25"
-    - "LEFT_HIP_jointwise_pck_0.30"
-    - "RIGHT_HIP_jointwise_pck_0.30"
-    - "LEFT_KNEE_jointwise_pck_0.30"
-    - "RIGHT_KNEE_jointwise_pck_0.30"
-    - "LEFT_ANKLE_jointwise_pck_0.30"
-    - "RIGHT_ANKLE_jointwise_pck_0.30"
-    - "LEFT_HIP_jointwise_pck_0.35"
-    - "RIGHT_HIP_jointwise_pck_0.35"
-    - "LEFT_KNEE_jointwise_pck_0.35"
-    - "RIGHT_KNEE_jointwise_pck_0.35"
-    - "LEFT_ANKLE_jointwise_pck_0.35"
-    - "RIGHT_ANKLE_jointwise_pck_0.35"
-    - "LEFT_HIP_jointwise_pck_0.40"
-    - "RIGHT_HIP_jointwise_pck_0.40"
-    - "LEFT_KNEE_jointwise_pck_0.40"
-    - "RIGHT_KNEE_jointwise_pck_0.40"
-    - "LEFT_ANKLE_jointwise_pck_0.40"
-    - "RIGHT_ANKLE_jointwise_pck_0.40"
 
 
 # Synchronization data for frame alignment
 sync_data:
-  S1:
-    "Walking 1": [667, 667, 667]
-    "Jog 1": [49, 50, 51]
-  S2:
-    "Walking 1": [547, 547, 546] 
-    "Jog 1": [493, 491, 502]
-  S3:
-    "Walking 1": [524, 524, 524]
-    "Jog 1": [464, 462, 462]
+    data:
+      S1:
+        Walking 1: [82,81,81]
+        Jog 1: [51, 51, 50]
+        Box 1: [57, 57, 56]
+        Gestures 1: [45, 45, 44]
+      S2:
+        Walking 1: [115, 115, 114]
+        Jog 1: [100, 100, 99]
+        Box 1: [119, 119, 117]
+      S3:
+        Walking 1: [80,80,80]
+        Jog 1: [65, 65, 65]
+        Box 1: [1,1,1]
+        Gestures 1: [83, 83, 82]
 
 # Analysis-specific configurations for HumanEva
 analysis:
