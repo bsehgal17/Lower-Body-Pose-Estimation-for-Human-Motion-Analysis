@@ -24,16 +24,7 @@ class GroundTruthLoader:
     ):
         """
         Extracts keypoint data for the given filters.
-
-        Parameters:
-        - subject: Subject ID (e.g., "S1")
-        - action_group: e.g., "Walk 1"
-        - camera: int (0, 1, 2)
-        - chunk: Optional chunk filter like "chunk0" (default)
-        - keypoint_columns: List of columns to extract. If None, auto-detects x/y pairs.
-
-        Returns:
-        - keypoints: np.ndarray of shape (N, J, 2)
+        Returns None if no data is found.
         """
         df_filtered = self.df[
             (self.df["Subject"] == subject)
@@ -43,9 +34,11 @@ class GroundTruthLoader:
         ]
 
         if df_filtered.empty:
-            raise ValueError(
-                f"No matching data found for Subject={subject}, Action={action_group}, Camera={camera}, Chunk={chunk}"
+            # Instead of raising error, return None to skip
+            print(
+                f"[Warning] No matching data for Subject={subject}, Action={action_group}, Camera={camera}, Chunk={chunk}"
             )
+            return None
 
         if keypoint_columns is None:
             keypoint_columns = [
@@ -54,7 +47,8 @@ class GroundTruthLoader:
 
         keypoints = []
         for _, row in df_filtered.iterrows():
-            row_kpts = row[keypoint_columns].values.astype(np.float64).reshape(-1, 2)
+            row_kpts = row[keypoint_columns].values.astype(
+                np.float64).reshape(-1, 2)
             keypoints.append(row_kpts)
 
         return np.array(keypoints)
