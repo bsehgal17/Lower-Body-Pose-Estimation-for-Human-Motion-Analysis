@@ -74,11 +74,11 @@ filter:
 
 
 evaluation:
-  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/CLAHE_enhanced_humaneva/detect/2025-09-16_18-27-30
+  # input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/detect
   metrics:
     - name: overall_pck
       params:
-        threshold: 0.25
+        threshold: 0.1
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -95,7 +95,7 @@ evaluation:
 
     - name: overall_pck
       params:
-        threshold: 0.3
+        threshold: 0.15
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -112,7 +112,7 @@ evaluation:
 
     - name: overall_pck
       params:
-        threshold: 0.35
+        threshold: 0.20
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -128,23 +128,6 @@ evaluation:
           - RIGHT_ANKLE
 
     - name: overall_pck
-      params:
-        threshold: 0.4
-        joints_to_evaluate:
-          # - LEFT_SHOULDER
-          # - RIGHT_SHOULDER
-          # - LEFT_ELBOW
-          # - RIGHT_ELBOW
-          # - LEFT_WRIST
-          # - RIGHT_WRIST
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-
-    - name: per_frame_pck
       params:
         threshold: 0.25
         joints_to_evaluate:
@@ -163,7 +146,7 @@ evaluation:
 
     - name: per_frame_pck
       params:
-        threshold: 0.3
+        threshold: 0.1
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -180,7 +163,7 @@ evaluation:
 
     - name: per_frame_pck
       params:
-        threshold: 0.35
+        threshold: 0.15
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -197,7 +180,7 @@ evaluation:
 
     - name: per_frame_pck
       params:
-        threshold: 0.4
+        threshold: 0.20
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -212,7 +195,7 @@ evaluation:
           - LEFT_ANKLE
           - RIGHT_ANKLE
 
-    - name: jointwise_pck
+    - name: per_frame_pck
       params:
         threshold: 0.25
         joints_to_evaluate:
@@ -231,7 +214,7 @@ evaluation:
 
     - name: jointwise_pck
       params:
-        threshold: 0.3
+        threshold: 0.10
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -248,7 +231,24 @@ evaluation:
 
     - name: jointwise_pck
       params:
-        threshold: 0.35
+        threshold: 0.15
+        joints_to_evaluate:
+          # - LEFT_SHOULDER
+          # - RIGHT_SHOULDER
+          # - LEFT_ELBOW
+          # - RIGHT_ELBOW
+          # - LEFT_WRIST
+          # - RIGHT_WRIST
+          - LEFT_HIP
+          - RIGHT_HIP
+          - LEFT_KNEE
+          - RIGHT_KNEE
+          - LEFT_ANKLE
+          - RIGHT_ANKLE
+
+    - name: jointwise_pck
+      params:
+        threshold: 0.20
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
@@ -264,7 +264,7 @@ evaluation:
           - RIGHT_ANKLE
     - name: jointwise_pck
       params:
-        threshold: 0.4
+        threshold: 0.25
         joints_to_evaluate:
           # - LEFT_SHOULDER
           # - RIGHT_SHOULDER
