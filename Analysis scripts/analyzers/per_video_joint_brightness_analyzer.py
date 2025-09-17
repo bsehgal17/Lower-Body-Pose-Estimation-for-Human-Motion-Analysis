@@ -408,14 +408,14 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                 # Filter data by group_key if provided
                 if group_key is not None and grouping_cols is not None:
                     filter_conditions = []
-                    for i, col in enumerate(grouping_cols):
-                        if i < len(group_key) and col in gt_data.columns:
-                            filter_conditions.append(gt_data[col] == group_key[i])
+                    for col, key in zip(grouping_cols, group_key):
+                        if col in gt_data.columns:
+                            filter_conditions.append(gt_data[col] == key)
 
                     if filter_conditions:
                         combined_condition = filter_conditions[0]
                         for condition in filter_conditions[1:]:
-                            combined_condition = combined_condition & condition
+                            combined_condition &= condition
                         gt_data = gt_data[combined_condition]
 
                         if gt_data.empty:
