@@ -11,19 +11,19 @@ pipelines:
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # New CLAHE Study Pipelines - HSV Color Space configurations (COMMENTED OUT FOR FILTERED TESTS)
-  # - name: clahe_hsv_05_8x8_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/clahe_hsv_05_8x8.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: clahe_hsv_05_8x8_humaneva
+    steps:
+      - command: enhance
+        config_file: "config_yamls/enhancement/clahe_hsv_05_8x8.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: clahe_hsv_05_16x16_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/clahe_hsv_05_16x16.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: clahe_hsv_05_16x16_humaneva
+    steps:
+      - command: enhance
+        config_file: "config_yamls/enhancement/clahe_hsv_05_16x16.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # Enhanced CLAHE with Image Filtering Pipelines - CLAHE 0.5 8x8
   # - name: filtered_clahe_05_8x8_bilateral_humaneva
@@ -126,50 +126,50 @@ pipelines:
 
 
   # HumanEva Gamma Correction Study Pipelines - Different gamma configurations (COMMENTED OUT FOR FILTERED TESTS)
-  # - name: gamma_conservative_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_conservative.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: gamma_conservative_humaneva
+    steps:
+      - command: enhance
+        config_file: "config_yamls/enhancement/gamma_humaneva_conservative.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: gamma_moderate_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_moderate.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: gamma_moderate_humaneva
+    steps:
+      - command: enhance
+        config_file: "config_yamls/enhancement/gamma_humaneva_moderate.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: gamma_aggressive_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_aggressive.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: gamma_aggressive_humaneva
+    steps:
+      - command: enhance
+        config_file: "config_yamls/enhancement/gamma_humaneva_aggressive.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: gamma_darkening_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_darkening.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: gamma_darkening_humaneva
+    steps:
+      - command: enhance
+        config_file: "config_yamls/enhancement/gamma_humaneva_darkening.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: gamma_fine_tuned_humaneva
-  #   steps:
-  #     - command: enhance
-  #       config_file: "config_yamls/enhancement/gamma_humaneva_fine_tuned.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: gamma_fine_tuned_humaneva
+    steps:
+      - command: enhance
+        config_file: "config_yamls/enhancement/gamma_humaneva_fine_tuned.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
  
 
@@ -518,96 +518,96 @@ pipelines:
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
-  # - name: detect_RTMW_X
-  #   steps:
-  #     - command: detect
-  #       config_file: "config_yamls/detect_and_filter.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/map_testing.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: detect_RTMW_X
+    steps:
+      - command: detect
+        config_file: "config_yamls/detector/detect_and_filter.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/map_testing.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
   
-  # - name: Perturbed_RTMW_X
-  #   steps:
-  #     # # - command: detect
-  #     # #   config_file: "config_yamls/rtmw_detector.yaml
-  #     # - command: noise
-  #     #   config_file: "config_yamls/rtmw_detector.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/map_testing.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
+  - name: Perturbed_RTMW_X
+    steps:
+      # # - command: detect
+      # #   config_file: "config_yamls/rtmw_detector.yaml
+      - command: noise
+        config_file: "config_yamls/detector/rtmw_detector.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/map_testing.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
 
-  # - name: Perturbed_RTMW_X_20
-  #   steps:
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml
-  #     # - command: noise
-  #     #   config_file: "config_yamls/test_noise_20.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/map_testing.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
+  - name: Perturbed_RTMW_X_20
+    steps:
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml
+      - command: noise
+        config_file: "config_yamls/noise/test_noise_20.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/map_testing.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
 
-  # - name: Perturbed_RTMW_X_60
-  #   steps:
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml
-  #     # - command: noise
-  #     #   config_file: "config_yamls/test_noise_60.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/map_testing.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
+  - name: Perturbed_RTMW_X_60
+    steps:
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml
+      - command: noise
+        config_file: "config_yamls/noise/test_noise_60.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/map_testing.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
 
-  # - name: Perturbed_RTMW_X_80
-  #   steps:
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml
-  #     # - command: noise
-  #     #   config_file: "config_yamls/test_noise_80.yaml"
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/map_testing.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
+  - name: Perturbed_RTMW_X_80
+    steps:
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml
+      - command: noise
+        config_file: "config_yamls/noise/test_noise_80.yaml"
+      # - command: detect
+      #   config_file: "config_yamls/rtmw_detector.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/map_testing.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
 
-  # - name: detect_RTMW
-  #   steps:
-  #     # - command: detect
-  #     #   config_file: "config_yamls/rtmw_detector.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
+  - name: detect_RTMW
+    steps:
+      - command: detect
+        config_file: "config_yamls/detector/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test.yaml"
       # - command: evaluation
       #   config_file: "config_yamls/map_testing_movi.yaml"
       # - command: evaluation
       #   config_file: "config_yamls/jointwise_ap_testing_movi.yaml"
       
-  # - name: detect_RTMW_X_full_data
-  #   steps:
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-  #     # - command: evaluation
-  #     #   config_file: "config_yamls/map_testing.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: detect_RTMW_X_full_data
+    steps:
+      - command: detect
+        config_file: "config_yamls/detector/rtmw_detector.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/map_testing.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
