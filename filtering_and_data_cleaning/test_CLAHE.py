@@ -2,6 +2,12 @@ import cv2
 import numpy as np
 from pathlib import Path
 from sklearn.decomposition import PCA
+import sys
+import os
+
+# Add utils to path for video format utilities
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from utils.video_format_utils import get_video_format_info
 
 
 def enhance_dark_video_with_labeled_collage(
@@ -24,7 +30,9 @@ def enhance_dark_video_with_labeled_collage(
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+
+    # Get the fourcc and extension from input video
+    fourcc, input_extension = get_video_format_info(input_path)
 
     steps = [
         "original",
@@ -40,7 +48,7 @@ def enhance_dark_video_with_labeled_collage(
 
     writers = {
         step: cv2.VideoWriter(
-            str(output_dir / f"{step}.mp4"), fourcc, fps, (width, height)
+            str(output_dir / f"{step}{input_extension}"), fourcc, fps, (width, height)
         )
         for step in steps
     }
@@ -219,7 +227,7 @@ def enhance_dark_video_with_labeled_collage(
 
 # Example usage
 if __name__ == "__main__":
-    input_video = r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\dataset\HumanEvaFull\S3\Image_Data\Walking_2_(C3).avi"
+    input_video = r"C:\Users\BhavyaSehgal\Downloads\bhavya_phd\dataset\HumanEvaFull\S3\Image_Data\Walking_1_(C3).avi"
     output_dir_pca = r"C:\Users\BhavyaSehgal\Downloads\output_pca_new"
     output_dir_manual = r"C:\Users\BhavyaSehgal\Downloads\output_manual_new"
 

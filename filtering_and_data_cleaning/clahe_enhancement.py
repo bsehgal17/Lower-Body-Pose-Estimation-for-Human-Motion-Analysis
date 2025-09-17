@@ -10,6 +10,12 @@ import numpy as np
 import logging
 from typing import Tuple, Optional, Union
 from pathlib import Path
+import sys
+import os
+
+# Add parent directory to path for utils
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from utils.video_format_utils import get_video_format_info
 
 logger = logging.getLogger(__name__)
 
@@ -169,9 +175,12 @@ class CLAHEEnhancer:
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-        # Define codec and create VideoWriter
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        out = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
+        # Get fourcc and extension from input video
+        fourcc, input_extension = get_video_format_info(input_path)
+
+        # Update output path to use same extension
+        output_path_with_ext = Path(output_path).with_suffix(input_extension)
+        out = cv2.VideoWriter(str(output_path_with_ext), fourcc, fps, (width, height))
 
         if not out.isOpened():
             logger.error(f"Could not create output video: {output_path}")

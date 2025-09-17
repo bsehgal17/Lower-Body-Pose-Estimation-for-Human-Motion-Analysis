@@ -14,6 +14,7 @@ from utils.import_utils import import_class_from_string
 from utils.plot import plot_filtering_effect
 from filtering_and_data_cleaning.filter_registry import FILTER_FN_MAP
 from filtering_and_data_cleaning.preprocessing_utils import TimeSeriesPreprocessor
+from utils.video_format_utils import get_video_format_info
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +83,13 @@ class KeypointFilterProcessor:
         fps = cap.get(cv2.CAP_PROP_FPS)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+        # Get fourcc and extension from input video
+        fourcc, input_extension = get_video_format_info(video_path)
+
+        # Update output path to use same extension
+        output_path_with_ext = Path(output_path).with_suffix(input_extension)
+        out = cv2.VideoWriter(str(output_path_with_ext), fourcc, fps, (width, height))
 
         frame_idx = 0
         while True:
