@@ -3,14 +3,15 @@
 Script to visualize the norm length and draw a circle around the knee keypoint
 with ground truth as center and radius as pck_threshold * norm_length for the first frame of each video.
 """
-
-import os
 import cv2
 import numpy as np
 import yaml
 from glob import glob
-from utils.joint_enum import GTJointsHumanEVa
-from dataset_files.HumanEva.get_gt_keypoint import GroundTruthLoader
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 
 # Load config from YAML
 CONFIG_PATH = "dataset_files/HumanEva/humaneva_config.yaml"
@@ -19,13 +20,16 @@ with open(CONFIG_PATH, "r") as f:
 
 VIDEO_DIR = config["paths"].get("dataset", "dataset_files/HumanEva")
 GT_PATH = config["paths"].get("ground_truth_file", None)
-PCK_THRESHOLD = config.get("pck_threshold", 0.2)  # Add this to your YAML if missing
+# Add this to your YAML if missing
+PCK_THRESHOLD = config.get("pck_threshold", 0.2)
 OUTPUT_DIR = "test_plots_output/pck_circles"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 # Get ground truth keypoints for first frame using loader and joint enum
 def get_ground_truth_keypoints(video_path, gt_path):
+    from utils.joint_enum import GTJointsHumanEVa
+    from dataset_files.HumanEva.get_gt_keypoint import GroundTruthLoader
     # Extract subject, action, camera from video filename (assumes format S1_Jog_1_(C1).mp4)
     basename = os.path.basename(video_path)
     parts = basename.split("_")
