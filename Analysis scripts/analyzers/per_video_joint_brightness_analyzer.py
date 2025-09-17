@@ -245,9 +245,9 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                     except Exception:
                         camera_index = 0
                 if subject_key and action_key and camera_index is not None:
-                    sync_offset = self.config.sync_data.data[subject_key][action_key][
-                        camera_index
-                    ]
+                    sync_offset = self.config.sync_data.data["data"][subject_key][
+                        action_key
+                    ][camera_index]
                 if sync_offset < 0:
                     sync_offset = 0
             except Exception as e:

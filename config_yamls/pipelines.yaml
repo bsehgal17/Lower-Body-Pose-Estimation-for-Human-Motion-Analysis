@@ -3,6 +3,27 @@ orchestrator:
   default_device: "cuda:0"
 
 pipelines:
+  - name: detect_RTMW
+    steps:
+      - command: detect
+        config_file: "config_yamls/detector/rtmw_detector.yaml"
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test.yaml"
+  - name: detect_RTMW_X
+    steps:
+      - command: detect
+        config_file: "config_yamls/detector/detect_and_filter.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/map_testing.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  
+      # - command: evaluation
+      #   config_file: "config_yamls/map_testing_movi.yaml"
+      # - command: evaluation
+      #   config_file: "config_yamls/jointwise_ap_testing_movi.yaml"
   # - name: CLAHE_enhanced_humaneva
   #   steps:
   #     # - command: detect
@@ -11,19 +32,19 @@ pipelines:
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # New CLAHE Study Pipelines - HSV Color Space configurations (COMMENTED OUT FOR FILTERED TESTS)
-  - name: clahe_hsv_05_8x8_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/clahe_hsv_05_8x8.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: clahe_hsv_05_8x8_humaneva
+  #   steps:
+  #     - command: enhance
+  #       config_file: "config_yamls/enhancement/clahe_hsv_05_8x8.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: clahe_hsv_05_16x16_humaneva
-    steps:
-      - command: enhance
-        config_file: "config_yamls/enhancement/clahe_hsv_05_16x16.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: clahe_hsv_05_16x16_humaneva
+  #   steps:
+  #     - command: enhance
+  #       config_file: "config_yamls/enhancement/clahe_hsv_05_16x16.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # Enhanced CLAHE with Image Filtering Pipelines - CLAHE 0.5 8x8
   # - name: filtered_clahe_05_8x8_bilateral_humaneva
@@ -518,17 +539,7 @@ pipelines:
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
-  - name: detect_RTMW_X
-    steps:
-      - command: detect
-        config_file: "config_yamls/detector/detect_and_filter.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/map_testing.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-  
+
   - name: Perturbed_RTMW_X
     steps:
       # # - command: detect
@@ -589,35 +600,6 @@ pipelines:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
 
-  - name: detect_RTMW
-    steps:
-      - command: detect
-        config_file: "config_yamls/detector/rtmw_detector.yaml"
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/map_testing_movi.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/jointwise_ap_testing_movi.yaml"
+
       
-  - name: detect_RTMW_X_full_data
-    steps:
-      - command: detect
-        config_file: "config_yamls/detector/rtmw_detector.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/map_testing.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-  - name: detect_RTMW_X_full_data
-    steps:
-      - command: detect
-        config_file: "config_yamls/detector/rtmw_detector.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/jointwise_ap_testing.yaml"
-      # - command: evaluation
-      #   config_file: "config_yamls/map_testing.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
