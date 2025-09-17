@@ -58,12 +58,20 @@ for subject, chunks in data_dict.items():
 
         # Combine all camera rows
         all_data = np.vstack(combined_rows)
-        columns = (
-            ["Camera"]
-            + [f"x{j + 1}" for j in range(joints)]
-            + [f"y{j + 1}" for j in range(joints)]
-        )
-        df_xy = pd.DataFrame(all_data, columns=columns)
+        # Interleave x and y columns for each joint from [x1, y1, x2, y2, ...]
+        interleaved = []
+        for row in all_data:
+            camera = row[0]
+            coords = row[1:]
+            # Each joint has 2 values: x, y
+            xy_pairs = [coords[2 * j : 2 * j + 2] for j in range(joints)]
+            flat_xy = [val for pair in xy_pairs for val in pair]
+            interleaved.append([camera] + flat_xy)
+        # New column order: Camera, x1, y1, x2, y2, ...
+        new_columns = ["Camera"] + [
+            f"{axis}{j + 1}" for j in range(joints) for axis in ("x", "y")
+        ]
+        df_xy = pd.DataFrame(interleaved, columns=new_columns)
 
         # Add Subject and Action columns
         df_xy.insert(0, "Action", chunk_name)

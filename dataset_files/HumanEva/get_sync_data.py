@@ -1,6 +1,7 @@
 import cv2
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def overlay_gt_on_frames(video_root, csv_file, output_root):
@@ -38,21 +39,22 @@ def overlay_gt_on_frames(video_root, csv_file, output_root):
 
             first_row = subset.iloc[0]
 
-            # Extract numeric values (skip first numeric which is Camera)
-            numeric_values = []
-            for v in first_row.values:
-                try:
-                    f = float(v)
-                    numeric_values.append(f)
-                except ValueError:
-                    continue
-            numeric_values = numeric_values[1:]  # skip Camera
-
-            # Convert into (x, y) pairs
-            keypoints = [
-                (int(numeric_values[i]), int(numeric_values[i + 1]))
-                for i in range(0, len(numeric_values), 2)
-            ]
+            # Extract keypoints using columns named x1, y1, x2, y2, ...
+            keypoints = []
+            idx = 1
+            while True:
+                x_col = f"x{idx}"
+                y_col = f"y{idx}"
+                if x_col in first_row and y_col in first_row:
+                    try:
+                        x = int(float(first_row[x_col]))
+                        y = int(float(first_row[y_col]))
+                        keypoints.append((x, y))
+                    except (ValueError, TypeError):
+                        pass
+                    idx += 1
+                else:
+                    break
 
             # Prepare output folder for frames
             rel_path = os.path.relpath(root, video_root)
@@ -60,6 +62,21 @@ def overlay_gt_on_frames(video_root, csv_file, output_root):
                 output_root, rel_path, os.path.splitext(video_file)[0]
             )
             os.makedirs(out_folder, exist_ok=True)
+
+            # Show first frame of video with keypoints using matplotlib
+            cap = cv2.VideoCapture(video_path)
+            ret, frame = cap.read()
+            if ret:
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                plt.figure(figsize=(8, 6))
+                plt.imshow(frame_rgb)
+                if keypoints:
+                    xs, ys = zip(*keypoints)
+                    plt.scatter(xs, ys, c="lime", s=40, edgecolors="black")
+                plt.title(f"First frame: {video_file}")
+                plt.axis("off")
+                plt.show()
+            cap.release()
 
             cap = cv2.VideoCapture(video_path)
             frame_idx = 0
@@ -86,5 +103,5 @@ def overlay_gt_on_frames(video_root, csv_file, output_root):
 overlay_gt_on_frames(
     video_root=r"C:\Users\BhavyaSehgal\Downloads\HumanEva",
     csv_file=r"C:\Users\BhavyaSehgal\Downloads\HumanEva\validate_combined_chunk0.csv",
-    output_root=r"C:\Users\BhavyaSehgal\Downloads\output_frames",
+    output_root=r"C:\Users\BhavyaSehgal\Downloads\output_frames_new",
 )
