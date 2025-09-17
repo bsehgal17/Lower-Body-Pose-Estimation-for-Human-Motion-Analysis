@@ -37,7 +37,7 @@ class OverallPCKCalculator(BasePCKCalculator):
         joint_set = set(joints_to_evaluate)
 
         if "LEFT_SHOULDER" in joint_set and "RIGHT_SHOULDER" in joint_set:
-            return ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"]
+            return ["LEFT_SHOULDER", "LEFT_HIP", "RIGHT_SHOULDER", "RIGHT_HIP"]
         if "LEFT_KNEE" in joint_set and "RIGHT_KNEE" in joint_set:
             return ["LEFT_KNEE", "LEFT_HIP", "RIGHT_KNEE",  "RIGHT_HIP"]
         if "LEFT_HIP" in joint_set and "RIGHT_HIP" in joint_set:
