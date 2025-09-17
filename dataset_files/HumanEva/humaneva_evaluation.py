@@ -87,7 +87,8 @@ def _draw_keypoints_on_frame(
                     int(keypoints[start_idx][0]),
                     int(keypoints[start_idx][1]),
                 )
-                end_point = (int(keypoints[end_idx][0]), int(keypoints[end_idx][1]))
+                end_point = (int(keypoints[end_idx][0]),
+                             int(keypoints[end_idx][1]))
                 cv2.line(annotated_frame, start_point, end_point, color, 2)
 
     return annotated_frame
@@ -134,7 +135,8 @@ def _generate_filtered_frames(
     start_frame = sync_offset
     end_frame = min(total_frames, len(pred_keypoints) + sync_offset)
 
-    logger.info(f"Processing frames {start_frame} to {end_frame} (step={frame_step})")
+    logger.info(
+        f"Processing frames {start_frame} to {end_frame} (step={frame_step})")
 
     stats = {
         "total_frames_processed": 0,
@@ -247,7 +249,7 @@ def humaneva_data_loader(
     min_keypoint_confidence,
     enable_visualization=False,
     visualization_output_dir=None,
-    frame_step=10,
+    frame_step=1,
     visualize_gt=True,
 ):
     """
@@ -280,7 +282,8 @@ def humaneva_data_loader(
             metadata["action"],
             metadata["camera"],
         )
-        camera_idx = int(camera_str[1:]) - 1
+        camera_idx = int(camera_str[1:])
+
         safe_action_name = action.replace(" ", "_")
 
         # --- GT Loading Logic (HumanEva specific) ---
@@ -354,7 +357,7 @@ def humaneva_data_loader(
             keypoint_weight=final_keypoint_weight,
         )
         pred_keypoints, pred_bboxes, pred_scores = pred_loader.get_filtered_predictions(
-            subject, action, camera_idx, original_video_path
+            subject, action, camera_idx-1, original_video_path
         )
         min_len = min(len(gt_keypoints), len(pred_keypoints))
 
@@ -385,7 +388,7 @@ def humaneva_data_loader(
                     frame_step=frame_step,
                     visualize_gt=visualize_gt,
                     sync_offset=_get_sync_offset(
-                        pipeline_config, subject, action, camera_idx
+                        pipeline_config, subject, action, camera_idx-1
                     ),
                 )
                 logger.info(
@@ -417,9 +420,9 @@ def run_humaneva_assessment(
     input_dir: str,
     min_bbox_confidence=None,
     min_keypoint_confidence=None,
-    enable_visualization=False,
+    enable_visualization=True,
     visualization_output_dir=None,
-    frame_step=10,
+    frame_step=1,
     visualize_gt=True,
 ):
     """
@@ -437,8 +440,10 @@ def run_humaneva_assessment(
         frame_step (int): Step size for frame processing
         visualize_gt (bool): Whether to include ground truth in visualizations
     """
-    gt_enum_class = import_class_from_string(pipeline_config.dataset.joint_enum_module)
-    pred_enum_class = import_class_from_string(pipeline_config.dataset.keypoint_format)
+    gt_enum_class = import_class_from_string(
+        pipeline_config.dataset.joint_enum_module)
+    pred_enum_class = import_class_from_string(
+        pipeline_config.dataset.keypoint_format)
 
     # Use config values if CLI arguments are None
     bbox_threshold = (
@@ -460,7 +465,8 @@ def run_humaneva_assessment(
     # Setup visualization if enabled
     if enable_visualization:
         if visualization_output_dir is None:
-            visualization_output_dir = os.path.join(output_dir, "visualizations")
+            visualization_output_dir = os.path.join(
+                output_dir, "visualizations")
         os.makedirs(visualization_output_dir, exist_ok=True)
         logger.info(
             f"Visualization enabled. Output directory: {visualization_output_dir}"
