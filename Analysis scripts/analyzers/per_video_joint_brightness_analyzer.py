@@ -262,18 +262,20 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             print(f"   No ground truth coordinates found for {video_name}")
             return {}
 
-        # Apply sync offset to ground truth coordinates
-        for joint in gt_coordinates:
-            gt_coordinates[joint] = gt_coordinates[joint][sync_offset:]
-
-        # Only use as many frames as available in ground truth CSV
-        min_frames = (
+        # Determine number of frames in ground truth for this video
+        num_gt_frames = (
             min([len(coords) for coords in gt_coordinates.values()])
             if gt_coordinates
             else 0
         )
+
+        # Apply sync offset to ground truth coordinates (no slicing, just use full GT)
+        for joint in gt_coordinates:
+            gt_coordinates[joint] = gt_coordinates[joint][:num_gt_frames]
+
+        # Select video frames from sync_offset to sync_offset + num_gt_frames
         video_data_synced = video_data.iloc[
-            sync_offset: sync_offset + min_frames
+            sync_offset: sync_offset + num_gt_frames
         ].reset_index(drop=True)
 
         # Load video file and extract brightness
