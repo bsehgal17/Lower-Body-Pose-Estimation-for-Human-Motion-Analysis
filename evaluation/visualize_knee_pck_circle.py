@@ -1,24 +1,29 @@
-# visualize_knee_pck_circle.py
+from dataset_files.HumanEva.get_gt_keypoint import GroundTruthLoader
+from config.global_config import get_global_config
+from utils.joint_enum import GTJointsHumanEVa
+from glob import glob
+import yaml
+import numpy as np
+import cv2
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 """
 Script to visualize the norm length and draw a circle around the knee keypoint
 with ground truth as center and radius as pck_threshold * norm_length for the first frame of each video.
 """
-import cv2
-import numpy as np
-import yaml
-from glob import glob
-
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 
 # Load config from YAML
 CONFIG_PATH = "dataset_files/HumanEva/humaneva_config.yaml"
+GLOBAL_CONFIG_PATH = "config_yamls/global_config.yaml"
 with open(CONFIG_PATH, "r") as f:
     config = yaml.safe_load(f)
 
-VIDEO_DIR = config["paths"].get("dataset", "dataset_files/HumanEva")
+# Use global config for video dir
+global_config = get_global_config(GLOBAL_CONFIG_PATH)
+VIDEO_DIR = global_config.paths.input_dir
 GT_PATH = config["paths"].get("ground_truth_file", None)
 # Add this to your YAML if missing
 PCK_THRESHOLD = config.get("pck_threshold", 0.2)
@@ -26,10 +31,7 @@ OUTPUT_DIR = "test_plots_output/pck_circles"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
-# Get ground truth keypoints for first frame using loader and joint enum
 def get_ground_truth_keypoints(video_path, gt_path):
-    from utils.joint_enum import GTJointsHumanEVa
-    from dataset_files.HumanEva.get_gt_keypoint import GroundTruthLoader
     # Extract subject, action, camera from video filename (assumes format S1_Jog_1_(C1).mp4)
     basename = os.path.basename(video_path)
     parts = basename.split("_")
@@ -56,6 +58,34 @@ def get_ground_truth_keypoints(video_path, gt_path):
     knee_xy = get_joint_xy(left_knee_idx)
     hip_xy = get_joint_xy(left_hip_idx)
     return {"knee": knee_xy, "hip": hip_xy}
+
+    # ...existing code...
+
+
+def process_videos(video_dir, output_dir, pck_threshold):
+    video_files = glob(os.path.join(video_dir, "*.mp4"))
+    for video_path in video_files:
+        cap = cv2.VideoCapture(video_path)
+        ret, frame = cap.read()
+        if not ret:
+            print(f"Failed to read first frame: {video_path}")
+            continue
+        gt_kpts = get_ground_truth_keypoints(video_path, GT_PATH)
+        norm_length = compute_norm_length(gt_kpts)
+        vis_img = visualize_frame(frame, gt_kpts, norm_length, pck_threshold)
+        out_path = os.path.join(
+            output_dir, os.path.basename(video_path) + "_pck_circle.png"
+        )
+        cv2.imwrite(out_path, vis_img)
+        print(f"Saved visualization: {out_path}")
+        cap.release()
+
+
+if __name__ == "__main__":
+    process_videos(VIDEO_DIR, OUTPUT_DIR, PCK_THRESHOLD)
+
+
+# Remove duplicate config and imports
 
 
 def compute_norm_length(gt_kpts):
