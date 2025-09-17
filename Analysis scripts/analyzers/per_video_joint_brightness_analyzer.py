@@ -20,6 +20,66 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 
 class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
+    def visualize_first_frame_with_joint_circles(
+        self,
+        video_name: str,
+        video_data: pd.DataFrame,
+        group_key=None,
+        grouping_cols: List[str] = None,
+        output_dir: str = None,
+    ):
+        """Visualize the first frame of the video with circles around each joint used for brightness sampling."""
+        # Load ground truth coordinates for this video
+        gt_coordinates = self._load_video_ground_truth(
+            video_name, video_data, group_key, grouping_cols
+        )
+        if not gt_coordinates:
+            print(f"   No ground truth coordinates found for {video_name}")
+            return
+
+        # Load video file
+        video_path = self._find_video_path(
+            video_name, video_data, group_key, grouping_cols
+        )
+        if not video_path or not os.path.exists(video_path):
+            print(f"   Video file not found for {video_name}")
+            return
+
+        cap = cv2.VideoCapture(video_path)
+        ret, frame = cap.read()
+        cap.release()
+        if not ret:
+            print(f"   Could not read first frame from {video_name}")
+            return
+
+        # Draw circles for each joint
+        for joint_name, joint_coords in gt_coordinates.items():
+            if len(joint_coords) > 0:
+                x, y = joint_coords[0]
+                x = int(x)
+                y = int(y)
+                cv2.circle(frame, (x, y), self.sampling_radius, (0, 0, 255), 2)
+                cv2.putText(
+                    frame,
+                    joint_name,
+                    (x + 5, y - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    (0, 255, 0),
+                    1,
+                )
+
+        # Save or show the frame
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+            out_path = os.path.join(output_dir, f"{video_name}_first_frame_joints.png")
+            cv2.imwrite(out_path, frame)
+            print(f"   Saved visualization: {out_path}")
+        else:
+            cv2.imshow(f"{video_name} - First Frame Joints", frame)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
     """Analyzer for per-video joint brightness analysis across all joints."""
 
     def __init__(

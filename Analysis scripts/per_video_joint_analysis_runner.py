@@ -309,8 +309,8 @@ if __name__ == "__main__":
     )
 
     if results:
-        print(f"\\n🎉 Successfully analyzed {len(results)} videos!")
-        print("\\nExample video results:")
+        print(f"\n🎉 Successfully analyzed {len(results)} videos!")
+        print("\nExample video results:")
         for i, (video_name, video_data) in enumerate(results.items()):
             if i >= 3:  # Show only first 3 videos
                 break
@@ -318,5 +318,45 @@ if __name__ == "__main__":
                 f"  - {video_name}: {len(video_data.get('joints_analyzed', []))} joints, "
                 f"{video_data.get('total_frames', 0)} frames"
             )
+
+        # Visualize first frame with joint circles for first video
+        print("\nVisualizing first frame with joint circles for first video...")
+        # Re-initialize analyzer to access method
+        from analyzers.per_video_joint_brightness_analyzer import (
+            PerVideoJointBrightnessAnalyzer,
+        )
+        from core.joint_data_loader import JointDataLoader
+
+        data_loader = JointDataLoader("movi")
+        data_loader.setup_configuration()
+        pck_data = data_loader.load_pck_data()
+        config = data_loader.config
+        analyzer = PerVideoJointBrightnessAnalyzer(
+            config=config,
+            joint_names=None,
+            sampling_radius=3,
+            dataset_name="movi",
+        )
+        # Get grouping columns and group key for first video
+        grouping_cols = config.get_grouping_columns()
+        first_video_name = list(results.keys())[0]
+        # Find group_key for first video
+        group_key = None
+        for key, group in pck_data.groupby(grouping_cols):
+            video_name = config.create_video_name(key, grouping_cols)
+            if video_name == first_video_name:
+                group_key = key
+                video_data = group
+                break
+        if group_key is not None:
+            analyzer.visualize_first_frame_with_joint_circles(
+                first_video_name,
+                video_data,
+                group_key=group_key,
+                grouping_cols=grouping_cols,
+                output_dir=None,  # Set to a path to save instead of show
+            )
+        else:
+            print("Could not find group key for first video.")
     else:
-        print("\\n❌ Analysis failed or returned no results")
+        print("\n❌ Analysis failed or returned no results")
