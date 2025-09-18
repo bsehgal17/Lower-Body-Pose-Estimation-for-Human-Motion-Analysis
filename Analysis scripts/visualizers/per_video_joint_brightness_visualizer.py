@@ -103,51 +103,51 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
         print("✅ Per-video visualization completed")
 
-    def create_pck_brightness_plot(self, analysis_results: Dict[str, Any]) -> None:
+    def create_pck_brightness_plot(self, analysis_results: dict) -> None:
         print("Creating combined average PCK vs brightness plot per video...")
 
         plot_data = []
         for video_name, video_results in analysis_results.items():
-            all_pck_scores, all_brightness_values = [], []
-            for pck_column, pck_results in video_results.items():
-                if pck_column in ["video_name", "total_frames", "joints_analyzed", "brightness_summary"]:
-                    continue
-                pck_scores = pck_results.get("pck_scores", [])
-                brightness_values = pck_results.get("brightness_values", [])
-                if pck_scores and brightness_values:
-                    all_pck_scores.extend(pck_scores)
-                    all_brightness_values.extend(brightness_values)
+            # Extract PCK scores and brightness values
+            pck_dict = video_results.get("pck_scores", {})
+            brightness_dict = video_results.get("avg_brightness", {})
 
-            if all_pck_scores and all_brightness_values:
+            # Convert dicts to lists
+            pck_values = list(pck_dict.values())
+            brightness_values = list(brightness_dict.values())
+
+            # Compute averages
+            if pck_values and brightness_values:
                 plot_data.append({
-                    "video": str(video_name),
-                    "avg_pck": np.mean(all_pck_scores),
-                    "avg_brightness": np.mean(all_brightness_values),
+                    "video": video_name,
+                    "avg_pck": np.mean(pck_values),
+                    "avg_brightness": np.mean(brightness_values)
                 })
 
         if not plot_data:
-            print("❌ No PCK-brightness data found for plotting")
+            print("❌ No data to plot.")
             return
 
         df = pd.DataFrame(plot_data)
         fig, ax = plt.subplots(figsize=(12, 8), constrained_layout=True)
 
+        # Unique videos
         videos = df["video"].unique()
-
         import seaborn as sns
         colors = sns.color_palette("husl", n_colors=len(videos))
 
+        # Scatter plot per video
         for i, video in enumerate(videos):
-            vdata = df[df["video"] == video].iloc[0]
+            row = df[df["video"] == video].iloc[0]
             ax.scatter(
-                vdata["avg_brightness"],
-                vdata["avg_pck"],
+                row["avg_brightness"],
+                row["avg_pck"],
                 label=video,
                 color=colors[i],
-                alpha=0.9,
                 s=120,
                 edgecolors="black",
                 linewidth=0.7,
+                alpha=0.9
             )
 
         # Trend line
@@ -163,25 +163,24 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         ax.set_ylabel("Average PCK Score", fontsize=12)
         ax.set_title("Average PCK vs Brightness Per Video",
                      fontsize=14, fontweight="bold")
+        ax.grid(True, alpha=0.3)
 
-        # ✅ Legend outside, no plot shrinking
-        num_cols = max(1, (len(videos) + 9) // 10)
+        # Legend outside, smaller font, multiple columns
+        num_cols = min(len(videos), 2)  # max 4 columns
+        plt.subplots_adjust(right=0.75)  # leave room for legend
         ax.legend(
-            bbox_to_anchor=(1.02, 1),  # place legend fully outside plot
+            bbox_to_anchor=(1.01, 1),
             loc="upper left",
-            fontsize=8,
+            fontsize=7,
             ncol=num_cols,
             frameon=True
         )
 
-        plt.subplots_adjust(right=0.8)  # leave room on right for legend
-        ax.grid(True, alpha=0.3)
-
-        if self.save_plots and self.output_dir:
+        if hasattr(self, "save_plots") and self.save_plots and hasattr(self, "output_dir") and self.output_dir:
             filename = os.path.join(
                 self.output_dir, "combined_avg_pck_brightness_per_video.png")
             plt.savefig(filename, dpi=300, bbox_inches="tight")
-            print(f"   ✅ Saved: {filename}")
+            print(f"✅ Saved: {filename}")
 
         plt.show()
         plt.close()
@@ -556,9 +555,12 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
             # Add brightness metrics for each joint
             for joint_name, stats in brightness_summary.items():
-                video_summary[f"{joint_name}_mean_brightness"] = stats["mean"]
-                video_summary[f"{joint_name}_std_brightness"] = stats["std"]
-                video_summary[f"{joint_name}_valid_frames"] = stats["valid_frames"]
+                video_summary[f"{joint_name}_mean_brightness"] = stats.get(
+                    "mean", 0.0)
+                video_summary[f"{joint_name}_std_brightness"] = stats.get(
+                    "std", 0.0)
+                video_summary[f"{joint_name}_valid_frames"] = stats.get(
+                    "valid_frames", 0)
 
             video_summaries.append(video_summary)
 
@@ -568,50 +570,42 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         video_df.to_csv(video_csv_path, index=False)
         print(f"   Saved video summary: {video_csv_path}")
 
-        # 2. Detailed results CSV
+        # 2. Detailed results CSV (joint-wise)
         detailed_results = []
         for video_name, video_results in analysis_results.items():
-            for pck_column, pck_results in video_results.items():
-                if pck_column in [
-                    "video_name",
-                    "total_frames",
-                    "joints_analyzed",
-                    "brightness_summary",
-                ]:
-                    continue
+            # Only consider pck_scores if they exist
+            pck_scores = video_results.get("pck_scores", {})
 
-                result_row = {
-                    "video_name": video_name,
-                    "pck_column": pck_column,
-                    "joint_name": pck_results.get("joint_name", "unknown"),
-                    "threshold": pck_results.get("threshold", "unknown"),
-                    "valid_frames": pck_results.get("valid_frames", 0),
-                    "pearson_correlation": pck_results.get("correlation", {}).get(
-                        "pearson", 0.0
-                    ),
-                    "spearman_correlation": pck_results.get("correlation", {}).get(
-                        "spearman", 0.0
-                    ),
-                }
+            if isinstance(pck_scores, dict):
+                for joint_key, pck_value in pck_scores.items():
+                    # Handle numbers directly
+                    if isinstance(pck_value, (int, float)):
+                        result_row = {
+                            "video_name": video_name,
+                            "joint_metric": joint_key,
+                            "pck_value": pck_value,
+                        }
+                        detailed_results.append(result_row)
+                    # If future format uses dict, handle safely
+                    elif isinstance(pck_value, dict):
+                        result_row = {
+                            "video_name": video_name,
+                            "joint_metric": joint_key,
+                            "pck_value": pck_value.get("value", None),
+                            "valid_frames": pck_value.get("valid_frames", None),
+                            "threshold": pck_value.get("threshold", None),
+                        }
+                        detailed_results.append(result_row)
 
-                # Add brightness and PCK statistics
-                brightness_stats = pck_results.get("brightness_stats", {})
-                pck_stats = pck_results.get("pck_stats", {})
-
-                for stat_name, stat_value in brightness_stats.items():
-                    result_row[f"brightness_{stat_name}"] = stat_value
-
-                for stat_name, stat_value in pck_stats.items():
-                    result_row[f"pck_{stat_name}"] = stat_value
-
-                detailed_results.append(result_row)
-
-        detailed_df = pd.DataFrame(detailed_results)
-        detailed_csv_path = os.path.join(
-            self.output_dir, "detailed_pck_brightness_results.csv"
-        )
-        detailed_df.to_csv(detailed_csv_path, index=False)
-        print(f"   Saved detailed results: {detailed_csv_path}")
+        if detailed_results:
+            detailed_df = pd.DataFrame(detailed_results)
+            detailed_csv_path = os.path.join(
+                self.output_dir, "detailed_pck_brightness_results.csv"
+            )
+            detailed_df.to_csv(detailed_csv_path, index=False)
+            print(f"   Saved detailed results: {detailed_csv_path}")
+        else:
+            print("❌ No detailed PCK results found.")
 
         print("✅ CSV export completed")
 

@@ -7,7 +7,7 @@ paths:
   video_directory: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva"
   pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/clahe_hsv_05_8x8_humaneva/evaluation/2025-09-17_06-54-10/detect/detect_metrics.xlsx"
   save_folder: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/HumanEva/High_threshold"
-  ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv"  # Path to combined ground truth CSV file
+  ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/validate_combined_chunk0.csv"
 
 columns:
   subject_column: "subject"
