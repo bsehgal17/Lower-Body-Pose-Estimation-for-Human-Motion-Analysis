@@ -2,21 +2,21 @@ from enum import Enum
 
 
 class GTJointsHumanEVa(Enum):
-    PELVIS = 1
-    SHOULDER_CENTER = (12, 3)
-    LEFT_HIP = 12
-    RIGHT_HIP = 16
-    LEFT_KNEE = (13, 14)
-    RIGHT_KNEE = (17, 18)
-    LEFT_ANKLE = 15
-    RIGHT_ANKLE = 19
-    HEAD = 20
-    LEFT_SHOULDER = 4
-    RIGHT_SHOULDER = 8
-    LEFT_ELBOW = (5, 6)
-    RIGHT_ELBOW = (9, 10)
-    LEFT_WRIST = 7
-    RIGHT_WRIST = 11
+    PELVIS = 0
+    SHOULDER_CENTER = (1, 2)
+    LEFT_HIP = 11
+    RIGHT_HIP = 15
+    LEFT_KNEE = (12, 13)
+    RIGHT_KNEE = (16, 17)
+    LEFT_ANKLE = 14
+    RIGHT_ANKLE = 18
+    HEAD = 19
+    LEFT_SHOULDER = 3
+    RIGHT_SHOULDER = 7
+    LEFT_ELBOW = (5, 4)
+    RIGHT_ELBOW = (8, 9)
+    LEFT_WRIST = 6
+    RIGHT_WRIST = 10
     MID_SHOULDER = (3, 7)  # Midpoint of both shoulders
 
 
