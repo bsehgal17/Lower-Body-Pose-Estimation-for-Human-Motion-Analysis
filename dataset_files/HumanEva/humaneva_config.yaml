@@ -74,7 +74,7 @@ filter:
 
 
 evaluation:
-  # input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/detect
+  # input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/detect/2025-09-18_00-46-59
   metrics:
     - name: overall_pck
       params:

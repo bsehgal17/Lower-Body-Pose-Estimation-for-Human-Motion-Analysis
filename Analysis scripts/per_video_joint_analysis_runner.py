@@ -190,7 +190,7 @@ class PerVideoJointAnalysisRunner:
     def _print_summary(self, analysis_results: Dict[str, Any]) -> None:
         """Print a summary of the analysis results."""
 
-        print(f"   📊 Total videos analyzed: {len(analysis_results)}")
+        print(f"    Total videos analyzed: {len(analysis_results)}")
 
         # Count total joints and PCK metrics analyzed
         total_joints = set()
@@ -216,19 +216,21 @@ class PerVideoJointAnalysisRunner:
 
                 total_pck_metrics += 1
 
-                if "correlation" in pck_results:
-                    corr = pck_results["correlation"]["pearson"]
-                    if not pd.isna(corr):
+                # Only attempt to read correlation if pck_results is a dict
+                if isinstance(pck_results, dict) and "correlation" in pck_results:
+                    corr_dict = pck_results.get("correlation", {})
+                    corr = corr_dict.get("pearson")
+                    if corr is not None and not pd.isna(corr):
                         correlations.append(corr)
 
         print(
-            f"   🦴 Unique joints analyzed: {len(total_joints)} ({', '.join(sorted(total_joints))})"
+            f"    Unique joints analyzed: {len(total_joints)} ({', '.join(sorted(total_joints))})"
         )
-        print(f"   📈 Total PCK metrics: {total_pck_metrics}")
-        print(f"   🎬 Total frames processed: {total_frames}")
+        print(f"    Total PCK metrics: {total_pck_metrics}")
+        print(f"    Total frames processed: {total_frames}")
 
         if correlations:
-            print("   📊 Correlation statistics:")
+            print("    Correlation statistics:")
             print(f"      - Mean correlation: {np.mean(correlations):.3f}")
             print(f"      - Std correlation: {np.std(correlations):.3f}")
             print(
@@ -246,14 +248,14 @@ class PerVideoJointAnalysisRunner:
         for video_name, video_results in analysis_results.items():
             brightness_summary = video_results.get("brightness_summary", {})
             if brightness_summary:
-                avg_brightness = np.mean(
-                    [
-                        stats["mean"]
-                        for stats in brightness_summary.values()
-                        if stats["mean"] > 0
-                    ]
-                )
-                brightness_averages[video_name] = avg_brightness
+                avg_brightness_values = [
+                    stats.get("mean", 0)
+                    for stats in brightness_summary.values()
+                    if stats.get("mean", 0) > 0
+                ]
+                if avg_brightness_values:
+                    avg_brightness = np.mean(avg_brightness_values)
+                    brightness_averages[video_name] = avg_brightness
 
         if brightness_averages:
             brightest_video = max(brightness_averages,
@@ -261,10 +263,10 @@ class PerVideoJointAnalysisRunner:
             darkest_video = min(brightness_averages,
                                 key=brightness_averages.get)
             print(
-                f"   💡 Brightest video: {brightest_video} ({brightness_averages[brightest_video]:.2f})"
+                f"    Brightest video: {brightest_video} ({brightness_averages[brightest_video]:.2f})"
             )
             print(
-                f"   🌑 Darkest video: {darkest_video} ({brightness_averages[darkest_video]:.2f})"
+                f"    Darkest video: {darkest_video} ({brightness_averages[darkest_video]:.2f})"
             )
 
 

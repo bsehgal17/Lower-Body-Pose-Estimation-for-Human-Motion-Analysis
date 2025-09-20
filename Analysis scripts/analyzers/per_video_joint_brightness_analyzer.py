@@ -27,9 +27,10 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         group_key=None,
         grouping_cols: List[str] = None,
         output_dir: str = None,
+        sync_offset: int = 0
     ):
-        """Visualize the first frame of the video with circles around each joint used for brightness sampling."""
-        # Load ground truth coordinates for this video
+        """Visualize the first frame of the video (after sync offset) with circles around each joint used for brightness sampling."""
+        # Load ground truth coordinates for this video (without sync offset)
         gt_coordinates = self._load_video_ground_truth(
             video_name, video_data, group_key, grouping_cols
         )
@@ -46,15 +47,22 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             return
 
         cap = cv2.VideoCapture(video_path)
+
+        # Skip to sync offset frame (the actual first frame we'll use)
+        if sync_offset > 0:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, sync_offset)
+
         ret, frame = cap.read()
         cap.release()
+
         if not ret:
-            print(f"   Could not read first frame from {video_name}")
+            print(f"   Could not read frame {sync_offset} from {video_name}")
             return
 
-        # Draw circles for each joint
+        # Draw circles for each joint using the coordinates from the first frame of offset GT
         for joint_name, joint_coords in gt_coordinates.items():
-            if len(joint_coords) > 0:
+            if len(joint_coords) > 0:  # Use the first frame of the offset coordinates
+                # This is frame 0 after sync offset is applied
                 x, y = joint_coords[0]
                 x = int(x)
                 y = int(y)
@@ -72,14 +80,14 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         # Save or show the frame
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
-            out_path = os.path.join(output_dir, f"{video_name}_first_frame_joints.png")
+            out_path = os.path.join(
+                output_dir, f"{video_name}_frame_{sync_offset}_joints.png")
             cv2.imwrite(out_path, frame)
             print(f"   Saved visualization: {out_path}")
         else:
-            cv2.imshow(f"{video_name} - First Frame Joints", frame)
+            cv2.imshow(f"{video_name} - Frame {sync_offset} Joints", frame)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
-
     """Analyzer for per-video joint brightness analysis across all joints."""
 
     def __init__(
@@ -88,6 +96,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         joint_names: List[str] = None,
         sampling_radius: int = 3,
         dataset_name: str = "movi",
+        visualize_joints: bool = False,
+        visualization_output_dir: str = None
     ):
         """Initialize the per-video joint brightness analyzer.
 
@@ -96,10 +106,14 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             joint_names: List of joint names to analyze (uses default if None)
             sampling_radius: Radius for brightness sampling around joint coordinates
             dataset_name: Name of the dataset ('movi' or 'humaneva')
+            visualize_joints: Whether to generate visualizations of joint areas
+            visualization_output_dir: Directory to save visualizations
         """
         super().__init__(config)
         self.sampling_radius = sampling_radius
         self.dataset_name = dataset_name.lower()
+        self.visualize_joints = visualize_joints
+        self.visualization_output_dir = visualization_output_dir
 
         # Set up joint names
         if joint_names is None:
@@ -152,7 +166,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         video_results = self._analyze_by_video(per_frame_data)
 
         print(
-            f"✅ Per-video joint brightness analysis completed for {len(video_results)} videos"
+            f" Per-video joint brightness analysis completed for {len(video_results)} videos"
         )
         return video_results
 
@@ -163,7 +177,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
         grouping_cols = self.config.get_grouping_columns()
 
         if not grouping_cols:
-            print("❌ No video grouping columns found in configuration")
+            print("L No video grouping columns found in configuration")
             return {}
 
         # Verify that the required columns exist in the data
@@ -171,7 +185,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             col for col in grouping_cols if col not in per_frame_data.columns
         ]
         if missing_cols:
-            print(f"❌ Missing grouping columns in data: {missing_cols}")
+            print(f"L Missing grouping columns in data: {missing_cols}")
             available_cols = [
                 col for col in grouping_cols if col in per_frame_data.columns
             ]
@@ -194,8 +208,52 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
 
         for group_key, video_data in video_groups:
             # Create proper video name using config format
-            video_name = self.config.create_video_name(group_key, grouping_cols)
+            video_name = self.config.create_video_name(
+                group_key, grouping_cols)
             print(f"\n--- Processing Video: {video_name} ---")
+            # Determine sync offset
+            sync_offset = 0
+            if hasattr(self.config, "sync_data") and self.config.sync_data:
+                try:
+                    subject_key = (
+                        str(video_data[grouping_cols[0]].iloc[0])
+                        if grouping_cols and grouping_cols[0] in video_data.columns
+                        else None
+                    )
+                    action_key = (
+                        video_data[grouping_cols[1]].iloc[0]
+                        if grouping_cols
+                        and len(grouping_cols) > 1
+                        and grouping_cols[1] in video_data.columns
+                        else None
+                    )
+                    if action_key and isinstance(action_key, str):
+                        action_key = action_key.replace("_", " ").title()
+                    camera_index = None
+                    if len(grouping_cols) > 2 and grouping_cols[2] in video_data.columns:
+                        camera_id = video_data[grouping_cols[2]].iloc[0]
+                        try:
+                            camera_index = int(camera_id) - 1
+                        except Exception:
+                            camera_index = 0
+                    if subject_key and action_key and camera_index is not None:
+                        sync_offset = self.config.sync_data.data["data"][subject_key][
+                            action_key
+                        ][camera_index]
+                    if sync_offset < 0:
+                        sync_offset = 0
+                    print(f"   Using sync offset: {sync_offset} frames")
+                except Exception as e:
+                    print(f"   Could not get sync offset: {e}")
+                    sync_offset = 0
+            # Generate visualization if enabled
+            if self.visualize_joints:
+                print(
+                    f"   Generating joint visualization for {video_name} at sync offset {sync_offset}")
+                self.visualize_first_frame_with_joint_circles(
+                    video_name, video_data, group_key, grouping_cols,
+                    self.visualization_output_dir, sync_offset
+                )
 
             # Analyze all joints for this video
             video_result = self._analyze_video_joints(
@@ -250,11 +308,21 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                     ][camera_index]
                 if sync_offset < 0:
                     sync_offset = 0
+                print(f"   Using sync offset: {sync_offset} frames")
             except Exception as e:
                 print(f"   Could not get sync offset: {e}")
                 sync_offset = 0
 
-        # Load ground truth coordinates for this video (apply sync offset)
+        # Generate visualization if enabled (moved this earlier)
+        if self.visualize_joints:
+            print(
+                f"   Generating joint visualization for {video_name} at sync offset {sync_offset}")
+            self.visualize_first_frame_with_joint_circles(
+                video_name, video_data, group_key, grouping_cols,
+                self.visualization_output_dir, sync_offset
+            )
+
+        # Load ground truth coordinates for this video (without sync offset)
         gt_coordinates = self._load_video_ground_truth(
             video_name, video_data, group_key, grouping_cols
         )
@@ -269,16 +337,7 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             else 0
         )
 
-        # Apply sync offset to ground truth coordinates (no slicing, just use full GT)
-        for joint in gt_coordinates:
-            gt_coordinates[joint] = gt_coordinates[joint][:num_gt_frames]
-
-        # Select video frames from sync_offset to sync_offset + num_gt_frames
-        video_data_synced = video_data.iloc[
-            sync_offset : sync_offset + num_gt_frames
-        ].reset_index(drop=True)
-
-        # Load video file and extract brightness
+        # Load video file and extract brightness with sync offset
         video_path = self._find_video_path(
             video_name, video_data, group_key, grouping_cols
         )
@@ -286,25 +345,48 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             print(f"   Video file not found for {video_name}")
             return {}
 
-        # Extract brightness for all joints (only for synced frames)
-        brightness_data = self._extract_video_brightness(video_path, gt_coordinates)
+        # Extract brightness for all joints (with sync offset applied during extraction)
+        brightness_data = self._extract_video_brightness(
+            video_path, gt_coordinates, sync_offset, num_gt_frames
+        )
         if not brightness_data:
             print(f"   No brightness data extracted for {video_name}")
             return {}
 
-        # Analyze jointwise PCK scores with brightness for this video
-        video_analysis = self._analyze_video_pck_brightness(
-            video_data_synced, brightness_data
-        )
+        # Calculate average brightness for each joint
+        avg_brightness = {}
+        for joint_name, brightness_values in brightness_data.items():
+            valid_values = [v for v in brightness_values if not pd.isna(v)]
+            if valid_values:
+                avg_brightness[joint_name] = float(np.mean(valid_values))
+            else:
+                avg_brightness[joint_name] = 0.0
 
-        # Add video metadata
-        video_analysis["video_name"] = str(video_name)
-        video_analysis["total_frames"] = len(video_data_synced)
-        video_analysis["joints_analyzed"] = list(brightness_data.keys())
-        video_analysis["brightness_summary"] = self._get_brightness_summary(
-            brightness_data
-        )
+        # Get PCK scores (already averaged per video, so just take the first row)
+        pck_scores = {}
+        jointwise_pck_columns = [
+            col for col in video_data.columns if "jointwise_pck" in col.lower()
+        ]
 
+        for pck_column in jointwise_pck_columns:
+            joint_name, threshold = self._parse_pck_column_name(pck_column)
+            if joint_name in self.joint_names and not video_data[pck_column].empty:
+                pck_scores[pck_column] = float(video_data[pck_column].iloc[0])
+
+        # Prepare results
+        video_analysis = {
+            "video_name": str(video_name),
+            "total_frames": len(video_data),
+            "synced_frames": num_gt_frames,
+            "sync_offset": sync_offset,
+            "joints_analyzed": list(brightness_data.keys()),
+            "avg_brightness": avg_brightness,
+            "pck_scores": pck_scores,
+            "brightness_summary": self._get_brightness_summary(brightness_data)
+        }
+
+        print(
+            f"    Calculated average brightness for {len(avg_brightness)} joints")
         return video_analysis
 
     def _load_video_ground_truth(
@@ -419,7 +501,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                         gt_data = gt_data[combined_condition]
 
                         if gt_data.empty:
-                            print(f"   No ground truth data found for {group_key}")
+                            print(
+                                f"   No ground truth data found for {group_key}")
                             return None
 
                 x_col = f"x{joint_number}"
@@ -492,7 +575,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
 
                 # Also try the display name format
                 for ext in video_extensions:
-                    video_path = os.path.join(video_directory, f"{video_name}{ext}")
+                    video_path = os.path.join(
+                        video_directory, f"{video_name}{ext}")
                     if os.path.exists(video_path):
                         return video_path
 
@@ -507,7 +591,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
 
             # General fallback: try the video_name directly
             for ext in video_extensions:
-                video_path = os.path.join(video_directory, f"{video_name}{ext}")
+                video_path = os.path.join(
+                    video_directory, f"{video_name}{ext}")
                 if os.path.exists(video_path):
                     return video_path
 
@@ -539,26 +624,31 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             return None
 
     def _extract_video_brightness(
-        self, video_path: str, gt_coordinates: Dict[str, np.ndarray]
+        self, video_path: str, gt_coordinates: Dict[str, np.ndarray], sync_offset: int, num_frames: int
     ) -> Dict[str, List[float]]:
-        """Extract brightness values for all joints from video."""
+        """Extract brightness values for all joints from video with sync offset."""
 
         try:
             cap = cv2.VideoCapture(video_path)
             if not cap.isOpened():
-                print(f"   Failed to open video: {os.path.basename(video_path)}")
+                print(
+                    f"   Failed to open video: {os.path.basename(video_path)}")
                 return {}
 
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            total_video_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             print(
-                f"   Processing {total_frames} frames for {len(gt_coordinates)} joints"
+                f"   Processing {num_frames} frames (sync offset: {sync_offset}) for {len(gt_coordinates)} joints"
             )
 
             # Initialize brightness storage
             brightness_data = {joint: [] for joint in gt_coordinates.keys()}
 
+            # Skip to sync offset
+            if sync_offset > 0:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, sync_offset)
+
             frame_idx = 0
-            while frame_idx < total_frames:
+            while frame_idx < num_frames:
                 ret, frame = cap.read()
                 if not ret:
                     break
@@ -590,10 +680,11 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
 
                 # Progress indicator
                 if frame_idx % 100 == 0:
-                    print(f"   Processed {frame_idx}/{total_frames} frames")
+                    print(f"   Processed {frame_idx}/{num_frames} frames")
 
             cap.release()
-            print(f"   ✅ Extracted brightness for {len(brightness_data)} joints")
+            print(
+                f"    Extracted brightness for {len(brightness_data)} joints")
             return brightness_data
 
         except Exception as e:
@@ -620,166 +711,6 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
             return np.mean(region)
         else:
             return brightness_frame[y, x]
-
-    def _analyze_video_pck_brightness(
-        self, video_data: pd.DataFrame, brightness_data: Dict[str, List[float]]
-    ) -> Dict[str, Any]:
-        """Analyze relationship between PCK scores and brightness for this video."""
-
-        analysis_results = {}
-
-        # Find jointwise PCK columns for this video
-        jointwise_pck_columns = [
-            col for col in video_data.columns if "jointwise_pck" in col.lower()
-        ]
-
-        if not jointwise_pck_columns:
-            print("   No jointwise PCK columns found in video data")
-            print(f"   Available columns: {list(video_data.columns)}")
-            return {}
-
-        print(
-            f"   Found {len(jointwise_pck_columns)} PCK columns: {jointwise_pck_columns}"
-        )
-        print(
-            f"   Available brightness data for joints: {list(brightness_data.keys())}"
-        )
-
-        # Analyze each PCK metric
-        for pck_column in jointwise_pck_columns:
-            joint_name, threshold = self._parse_pck_column_name(pck_column)
-            print(
-                f"   Processing {pck_column} -> joint: {joint_name}, threshold: {threshold}"
-            )
-
-            if joint_name not in brightness_data:
-                print(f"      ❌ Joint {joint_name} not found in brightness data")
-                continue
-
-            # Get PCK scores and brightness values for this joint
-            pck_scores = video_data[pck_column].dropna()
-            joint_brightness = brightness_data[joint_name]
-            print(
-                f"      Initial data: {len(pck_scores)} PCK scores, {len(joint_brightness)} brightness values"
-            )
-
-            # Align data lengths
-            min_length = min(len(pck_scores), len(joint_brightness))
-            if min_length == 0:
-                print("      ❌ No data to align (min_length = 0)")
-                continue
-
-            pck_scores = pck_scores.iloc[:min_length]
-            joint_brightness = joint_brightness[:min_length]
-
-            # Remove NaN values
-            valid_mask = ~(pd.isna(pck_scores) | pd.isna(joint_brightness))
-            pck_scores_clean = np.array(pck_scores)[valid_mask]
-            joint_brightness_clean = np.array(joint_brightness)[valid_mask]
-            print(f"      After cleaning: {len(pck_scores_clean)} valid data points")
-
-            if len(pck_scores_clean) == 0:
-                print("      ❌ No valid data after cleaning")
-                continue
-
-            # Perform analysis
-            result = self._compute_pck_brightness_metrics(
-                pck_scores_clean, joint_brightness_clean
-            )
-            result["joint_name"] = joint_name
-            result["threshold"] = threshold
-            result["valid_frames"] = len(pck_scores_clean)
-            result["pck_scores"] = pck_scores_clean.tolist()
-            result["brightness_values"] = joint_brightness_clean.tolist()
-
-            analysis_results[pck_column] = result
-            print(
-                f"      ✅ Successfully processed {pck_column} with {len(pck_scores_clean)} data points"
-            )
-
-        return analysis_results
-
-    def _compute_pck_brightness_metrics(
-        self, pck_scores: np.ndarray, brightness_values: np.ndarray
-    ) -> Dict[str, Any]:
-        """Compute comprehensive metrics for PCK-brightness relationship."""
-
-        result = {}
-
-        # Basic statistics
-        result["brightness_stats"] = {
-            "mean": float(np.mean(brightness_values)),
-            "std": float(np.std(brightness_values)),
-            "min": float(np.min(brightness_values)),
-            "max": float(np.max(brightness_values)),
-            "median": float(np.median(brightness_values)),
-        }
-
-        result["pck_stats"] = {
-            "mean": float(np.mean(pck_scores)),
-            "std": float(np.std(pck_scores)),
-            "min": float(np.min(pck_scores)),
-            "max": float(np.max(pck_scores)),
-            "success_rate": float(
-                np.mean(pck_scores > 0.5)
-            ),  # Assuming 0.5 is success threshold
-        }
-
-        # Correlation analysis
-        if len(set(pck_scores)) > 1 and len(set(brightness_values)) > 1:
-            correlation = np.corrcoef(pck_scores, brightness_values)[0, 1]
-            result["correlation"] = {
-                "pearson": float(correlation) if not np.isnan(correlation) else 0.0,
-                "spearman": float(
-                    np.corrcoef(
-                        np.argsort(np.argsort(pck_scores)),
-                        np.argsort(np.argsort(brightness_values)),
-                    )[0, 1]
-                )
-                if not np.isnan(correlation)
-                else 0.0,
-            }
-        else:
-            result["correlation"] = {"pearson": 0.0, "spearman": 0.0}
-
-        # Brightness distribution by PCK performance
-        result["performance_brightness"] = self._analyze_brightness_by_performance(
-            pck_scores, brightness_values
-        )
-
-        return result
-
-    def _analyze_brightness_by_performance(
-        self, pck_scores: np.ndarray, brightness_values: np.ndarray
-    ) -> Dict[str, Any]:
-        """Analyze brightness distribution based on PCK performance levels."""
-
-        performance_ranges = {
-            "high": pck_scores >= 0.8,
-            "medium": (pck_scores >= 0.5) & (pck_scores < 0.8),
-            "low": pck_scores < 0.5,
-        }
-
-        range_analysis = {}
-
-        for range_name, mask in performance_ranges.items():
-            if np.sum(mask) > 0:
-                range_brightness = brightness_values[mask]
-                range_analysis[range_name] = {
-                    "count": int(np.sum(mask)),
-                    "mean_brightness": float(np.mean(range_brightness)),
-                    "std_brightness": float(np.std(range_brightness)),
-                    "median_brightness": float(np.median(range_brightness)),
-                }
-            else:
-                range_analysis[range_name] = {
-                    "count": 0,
-                    "mean_brightness": 0.0,
-                    "std_brightness": 0.0,
-                    "median_brightness": 0.0,
-                }
-
-        return range_analysis
 
     def _get_brightness_summary(
         self, brightness_data: Dict[str, List[float]]
@@ -835,11 +766,12 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                 pck_idx = parts.index("pck")
                 joint_parts = (
                     parts[: pck_idx - 1]
-                    if "jointwise" in parts[pck_idx - 1 : pck_idx]
+                    if "jointwise" in parts[pck_idx - 1: pck_idx]
                     else parts[:pck_idx]
                 )
                 joint_name = "_".join(joint_parts)
-                threshold = parts[-1] if len(parts) > pck_idx + 1 else "unknown"
+                threshold = parts[-1] if len(parts) > pck_idx + \
+                    1 else "unknown"
                 return joint_name, threshold
 
         return "unknown_joint", "unknown_threshold"
@@ -875,7 +807,8 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
                                 f"   Joint index {joint_idx} out of range (max: {num_joints - 1})"
                             )
                             continue
-                        joint_coords_list.append(gt_keypoints_np[:, joint_idx, :])
+                        joint_coords_list.append(
+                            gt_keypoints_np[:, joint_idx, :])
 
                     if not joint_coords_list:
                         return None
@@ -903,19 +836,32 @@ class PerVideoJointBrightnessAnalyzer(BaseAnalyzer):
 
                 # Filter data by group_key if provided
                 if group_key is not None and grouping_cols is not None:
+                    subject, action, camera = group_key
+
+                    # Normalize column names (case-insensitive mapping)
+                    columns_lower = {c.lower(): c for c in gt_data.columns}
+
                     filter_conditions = []
-                    for i, col in enumerate(grouping_cols):
-                        if i < len(group_key) and col in gt_data.columns:
-                            filter_conditions.append(gt_data[col] == group_key[i])
+                    if "subject" in columns_lower:
+                        filter_conditions.append(
+                            gt_data[columns_lower["subject"]] == subject)
+                    if "action_group" in columns_lower:  # use action_group instead of Action
+                        filter_conditions.append(
+                            gt_data[columns_lower["action_group"]] == action.replace("_", " "))
+                    if "camera" in columns_lower:
+                        filter_conditions.append(
+                            gt_data[columns_lower["camera"]] == camera)
 
                     if filter_conditions:
                         combined_condition = filter_conditions[0]
-                        for condition in filter_conditions[1:]:
-                            combined_condition = combined_condition & condition
+                        for cond in filter_conditions[1:]:
+                            combined_condition &= cond
+
                         gt_data = gt_data[combined_condition]
 
                         if gt_data.empty:
-                            print(f"   No ground truth data found for {group_key}")
+                            print(
+                                f"   No ground truth data found for {group_key}")
                             return None
 
                 if isinstance(joint_enum_value, tuple):
