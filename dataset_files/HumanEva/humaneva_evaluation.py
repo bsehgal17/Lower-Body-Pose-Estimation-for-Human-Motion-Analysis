@@ -163,25 +163,10 @@ def run_humaneva_assessment(
         frame_step (int): Step size for frame processing
         visualize_gt (bool): Whether to include ground truth in visualizations
     """
-    gt_enum_class = import_class_from_string(pipeline_config.dataset.joint_enum_module)
-    pred_enum_class = import_class_from_string(pipeline_config.dataset.keypoint_format)
-
-    # Use config values if CLI arguments are None
-    bbox_threshold = (
-        min_bbox_confidence
-        if min_bbox_confidence is not None
-        else pipeline_config.confidence_filtering.min_bbox_confidence
-    )
-    keypoint_threshold = (
-        min_keypoint_confidence
-        if min_keypoint_confidence is not None
-        else pipeline_config.confidence_filtering.min_keypoint_confidence
-    )
-
-    logger.info(
-        f"Running HumanEva assessment with confidence filtering "
-        f"(bbox >= {bbox_threshold}, keypoint >= {keypoint_threshold})"
-    )
+    gt_enum_class = import_class_from_string(
+        pipeline_config.dataset.joint_enum_module)
+    pred_enum_class = import_class_from_string(
+        pipeline_config.dataset.keypoint_format)
 
     # Visualization logic removed
 

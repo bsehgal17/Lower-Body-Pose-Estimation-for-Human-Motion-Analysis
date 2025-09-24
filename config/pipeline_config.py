@@ -13,9 +13,7 @@ from .noise_config import NoiseConfig
 from .evaluation_config import EvaluationConfig
 from .dataset_config import DatasetConfig  # <- new import
 from .enhancement_config import EnhancementConfig  # <- enhancement import
-from .confidence_config import (
-    ConfidenceFilteringConfig,
-)  # <- confidence filtering import
+# <- confidence filtering import
 
 
 logging.basicConfig(
@@ -34,7 +32,6 @@ class PipelineConfig:
     evaluation: Optional[EvaluationConfig] = None
     dataset: Optional[DatasetConfig] = None
     enhancement: Optional[EnhancementConfig] = None
-    confidence_filtering: Optional[ConfidenceFilteringConfig] = None
 
     # ------------------------------------------------------------------
     # YAML (de)serialization helpers
@@ -43,7 +40,8 @@ class PipelineConfig:
     @classmethod
     def from_yaml(cls, yaml_path: str) -> "PipelineConfig":
         if not os.path.exists(yaml_path):
-            raise FileNotFoundError(f"Pipeline config file not found: {yaml_path}")
+            raise FileNotFoundError(
+                f"Pipeline config file not found: {yaml_path}")
         with open(yaml_path, "r", encoding="utf-8") as f:
             raw_config = yaml.safe_load(f)
 
@@ -58,21 +56,19 @@ class PipelineConfig:
             filter=FilterConfig(**raw_config["filter"])
             if "filter" in raw_config
             else None,
-            noise=NoiseConfig(**raw_config["noise"]) if "noise" in raw_config else None,
+            noise=NoiseConfig(
+                **raw_config["noise"]) if "noise" in raw_config else None,
             evaluation=EvaluationConfig(**raw_config["evaluation"])
             if "evaluation" in raw_config
             else None,
             dataset=DatasetConfig(**raw_config["dataset"])
             if "dataset" in raw_config
             else None,
-            enhancement=cls._parse_enhancement_config(raw_config.get("enhancement"))
+            enhancement=cls._parse_enhancement_config(
+                raw_config.get("enhancement"))
             if "enhancement" in raw_config
             else None,
-            confidence_filtering=ConfidenceFilteringConfig(
-                **raw_config["confidence_filtering"]
-            )
-            if "confidence_filtering" in raw_config
-            else None,
+
         )
 
     @classmethod
@@ -99,7 +95,8 @@ class PipelineConfig:
 
         filtered_clahe = None
         if "filtered_clahe" in enhancement_data:
-            filtered_clahe = FilteredCLAHEConfig(**enhancement_data["filtered_clahe"])
+            filtered_clahe = FilteredCLAHEConfig(
+                **enhancement_data["filtered_clahe"])
 
         brightness = None
         if "brightness" in enhancement_data:
@@ -115,11 +112,13 @@ class PipelineConfig:
 
         filtered_gamma = None
         if "filtered_gamma" in enhancement_data:
-            filtered_gamma = FilteredGammaConfig(**enhancement_data["filtered_gamma"])
+            filtered_gamma = FilteredGammaConfig(
+                **enhancement_data["filtered_gamma"])
 
         processing = None
         if "processing" in enhancement_data:
-            processing = EnhancementProcessingConfig(**enhancement_data["processing"])
+            processing = EnhancementProcessingConfig(
+                **enhancement_data["processing"])
 
         return EnhancementConfig(
             type=enhancement_data.get("type"),
@@ -130,7 +129,8 @@ class PipelineConfig:
             gamma=gamma,
             filtered_gamma=filtered_gamma,
             processing=processing,
-            create_comparison_images=enhancement_data.get("create_comparison_images"),
+            create_comparison_images=enhancement_data.get(
+                "create_comparison_images"),
         )
 
     def to_yaml(self, yaml_path: str):
