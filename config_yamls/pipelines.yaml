@@ -30,16 +30,21 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: detect_HRNet_dark
-    steps:
-      - command: detect
-        config_file: "config_yamls/detector/HRNet_detector_humaneva.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: detect_HRNet_dark
+  #   steps:
+  #     - command: detect
+  #       config_file: "config_yamls/detector/HRNet_detector_humaneva.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: detect_RTMPose_L
+  # - name: detect_RTMPose_L
+  #   steps:
+  #     - command: detect
+  #       config_file: "config_yamls/detector/RTMPose_l_detector_humaneva.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: Mediapipe
     steps:
-      - command: detect
-        config_file: "config_yamls/detector/RTMPose_l_detector_humaneva.yaml"
       - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+        config_file: "dataset_files/HumanEva/humaneva_config_mediapipe.yaml"
