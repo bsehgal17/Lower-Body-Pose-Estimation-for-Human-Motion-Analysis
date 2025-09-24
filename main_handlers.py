@@ -162,41 +162,14 @@ def _handle_assess_command(
     step_out.mkdir(parents=True, exist_ok=True)
 
     # Get confidence filtering parameters - prioritize config file, then command line
-    cmd_bbox_confidence = args.min_bbox_confidence
-    cmd_keypoint_confidence = args.min_keypoint_confidence
+    # Removed unused variables for confidence filtering
 
-    # Check if config file has confidence filtering settings
-    if (
-        pipeline_config.confidence_filtering
-        and pipeline_config.confidence_filtering.enabled
-    ):
-        # Use config file values
-        min_bbox_confidence = pipeline_config.confidence_filtering.min_bbox_confidence
-        min_keypoint_confidence = (
-            pipeline_config.confidence_filtering.min_keypoint_confidence
-        )
-        logger.info(
-            f"Using confidence filtering from config file: "
-            f"bbox >= {min_bbox_confidence}, keypoint >= {min_keypoint_confidence}"
-        )
-    elif cmd_bbox_confidence is not None and cmd_keypoint_confidence is not None:
-        # Use command line values
-        min_bbox_confidence = cmd_bbox_confidence
-        min_keypoint_confidence = cmd_keypoint_confidence
-        logger.info(
-            f"Using confidence filtering from command line: "
-            f"bbox >= {min_bbox_confidence}, keypoint >= {min_keypoint_confidence}"
-        )
-    else:
-        # No configuration provided
-        logger.error("No confidence filtering configuration found. Please either:")
-        logger.error("1. Add confidence_filtering section to your config file, or")
-        logger.error(
-            "2. Provide --min_bbox_confidence and --min_keypoint_confidence arguments"
-        )
-        raise ValueError(
-            "Confidence filtering parameters are required but not provided"
-        )
+    # For HumanEva, disable confidence filtering by passing zero thresholds
+    min_bbox_confidence = 0.0
+    min_keypoint_confidence = 0.0
+    logger.info(
+        "Disabling confidence filtering for HumanEva evaluation (all skeletons considered)"
+    )
 
     if pipeline_config.evaluation.input_dir:
         logger.info(

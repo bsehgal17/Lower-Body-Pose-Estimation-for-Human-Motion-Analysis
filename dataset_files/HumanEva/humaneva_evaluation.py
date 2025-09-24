@@ -104,43 +104,14 @@ def humaneva_data_loader(
             f"{safe_action_name}_({camera_str}).avi",
         )
 
-        # Use PredictionLoader with confidence filtering parameters from config
-        confidence_config = pipeline_config.confidence_filtering
-
-        # Use config values if available and enabled, otherwise use function arguments
-        if confidence_config and confidence_config.enabled:
-            final_bbox_conf = confidence_config.min_bbox_confidence
-            final_keypoint_conf = confidence_config.min_keypoint_confidence
-            final_bbox_weight = confidence_config.bbox_weight
-            final_keypoint_weight = confidence_config.keypoint_weight
-            logger.info(
-                f"Using confidence filtering from config: bbox >= {final_bbox_conf}, "
-                f"keypoint >= {final_keypoint_conf}, weights: bbox={final_bbox_weight:.3f}, keypoint={final_keypoint_weight:.3f}"
-            )
-        else:
-            # If config is disabled or not available, use function arguments or error if None
-            if min_bbox_confidence is None or min_keypoint_confidence is None:
-                raise ValueError(
-                    "Confidence filtering parameters must be provided either via config file "
-                    "(enabled confidence_filtering section) or CLI arguments"
-                )
-
-            if confidence_config:
-                logger.info(
-                    f"Config filtering disabled, using function arguments: bbox >= {final_bbox_conf}, keypoint >= {final_keypoint_conf}"
-                )
-            else:
-                logger.info(
-                    f"No confidence filtering config found, using function arguments: bbox >= {final_bbox_conf}, keypoint >= {final_keypoint_conf}"
-                )
-
+        # Remove confidence filtering: pass zero thresholds and weights
         pred_loader = PredictionLoader(
             pred_pkl_path,
             pipeline_config,
-            min_bbox_confidence=final_bbox_conf,
-            min_keypoint_confidence=final_keypoint_conf,
-            bbox_weight=final_bbox_weight,
-            keypoint_weight=final_keypoint_weight,
+            min_bbox_confidence=0.0,
+            min_keypoint_confidence=0.0,
+            bbox_weight=0.0,
+            keypoint_weight=0.0,
         )
         pred_keypoints, pred_bboxes, pred_scores = pred_loader.get_filtered_predictions(
             subject, action, camera_idx - 1, original_video_path
