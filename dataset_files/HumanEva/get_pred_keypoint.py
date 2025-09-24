@@ -17,17 +17,9 @@ class PredictionLoader:
         self,
         pred_pkl_path,
         pipeline_config,
-        min_bbox_confidence,
-        min_keypoint_confidence,
-        bbox_weight,
-        keypoint_weight,
     ):
         self.pred_pkl_path = pred_pkl_path
         self.pipeline_config = pipeline_config
-        self.min_bbox_confidence = min_bbox_confidence
-        self.min_keypoint_confidence = min_keypoint_confidence
-        self.bbox_weight = bbox_weight
-        self.keypoint_weight = keypoint_weight
 
     def load_raw_predictions(self):
         """Load raw prediction pickle file."""

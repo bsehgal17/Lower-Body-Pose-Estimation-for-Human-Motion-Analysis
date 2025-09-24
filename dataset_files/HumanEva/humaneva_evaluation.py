@@ -104,14 +104,10 @@ def humaneva_data_loader(
             f"{safe_action_name}_({camera_str}).avi",
         )
 
-        # Remove confidence filtering: pass zero thresholds and weights
+        # Remove confidence filtering: PredictionLoader no longer takes confidence arguments
         pred_loader = PredictionLoader(
             pred_pkl_path,
             pipeline_config,
-            min_bbox_confidence=0.0,
-            min_keypoint_confidence=0.0,
-            bbox_weight=0.0,
-            keypoint_weight=0.0,
         )
         pred_keypoints, pred_bboxes, pred_scores = pred_loader.get_filtered_predictions(
             subject, action, camera_idx - 1, original_video_path
