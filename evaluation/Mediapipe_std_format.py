@@ -2,6 +2,7 @@ import json
 import pickle
 import os
 import numpy as np
+import math
 
 
 def convert_mediapipe_json_to_standard(input_json_path, output_dir):
@@ -19,15 +20,23 @@ def convert_mediapipe_json_to_standard(input_json_path, output_dir):
         frame_idx = frame.get("frame_number", -1)
         landmarks = frame.get("landmarks", [])
 
+        # Get frame size (replace with actual values if not present in JSON)
+        frame_width = data.get("resolution")[0]   # default width
+        frame_height = data.get("resolution")[1]  # default height
+
         if landmarks and len(landmarks) > 0:
             keypoints = []
             visibility = []
             xs, ys = [], []
 
             for lm in landmarks:
-                x = lm.get("x", 0.0)
-                y = lm.get("y", 0.0)
+                # Convert normalized coordinates to pixel coordinates
+                x = min(math.floor(lm.get("x", 0.0) *
+                        frame_width), frame_width - 1)
+                y = min(math.floor(lm.get("y", 0.0) *
+                        frame_height), frame_height - 1)
                 vis = lm.get("visibility", 0.0)
+
                 keypoints.append([x, y])
                 visibility.append(vis)
                 xs.append(x)
@@ -88,7 +97,7 @@ def process_folder(root_folder):
 
     # Create output root folder parallel to the input root folder
     parent_dir = os.path.dirname(root_folder)
-    output_root = os.path.join(parent_dir, "standardized_results")
+    output_root = os.path.join(parent_dir, "detect/standardized_results")
     os.makedirs(output_root, exist_ok=True)
 
     for dirpath, _, filenames in os.walk(root_folder):
