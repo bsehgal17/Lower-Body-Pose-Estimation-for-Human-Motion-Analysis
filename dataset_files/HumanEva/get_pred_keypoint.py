@@ -82,8 +82,8 @@ class PredictionLoader:
 
             # Convert keypoints to np.array safely
             try:
-                kpts = np.array(kpts_raw[0]) if isinstance(
-                    kpts_raw[0], list) else np.array(kpts_raw)
+                kpts = np.array(kpts_raw) if isinstance(
+                    kpts_raw, list) else np.array(kpts_raw)
             except Exception:
                 continue  # skip if keypoints are malformed
 
