@@ -16,19 +16,19 @@ pipelines:
   #     - command: evaluation
   #       config_file: "config_yamls/jointwise_ap_testing.yaml"
 
-  - name: detect_DWPose
-    steps:
-      - command: detect
-        config_file: "config_yamls/detector/DWPose_detector_humaneva.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
+  # - name: detect_DWPose
+  #   steps:
+  #     - command: detect
+  #       config_file: "config_yamls/detector/DWPose_detector_humaneva.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
 
-  - name: detect_HRNet
-    steps:
-      - command: detect
-        config_file: "config_yamls/detector/HRNet_detector_humaneva_normal.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: detect_HRNet
+  #   steps:
+  #     - command: detect
+  #       config_file: "config_yamls/detector/HRNet_detector_humaneva_normal.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   - name: detect_HRNet_dark
     steps:
