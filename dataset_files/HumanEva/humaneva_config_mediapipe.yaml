@@ -284,7 +284,7 @@ evaluation:
 
 dataset:
  joint_enum_module: utils.joint_enum.GTJointsHumanEVa
- keypoint_format: utils.joint_enum.PredJointsDeepLabCut
+ keypoint_format: utils.joint_enum.Mediapipe
  sync_data:
     data:
       S1:

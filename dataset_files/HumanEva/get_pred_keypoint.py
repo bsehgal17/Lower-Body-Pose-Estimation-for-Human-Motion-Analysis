@@ -71,22 +71,36 @@ class PredictionLoader:
 
         for frame_idx, people in frames_data.items():
             if not people:
-                continue
-            # Just take the first person in the frame, no confidence filtering
+                continue  # skip frames with no people
+
+            # Just take the first person in the frame
             person = people[0]
+
             kpts_raw = person.get("keypoints")
-            kpts = (
-                np.array(kpts_raw[0])
-                if isinstance(kpts_raw[0], list)
-                else np.array(kpts_raw)
-            )
-            visibility = person.get("keypoints_visible", np.ones(kpts.shape[0]))
+            if kpts_raw is None:
+                continue  # skip if keypoints are missing
+
+            # Convert keypoints to np.array safely
+            try:
+                kpts = np.array(kpts_raw[0]) if isinstance(
+                    kpts_raw[0], list) else np.array(kpts_raw)
+            except Exception:
+                continue  # skip if keypoints are malformed
+
+            visibility = person.get("keypoints_visible")
+            if visibility is None or len(visibility) != kpts.shape[0]:
+                visibility = np.ones(kpts.shape[0])  # default visibility
+
+            # Filter keypoints
             kpts_filtered = self._filter_keypoints(kpts, visibility)
             if kpts_filtered is None:
-                continue
+                continue  # skip if filtering fails
+
+            # Safe extraction of bbox and scores
             pred_keypoints[frame_idx] = kpts_filtered
             pred_bboxes[frame_idx] = person.get("bboxes", [0, 0, 0, 0])
             pred_scores[frame_idx] = person.get("scores", 0.0)
+
         return pred_keypoints, pred_bboxes, pred_scores
 
     def _rescale_predictions(self, pred_keypoints, pred_bboxes, original_video_path):

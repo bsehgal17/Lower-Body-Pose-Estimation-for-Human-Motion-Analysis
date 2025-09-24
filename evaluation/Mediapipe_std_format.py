@@ -28,7 +28,7 @@ def convert_mediapipe_json_to_standard(input_json_path, output_dir):
                 x = lm.get("x", 0.0)
                 y = lm.get("y", 0.0)
                 vis = lm.get("visibility", 0.0)
-                keypoints.append([x, y, vis])
+                keypoints.append([x, y])
                 visibility.append(vis)
                 xs.append(x)
                 ys.append(y)
