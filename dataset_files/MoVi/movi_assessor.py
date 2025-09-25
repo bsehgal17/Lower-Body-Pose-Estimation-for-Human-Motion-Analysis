@@ -38,9 +38,9 @@ def assess_single_movi_sample(gt_csv_path, pred_pkl_path, video_path, pipeline_c
     pred_keypoints, pred_bboxes, pred_scores = pred_loader._extract_keypoints_data(
         pred_data
     )
-    pred_keypoints, pred_bboxes = pred_loader._rescale_predictions(
-        pred_keypoints, pred_bboxes, video_path
-    )
+    # pred_keypoints, pred_bboxes = pred_loader._rescale_predictions(
+    #     pred_keypoints, pred_bboxes, video_path
+    # )
     # --- Align ground truth and predictions ---
     min_len = min(len(gt_keypoints_np), len(pred_keypoints))
 

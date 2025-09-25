@@ -273,5 +273,5 @@ evaluation:
 
 dataset:
   joint_enum_module: utils.joint_enum.GTJointsMoVi
-  keypoint_format: utils.joint_enum.PredJointsDeepLabCut  # or RTMW equivalent if using another model
+  keypoint_format: utils.joint_enum.Mediapipe  # or RTMW equivalent if using another model
   

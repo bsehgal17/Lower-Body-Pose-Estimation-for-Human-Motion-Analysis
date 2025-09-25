@@ -77,8 +77,8 @@ def convert_mediapipe_json_to_standard(input_json_path, output_dir):
     base_name = os.path.splitext(os.path.basename(input_json_path))[0]
     os.makedirs(output_dir, exist_ok=True)
 
-    out_json_path = os.path.join(output_dir, f"{base_name}_standard.json")
-    out_pkl_path = os.path.join(output_dir, f"{base_name}_standard.pkl")
+    out_json_path = os.path.join(output_dir, f"{base_name}.json")
+    out_pkl_path = os.path.join(output_dir, f"{base_name}.pkl")
 
     # Save JSON
     with open(out_json_path, "w") as f:
