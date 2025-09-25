@@ -1,5 +1,5 @@
 paths:
-  dataset: HumanEva
+  dataset: MoVi
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 models:

@@ -5,7 +5,7 @@ from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from dataset_files.HumanEva.humaneva_metadata import get_humaneva_metadata_from_video
 from dataset_files.HumanEva.get_gt_keypoint import GroundTruthLoader
-from dataset_files.HumanEva.get_pred_keypoint import PredictionLoader
+from evaluation.get_pred_keypoint import PredictionLoader
 from utils.import_utils import import_class_from_string
 from evaluation.generic_evaluator import MetricsEvaluator, run_assessment
 
@@ -104,7 +104,6 @@ def humaneva_data_loader(
             f"{safe_action_name}_({camera_str}).avi",
         )
 
-        # Remove confidence filtering: PredictionLoader no longer takes confidence arguments
         pred_loader = PredictionLoader(
             pred_pkl_path,
             pipeline_config,

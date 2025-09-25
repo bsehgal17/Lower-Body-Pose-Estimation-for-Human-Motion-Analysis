@@ -40,7 +40,7 @@ def movi_data_loader(pred_pkl_path, pipeline_config: PipelineConfig, global_conf
 
         # Unpack all six returned values from the assessor function
         gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores = assess_single_movi_sample(
-            gt_csv_path, pred_pkl_path, video_path
+            gt_csv_path, pred_pkl_path, video_path, pipeline_config
         )
 
         # The original fix to ensure pred_keypoints is a list of arrays

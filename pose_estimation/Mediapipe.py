@@ -169,7 +169,7 @@ def process_all_videos(input_directory, output_base_dir):
             output_video_path = os.path.join(
                 processed_videos_dir, f"{video_name}_processed.mp4")
             output_data_path = os.path.join(
-                pose_data_dir, f"{video_name}_pose_data.json")
+                pose_data_dir, f"{video_name}.json")
 
             # Create necessary subdirectories
             os.makedirs(os.path.dirname(output_video_path), exist_ok=True)
@@ -212,9 +212,9 @@ def process_all_videos(input_directory, output_base_dir):
 
 def main():
     # Change this to your input directory
-    input_directory = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva_Walk"
+    input_directory = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi"
     # Change this to your desired output directory
-    output_directory = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/Mediapipe"
+    output_directory = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/Mediapipe"
 
     print("Starting MediaPipe Pose Estimation on Videos")
     print("=" * 50)

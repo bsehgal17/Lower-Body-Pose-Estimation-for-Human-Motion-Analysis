@@ -31,9 +31,9 @@ def convert_mediapipe_json_to_standard(input_json_path, output_dir):
 
             for lm in landmarks:
                 # Convert normalized coordinates to pixel coordinates
-                x = min(math.floor(lm.get("x", 0.0) *
+                x = min((lm.get("x", 0.0) *
                         frame_width), frame_width - 1)
-                y = min(math.floor(lm.get("y", 0.0) *
+                y = min((lm.get("y", 0.0) *
                         frame_height), frame_height - 1)
                 vis = lm.get("visibility", 0.0)
 
@@ -119,5 +119,5 @@ def process_folder(root_folder):
 # Run conversion when script is executed
 # ---------------------------
 if __name__ == "__main__":
-    folder_path = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/Mediapipe/pose_data"
+    folder_path = "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/Mediapipe/pose_data"
     process_folder(folder_path)
