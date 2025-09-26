@@ -38,7 +38,8 @@ class JointwisePCKCalculator(BasePCKCalculator):
 
     def compute(self, gt_keypoints, pred_keypoints):
         gt, pred = np.array(gt_keypoints), np.array(pred_keypoints)
-
+        if pred.shape[1] == 1:
+            pred = pred.squeeze(1)
         if self.joints_to_evaluate is None:
             self.joints_to_evaluate = [j.name for j in self.gt_enum]
 
