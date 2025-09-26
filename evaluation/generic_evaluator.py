@@ -19,19 +19,31 @@ class MetricsEvaluator:
         self.aggregator = ResultAggregator(output_path=output_path)
         self.output_path = output_path
 
-    def evaluate(self, calculator, gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores, sample_info, metric_name, params):
+    def evaluate(
+        self,
+        calculator,
+        gt_keypoints,
+        gt_bboxes,
+        gt_scores,
+        pred_keypoints,
+        pred_bboxes,
+        pred_scores,
+        sample_info,
+        metric_name,
+        params,
+    ):
         """
         Computes a metric and stores the result in the aggregator.
         """
         try:
             sig = inspect.signature(calculator.compute)
             available_args = {
-                'gt_keypoints': gt_keypoints,
-                'gt_bboxes': gt_bboxes,
-                'gt_scores': gt_scores,
-                'pred_keypoints': pred_keypoints,
-                'pred_bboxes': pred_bboxes,
-                'pred_scores': pred_scores
+                "gt_keypoints": gt_keypoints,
+                "gt_bboxes": gt_bboxes,
+                "gt_scores": gt_scores,
+                "pred_keypoints": pred_keypoints,
+                "pred_bboxes": pred_bboxes,
+                "pred_scores": pred_scores,
             }
             filtered_args = {
                 param: available_args[param]
@@ -41,7 +53,8 @@ class MetricsEvaluator:
             result = calculator.compute(**filtered_args)
         except Exception as e:
             logger.error(
-                f"Error computing metric '{metric_name}' for sample {sample_info}: {e}")
+                f"Error computing metric '{metric_name}' for sample {sample_info}: {e}"
+            )
             return
 
         self.aggregator.add_metric(sample_info, result, metric_name, params)
@@ -73,20 +86,37 @@ def run_assessment(
                 continue
 
             pred_pkl_path = os.path.join(root, file)
-            sample = data_loader_func(
-                pred_pkl_path, pipeline_config, global_config)
+            sample = data_loader_func(pred_pkl_path, pipeline_config, global_config)
 
             if not sample:
                 continue
 
-            gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores, sample_info = sample
+            (
+                gt_keypoints,
+                gt_bboxes,
+                gt_scores,
+                pred_keypoints,
+                pred_bboxes,
+                pred_scores,
+                sample_info,
+            ) = sample
+
+            # Skip this sample if gt_keypoints is None or empty (no GT data)
+            if gt_keypoints is None or (
+                isinstance(gt_keypoints, (list, np.ndarray)) and len(gt_keypoints) == 0
+            ):
+                logger.warning(
+                    f"Skipping sample {sample_info} due to missing GT keypoints."
+                )
+                continue
 
             for metric_cfg in pipeline_config.evaluation.metrics:
                 metric_name = metric_cfg["name"]
                 params = metric_cfg.get("params", {})
 
                 metric_entry = next(
-                    (m for m in EVALUATION_METRICS if m["name"] == metric_name), None)
+                    (m for m in EVALUATION_METRICS if m["name"] == metric_name), None
+                )
                 if not metric_entry:
                     logger.error(f"Metric '{metric_name}' not found.")
                     continue
@@ -95,8 +125,18 @@ def run_assessment(
                     params=params, gt_enum=gt_enum_class, pred_enum=pred_enum_class
                 )
 
-                evaluator.evaluate(calculator, gt_keypoints, gt_bboxes, gt_scores, pred_keypoints, pred_bboxes, pred_scores,
-                                   sample_info, metric_name, params)
+                evaluator.evaluate(
+                    calculator,
+                    gt_keypoints,
+                    gt_bboxes,
+                    gt_scores,
+                    pred_keypoints,
+                    pred_bboxes,
+                    pred_scores,
+                    sample_info,
+                    metric_name,
+                    params,
+                )
 
     # Fix: Pass the `grouping_keys` argument to the `evaluator.save` method
     evaluator.save(grouping_keys)
