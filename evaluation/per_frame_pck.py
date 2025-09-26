@@ -46,8 +46,8 @@ class PerFramePCKCalculator(BasePCKCalculator):
 
     def compute(self, gt_keypoints, pred_keypoints):
         gt, pred = np.array(gt_keypoints), np.array(pred_keypoints)
-        if pred.shape[-1] == 3:
-            pred = pred[..., :2]
+        if pred.shape[1] == 1:
+            pred = pred.squeeze(1)
 
         if gt.shape[0] != pred.shape[0] or gt.ndim != 3:
             raise ValueError("Input shape mismatch")
