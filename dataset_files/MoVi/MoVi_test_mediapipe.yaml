@@ -66,7 +66,7 @@ filter:
     - RIGHT_HIP
 
 evaluation:
-  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/Mediapipe/
+  # input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/Mediapipe/
   metrics:
 
     # Updated thresholds for overall_pck

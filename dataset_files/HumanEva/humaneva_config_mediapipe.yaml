@@ -74,7 +74,7 @@ filter:
 
 
 evaluation:
-  input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/Mediapipe/
+  # input_dir : /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/Mediapipe/
   metrics:
 
     # Updated thresholds for overall_pck
