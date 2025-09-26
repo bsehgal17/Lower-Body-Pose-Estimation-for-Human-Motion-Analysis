@@ -72,7 +72,7 @@ evaluation:
     # Updated thresholds for overall_pck
     - name: overall_pck
       params:
-        threshold: 0.1
+        threshold: 0.01
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP
@@ -82,7 +82,7 @@ evaluation:
           - RIGHT_ANKLE
     - name: overall_pck
       params:
-        threshold: 0.2
+        threshold: 0.05
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP
@@ -92,7 +92,7 @@ evaluation:
           - RIGHT_ANKLE
     - name: per_frame_pck
       params:
-        threshold: 0.1
+        threshold: 0.01
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP
@@ -102,7 +102,7 @@ evaluation:
           - RIGHT_ANKLE
     - name: per_frame_pck
       params:
-        threshold: 0.2
+        threshold: 0.05
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP
@@ -112,7 +112,7 @@ evaluation:
           - RIGHT_ANKLE
     - name: jointwise_pck
       params:
-        threshold: 0.1
+        threshold: 0.01
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP
@@ -122,7 +122,7 @@ evaluation:
           - RIGHT_ANKLE
     - name: jointwise_pck
       params:
-        threshold: 0.2
+        threshold: 0.05
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP
