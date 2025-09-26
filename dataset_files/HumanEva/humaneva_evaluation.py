@@ -1,6 +1,7 @@
 import os
 import logging
 import pickle
+import numpy as np
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from dataset_files.HumanEva.humaneva_metadata import get_humaneva_metadata_from_video
@@ -96,6 +97,15 @@ def humaneva_data_loader(
             gt_data = pickle.load(f)
         gt_keypoints = gt_data["keypoints"]
 
+        # If GT keypoints are None or empty, skip this sample
+        if gt_keypoints is None or (
+            isinstance(gt_keypoints, (list, np.ndarray)) and len(gt_keypoints) == 0
+        ):
+            logger.warning(
+                f"Skipping {pred_pkl_path} due to missing or empty GT keypoints."
+            )
+            return None
+
         # --- Prediction Loading and Preprocessing ---
         original_video_path = os.path.join(
             original_video_base,
@@ -111,6 +121,15 @@ def humaneva_data_loader(
         pred_keypoints, pred_bboxes, pred_scores = pred_loader.get_filtered_predictions(
             subject, action, camera_idx - 1, original_video_path
         )
+        # If pred_keypoints is None or empty, also skip (optional, for robustness)
+        if pred_keypoints is None or (
+            isinstance(pred_keypoints, (list, np.ndarray)) and len(pred_keypoints) == 0
+        ):
+            logger.warning(
+                f"Skipping {pred_pkl_path} due to missing or empty predicted keypoints."
+            )
+            return None
+
         min_len = min(len(gt_keypoints), len(pred_keypoints))
 
         # Create placeholder lists for GT bboxes and scores for MAPCalculator
@@ -162,10 +181,8 @@ def run_humaneva_assessment(
         frame_step (int): Step size for frame processing
         visualize_gt (bool): Whether to include ground truth in visualizations
     """
-    gt_enum_class = import_class_from_string(
-        pipeline_config.dataset.joint_enum_module)
-    pred_enum_class = import_class_from_string(
-        pipeline_config.dataset.keypoint_format)
+    gt_enum_class = import_class_from_string(pipeline_config.dataset.joint_enum_module)
+    pred_enum_class = import_class_from_string(pipeline_config.dataset.keypoint_format)
 
     # Visualization logic removed
 
