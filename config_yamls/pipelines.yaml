@@ -3,6 +3,65 @@ orchestrator:
   default_device: "cuda:0"
 
 pipelines:
+  - name: detect_RTMW_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  - name: detect_RTMW_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+
+  - name: detect_DWPose_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  - name: detect_HRNet_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  - name: detect_HRNet_dark_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  - name: detect_RTMPose_L_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  - name: detect_DWPose_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+
+  - name: detect_HRNet_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+
+  - name: detect_HRNet_dark_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+
+  - name: detect_RTMPose_L_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+
+  - name: Mediapipe_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config_mediapipe_nojoints.yaml"
+
+  - name: Mediapipe_nojoints
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/MoVi/MoVi_test_mediapipe_nojoints.yaml"
   - name: detect_RTMW
     steps:
       # - command: detect

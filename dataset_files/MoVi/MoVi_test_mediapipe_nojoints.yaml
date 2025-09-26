@@ -1,0 +1,95 @@
+paths:
+  dataset: MoVi
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/MoVi_groundtruth/
+
+models:
+  detector: RTMW
+  det_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/demo/mmdetection_cfg/faster_rcnn_r50_fpn_coco.py
+  det_checkpoint: https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
+  pose_config: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-l_8xb320-270e_cocktail14-384x288.py
+  pose_checkpoint: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/models/mmpose/rtmw-dw-x-l_simcc-cocktail14_270e-384x288-20231122.pth
+
+processing:
+  device: cuda:0
+  nms_threshold: 0.3
+  detection_threshold: 0.3
+  kpt_threshold: 0.3
+confidence_filtering:
+  min_bbox_confidence: 0.3
+  min_keypoint_confidence: 0.2
+  bbox_weight: 0.3
+  keypoint_weight: 0.7
+  min_valid_keypoints: 3
+  enabled: true
+noise:
+  apply_poisson_noise: true
+  apply_gaussian_noise: true
+  apply_motion_blur: true
+  apply_brightness_reduction: true
+  brightness_factor: 30
+  poisson_scale: 1.0
+  gaussian_std: 2.0
+  motion_blur_kernel_size: 5
+  target_resolution: null
+filter:
+  name: "gaussian"
+  params:
+    sigma: 0.5
+  outlier_removal:
+    enable: true
+    method: "iqr"
+    params:
+      iqr_multiplier: 1.5
+  enable_interpolation: true
+  interpolation_kind: "linear"
+  enable_filter_plots: true
+  joints_to_filter:
+    - LEFT_ANKLE
+    - RIGHT_ANKLE
+    - LEFT_KNEE
+    - RIGHT_KNEE
+    - LEFT_HIP
+    - RIGHT_HIP
+
+evaluation:
+  metrics:
+    - name: overall_pck
+      params:
+        threshold: 0.01
+    - name: overall_pck
+      params:
+        threshold: 0.02
+    - name: overall_pck
+      params:
+        threshold: 0.05
+    - name: overall_pck
+      params:
+        threshold: 0.1
+    - name: per_frame_pck
+      params:
+        threshold: 0.01
+    - name: per_frame_pck
+      params:
+        threshold: 0.02
+    - name: per_frame_pck
+      params:
+        threshold: 0.05
+    - name: per_frame_pck
+      params:
+        threshold: 0.1
+    - name: jointwise_pck
+      params:
+        threshold: 0.01
+    - name: jointwise_pck
+      params:
+        threshold: 0.02
+    - name: jointwise_pck
+      params:
+        threshold: 0.05
+    - name: jointwise_pck
+      params:
+        threshold: 0.1
+
+dataset:
+  joint_enum_module: utils.joint_enum.GTJointsMoVi
+  keypoint_format: utils.joint_enum.Mediapipe
