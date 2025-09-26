@@ -72,36 +72,6 @@ evaluation:
     # Updated thresholds for overall_pck
     - name: overall_pck
       params:
-        threshold: 0.01
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-    - name: overall_pck
-      params:
-        threshold: 0.02
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-    - name: overall_pck
-      params:
-        threshold: 0.05
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-    - name: overall_pck
-      params:
         threshold: 0.1
         joints_to_evaluate:
           - LEFT_HIP
@@ -110,32 +80,9 @@ evaluation:
           - RIGHT_KNEE
           - LEFT_ANKLE
           - RIGHT_ANKLE
-
-
-    # Updated thresholds for per_frame_pck
-    - name: per_frame_pck
+    - name: overall_pck
       params:
-        threshold: 0.01
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-    - name: per_frame_pck
-      params:
-        threshold: 0.02
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-    - name: per_frame_pck
-      params:
-        threshold: 0.05
+        threshold: 0.2
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP
@@ -153,32 +100,9 @@ evaluation:
           - RIGHT_KNEE
           - LEFT_ANKLE
           - RIGHT_ANKLE
-
-
-    # Updated thresholds for jointwise_pck
-    - name: jointwise_pck
+    - name: per_frame_pck
       params:
-        threshold: 0.01
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-    - name: jointwise_pck
-      params:
-        threshold: 0.02
-        joints_to_evaluate:
-          - LEFT_HIP
-          - RIGHT_HIP
-          - LEFT_KNEE
-          - RIGHT_KNEE
-          - LEFT_ANKLE
-          - RIGHT_ANKLE
-    - name: jointwise_pck
-      params:
-        threshold: 0.05
+        threshold: 0.2
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP
@@ -189,6 +113,16 @@ evaluation:
     - name: jointwise_pck
       params:
         threshold: 0.1
+        joints_to_evaluate:
+          - LEFT_HIP
+          - RIGHT_HIP
+          - LEFT_KNEE
+          - RIGHT_KNEE
+          - LEFT_ANKLE
+          - RIGHT_ANKLE
+    - name: jointwise_pck
+      params:
+        threshold: 0.2
         joints_to_evaluate:
           - LEFT_HIP
           - RIGHT_HIP

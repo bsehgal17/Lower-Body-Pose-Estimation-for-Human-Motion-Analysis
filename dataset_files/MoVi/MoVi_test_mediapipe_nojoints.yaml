@@ -55,40 +55,22 @@ evaluation:
   metrics:
     - name: overall_pck
       params:
-        threshold: 0.01
+        threshold: 0.1
     - name: overall_pck
       params:
-        threshold: 0.02
-    - name: overall_pck
-      params:
-        threshold: 0.05
-    - name: overall_pck
+        threshold: 0.2
+    - name: per_frame_pck
       params:
         threshold: 0.1
     - name: per_frame_pck
       params:
-        threshold: 0.01
-    - name: per_frame_pck
-      params:
-        threshold: 0.02
-    - name: per_frame_pck
-      params:
-        threshold: 0.05
-    - name: per_frame_pck
-      params:
-        threshold: 0.1
-    - name: jointwise_pck
-      params:
-        threshold: 0.01
-    - name: jointwise_pck
-      params:
-        threshold: 0.02
-    - name: jointwise_pck
-      params:
-        threshold: 0.05
+        threshold: 0.2
     - name: jointwise_pck
       params:
         threshold: 0.1
+    - name: jointwise_pck
+      params:
+        threshold: 0.2
 
 dataset:
   joint_enum_module: utils.joint_enum.GTJointsMoVi
