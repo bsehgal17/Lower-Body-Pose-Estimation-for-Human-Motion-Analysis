@@ -1,4 +1,6 @@
 from evaluation.base_calculators import BasePCKCalculator, average_if_tuple
+from utils.pck_utils import compute_norm_length
+from utils.pck_utils import select_norm_joints
 import numpy as np
 import logging
 
@@ -9,40 +11,22 @@ class PerFramePCKCalculator(BasePCKCalculator):
     def __init__(self, params, gt_enum, pred_enum, verbose=False):
         if "threshold" not in params:
             raise ValueError(
-                "Parameter 'threshold' is required for PerFramePCKCalculator.")
+                "Parameter 'threshold' is required for PerFramePCKCalculator."
+            )
 
         threshold = params["threshold"]
         joints_to_evaluate = params.get("joints_to_evaluate", None)
-
-        norm_joints = params.get(
-            "norm_joints", self.auto_select_norm_joints(joints_to_evaluate))
-
+        norm_joints = params.get("norm_joints", select_norm_joints(joints_to_evaluate))
         if verbose:
-            print(
-                f"[PerFramePCKCalculator] Using normalization joints: {norm_joints}")
-
+            print(f"[PerFramePCKCalculator] Using normalization joints: {norm_joints}")
         super().__init__(threshold=threshold, joints_to_evaluate=joints_to_evaluate)
-
         if gt_enum is None or pred_enum is None:
             raise ValueError("Both gt_enum and pred_enum must be provided.")
-
         self.gt_enum = gt_enum
         self.pred_enum = pred_enum
         self.norm_joints = norm_joints
 
-    def auto_select_norm_joints(self, joints_to_evaluate):
-        if joints_to_evaluate is None:
-            return ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"]
-
-        joint_set = set(joints_to_evaluate)
-
-        if "LEFT_SHOULDER" in joint_set and "RIGHT_SHOULDER" in joint_set:
-            return ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"]
-        if "LEFT_KNEE" in joint_set and "RIGHT_KNEE" in joint_set:
-            return ["LEFT_KNEE", "RIGHT_KNEE", "LEFT_HIP", "RIGHT_HIP"]
-        if "LEFT_HIP" in joint_set and "RIGHT_HIP" in joint_set:
-            return ["LEFT_HIP", "RIGHT_HIP"]
-        return ["LEFT_HIP", "RIGHT_HIP"]
+    # auto_select_norm_joints removed; use select_norm_joints from utils.pck_utils instead
 
     def compute(self, gt_keypoints, pred_keypoints):
         gt, pred = np.array(gt_keypoints), np.array(pred_keypoints)
@@ -52,25 +36,13 @@ class PerFramePCKCalculator(BasePCKCalculator):
         if gt.shape[0] != pred.shape[0] or gt.ndim != 3:
             raise ValueError("Input shape mismatch")
 
-        # Compute normalization lengths
-        norm_parts = []
-        for i in range(0, len(self.norm_joints), 2):
-            try:
-                j1 = getattr(self.gt_enum, self.norm_joints[i])
-                j2 = getattr(self.gt_enum, self.norm_joints[i + 1])
-
-                p1 = np.array([average_if_tuple(x) for x in gt[:, j1.value]])
-                p2 = np.array([average_if_tuple(x) for x in gt[:, j2.value]])
-                norm_parts.append(np.linalg.norm(p1 - p2, axis=-1))
-            except AttributeError:
-                logger.warning(
-                    f"Normalization joint missing: {self.norm_joints[i]} or {self.norm_joints[i+1]} — skipping.")
-                continue
-
-        if not norm_parts:
-            raise ValueError("No valid joint pairs found for normalization.")
-
-        norm_length = np.mean(norm_parts, axis=0)
+        # Compute normalization length using shared utility
+        gt_keypoints_proc = np.array(
+            [[average_if_tuple(x) for x in frame] for frame in gt]
+        )
+        norm_length = compute_norm_length(
+            self.gt_enum, self.norm_joints, gt_keypoints_proc
+        )
 
         if self.joints_to_evaluate is None:
             self.joints_to_evaluate = [j.name for j in self.gt_enum]
@@ -79,20 +51,24 @@ class PerFramePCKCalculator(BasePCKCalculator):
 
         for joint in self.joints_to_evaluate:
             if joint not in self.gt_enum.__members__:
-                logger.warning(
-                    f"Joint '{joint}' not found in GT enum. Skipping.")
+                logger.warning(f"Joint '{joint}' not found in GT enum. Skipping.")
                 continue
             if joint not in self.pred_enum.__members__:
-                logger.warning(
-                    f"Joint '{joint}' not found in Pred enum. Skipping.")
+                logger.warning(f"Joint '{joint}' not found in Pred enum. Skipping.")
                 continue
 
             g_idx, p_idx = self.gt_enum[joint].value, self.pred_enum[joint].value
 
-            gt_point = (gt[:, g_idx[0]] + gt[:, g_idx[1]]) / \
-                2 if isinstance(g_idx, tuple) else gt[:, g_idx]
-            pred_point = (pred[:, p_idx[0]] + pred[:, p_idx[1]]) / \
-                2 if isinstance(p_idx, tuple) else pred[:, p_idx]
+            gt_point = (
+                (gt[:, g_idx[0]] + gt[:, g_idx[1]]) / 2
+                if isinstance(g_idx, tuple)
+                else gt[:, g_idx]
+            )
+            pred_point = (
+                (pred[:, p_idx[0]] + pred[:, p_idx[1]]) / 2
+                if isinstance(p_idx, tuple)
+                else pred[:, p_idx]
+            )
 
             gt_pts.append(gt_point)
             pred_pts.append(pred_point)
