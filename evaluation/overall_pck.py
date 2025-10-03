@@ -32,7 +32,7 @@ class OverallPCKCalculator(BasePCKCalculator):
 
     def auto_select_norm_joints(self, joints_to_evaluate):
         if joints_to_evaluate is None:
-            return ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"]
+            return ["LEFT_SHOULDER", "RIGHT_HIP", "RIGHT_SHOULDER", "LEFT_HIP"]
 
         joint_set = set(joints_to_evaluate)
 
