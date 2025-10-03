@@ -4,7 +4,7 @@ from scipy.interpolate import interp1d
 
 
 class TimeSeriesPreprocessor:
-    def __init__(self, method: str = "iqr", interpolation: str = "linear"):
+    def __init__(self, method: str, interpolation: str):
         """
         Initializes a preprocessing utility for 1D time-series.
 
