@@ -17,10 +17,12 @@ class OverallPCKCalculator(BasePCKCalculator):
         threshold = params["threshold"]
         joints_to_evaluate = params.get("joints_to_evaluate", None)
 
-        norm_joints = params.get("norm_joints", select_norm_joints(joints_to_evaluate))
+        norm_joints = params.get(
+            "norm_joints", select_norm_joints(joints_to_evaluate))
 
         if verbose:
-            print(f"[OverallPCKCalculator] Using normalization joints: {norm_joints}")
+            print(
+                f"[OverallPCKCalculator] Using normalization joints: {norm_joints}")
 
         super().__init__(threshold=threshold, joints_to_evaluate=joints_to_evaluate)
 
@@ -30,8 +32,6 @@ class OverallPCKCalculator(BasePCKCalculator):
         self.gt_enum = gt_enum
         self.pred_enum = pred_enum
         self.norm_joints = norm_joints
-
-    # auto_select_norm_joints removed; use select_norm_joints from utils.pck_utils instead
 
     def compute(self, gt_keypoints, pred_keypoints):
         gt, pred = np.array(gt_keypoints), np.array(pred_keypoints)
@@ -56,10 +56,12 @@ class OverallPCKCalculator(BasePCKCalculator):
 
         for joint in self.joints_to_evaluate:
             if joint not in self.gt_enum.__members__:
-                logger.warning(f"Joint '{joint}' not found in GT enum. Skipping.")
+                logger.warning(
+                    f"Joint '{joint}' not found in GT enum. Skipping.")
                 continue
             if joint not in self.pred_enum.__members__:
-                logger.warning(f"Joint '{joint}' not found in Pred enum. Skipping.")
+                logger.warning(
+                    f"Joint '{joint}' not found in Pred enum. Skipping.")
                 continue
 
             g_idx, p_idx = self.gt_enum[joint].value, self.pred_enum[joint].value
