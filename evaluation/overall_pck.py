@@ -1,4 +1,6 @@
 from evaluation.base_calculators import BasePCKCalculator, average_if_tuple
+from utils.pck_utils import compute_norm_length
+from utils.pck_utils import select_norm_joints
 import numpy as np
 import logging
 
@@ -9,13 +11,14 @@ class OverallPCKCalculator(BasePCKCalculator):
     def __init__(self, params, gt_enum, pred_enum, verbose=False):
         if "threshold" not in params:
             raise ValueError(
-                "Parameter 'threshold' is required for OverallPCKCalculator.")
+                "Parameter 'threshold' is required for OverallPCKCalculator."
+            )
 
         threshold = params["threshold"]
         joints_to_evaluate = params.get("joints_to_evaluate", None)
 
         norm_joints = params.get(
-            "norm_joints", self.auto_select_norm_joints(joints_to_evaluate))
+            "norm_joints", select_norm_joints(joints_to_evaluate))
 
         if verbose:
             print(
@@ -30,20 +33,6 @@ class OverallPCKCalculator(BasePCKCalculator):
         self.pred_enum = pred_enum
         self.norm_joints = norm_joints
 
-    def auto_select_norm_joints(self, joints_to_evaluate):
-        if joints_to_evaluate is None:
-            return ["LEFT_SHOULDER", "RIGHT_HIP", "RIGHT_SHOULDER", "LEFT_HIP"]
-
-        joint_set = set(joints_to_evaluate)
-
-        if "LEFT_SHOULDER" in joint_set and "RIGHT_SHOULDER" in joint_set:
-            return ["LEFT_SHOULDER", "RIGHT_HIP", "RIGHT_SHOULDER", "LEFT_HIP"]
-        if "LEFT_KNEE" in joint_set and "RIGHT_KNEE" in joint_set:
-            return ["LEFT_KNEE", "LEFT_HIP", "RIGHT_KNEE",  "RIGHT_HIP"]
-        if "LEFT_HIP" in joint_set and "RIGHT_HIP" in joint_set:
-            return ["LEFT_HIP", "RIGHT_HIP"]
-        return ["LEFT_HIP", "RIGHT_HIP"]
-
     def compute(self, gt_keypoints, pred_keypoints):
         gt, pred = np.array(gt_keypoints), np.array(pred_keypoints)
         if pred.shape[1] == 1:
@@ -52,25 +41,13 @@ class OverallPCKCalculator(BasePCKCalculator):
         if gt.shape[0] != pred.shape[0] or gt.ndim != 3:
             raise ValueError("Input shape mismatch")
 
-        # Compute normalization lengths
-        norm_parts = []
-        for i in range(0, len(self.norm_joints), 2):
-            try:
-                j1 = getattr(self.gt_enum, self.norm_joints[i])
-                j2 = getattr(self.gt_enum, self.norm_joints[i + 1])
-
-                p1 = np.array([average_if_tuple(x) for x in gt[:, j1.value]])
-                p2 = np.array([average_if_tuple(x) for x in gt[:, j2.value]])
-                norm_parts.append(np.linalg.norm(p1 - p2, axis=-1))
-            except AttributeError:
-                logger.warning(
-                    f"Normalization joint missing: {self.norm_joints[i]} or {self.norm_joints[i+1]} — skipping.")
-                continue
-
-        if not norm_parts:
-            raise ValueError("No valid joint pairs found for normalization.")
-
-        norm_length = np.mean(norm_parts, axis=0)
+        # Compute normalization length using shared utility
+        gt_keypoints_proc = np.array(
+            [[average_if_tuple(x) for x in frame] for frame in gt]
+        )
+        norm_length = compute_norm_length(
+            self.gt_enum, self.norm_joints, gt_keypoints_proc
+        )
 
         if self.joints_to_evaluate is None:
             self.joints_to_evaluate = [j.name for j in self.gt_enum]
