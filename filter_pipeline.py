@@ -211,10 +211,10 @@ class KeypointFilterProcessor:
         for param_set in param_variants:
             frames = deepcopy(keypoints_frames)
 
-            # Get number of persons from first frame
+            # Get number of persons from first frame's poses
             first_frame = frames[0]
-            if "keypoints" in first_frame and first_frame["keypoints"]:
-                num_persons = len(first_frame["keypoints"])
+            if "poses" in first_frame and first_frame["poses"]:
+                num_persons = len(first_frame["poses"])
             else:
                 num_persons = 0
 
@@ -223,7 +223,8 @@ class KeypointFilterProcessor:
             # 🟢 If no joints specified, use all available joints
             if not self.joints_to_filter:
                 try:
-                    total_joints = len(frames[0]["keypoints"][0])
+                    # Get total joints from first person's first pose
+                    total_joints = len(frames[0]["poses"][0]["keypoints"])
                     joints_to_filter = list(range(total_joints))
                     logger.info(
                         f"No joints_to_filter specified — applying filter to all {total_joints} joints."
@@ -236,19 +237,21 @@ class KeypointFilterProcessor:
             else:
                 joints_to_filter = self.joints_to_filter
 
-            # 🔧 Filtering process
+            # 🔧 Filtering process - Apply to poses keypoints
             for person_idx in range(num_persons):
                 for joint_id in joints_to_filter:
                     x_series, y_series = [], []
 
                     for frame in frames:
-                        if person_idx >= len(frame["keypoints"]):
+                        if person_idx >= len(frame["poses"]):
                             x_series.append(np.nan)
                             y_series.append(np.nan)
                             continue
 
                         try:
-                            kp = frame["keypoints"][person_idx][joint_id]
+                            # Access keypoints from poses
+                            pose = frame["poses"][person_idx]
+                            kp = pose["keypoints"][joint_id]  # [x, y] or [x, y, score]
                             x_series.append(kp[0])
                             y_series.append(kp[1])
                         except Exception:
@@ -300,15 +303,12 @@ class KeypointFilterProcessor:
                         x_filt = self.filter_fn(x_proc, **param_set)
                         y_filt = self.filter_fn(y_proc, **param_set)
 
-                        # Update filtered values
+                        # Update filtered values in poses
                         for i, frame in enumerate(frames):
-                            if person_idx < len(frame["keypoints"]):
-                                frame["keypoints"][person_idx][joint_id][0] = float(
-                                    x_filt[i]
-                                )
-                                frame["keypoints"][person_idx][joint_id][1] = float(
-                                    y_filt[i]
-                                )
+                            if person_idx < len(frame["poses"]):
+                                pose = frame["poses"][person_idx]
+                                pose["keypoints"][joint_id][0] = float(x_filt[i])
+                                pose["keypoints"][joint_id][1] = float(y_filt[i])
 
                         # Optional plotting
                         if (
@@ -340,60 +340,71 @@ class KeypointFilterProcessor:
                             f"Filter error on joint {joint_id}, person {person_idx}: {e}"
                         )
 
-            # 🟢 Step 6: Convert to same format as pred_data
+            # 🟢 Step 6: Convert to EXACT same format as pred_data
             formatted_output = {
                 "video_name": getattr(self, "video_name", "Unknown_Video"),
                 "persons": [],
-                "all_detections_per_frame": {},  # Keep empty as in your example
-                "detection_config": getattr(
-                    self, "detection_config", {}
-                ),  # Copy detection config if available
+                "all_detections_per_frame": {},
+                "detection_config": getattr(self, "detection_config", {}),
             }
 
-            # Create persons list with same structure as your pred_data
+            # Create persons list matching your exact structure
             for person_idx in range(num_persons):
                 detections = []
-                poses = []  # Add poses array if needed
+                poses = []
 
+                # Process each frame for this person
                 for frame_idx, frame in enumerate(frames):
-                    if person_idx >= len(frame["keypoints"]):
-                        continue
-
-                    kp_data = frame["keypoints"][person_idx]
                     frame_idx_val = frame.get("frame_idx", frame_idx)
 
-                    # Get bbox and scores from frame
-                    bbox = frame.get("bbox", None)
-                    bbox_scores = frame.get("bbox_scores", [])
-                    score = (
-                        bbox_scores[person_idx]
-                        if person_idx < len(bbox_scores)
-                        else None
+                    # Create detection entry (from detections if available, else from poses)
+                    detection_entry = None
+                    if "detections" in frame and person_idx < len(frame["detections"]):
+                        detection_data = frame["detections"][person_idx]
+                        detection_entry = {
+                            "frame_idx": frame_idx_val,
+                            "bbox": detection_data.get("bbox"),
+                            "score": detection_data.get("score"),
+                            "label": detection_data.get("label", 0),
+                        }
+
+                    # Create pose entry (this is where filtered keypoints are)
+                    if person_idx < len(frame["poses"]):
+                        pose_data = frame["poses"][person_idx]
+                        pose_entry = {
+                            "frame_idx": frame_idx_val,
+                            "keypoints": pose_data[
+                                "keypoints"
+                            ],  # This contains filtered keypoints
+                            "keypoints_visible": pose_data.get(
+                                "keypoints_visible", [1.0] * len(pose_data["keypoints"])
+                            ),
+                            "bbox": pose_data.get("bbox"),
+                            "bbox_scores": pose_data.get("bbox_scores", []),
+                        }
+                        poses.append(pose_entry)
+
+                    if detection_entry:
+                        detections.append(detection_entry)
+
+                # Get person_id from original data or use index
+                person_id = None
+                if (
+                    frames
+                    and "poses" in frames[0]
+                    and person_idx < len(frames[0]["poses"])
+                ):
+                    person_id = frames[0]["poses"][person_idx].get(
+                        "person_id", person_idx
                     )
+                else:
+                    person_id = person_idx
 
-                    # Create detection entry
-                    detection = {
-                        "frame_idx": frame_idx_val,
-                        "bbox": bbox,
-                        "keypoints": kp_data,
-                        "keypoints_visible": frame.get(
-                            "keypoints_visible", [[1.0] * len(kp_data)] * num_persons
-                        )[person_idx]
-                        if "keypoints_visible" in frame
-                        else [1.0] * len(kp_data),
-                        "bbox_scores": bbox_scores,
-                    }
-
-                    detections.append(detection)
-
-                    # If you have pose data, add it here
-                    # poses.append(...)
-
-                # Create person entry matching your structure
+                # Create person entry matching your exact structure
                 person_entry = {
-                    "person_id": person_idx,  # Or get from original data if available
+                    "person_id": person_id,
                     "detections": detections,
-                    "poses": poses,  # Add empty poses array or actual pose data
+                    "poses": poses,  # This contains the filtered keypoints
                 }
 
                 formatted_output["persons"].append(person_entry)
