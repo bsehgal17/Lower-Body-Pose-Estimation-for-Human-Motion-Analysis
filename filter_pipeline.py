@@ -99,8 +99,7 @@ class KeypointFilterProcessor:
 
             frame_data = keypoints_frames[frame_idx]["keypoints"]
 
-            for person in frame_data:
-                joints = person["keypoints"][0]
+            for joints in frame_data:
                 for joint in joints:
                     x, y = int(joint[0]), int(joint[1])
                     if not np.isnan(x) and not np.isnan(y):
@@ -219,7 +218,7 @@ class KeypointFilterProcessor:
             # 🟢 If no joints specified, use all available joints
             if not self.joints_to_filter:
                 try:
-                    total_joints = len(frames[0]["keypoints"][0]["keypoints"][0])
+                    total_joints = len(frames[0]["keypoints"][0])
                     joints_to_filter = list(range(total_joints))
                     logger.info(
                         f"No joints_to_filter specified — applying filter to all {total_joints} joints."
@@ -244,9 +243,7 @@ class KeypointFilterProcessor:
                             continue
 
                         try:
-                            kp = frame["keypoints"][person_idx]["keypoints"][0][
-                                joint_id
-                            ]
+                            kp = frame["keypoints"][person_idx][joint_id]
                             x_series.append(kp[0])
                             y_series.append(kp[1])
                         except Exception:
@@ -301,12 +298,12 @@ class KeypointFilterProcessor:
 
                         # Step 4: Update filtered values
                         for i, frame in enumerate(frames):
-                            frame["keypoints"][person_idx]["keypoints"][0][joint_id][
-                                0
-                            ] = float(x_filt[i])
-                            frame["keypoints"][person_idx]["keypoints"][0][joint_id][
-                                1
-                            ] = float(y_filt[i])
+                            frame["keypoints"][person_idx][joint_id][0] = float(
+                                x_filt[i]
+                            )
+                            frame["keypoints"][person_idx][joint_id][1] = float(
+                                y_filt[i]
+                            )
 
                         # Step 5: Optional plot
                         if (
