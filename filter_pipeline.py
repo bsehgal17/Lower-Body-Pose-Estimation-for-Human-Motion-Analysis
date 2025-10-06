@@ -1,23 +1,18 @@
 import os
 import json
 import logging
-import pickle
 from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 from itertools import product
 from pathlib import Path
-import cv2
-import os
-import json
-import numpy as np
 from copy import deepcopy
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from utils.import_utils import import_class_from_string
 from utils.plot import plot_filtering_effect
+from utils.standard_saver import save_standard_format
 from filtering_and_data_cleaning.filter_registry import FILTER_FN_MAP
 from filtering_and_data_cleaning.preprocessing_utils import TimeSeriesPreprocessor
-from utils.video_format_utils import get_video_format_info
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +26,7 @@ class KeypointFilterProcessor:
         self.filter_kwargs = filter_kwargs
         self.input_dir = self.config.filter.input_dir
         self.pred_enum = import_class_from_string(config.dataset.keypoint_format)
+        self.custom_output_dir = None  # Will be set later
 
         self.enable_outlier_removal = getattr(config.filter.outlier_removal, "enable")
         self.outlier_method = getattr(config.filter.outlier_removal, "method")
@@ -71,50 +67,6 @@ class KeypointFilterProcessor:
             )
         return FILTER_FN_MAP[self.filter_name]
 
-    def _overlay_keypoints_on_video(
-        self, video_path: str, keypoints_frames: List[Dict], output_path: str
-    ):
-        """
-        Overlay keypoints on video frames and save new video.
-        """
-        cap = cv2.VideoCapture(video_path)
-        if not cap.isOpened():
-            logger.error(f"Cannot open video {video_path}")
-            return
-
-        # Video properties
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        # Get fourcc and extension from input video
-        fourcc, input_extension = get_video_format_info(video_path)
-
-        # Update output path to use same extension
-        output_path_with_ext = Path(output_path).with_suffix(input_extension)
-        out = cv2.VideoWriter(str(output_path_with_ext), fourcc, fps, (width, height))
-
-        frame_idx = 0
-        while True:
-            ret, frame = cap.read()
-            if not ret or frame_idx >= len(keypoints_frames):
-                break
-
-            frame_data = keypoints_frames[frame_idx]["keypoints"]
-
-            for joints in frame_data:
-                for joint in joints:
-                    x, y = int(joint[0]), int(joint[1])
-                    if not np.isnan(x) and not np.isnan(y):
-                        cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
-
-            out.write(frame)
-            frame_idx += 1
-
-        cap.release()
-        out.release()
-        logger.info(f"Filtered video saved at: {output_path}")
-
     def process_directory(self):
         for root, _, files in os.walk(self.input_dir):
             for file in files:
@@ -149,38 +101,67 @@ class KeypointFilterProcessor:
             json_path_obj = Path(json_path)
 
             # Find the anchor index (e.g., "S1", "S2", etc.)
-            anchor_index = next(
-                i for i, part in enumerate(json_path_obj.parts) if part.startswith("S")
-            )
+            try:
+                anchor_index = next(
+                    i
+                    for i, part in enumerate(json_path_obj.parts)
+                    if part.startswith("S")
+                )
+                # Construct relative path from anchor up to parent of .json file
+                relative_subdir = str(Path(*json_path_obj.parts[anchor_index:-1]))
+            except StopIteration:
+                logger.warning(
+                    f"Could not find anchor starting with 'S' in path: {json_path}"
+                )
+                relative_subdir = None
 
-            # Construct relative path from anchor up to parent of .json file
-            # excludes the filename
-            relative_subdir = Path(*json_path_obj.parts[anchor_index:-1])
-
-            # Save each param variant result
+            # Save each param variant result using StandardDataSaver
             for suffix, filtered_frames in filtered_variants:
-                filtered_keypoints = {
-                    "keypoints": filtered_frames,
-                    "detection_config": self.original_detection_config,
-                }
+                # Ensure output directory is set
+                if not self.custom_output_dir:
+                    logger.error("Output directory not set. Cannot save results.")
+                    return
 
+                # Prepare output directory structure
                 output_folder = os.path.join(
                     self.custom_output_dir,
                     f"{self.filter_name}_{suffix}",
-                    relative_subdir,
                 )
-                self._save_filtered(json_path, filtered_keypoints, output_folder)
-                self._save_as_pickle(json_path, filtered_keypoints, output_folder)
-            video_name = json_path.replace(".json", ".avi")
-            if os.path.exists(video_name):
-                video_output_path = os.path.join(
-                    output_folder, os.path.basename(video_name)
+
+                # Reconstruct the original pred_data structure with filtered frames
+                filtered_pred_data = deepcopy(pred_data)
+
+                # Update the poses in persons with filtered keypoints
+                frame_idx_to_filtered = {
+                    frame.get("frame_idx"): frame for frame in filtered_frames
+                }
+
+                for person in filtered_pred_data.get("persons", []):
+                    for pose in person.get("poses", []):
+                        frame_idx = pose.get("frame_idx")
+                        if frame_idx in frame_idx_to_filtered:
+                            filtered_frame = frame_idx_to_filtered[frame_idx]
+                            person_idx = person.get("person_id", 0)
+                            if person_idx < len(filtered_frame.get("keypoints", [])):
+                                pose["keypoints"] = filtered_frame["keypoints"][
+                                    person_idx
+                                ]
+
+                # Save using the standard saver
+                saved_paths = save_standard_format(
+                    data=filtered_pred_data,
+                    output_dir=output_folder,
+                    original_file_path=json_path,
+                    suffix="",  # suffix already included in folder name
+                    relative_subdir=relative_subdir,
+                    save_json=True,
+                    save_pickle=True,
+                    save_video_overlay=True,  # Enable video overlay
+                    video_input_dir=root,  # Search for video in the same directory
+                    video_name=None,  # Will be extracted from data
                 )
-                self._overlay_keypoints_on_video(
-                    video_name, filtered_frames, video_output_path
-                )
-            else:
-                logger.warning(f"Video file not found for overlay: {video_name}")
+
+                logger.info(f"Filter variant '{suffix}' saved. Files: {saved_paths}")
 
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
@@ -204,7 +185,7 @@ class KeypointFilterProcessor:
 
     def _apply_filter_to_data(
         self, keypoints_frames: List[Dict], root: str
-    ) -> List[Tuple[str, Dict]]:
+    ) -> List[Tuple[str, List[Dict]]]:
         param_variants = self._expand_filter_params()
         results = []
 
@@ -344,86 +325,10 @@ class KeypointFilterProcessor:
                             f"Filter error on joint {joint_id}, person {person_idx}: {e}"
                         )
 
-            # 🟢 Step 6: Convert to EXACT same format as pred_data
-            formatted_output = {
-                "video_name": getattr(self, "video_name", "Unknown_Video"),
-                "persons": [],
-                "all_detections_per_frame": {},
-                "detection_config": getattr(self, "detection_config", {}),
-            }
-
-            # Group frames by person to create the persons list
-            for person_idx in range(num_persons):
-                detections = []
-                poses = []
-
-                # Process each frame for this person
-                for frame in frames:
-                    frame_idx = frame.get("frame_idx")
-
-                    # Skip if this person doesn't exist in this frame
-                    if person_idx >= len(frame["keypoints"]):
-                        continue
-
-                    # Create detection entry
-                    detection_entry = {
-                        "frame_idx": frame_idx,
-                        "bbox": frame.get("bbox"),
-                        "score": frame.get("bbox_scores", [None] * num_persons)[
-                            person_idx
-                        ]
-                        if "bbox_scores" in frame
-                        else None,
-                        "label": 0,  # Default label
-                    }
-                    detections.append(detection_entry)
-
-                    # Create pose entry (using the filtered keypoints)
-                    pose_entry = {
-                        "frame_idx": frame_idx,
-                        "keypoints": frame["keypoints"][
-                            person_idx
-                        ],  # Filtered keypoints
-                        "keypoints_visible": frame.get(
-                            "keypoints_visible",
-                            [[1.0] * len(frame["keypoints"][0])] * num_persons,
-                        )[person_idx]
-                        if "keypoints_visible" in frame
-                        else [1.0] * len(frame["keypoints"][0]),
-                        "bbox": frame.get("bbox"),
-                        "bbox_scores": frame.get("bbox_scores", []),
-                    }
-                    poses.append(pose_entry)
-
-                # Create person entry matching your exact structure
-                person_entry = {
-                    "person_id": person_idx,  # Use index as person_id
-                    "detections": detections,
-                    "poses": poses,
-                }
-
-                formatted_output["persons"].append(person_entry)
-
-            results.append((label_suffix, formatted_output))
+            # Just return the filtered frames with a label - no formatting here
+            results.append((label_suffix, frames))
 
         return results
-
-    def _save_filtered(self, original_path: str, data: List[Dict], output_dir: str):
-        os.makedirs(output_dir, exist_ok=True)
-        # keep original filename
-        out_path = os.path.join(output_dir, os.path.basename(original_path))
-        with open(out_path, "w") as f:
-            json.dump(data, f, indent=4)
-        logger.info(f"Filtered keypoints saved to: {out_path}")
-
-    def _save_as_pickle(self, original_path: str, data: List[Dict], output_dir: str):
-        os.makedirs(output_dir, exist_ok=True)
-        pkl_path = os.path.join(
-            output_dir, os.path.basename(original_path).replace(".json", ".pkl")
-        )
-        with open(pkl_path, "wb") as f:
-            pickle.dump(data, f)
-        logger.info(f"Filtered keypoints (pickle) saved to: {pkl_path}")
 
 
 def run_keypoint_filtering_from_config(
