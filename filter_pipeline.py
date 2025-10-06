@@ -7,7 +7,10 @@ import numpy as np
 from itertools import product
 from pathlib import Path
 import cv2
-
+import os
+import json
+import numpy as np
+from copy import deepcopy
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from utils.import_utils import import_class_from_string
@@ -202,17 +205,19 @@ class KeypointFilterProcessor:
     def _apply_filter_to_data(
         self, keypoints_frames: List[Dict], root: str
     ) -> List[Tuple[str, Dict]]:
-        import os
-        import json
-        import numpy as np
-        from copy import deepcopy
-
         param_variants = self._expand_filter_params()
         results = []
 
         for param_set in param_variants:
             frames = deepcopy(keypoints_frames)
-            num_persons = len(frames[0]["keypoints"]) if "keypoints" in frames[0] else 0
+
+            # Get number of persons from first frame
+            first_frame = frames[0]
+            if "keypoints" in first_frame and first_frame["keypoints"]:
+                num_persons = len(first_frame["keypoints"])
+            else:
+                num_persons = 0
+
             label_suffix = "_".join(f"{k}{v}" for k, v in param_set.items())
 
             # 🟢 If no joints specified, use all available joints
@@ -257,10 +262,9 @@ class KeypointFilterProcessor:
                         continue
 
                     try:
-                        # Step 1: Start with original
+                        # Filtering pipeline
                         x_proc, y_proc = x_series.copy(), y_series.copy()
 
-                        # Step 2: Preprocessing (optional)
                         if self.enable_outlier_removal or self.enable_interp:
                             preprocessor = TimeSeriesPreprocessor(
                                 method=self.outlier_method
@@ -292,20 +296,21 @@ class KeypointFilterProcessor:
                                     f"Preprocessing failed on joint {joint_id}, person {person_idx}. Proceeding with raw series. Error: {e}"
                                 )
 
-                        # Step 3: Apply filtering
+                        # Apply filtering
                         x_filt = self.filter_fn(x_proc, **param_set)
                         y_filt = self.filter_fn(y_proc, **param_set)
 
-                        # Step 4: Update filtered values
+                        # Update filtered values
                         for i, frame in enumerate(frames):
-                            frame["keypoints"][person_idx][joint_id][0] = float(
-                                x_filt[i]
-                            )
-                            frame["keypoints"][person_idx][joint_id][1] = float(
-                                y_filt[i]
-                            )
+                            if person_idx < len(frame["keypoints"]):
+                                frame["keypoints"][person_idx][joint_id][0] = float(
+                                    x_filt[i]
+                                )
+                                frame["keypoints"][person_idx][joint_id][1] = float(
+                                    y_filt[i]
+                                )
 
-                        # Step 5: Optional plot
+                        # Optional plotting
                         if (
                             joint_id == self.pred_enum.LEFT_ANKLE.value
                             and person_idx == 0
@@ -335,58 +340,67 @@ class KeypointFilterProcessor:
                             f"Filter error on joint {joint_id}, person {person_idx}: {e}"
                         )
 
-            # 🟢 Step 6: Convert to required output format
+            # 🟢 Step 6: Convert to same format as pred_data
             formatted_output = {
                 "video_name": getattr(self, "video_name", "Unknown_Video"),
                 "persons": [],
+                "all_detections_per_frame": {},  # Keep empty as in your example
+                "detection_config": getattr(
+                    self, "detection_config", {}
+                ),  # Copy detection config if available
             }
 
+            # Create persons list with same structure as your pred_data
             for person_idx in range(num_persons):
                 detections = []
-                for frame in frames:
+                poses = []  # Add poses array if needed
+
+                for frame_idx, frame in enumerate(frames):
                     if person_idx >= len(frame["keypoints"]):
                         continue
 
-                    kp_data = frame["keypoints"][person_idx]["keypoints"][0]
-                    frame_idx = frame.get("frame_idx", None)
-                    score = frame["keypoints"][person_idx].get("score", None)
-                    label = frame["keypoints"][person_idx].get("label", None)
+                    kp_data = frame["keypoints"][person_idx]
+                    frame_idx_val = frame.get("frame_idx", frame_idx)
 
-                    # Optionally compute bbox from keypoints
-                    try:
-                        xs = [kp[0] for kp in kp_data if not np.isnan(kp[0])]
-                        ys = [kp[1] for kp in kp_data if not np.isnan(kp[1])]
-                        bbox = [
-                            float(np.min(xs)) if xs else None,
-                            float(np.min(ys)) if ys else None,
-                            float(np.max(xs)) if xs else None,
-                            float(np.max(ys)) if ys else None,
-                        ]
-                    except Exception:
-                        bbox = None
-
-                    detections.append(
-                        {
-                            "frame_idx": frame_idx,
-                            "bbox": bbox,
-                            "keypoints": kp_data,
-                            "score": score,
-                            "label": label,
-                        }
+                    # Get bbox and scores from frame
+                    bbox = frame.get("bbox", None)
+                    bbox_scores = frame.get("bbox_scores", [])
+                    score = (
+                        bbox_scores[person_idx]
+                        if person_idx < len(bbox_scores)
+                        else None
                     )
 
-                formatted_output["persons"].append(
-                    {
-                        "person_id": frames[0]["keypoints"][person_idx].get(
-                            "person_id", person_idx
-                        ),
-                        "detections": detections,
+                    # Create detection entry
+                    detection = {
+                        "frame_idx": frame_idx_val,
+                        "bbox": bbox,
+                        "keypoints": kp_data,
+                        "keypoints_visible": frame.get(
+                            "keypoints_visible", [[1.0] * len(kp_data)] * num_persons
+                        )[person_idx]
+                        if "keypoints_visible" in frame
+                        else [1.0] * len(kp_data),
+                        "bbox_scores": bbox_scores,
                     }
-                )
+
+                    detections.append(detection)
+
+                    # If you have pose data, add it here
+                    # poses.append(...)
+
+                # Create person entry matching your structure
+                person_entry = {
+                    "person_id": person_idx,  # Or get from original data if available
+                    "detections": detections,
+                    "poses": poses,  # Add empty poses array or actual pose data
+                }
+
+                formatted_output["persons"].append(person_entry)
 
             results.append((label_suffix, formatted_output))
 
-        return results  # list of (suffix, formatted_video_dict)
+        return results
 
     def _save_filtered(self, original_path: str, data: List[Dict], output_dir: str):
         os.makedirs(output_dir, exist_ok=True)
