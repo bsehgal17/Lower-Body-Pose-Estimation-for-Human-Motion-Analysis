@@ -27,11 +27,14 @@ class KeypointFilterProcessor:
         self.filter_name = filter_name
         self.filter_kwargs = filter_kwargs
         self.input_dir = self.config.filter.input_dir
-        self.pred_enum = import_class_from_string(config.dataset.keypoint_format)
+        self.pred_enum = import_class_from_string(
+            config.dataset.keypoint_format)
 
-        self.enable_outlier_removal = getattr(config.filter.outlier_removal, "enable")
+        self.enable_outlier_removal = getattr(
+            config.filter.outlier_removal, "enable")
         self.outlier_method = getattr(config.filter.outlier_removal, "method")
-        self.outlier_params = getattr(config.filter.outlier_removal, "params", {})
+        self.outlier_params = getattr(
+            config.filter.outlier_removal, "params", {})
 
         self.enable_interp = getattr(config.filter, "enable_interpolation")
         self.interpolation_kind = getattr(config.filter, "interpolation_kind")
@@ -53,7 +56,8 @@ class KeypointFilterProcessor:
                     )
                 return joint_indices
             except Exception as e:
-                logger.warning(f"Error parsing joints_to_filter from config: {e}")
+                logger.warning(
+                    f"Error parsing joints_to_filter from config: {e}")
                 return []
         else:
             logger.warning(
@@ -89,7 +93,8 @@ class KeypointFilterProcessor:
 
         # Update output path to use same extension
         output_path_with_ext = Path(output_path).with_suffix(input_extension)
-        out = cv2.VideoWriter(str(output_path_with_ext), fourcc, fps, (width, height))
+        out = cv2.VideoWriter(str(output_path_with_ext),
+                              fourcc, fps, (width, height))
 
         frame_idx = 0
         while True:
@@ -129,12 +134,17 @@ class KeypointFilterProcessor:
                 pred_data = json.load(f)
 
             # Extract frames and detection config
-            frames = pred_data.get("keypoints", [])
+            frames = []
+            if "persons" in pred_data:
+                for person in pred_data["persons"]:
+                    if "poses" in person:
+                        frames.extend(person["poses"])
             if not frames:
                 logger.warning(f"No keypoints found in {json_path}")
                 return
 
-            self.original_detection_config = pred_data.get("detection_config", {})
+            self.original_detection_config = pred_data.get(
+                "detection_config", {})
 
             # Apply filtering to frames only
             filtered_variants = self._apply_filter_to_data(frames, root)
@@ -163,8 +173,10 @@ class KeypointFilterProcessor:
                     f"{self.filter_name}_{suffix}",
                     relative_subdir,
                 )
-                self._save_filtered(json_path, filtered_keypoints, output_folder)
-                self._save_as_pickle(json_path, filtered_keypoints, output_folder)
+                self._save_filtered(
+                    json_path, filtered_keypoints, output_folder)
+                self._save_as_pickle(
+                    json_path, filtered_keypoints, output_folder)
             video_name = json_path.replace(".json", ".avi")
             if os.path.exists(video_name):
                 video_output_path = os.path.join(
@@ -174,7 +186,8 @@ class KeypointFilterProcessor:
                     video_name, filtered_frames, video_output_path
                 )
             else:
-                logger.warning(f"Video file not found for overlay: {video_name}")
+                logger.warning(
+                    f"Video file not found for overlay: {video_name}")
 
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
@@ -185,7 +198,8 @@ class KeypointFilterProcessor:
                 try:
                     return list(eval(val.strip()))
                 except Exception as e:
-                    logger.warning(f"Could not parse range expression '{val}': {e}")
+                    logger.warning(
+                        f"Could not parse range expression '{val}': {e}")
                     return [val]
             elif isinstance(val, list):
                 return val
@@ -204,7 +218,8 @@ class KeypointFilterProcessor:
 
         for param_set in param_variants:
             frames = json.loads(json.dumps(keypoints_frames))  # deep copy
-            num_persons = len(frames[0]["keypoints"]) if "keypoints" in frames[0] else 0
+            num_persons = len(frames[0]["keypoints"]
+                              ) if "keypoints" in frames[0] else 0
             label_suffix = "_".join(f"{k}{v}" for k, v in param_set.items())
 
             for person_idx in range(num_persons):
@@ -295,13 +310,15 @@ class KeypointFilterProcessor:
                                 x_series,
                                 x_filt,
                                 title=f"X - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(plot_dir, f"x_{joint_id}.png"),
+                                save_path=os.path.join(
+                                    plot_dir, f"x_{joint_id}.png"),
                             )
                             plot_filtering_effect(
                                 y_series,
                                 y_filt,
                                 title=f"Y - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(plot_dir, f"y_{joint_id}.png"),
+                                save_path=os.path.join(
+                                    plot_dir, f"y_{joint_id}.png"),
                             )
 
                     except Exception as e:
@@ -324,7 +341,8 @@ class KeypointFilterProcessor:
     def _save_as_pickle(self, original_path: str, data: List[Dict], output_dir: str):
         os.makedirs(output_dir, exist_ok=True)
         pkl_path = os.path.join(
-            output_dir, os.path.basename(original_path).replace(".json", ".pkl")
+            output_dir, os.path.basename(
+                original_path).replace(".json", ".pkl")
         )
         with open(pkl_path, "wb") as f:
             pickle.dump(data, f)

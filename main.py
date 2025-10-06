@@ -9,7 +9,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def run_pipeline(pipelines_yaml_path: str = "config_yamls/pipelines.yaml"):
+def run_pipeline(pipelines_yaml_path: str = "config_yamls/pipeline_filter.yaml"):
     with open(pipelines_yaml_path, "r") as f:
         config = yaml.safe_load(f)
 
@@ -28,7 +28,8 @@ def run_pipeline(pipelines_yaml_path: str = "config_yamls/pipelines.yaml"):
         logger.info(f"Using Global Config: {global_config_file}")
 
         # Track pipeline steps to enable enhancement awareness
-        pipeline_steps = [step["command"] for step in pipeline.get("steps", [])]
+        pipeline_steps = [step["command"]
+                          for step in pipeline.get("steps", [])]
 
         for i, step in enumerate(pipeline.get("steps", [])):
             command = step["command"]

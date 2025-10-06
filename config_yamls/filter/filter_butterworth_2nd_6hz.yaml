@@ -22,7 +22,7 @@ filter:
   outlier_removal:
       enable: False
 
-  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/detect"
+  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/detect/"
 
 
 
