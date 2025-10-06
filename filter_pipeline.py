@@ -202,15 +202,21 @@ class KeypointFilterProcessor:
 
     def _apply_filter_to_data(
         self, keypoints_frames: List[Dict], root: str
-    ) -> List[Tuple[str, List[Dict]]]:
+    ) -> List[Tuple[str, Dict]]:
+        import os
+        import json
+        import numpy as np
+        from copy import deepcopy
+
         param_variants = self._expand_filter_params()
         results = []
 
         for param_set in param_variants:
-            frames = json.loads(json.dumps(keypoints_frames))  # deep copy
+            frames = deepcopy(keypoints_frames)
             num_persons = len(frames[0]["keypoints"]) if "keypoints" in frames[0] else 0
             label_suffix = "_".join(f"{k}{v}" for k, v in param_set.items())
 
+            # 🟢 If no joints specified, use all available joints
             if not self.joints_to_filter:
                 try:
                     total_joints = len(frames[0]["keypoints"][0]["keypoints"][0])
@@ -226,6 +232,7 @@ class KeypointFilterProcessor:
             else:
                 joints_to_filter = self.joints_to_filter
 
+            # 🔧 Filtering process
             for person_idx in range(num_persons):
                 for joint_id in joints_to_filter:
                     x_series, y_series = [], []
@@ -253,10 +260,10 @@ class KeypointFilterProcessor:
                         continue
 
                     try:
-                        # Step 1: Start with original series
+                        # Step 1: Start with original
                         x_proc, y_proc = x_series.copy(), y_series.copy()
 
-                        # Step 2: Preprocess if needed
+                        # Step 2: Preprocessing (optional)
                         if self.enable_outlier_removal or self.enable_interp:
                             preprocessor = TimeSeriesPreprocessor(
                                 method=self.outlier_method
@@ -288,9 +295,11 @@ class KeypointFilterProcessor:
                                     f"Preprocessing failed on joint {joint_id}, person {person_idx}. Proceeding with raw series. Error: {e}"
                                 )
 
+                        # Step 3: Apply filtering
                         x_filt = self.filter_fn(x_proc, **param_set)
                         y_filt = self.filter_fn(y_proc, **param_set)
 
+                        # Step 4: Update filtered values
                         for i, frame in enumerate(frames):
                             frame["keypoints"][person_idx]["keypoints"][0][joint_id][
                                 0
@@ -299,6 +308,7 @@ class KeypointFilterProcessor:
                                 1
                             ] = float(y_filt[i])
 
+                        # Step 5: Optional plot
                         if (
                             joint_id == self.pred_enum.LEFT_ANKLE.value
                             and person_idx == 0
@@ -328,9 +338,58 @@ class KeypointFilterProcessor:
                             f"Filter error on joint {joint_id}, person {person_idx}: {e}"
                         )
 
-            results.append((label_suffix, frames))
+            # 🟢 Step 6: Convert to required output format
+            formatted_output = {
+                "video_name": getattr(self, "video_name", "Unknown_Video"),
+                "persons": [],
+            }
 
-        return results  # list of (suffix, filtered_frames)
+            for person_idx in range(num_persons):
+                detections = []
+                for frame in frames:
+                    if person_idx >= len(frame["keypoints"]):
+                        continue
+
+                    kp_data = frame["keypoints"][person_idx]["keypoints"][0]
+                    frame_idx = frame.get("frame_idx", None)
+                    score = frame["keypoints"][person_idx].get("score", None)
+                    label = frame["keypoints"][person_idx].get("label", None)
+
+                    # Optionally compute bbox from keypoints
+                    try:
+                        xs = [kp[0] for kp in kp_data if not np.isnan(kp[0])]
+                        ys = [kp[1] for kp in kp_data if not np.isnan(kp[1])]
+                        bbox = [
+                            float(np.min(xs)) if xs else None,
+                            float(np.min(ys)) if ys else None,
+                            float(np.max(xs)) if xs else None,
+                            float(np.max(ys)) if ys else None,
+                        ]
+                    except Exception:
+                        bbox = None
+
+                    detections.append(
+                        {
+                            "frame_idx": frame_idx,
+                            "bbox": bbox,
+                            "keypoints": kp_data,
+                            "score": score,
+                            "label": label,
+                        }
+                    )
+
+                formatted_output["persons"].append(
+                    {
+                        "person_id": frames[0]["keypoints"][person_idx].get(
+                            "person_id", person_idx
+                        ),
+                        "detections": detections,
+                    }
+                )
+
+            results.append((label_suffix, formatted_output))
+
+        return results  # list of (suffix, formatted_video_dict)
 
     def _save_filtered(self, original_path: str, data: List[Dict], output_dir: str):
         os.makedirs(output_dir, exist_ok=True)
