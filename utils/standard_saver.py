@@ -90,7 +90,7 @@ class StandardDataSaver:
         if self.config.save_video_overlay and video_name:
             video_path = self._find_video_file(video_name, original_file_path)
             if video_path:
-                overlay_path = os.path.join(output_dir, f"{base_name}_overlay")
+                overlay_path = os.path.join(output_dir, f"{base_name}")
                 self._create_video_overlay(video_path, data, overlay_path)
                 saved_paths["video"] = overlay_path
 
@@ -179,7 +179,8 @@ class StandardDataSaver:
 
         # Update output path to use same extension
         output_path_with_ext = f"{output_path_base}{input_extension}"
-        out = cv2.VideoWriter(output_path_with_ext, fourcc, fps, (width, height))
+        out = cv2.VideoWriter(output_path_with_ext,
+                              fourcc, fps, (width, height))
 
         # Convert data to frame-based structure for easier processing
         frame_keypoints = self._extract_frame_keypoints(data)
@@ -194,10 +195,12 @@ class StandardDataSaver:
             if frame_idx in frame_keypoints:
                 for person_keypoints in frame_keypoints[frame_idx]:
                     for joint in person_keypoints:
-                        if len(joint) >= 2:  # Ensure we have x, y coordinates
-                            x, y = int(joint[0]), int(joint[1])
-                            if not np.isnan(x) and not np.isnan(y):
-                                cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+                        for i in range(0, len(joint)):
+                            if len(joint[i]) >= 2:  # Ensure we have x, y coordinates
+                                x, y = int(joint[i][0]), int(joint[i][1])
+                                if not np.isnan(x) and not np.isnan(y):
+                                    cv2.circle(frame, (x, y), 5,
+                                               (0, 255, 0), -1)
 
             out.write(frame)
             frame_idx += 1
