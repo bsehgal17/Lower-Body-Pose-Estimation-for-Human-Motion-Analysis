@@ -111,19 +111,44 @@ def unpack_prediction_pkl(pkl_path, person_idx=0):
         return np.stack(keypoints_list, axis=0) if keypoints_list else np.array([])
 
     else:
-        # Legacy .pkl format
+        # PKL format - handle both new SavedData and legacy dictionary formats
         with open(pkl_path, "rb") as f:
             data = pickle.load(f)
 
-        keypoints_list = []
-        for frame_data in data["keypoints"]:
-            people = frame_data["keypoints"]
-            if len(people) <= person_idx:
-                raise ValueError(
-                    f"Frame {frame_data['frame_idx']} has fewer than {person_idx + 1} people."
-                )
+        # Handle SavedData objects
+        if hasattr(data, "to_dict"):
+            # It's a SavedData object, convert to dictionary
+            data = data.to_dict()
+        elif hasattr(data, "video_data"):
+            # It's a SavedData object without to_dict method (older version)
+            data = data.video_data.to_dict()
 
-            kpts = np.array(people[person_idx]["keypoints"])  # (J, 2)
-            keypoints_list.append(kpts)
+        # Check if it's new format (with persons) or legacy format
+        if "persons" in data:
+            # New format - similar to JSON handling but from PKL
+            if person_idx >= len(data["persons"]):
+                raise ValueError(f"Video has fewer than {person_idx + 1} persons.")
 
-        return np.stack(keypoints_list, axis=0)  # (N, J, 2)
+            person = data["persons"][person_idx]
+            poses = sorted(person["poses"], key=lambda x: x["frame_idx"])
+
+            keypoints_list = []
+            for pose in poses:
+                kpts = np.array(pose["keypoints"])
+                keypoints_list.append(kpts)
+
+            return np.stack(keypoints_list, axis=0) if keypoints_list else np.array([])
+        else:
+            # Legacy format
+            keypoints_list = []
+            for frame_data in data["keypoints"]:
+                people = frame_data["keypoints"]
+                if len(people) <= person_idx:
+                    raise ValueError(
+                        f"Frame {frame_data['frame_idx']} has fewer than {person_idx + 1} people."
+                    )
+
+                kpts = np.array(people[person_idx]["keypoints"])  # (J, 2)
+                keypoints_list.append(kpts)
+
+            return np.stack(keypoints_list, axis=0)  # (N, J, 2)

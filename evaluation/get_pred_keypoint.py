@@ -22,9 +22,18 @@ class PredictionLoader:
         self.pipeline_config = pipeline_config
 
     def load_raw_predictions(self):
-        """Load raw prediction pickle file."""
+        """Load raw prediction pickle file and convert to dictionary format."""
         with open(self.pred_pkl_path, "rb") as f:
             pred_data = pickle.load(f)
+
+        # Handle both SavedData objects and legacy dictionaries
+        if hasattr(pred_data, "to_dict"):
+            # It's a SavedData object, convert to dictionary
+            pred_data = pred_data.to_dict()
+        elif hasattr(pred_data, "video_data"):
+            # It's a SavedData object without to_dict method (older version)
+            pred_data = pred_data.video_data.to_dict()
+
         return pred_data
 
     def _filter_keypoints(self, kpts, visibility):
@@ -82,8 +91,11 @@ class PredictionLoader:
 
             # Convert keypoints to np.array safely
             try:
-                kpts = np.array(kpts_raw) if isinstance(
-                    kpts_raw, list) else np.array(kpts_raw)
+                kpts = (
+                    np.array(kpts_raw)
+                    if isinstance(kpts_raw, list)
+                    else np.array(kpts_raw)
+                )
             except Exception:
                 continue  # skip if keypoints are malformed
 

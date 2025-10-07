@@ -29,7 +29,16 @@ class PredictionExtractor:
         print(f"Loading Pickle file from {self.file_path} ...")
         with open(self.file_path, "rb") as f:
             data = pickle.load(f)
-        print(f"Loaded {len(data)} frames from Pickle.")
+
+        # Handle both SavedData objects and legacy dictionaries
+        if hasattr(data, "to_dict"):
+            # It's a SavedData object, convert to dictionary
+            data = data.to_dict()
+        elif hasattr(data, "video_data"):
+            # It's a SavedData object without to_dict method (older version)
+            data = data.video_data.to_dict()
+
+        print(f"Loaded data from Pickle (type: {type(data)}).")
         return data
 
     def get_keypoint_array(self, frame_range=None):

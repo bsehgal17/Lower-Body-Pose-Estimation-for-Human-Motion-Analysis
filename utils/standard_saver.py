@@ -232,10 +232,11 @@ class StandardDataSaver:
         logger.info(f"Data saved to JSON: {file_path}")
 
     def _save_as_pickle(self, data: SavedData, file_path: str):
-        """Save SavedData as pickle file."""
-        # Save the entire SavedData dataclass structure
+        """Save SavedData as pickle file in dictionary format for compatibility."""
+        # Save as dictionary for backward compatibility with evaluation scripts
+        data_dict = data.to_dict()
         with open(file_path, "wb") as f:
-            pickle.dump(data, f)
+            pickle.dump(data_dict, f)
         logger.info(f"Data saved to pickle: {file_path}")
 
     def _find_video_file(
