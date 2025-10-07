@@ -25,15 +25,12 @@ class KeypointFilterProcessor:
         self.filter_name = filter_name
         self.filter_kwargs = filter_kwargs
         self.input_dir = self.config.filter.input_dir
-        self.pred_enum = import_class_from_string(
-            config.dataset.keypoint_format)
+        self.pred_enum = import_class_from_string(config.dataset.keypoint_format)
         self.custom_output_dir = None  # Will be set later
 
-        self.enable_outlier_removal = getattr(
-            config.filter.outlier_removal, "enable")
+        self.enable_outlier_removal = getattr(config.filter.outlier_removal, "enable")
         self.outlier_method = getattr(config.filter.outlier_removal, "method")
-        self.outlier_params = getattr(
-            config.filter.outlier_removal, "params", {})
+        self.outlier_params = getattr(config.filter.outlier_removal, "params", {})
 
         self.enable_interp = getattr(config.filter, "enable_interpolation")
         self.interpolation_kind = getattr(config.filter, "interpolation_kind")
@@ -55,8 +52,7 @@ class KeypointFilterProcessor:
                     )
                 return joint_indices
             except Exception as e:
-                logger.warning(
-                    f"Error parsing joints_to_filter from config: {e}")
+                logger.warning(f"Error parsing joints_to_filter from config: {e}")
                 return []
             return []
 
@@ -82,21 +78,17 @@ class KeypointFilterProcessor:
             with open(json_path, "r") as f:
                 pred_data = json.load(f)
 
-            # Extract frames and detection config
-            frames = []
-            if "persons" in pred_data:
-                for person in pred_data["persons"]:
-                    if "poses" in person:
-                        frames.extend(person["poses"])
-            if not frames:
-                logger.warning(f"No keypoints found in {json_path}")
+            # Extract persons data and detection config
+            if "persons" not in pred_data or not pred_data["persons"]:
+                logger.warning(f"No persons found in {json_path}")
                 return
 
-            self.original_detection_config = pred_data.get(
-                "detection_config", {})
+            self.original_detection_config = pred_data.get("detection_config", {})
 
-            # Apply filtering to frames only
-            filtered_variants = self._apply_filter_to_data(frames, root)
+            # Process each person independently to maintain proper structure
+            filtered_variants = self._apply_filter_to_persons(
+                pred_data["persons"], root
+            )
 
             # Convert json_path to Path
             json_path_obj = Path(json_path)
@@ -109,8 +101,7 @@ class KeypointFilterProcessor:
                     if part.startswith("S")
                 )
                 # Construct relative path from anchor up to parent of .json file
-                relative_subdir = str(
-                    Path(*json_path_obj.parts[anchor_index:-1]))
+                relative_subdir = str(Path(*json_path_obj.parts[anchor_index:-1]))
             except StopIteration:
                 logger.warning(
                     f"Could not find anchor starting with 'S' in path: {json_path}"
@@ -118,11 +109,10 @@ class KeypointFilterProcessor:
                 relative_subdir = None
 
             # Save each param variant result using StandardDataSaver
-            for suffix, filtered_frames, filter_params in filtered_variants:
+            for suffix, filtered_persons, filter_params in filtered_variants:
                 # Ensure output directory is set
                 if not self.custom_output_dir:
-                    logger.error(
-                        "Output directory not set. Cannot save results.")
+                    logger.error("Output directory not set. Cannot save results.")
                     return
 
                 # Prepare output directory structure
@@ -131,23 +121,9 @@ class KeypointFilterProcessor:
                     f"{self.filter_name}_{suffix}",
                 )
 
-                # Reconstruct the original pred_data structure with filtered frames
+                # Reconstruct the original pred_data structure with filtered persons
                 filtered_pred_data = deepcopy(pred_data)
-
-                # Update the poses in persons with filtered keypoints
-                frame_idx_to_filtered = {
-                    frame.get("frame_idx"): frame for frame in filtered_frames
-                }
-
-                for person_idx, person in enumerate(filtered_pred_data.get("persons", [])):
-                    for pose in person.get("poses", []):
-                        frame_idx = pose.get("frame_idx")
-                        if frame_idx in frame_idx_to_filtered:
-                            filtered_frame = frame_idx_to_filtered[frame_idx]
-                            keypoints_list = filtered_frame.get(
-                                "keypoints", [])
-                            if person_idx < len(keypoints_list):
-                                pose["keypoints"] = keypoints_list[person_idx]
+                filtered_pred_data["persons"] = filtered_persons
 
                 # Save using the standard saver with processing metadata
                 saved_paths = save_standard_format(
@@ -169,8 +145,7 @@ class KeypointFilterProcessor:
                     },
                 )
 
-                logger.info(
-                    f"Filter variant '{suffix}' saved. Files: {saved_paths}")
+                logger.info(f"Filter variant '{suffix}' saved. Files: {saved_paths}")
 
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
@@ -181,8 +156,7 @@ class KeypointFilterProcessor:
                 try:
                     return list(eval(val.strip()))
                 except Exception as e:
-                    logger.warning(
-                        f"Could not parse range expression '{val}': {e}")
+                    logger.warning(f"Could not parse range expression '{val}': {e}")
                     return [val]
             elif isinstance(val, list):
                 return val
@@ -192,6 +166,157 @@ class KeypointFilterProcessor:
         keys = list(self.filter_kwargs.keys())
         values = [parse_value(self.filter_kwargs[k]) for k in keys]
         return [dict(zip(keys, v)) for v in product(*values)]
+
+    def _apply_filter_to_persons(
+        self, persons_data: List[Dict], root: str
+    ) -> List[Tuple[str, List[Dict], Dict[str, Any]]]:
+        """Apply filtering to each person's poses independently."""
+        param_variants = self._expand_filter_params()
+        results = []
+
+        for param_set in param_variants:
+            label_suffix = "_".join(f"{k}{v}" for k, v in param_set.items())
+            filtered_persons = []
+
+            for person in persons_data:
+                if "poses" not in person or not person["poses"]:
+                    # Keep person structure even if no poses
+                    filtered_persons.append(deepcopy(person))
+                    continue
+
+                person_poses = person["poses"]
+                filtered_person = deepcopy(person)
+
+                # Apply filtering to this person's poses
+                filtered_poses = self._apply_filter_to_person_poses(
+                    person_poses, param_set, root
+                )
+                filtered_person["poses"] = filtered_poses
+                filtered_persons.append(filtered_person)
+
+            results.append((label_suffix, filtered_persons, param_set))
+
+        return results
+
+    def _apply_filter_to_person_poses(
+        self, poses: List[Dict], param_set: Dict[str, Any], root: str
+    ) -> List[Dict]:
+        """Apply filtering to a single person's poses."""
+        if not poses:
+            return poses
+
+        filtered_poses = deepcopy(poses)
+
+        # Get joints to filter
+        if not self.joints_to_filter:
+            try:
+                # Get total joints from first pose's keypoints
+                total_joints = len(poses[0]["keypoints"])
+                joints_to_filter = list(range(total_joints))
+                logger.info(
+                    f"No joints_to_filter specified — applying filter to all {total_joints} joints."
+                )
+            except Exception:
+                logger.warning("Unable to determine total joints, skipping filtering.")
+                return poses
+        else:
+            joints_to_filter = self.joints_to_filter
+
+        # Apply filtering to each joint
+        for joint_id in joints_to_filter:
+            x_series, y_series = [], []
+
+            # Extract time series for this joint
+            for pose in poses:
+                try:
+                    kp = pose["keypoints"][joint_id]  # [x, y] or [x, y, score]
+                    x_series.append(kp[0])
+                    y_series.append(kp[1])
+                except Exception:
+                    x_series.append(np.nan)
+                    y_series.append(np.nan)
+
+            x_series = np.array(x_series, dtype=np.float64)
+            y_series = np.array(y_series, dtype=np.float64)
+
+            if np.all(np.isnan(x_series)) or np.all(np.isnan(y_series)):
+                continue
+
+            try:
+                # Filtering pipeline
+                x_proc, y_proc = x_series.copy(), y_series.copy()
+
+                if self.enable_outlier_removal or self.enable_interp:
+                    preprocessor = TimeSeriesPreprocessor(
+                        method=self.outlier_method
+                        if self.enable_outlier_removal
+                        else None,
+                        interpolation=self.interpolation_kind
+                        if self.enable_interp
+                        else None,
+                    )
+                    try:
+                        x_proc = preprocessor.clean(
+                            x_proc,
+                            **(
+                                self.outlier_params
+                                if self.enable_outlier_removal
+                                else {}
+                            ),
+                        )
+                        y_proc = preprocessor.clean(
+                            y_proc,
+                            **(
+                                self.outlier_params
+                                if self.enable_outlier_removal
+                                else {}
+                            ),
+                        )
+                    except Exception as e:
+                        logger.warning(
+                            f"Preprocessing failed on joint {joint_id}. Proceeding with raw series. Error: {e}"
+                        )
+
+                # Apply filtering
+                x_filt = self.filter_fn(x_proc, **param_set)
+                y_filt = self.filter_fn(y_proc, **param_set)
+
+                # Update filtered values in poses
+                for i, pose in enumerate(filtered_poses):
+                    try:
+                        pose["keypoints"][joint_id][0] = float(x_filt[i])
+                        pose["keypoints"][joint_id][1] = float(y_filt[i])
+                    except (IndexError, TypeError):
+                        logger.warning(
+                            f"Could not update keypoint {joint_id} for pose {i}"
+                        )
+
+                # Optional plotting (only for first person's left ankle)
+                if joint_id == self.pred_enum.LEFT_ANKLE.value and getattr(
+                    self.config.filter, "enable_filter_plots", False
+                ):
+                    label_suffix = "_".join(f"{k}{v}" for k, v in param_set.items())
+                    plot_dir = os.path.join(
+                        root, "plots", f"{self.filter_name}_{label_suffix}"
+                    )
+                    os.makedirs(plot_dir, exist_ok=True)
+                    plot_filtering_effect(
+                        x_series,
+                        x_filt,
+                        title=f"X - Joint {joint_id} ({self.filter_name})",
+                        save_path=os.path.join(plot_dir, f"x_{joint_id}.png"),
+                    )
+                    plot_filtering_effect(
+                        y_series,
+                        y_filt,
+                        title=f"Y - Joint {joint_id} ({self.filter_name})",
+                        save_path=os.path.join(plot_dir, f"y_{joint_id}.png"),
+                    )
+
+            except Exception as e:
+                logger.warning(f"Filter error on joint {joint_id}: {e}")
+
+        return filtered_poses
 
     def _apply_filter_to_data(
         self, keypoints_frames: List[Dict], root: str
@@ -321,15 +446,13 @@ class KeypointFilterProcessor:
                                 x_series,
                                 x_filt,
                                 title=f"X - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(
-                                    plot_dir, f"x_{joint_id}.png"),
+                                save_path=os.path.join(plot_dir, f"x_{joint_id}.png"),
                             )
                             plot_filtering_effect(
                                 y_series,
                                 y_filt,
                                 title=f"Y - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(
-                                    plot_dir, f"y_{joint_id}.png"),
+                                save_path=os.path.join(plot_dir, f"y_{joint_id}.png"),
                             )
 
                     except Exception as e:
