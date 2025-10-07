@@ -3,22 +3,23 @@ orchestrator:
   default_device: "cuda:0"
 
 pipelines:
-    - name: filter_butterworth_2nd_1hz
-      steps:
-        - command: evaluation
-          config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-    - name: filter_butterworth_2nd_6hz
-      steps:
-        - command: evaluation
-          config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: filter_butterworth_2nd_1hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_2nd_1hz.yaml"
 
-    - name: filter_butterworth_4th_6hz
-      steps:
-        - command: evaluation
-          config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: filter_butterworth_2nd_6hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_2nd_6hz.yaml"
 
-    - name: filter_butterworth_2nd_15hz
-      steps:
-        - command: evaluation
-          config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: filter_butterworth_4th_6hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_6hz.yaml"
+
+  - name: filter_butterworth_2nd_15hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_2nd_15hz.yaml"

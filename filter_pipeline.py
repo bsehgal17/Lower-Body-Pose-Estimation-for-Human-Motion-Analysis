@@ -25,12 +25,15 @@ class KeypointFilterProcessor:
         self.filter_name = filter_name
         self.filter_kwargs = filter_kwargs
         self.input_dir = self.config.filter.input_dir
-        self.pred_enum = import_class_from_string(config.dataset.keypoint_format)
+        self.pred_enum = import_class_from_string(
+            config.dataset.keypoint_format)
         self.custom_output_dir = None  # Will be set later
 
-        self.enable_outlier_removal = getattr(config.filter.outlier_removal, "enable")
+        self.enable_outlier_removal = getattr(
+            config.filter.outlier_removal, "enable")
         self.outlier_method = getattr(config.filter.outlier_removal, "method")
-        self.outlier_params = getattr(config.filter.outlier_removal, "params", {})
+        self.outlier_params = getattr(
+            config.filter.outlier_removal, "params", {})
 
         self.enable_interp = getattr(config.filter, "enable_interpolation")
         self.interpolation_kind = getattr(config.filter, "interpolation_kind")
@@ -52,7 +55,8 @@ class KeypointFilterProcessor:
                     )
                 return joint_indices
             except Exception as e:
-                logger.warning(f"Error parsing joints_to_filter from config: {e}")
+                logger.warning(
+                    f"Error parsing joints_to_filter from config: {e}")
                 return []
             return []
 
@@ -88,7 +92,8 @@ class KeypointFilterProcessor:
                 logger.warning(f"No keypoints found in {json_path}")
                 return
 
-            self.original_detection_config = pred_data.get("detection_config", {})
+            self.original_detection_config = pred_data.get(
+                "detection_config", {})
 
             # Apply filtering to frames only
             filtered_variants = self._apply_filter_to_data(frames, root)
@@ -104,7 +109,8 @@ class KeypointFilterProcessor:
                     if part.startswith("S")
                 )
                 # Construct relative path from anchor up to parent of .json file
-                relative_subdir = str(Path(*json_path_obj.parts[anchor_index:-1]))
+                relative_subdir = str(
+                    Path(*json_path_obj.parts[anchor_index:-1]))
             except StopIteration:
                 logger.warning(
                     f"Could not find anchor starting with 'S' in path: {json_path}"
@@ -115,7 +121,8 @@ class KeypointFilterProcessor:
             for suffix, filtered_frames, filter_params in filtered_variants:
                 # Ensure output directory is set
                 if not self.custom_output_dir:
-                    logger.error("Output directory not set. Cannot save results.")
+                    logger.error(
+                        "Output directory not set. Cannot save results.")
                     return
 
                 # Prepare output directory structure
@@ -132,16 +139,15 @@ class KeypointFilterProcessor:
                     frame.get("frame_idx"): frame for frame in filtered_frames
                 }
 
-                for person in filtered_pred_data.get("persons", []):
+                for person_idx, person in enumerate(filtered_pred_data.get("persons", [])):
                     for pose in person.get("poses", []):
                         frame_idx = pose.get("frame_idx")
                         if frame_idx in frame_idx_to_filtered:
                             filtered_frame = frame_idx_to_filtered[frame_idx]
-                            person_idx = person.get("person_id", 0)
-                            if person_idx < len(filtered_frame.get("keypoints", [])):
-                                pose["keypoints"] = filtered_frame["keypoints"][
-                                    person_idx
-                                ]
+                            keypoints_list = filtered_frame.get(
+                                "keypoints", [])
+                            if person_idx < len(keypoints_list):
+                                pose["keypoints"] = keypoints_list[person_idx]
 
                 # Save using the standard saver with processing metadata
                 saved_paths = save_standard_format(
@@ -163,7 +169,8 @@ class KeypointFilterProcessor:
                     },
                 )
 
-                logger.info(f"Filter variant '{suffix}' saved. Files: {saved_paths}")
+                logger.info(
+                    f"Filter variant '{suffix}' saved. Files: {saved_paths}")
 
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
@@ -174,7 +181,8 @@ class KeypointFilterProcessor:
                 try:
                     return list(eval(val.strip()))
                 except Exception as e:
-                    logger.warning(f"Could not parse range expression '{val}': {e}")
+                    logger.warning(
+                        f"Could not parse range expression '{val}': {e}")
                     return [val]
             elif isinstance(val, list):
                 return val
@@ -203,7 +211,7 @@ class KeypointFilterProcessor:
 
             label_suffix = "_".join(f"{k}{v}" for k, v in param_set.items())
 
-            # 🟢 If no joints specified, use all available joints
+            # If no joints specified, use all available joints
             if not self.joints_to_filter:
                 try:
                     # Get total joints from first person's keypoints
@@ -220,7 +228,7 @@ class KeypointFilterProcessor:
             else:
                 joints_to_filter = self.joints_to_filter
 
-            # 🔧 Filtering process - Apply to keypoints
+            # Filtering process - Apply to keypoints
             for person_idx in range(num_persons):
                 for joint_id in joints_to_filter:
                     x_series, y_series = [], []
@@ -313,13 +321,15 @@ class KeypointFilterProcessor:
                                 x_series,
                                 x_filt,
                                 title=f"X - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(plot_dir, f"x_{joint_id}.png"),
+                                save_path=os.path.join(
+                                    plot_dir, f"x_{joint_id}.png"),
                             )
                             plot_filtering_effect(
                                 y_series,
                                 y_filt,
                                 title=f"Y - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(plot_dir, f"y_{joint_id}.png"),
+                                save_path=os.path.join(
+                                    plot_dir, f"y_{joint_id}.png"),
                             )
 
                     except Exception as e:
