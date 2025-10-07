@@ -1,11 +1,10 @@
 import os
 import logging
-import pickle
 from dataclasses import asdict
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from utils.video_io import get_video_files
-from utils.json_io import save_keypoints_to_json
+from utils.standard_saver import save_standard_format, SavedData
 from utils.data_structures import VideoData
 from pose_estimation.rtmw.detector_rtmw import Detector
 from pose_estimation.rtmw.estimator_rtmw import PoseEstimator
@@ -48,8 +47,6 @@ def run_detection_pipeline(
         )
         os.makedirs(current_save_dir, exist_ok=True)
 
-        output_json_file = os.path.join(current_save_dir, f"{video_name}.json")
-        output_pkl_file = os.path.join(current_save_dir, f"{video_name}.pkl")
         output_video_file = os.path.join(current_save_dir, os.path.basename(video_path))
 
         logger.info(f"Processing {video_path} -> {output_video_file}")
@@ -75,20 +72,29 @@ def run_detection_pipeline(
         detector_config_dict = asdict(pipeline_config.processing)
         video_data.detection_config = detector_config_dict
 
-        # Save complete video data (all persons together)
-        save_keypoints_to_json(
+        # Create SavedData with detection configuration
+        saved_data = SavedData.from_video_data(
             video_data,
-            current_save_dir,
-            video_name,
-            detector_config=detector_config_dict,
+            detection_config=detector_config_dict,
+            processing_metadata={
+                "pipeline": "rtmw",
+                "input_video": video_path,
+                "output_dir": current_save_dir,
+            },
         )
 
-        # Save complete data as pickle
-        complete_bundle = video_data.to_dict()
-        with open(output_pkl_file, "wb") as f:
-            pickle.dump(complete_bundle, f)
+        # Save using standard_saver
+        save_standard_format(
+            data=saved_data,
+            output_dir=current_save_dir,
+            original_file_path=video_path,
+            suffix="",
+            save_json=True,
+            save_pickle=True,
+            save_video_overlay=False,
+        )
 
         logger.info(
-            f"Complete video data saved to {output_json_file} and {output_pkl_file}"
+            f"Complete video data saved to {current_save_dir}/{video_name}.json and {current_save_dir}/{video_name}.pkl"
         )
         logger.info(f"Output video saved to {output_video_file}")
