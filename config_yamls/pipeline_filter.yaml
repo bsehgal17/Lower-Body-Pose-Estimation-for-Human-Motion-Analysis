@@ -4,22 +4,41 @@ orchestrator:
 
 pipelines:
 
-  - name: filter_butterworth_2nd_1hz
+  - name: filter_butterworth_2nd_20hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_1hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_2nd_20hz.yaml"
 
-  - name: filter_butterworth_2nd_6hz
+  - name: filter_butterworth_2nd_40hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_6hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_2nd_40hz.yaml"
 
-  - name: filter_butterworth_4th_6hz
+  - name: filter_butterworth_2nd_60hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_6hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_2nd_60hz.yaml"
 
-  - name: filter_butterworth_2nd_15hz
+  - name: filter_butterworth_2nd_70hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_15hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_2nd_70hz.yaml"
+  - name: filter_butterworth_2nd_20hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_2nd_40hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_2nd_60hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_2nd_70hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"

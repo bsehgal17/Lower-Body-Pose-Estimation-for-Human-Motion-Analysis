@@ -17,7 +17,7 @@ filter:
   name: "butterworth"
   params:
     order: 2
-    cutoff: 6.0
+    cutoff: 40.0
     fs: 60.0  # sampling frequency, adjust as needed
   outlier_removal:
       enable: False
