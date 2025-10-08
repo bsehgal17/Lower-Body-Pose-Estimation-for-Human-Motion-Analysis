@@ -18,11 +18,11 @@ class SaveConfig:
     """Configuration for saving data."""
 
     output_dir: str
-    relative_subdir: Optional[str] = None
-    save_json: bool = True
-    save_pickle: bool = True
-    save_video_overlay: bool = False
-    video_input_dir: Optional[str] = None
+    relative_subdir: Optional[str]
+    save_json: bool
+    save_pickle: bool
+    save_video_overlay: bool
+    video_input_dir: Optional[str]
 
     def get_full_output_dir(self) -> str:
         """Get the complete output directory path."""
@@ -39,8 +39,8 @@ class SavedData:
     """
 
     video_data: VideoData
-    detection_config: Optional[Dict[str, Any]] = None
-    processing_metadata: Optional[Dict[str, Any]] = None
+    detection_config: Optional[Dict[str, Any]]
+    processing_metadata: Optional[Dict[str, Any]]
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""

@@ -57,28 +57,6 @@ class Person:
         )
         self.poses.append(pose)
 
-    def get_detection_at_frame(self, frame_idx: int) -> Optional[Detection]:
-        """Get detection for this person at specific frame."""
-        for detection in self.detections:
-            if detection.frame_idx == frame_idx:
-                return detection
-        return None
-
-    def get_pose_at_frame(self, frame_idx: int) -> Optional[PoseData]:
-        """Get pose data for this person at specific frame."""
-        for pose in self.poses:
-            if pose.frame_idx == frame_idx:
-                return pose
-        return None
-
-    def get_frames_with_detections(self) -> List[int]:
-        """Get list of frame indices where this person was detected."""
-        return [det.frame_idx for det in self.detections]
-
-    def get_frames_with_poses(self) -> List[int]:
-        """Get list of frame indices where this person has pose data."""
-        return [pose.frame_idx for pose in self.poses]
-
 
 @dataclass
 class VideoData:
@@ -163,18 +141,6 @@ class VideoData:
                 }
                 for person in self.persons
             ],
-            "all_detections_per_frame": {
-                str(frame_idx): [
-                    {
-                        "frame_idx": det.frame_idx,
-                        "bbox": det.bbox,
-                        "score": det.score,
-                        "label": det.label,
-                    }
-                    for det in detections
-                ]
-                for frame_idx, detections in self.all_detections_per_frame.items()
-            },
             "detection_config": self.detection_config,
         }
 
@@ -208,21 +174,31 @@ class VideoData:
                     pose_data["bbox_scores"],
                 )
 
-        # Load all detections per frame
-        for frame_idx_str, detections_data in data.get(
-            "all_detections_per_frame", {}
-        ).items():
+        # Reconstruct all_detections_per_frame from person data
+        # This maintains functionality while avoiding redundant storage
+        for person in video_data.persons:
+            for detection in person.detections:
+                frame_idx = detection.frame_idx
+                if frame_idx not in video_data.all_detections_per_frame:
+                    video_data.all_detections_per_frame[frame_idx] = []
+                video_data.all_detections_per_frame[frame_idx].append(detection)
+
+        # Load legacy all_detections_per_frame if present (for backward compatibility)
+        legacy_detections = data.get("all_detections_per_frame", {})
+        for frame_idx_str, detections_data in legacy_detections.items():
             frame_idx = int(frame_idx_str)
-            frame_detections = []
-            for det_data in detections_data:
-                detection = Detection(
-                    frame_idx=det_data["frame_idx"],
-                    bbox=det_data["bbox"],
-                    score=det_data["score"],
-                    label=det_data["label"],
-                )
-                frame_detections.append(detection)
-            video_data.all_detections_per_frame[frame_idx] = frame_detections
+            # Only add if not already reconstructed from person data
+            if frame_idx not in video_data.all_detections_per_frame:
+                frame_detections = []
+                for det_data in detections_data:
+                    detection = Detection(
+                        frame_idx=det_data["frame_idx"],
+                        bbox=det_data["bbox"],
+                        score=det_data["score"],
+                        label=det_data["label"],
+                    )
+                    frame_detections.append(detection)
+                video_data.all_detections_per_frame[frame_idx] = frame_detections
 
         return video_data
 
