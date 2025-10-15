@@ -4,41 +4,207 @@ orchestrator:
 
 pipelines:
 
-  - name: filter_butterworth_2nd_20hz
+  # Gaussian Filter Tests - sigma values from 0.4 to 2.5
+  - name: filter_gaussian_sigma_0.4
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_20hz.yaml"
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.4.yaml"
 
-  - name: filter_butterworth_2nd_40hz
+  - name: filter_gaussian_sigma_0.5
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_40hz.yaml"
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.5.yaml"
 
-  - name: filter_butterworth_2nd_60hz
+  - name: filter_gaussian_sigma_0.6
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_60hz.yaml"
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.6.yaml"
 
-  - name: filter_butterworth_2nd_70hz
+  - name: filter_gaussian_sigma_0.7
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_2nd_70hz.yaml"
-  - name: filter_butterworth_2nd_20hz
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.7.yaml"
+
+  - name: filter_gaussian_sigma_0.8
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.8.yaml"
+
+  - name: filter_gaussian_sigma_0.9
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.9.yaml"
+
+  - name: filter_gaussian_sigma_1.0
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.0.yaml"
+
+  - name: filter_gaussian_sigma_1.5
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.5.yaml"
+
+  - name: filter_gaussian_sigma_2.0
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.0.yaml"
+
+  - name: filter_gaussian_sigma_2.5
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.5.yaml"
+
+  # Savitzky-Golay Filter Tests - window lengths 7,9,11 with polyorders 2,3
+  - name: filter_savgol_wl7_po2
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl7_po2.yaml"
+
+  - name: filter_savgol_wl7_po3
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl7_po3.yaml"
+
+  - name: filter_savgol_wl9_po2
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl9_po2.yaml"
+
+  - name: filter_savgol_wl9_po3
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl9_po3.yaml"
+
+  - name: filter_savgol_wl11_po2
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl11_po2.yaml"
+
+  - name: filter_savgol_wl11_po3
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl11_po3.yaml"
+
+  # Evaluation steps for Gaussian filters
+  - name: filter_gaussian_sigma_0.4
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_2nd_40hz
+  - name: filter_gaussian_sigma_0.5
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_2nd_60hz
+  - name: filter_gaussian_sigma_0.6
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_2nd_70hz
+  - name: filter_gaussian_sigma_0.7
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_gaussian_sigma_0.8
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_gaussian_sigma_0.9
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_gaussian_sigma_1.0
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_gaussian_sigma_1.5
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_gaussian_sigma_2.0
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_gaussian_sigma_2.5
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # Evaluation steps for Savitzky-Golay filters
+  - name: filter_savgol_wl7_po2
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_savgol_wl7_po3
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_savgol_wl9_po2
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_savgol_wl9_po3
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_savgol_wl11_po2
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_savgol_wl11_po3
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # Commented out original Butterworth filters
+  # - name: filter_butterworth_2nd_20hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_2nd_20hz.yaml"
+
+  # - name: filter_butterworth_2nd_40hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_2nd_40hz.yaml"
+
+  # - name: filter_butterworth_2nd_60hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_2nd_60hz.yaml"
+
+  # - name: filter_butterworth_2nd_70hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_2nd_70hz.yaml"
+
+  # - name: filter_butterworth_2nd_20hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_2nd_40hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_2nd_60hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_2nd_70hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"

@@ -5,7 +5,7 @@ paths:
 filter:
   name: "gaussian"
   params:
-    sigma: 2.5
+    sigma: 0.9
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/detect"
   outlier_removal:

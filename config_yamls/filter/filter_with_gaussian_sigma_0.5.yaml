@@ -3,10 +3,9 @@ paths:
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 filter:
-  name: "savitzky"
+  name: "gaussian"
   params:
-    window_length: 60
-    polyorder: 3
+    sigma: 0.5
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/detect"
   outlier_removal:
@@ -44,7 +43,6 @@ evaluation:
     #     threshold: 0.05
     # - name: gat_metric
     #   params: {}
-
 
 dataset:
  joint_enum_module: utils.joint_enum.GTJointsHumanEVa
