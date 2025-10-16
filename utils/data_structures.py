@@ -91,6 +91,14 @@ class PoseData(BaseModel):
         "keypoint coverage score, etc. Different from detection score as this reflects "
         "pose estimation quality rather than object detection confidence.",
     )
+    pose_model: str = Field(
+        ...,
+        description="Name or identifier of the pose estimation model used to generate these keypoints. "
+        "Examples: 'rtmpose-m', 'dwpose', 'alphapose', 'mediapipe', 'openpose', etc. "
+        "This field is crucial for interpreting keypoint order, coordinate system, "
+        "and model-specific confidence thresholds. Different models may use different "
+        "keypoint schemas (e.g., COCO-17, COCO-133, MPII-16).",
+    )
 
 
 class Person(BaseModel):
@@ -140,6 +148,7 @@ class Person(BaseModel):
         keypoints_visible: List[float],
         bbox: List[float],
         bbox_scores: List[float],
+        pose_model: str,
     ):
         """Add pose data for this person in a specific frame."""
         pose = PoseData(
@@ -148,6 +157,7 @@ class Person(BaseModel):
             keypoints_visible=keypoints_visible,
             pose_bbox=bbox,
             pose_bbox_scores=bbox_scores,
+            pose_model=pose_model,
         )
         self.poses.append(pose)
 
@@ -256,6 +266,7 @@ class VideoData(BaseModel):
                             "keypoints_visible": pose.keypoints_visible,
                             "bbox": pose.pose_bbox,
                             "bbox_scores": pose.pose_bbox_scores,
+                            "pose_model": pose.pose_model,
                         }
                         for pose in person.poses
                     ],
@@ -293,6 +304,9 @@ class VideoData(BaseModel):
                     pose_data["keypoints_visible"],
                     pose_data["bbox"],
                     pose_data["bbox_scores"],
+                    pose_data.get(
+                        "pose_model", "unknown"
+                    ),  # Default for backward compatibility
                 )
 
         # Reconstruct all_detections_per_frame from person data
