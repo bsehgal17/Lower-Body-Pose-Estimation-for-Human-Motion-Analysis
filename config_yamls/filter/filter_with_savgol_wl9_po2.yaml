@@ -8,7 +8,7 @@ filter:
     window_length: 9
     polyorder: 2
 
-  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW_X/detect"
+  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/detect/"
   outlier_removal:
     enable: False
   # outlier_removal:
