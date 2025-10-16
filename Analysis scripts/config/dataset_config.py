@@ -3,12 +3,11 @@ Dataset configuration definitions.
 """
 
 import os
-from typing import Any, List
-from dataclasses import dataclass
+from typing import Any, List, Optional
+from pydantic import BaseModel, model_validator
 
 
-@dataclass
-class DatasetConfig:
+class DatasetConfig(BaseModel):
     """Base configuration for datasets."""
 
     name: str
@@ -21,16 +20,18 @@ class DatasetConfig:
     camera_column: str
     pck_overall_score_columns: List[str]
     pck_per_frame_score_columns: List[str]
-    pck_jointwise_score_columns: List[str] = None
-    sync_data: Any = None
-    analysis_config: Any = None  # Analysis-specific configuration
-    ground_truth_file: str = None  # Path to ground truth coordinates file
-    grouping_columns: List[str] = None  # Columns to use for video grouping
-    video_name_format: str = "{subject}"  # Format for creating video names
+    pck_jointwise_score_columns: Optional[List[str]]
+    sync_data: Optional[Any]
+    analysis_config: Optional[Any]  # Analysis-specific configuration
+    ground_truth_file: Optional[str]  # Path to ground truth coordinates file
+    grouping_columns: Optional[List[str]]  # Columns to use for video grouping
+    video_name_format: str  # Format for creating video names
 
-    def __post_init__(self):
+    @model_validator(mode="after")
+    def validate_config(self):
         """Validate configuration after initialization."""
         self.validate()
+        return self
 
     def get_analysis_bin_size(
         self, analysis_type: str = "pck_brightness", default: int = 5

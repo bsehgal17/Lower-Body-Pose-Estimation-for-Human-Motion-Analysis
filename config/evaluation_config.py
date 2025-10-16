@@ -1,14 +1,12 @@
-from dataclasses import dataclass, field
+from pydantic import BaseModel, Field
 from typing import Dict, Any, List, Optional
 
 
-@dataclass
-class EvaluationMetric:
+class EvaluationMetric(BaseModel):
     name: str
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: Dict[str, Any] = Field(default_factory=dict)
 
 
-@dataclass
-class EvaluationConfig:
+class EvaluationConfig(BaseModel):
     input_dir: Optional[str] = None  # ← directly here
-    metrics: List[EvaluationMetric] = field(default_factory=list)
+    metrics: List[EvaluationMetric] = Field(default_factory=list)

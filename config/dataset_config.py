@@ -1,9 +1,8 @@
-from dataclasses import dataclass
+from pydantic import BaseModel
 from typing import Optional, Dict
 
 
-@dataclass
-class DatasetConfig:
+class DatasetConfig(BaseModel):
     keypoint_format: Optional[str] = None  # e.g. "utils.joint_enum"
     joint_enum_module: Optional[str] = None  # e.g. "utils.joint_enum"
     sync_data: Optional[Dict[str, Dict[str, list]]] = (

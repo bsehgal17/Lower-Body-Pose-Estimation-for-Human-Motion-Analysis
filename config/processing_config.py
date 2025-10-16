@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from pydantic import BaseModel, model_validator, Field
 import logging
 
 # Configure logging
@@ -8,35 +8,30 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class ProcessingConfig:
+class ProcessingConfig(BaseModel):
     """Configuration for general processing parameters."""
 
     device: str
-    nms_threshold: float
-    detection_threshold: float
-    kpt_threshold: float
+    nms_threshold: float = Field(ge=0, le=1)
+    detection_threshold: float = Field(ge=0, le=1)
+    kpt_threshold: float = Field(ge=0, le=1)
 
-    def __post_init__(self):
-        if not (0 <= self.nms_threshold <= 1):
-            raise ValueError("NMS threshold must be between 0 and 1.")
-        if not (0 <= self.detection_threshold <= 1):
-            raise ValueError("Detection threshold must be between 0 and 1.")
-        if not (0 <= self.kpt_threshold <= 1):
-            raise ValueError("Keypoint threshold must be between 0 and 1.")
-
+    @model_validator(mode="after")
+    def validate_device(self):
         if not (self.device.startswith("cuda") or self.device == "cpu"):
-            logger.warning(
-                f"Invalid device specified: {self.device}. Using 'cpu'.")
+            logger.warning(f"Invalid device specified: {self.device}. Using 'cpu'.")
             self.device = "cpu"
 
         if self.device.startswith("cuda"):
             try:
                 import torch
+
                 if not torch.cuda.is_available():
                     logger.warning(
-                        "CUDA requested but not available. Falling back to CPU.")
+                        "CUDA requested but not available. Falling back to CPU."
+                    )
                     self.device = "cpu"
             except ImportError:
                 logger.warning("PyTorch not installed, falling back to CPU.")
                 self.device = "cpu"
+        return self

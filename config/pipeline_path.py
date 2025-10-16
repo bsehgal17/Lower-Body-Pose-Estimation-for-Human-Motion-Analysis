@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from pydantic import BaseModel, model_validator
 import logging
 import os
 
@@ -9,15 +9,17 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class PipelinePathsConfig:
+class PipelinePathsConfig(BaseModel):
     """Pipeline-level paths: dataset name and ground truth file."""
 
     dataset: str
     ground_truth_file: str
 
-    def __post_init__(self):
+    @model_validator(mode="after")
+    def validate_paths(self):
         if not os.path.exists(self.ground_truth_file):
             logger.warning(
-                f"Ground truth file does not exist: {self.ground_truth_file}")
+                f"Ground truth file does not exist: {self.ground_truth_file}"
+            )
         logger.info(f"Using dataset: {self.dataset}")
+        return self

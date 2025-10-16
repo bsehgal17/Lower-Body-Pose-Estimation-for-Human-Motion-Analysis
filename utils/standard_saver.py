@@ -4,7 +4,7 @@ import pickle
 import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Union
-from dataclasses import dataclass
+from pydantic import BaseModel
 import cv2
 import numpy as np
 from utils.video_format_utils import get_video_format_info
@@ -13,8 +13,7 @@ from utils.data_structures import VideoData
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class SaveConfig:
+class SaveConfig(BaseModel):
     """Configuration for saving data."""
 
     output_dir: str
@@ -31,8 +30,7 @@ class SaveConfig:
         return self.output_dir
 
 
-@dataclass
-class SavedData:
+class SavedData(BaseModel):
     """
     Structured representation of data being saved to JSON/PKL files.
     This dataclass encapsulates the complete content structure.

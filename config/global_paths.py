@@ -1,6 +1,5 @@
-from dataclasses import dataclass
+from pydantic import BaseModel
 import logging
-import os
 
 # Configure logging
 logging.basicConfig(
@@ -9,7 +8,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class GlobalPathsConfig:
+class GlobalPathsConfig(BaseModel):
     input_dir: str
     output_dir: str

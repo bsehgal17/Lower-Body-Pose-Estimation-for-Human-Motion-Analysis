@@ -1,7 +1,7 @@
 import os
 import yaml
 from typing import Optional
-from dataclasses import dataclass
+from pydantic import BaseModel
 import logging
 
 # pipeline‑level paths (dataset + ground‑truth)
@@ -22,16 +22,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class PipelineConfig:
+class PipelineConfig(BaseModel):
     paths: PipelinePathsConfig
-    models: Optional[ModelsConfig] = None
-    processing: Optional[ProcessingConfig] = None
-    filter: Optional[FilterConfig] = None
-    noise: Optional[NoiseConfig] = None
-    evaluation: Optional[EvaluationConfig] = None
-    dataset: Optional[DatasetConfig] = None
-    enhancement: Optional[EnhancementConfig] = None
+    models: Optional[ModelsConfig]
+    processing: Optional[ProcessingConfig]
+    filter: Optional[FilterConfig]
+    noise: Optional[NoiseConfig]
+    evaluation: Optional[EvaluationConfig]
+    dataset: Optional[DatasetConfig]
+    enhancement: Optional[EnhancementConfig]
 
     # ------------------------------------------------------------------
     # YAML (de)serialization helpers
@@ -40,8 +39,7 @@ class PipelineConfig:
     @classmethod
     def from_yaml(cls, yaml_path: str) -> "PipelineConfig":
         if not os.path.exists(yaml_path):
-            raise FileNotFoundError(
-                f"Pipeline config file not found: {yaml_path}")
+            raise FileNotFoundError(f"Pipeline config file not found: {yaml_path}")
         with open(yaml_path, "r", encoding="utf-8") as f:
             raw_config = yaml.safe_load(f)
 
@@ -56,19 +54,16 @@ class PipelineConfig:
             filter=FilterConfig(**raw_config["filter"])
             if "filter" in raw_config
             else None,
-            noise=NoiseConfig(
-                **raw_config["noise"]) if "noise" in raw_config else None,
+            noise=NoiseConfig(**raw_config["noise"]) if "noise" in raw_config else None,
             evaluation=EvaluationConfig(**raw_config["evaluation"])
             if "evaluation" in raw_config
             else None,
             dataset=DatasetConfig(**raw_config["dataset"])
             if "dataset" in raw_config
             else None,
-            enhancement=cls._parse_enhancement_config(
-                raw_config.get("enhancement"))
+            enhancement=cls._parse_enhancement_config(raw_config.get("enhancement"))
             if "enhancement" in raw_config
             else None,
-
         )
 
     @classmethod
@@ -95,8 +90,7 @@ class PipelineConfig:
 
         filtered_clahe = None
         if "filtered_clahe" in enhancement_data:
-            filtered_clahe = FilteredCLAHEConfig(
-                **enhancement_data["filtered_clahe"])
+            filtered_clahe = FilteredCLAHEConfig(**enhancement_data["filtered_clahe"])
 
         brightness = None
         if "brightness" in enhancement_data:
@@ -112,13 +106,11 @@ class PipelineConfig:
 
         filtered_gamma = None
         if "filtered_gamma" in enhancement_data:
-            filtered_gamma = FilteredGammaConfig(
-                **enhancement_data["filtered_gamma"])
+            filtered_gamma = FilteredGammaConfig(**enhancement_data["filtered_gamma"])
 
         processing = None
         if "processing" in enhancement_data:
-            processing = EnhancementProcessingConfig(
-                **enhancement_data["processing"])
+            processing = EnhancementProcessingConfig(**enhancement_data["processing"])
 
         return EnhancementConfig(
             type=enhancement_data.get("type"),
@@ -129,8 +121,7 @@ class PipelineConfig:
             gamma=gamma,
             filtered_gamma=filtered_gamma,
             processing=processing,
-            create_comparison_images=enhancement_data.get(
-                "create_comparison_images"),
+            create_comparison_images=enhancement_data.get("create_comparison_images"),
         )
 
     def to_yaml(self, yaml_path: str):
@@ -138,21 +129,21 @@ class PipelineConfig:
         cfg_dict = {}
 
         if self.paths:
-            cfg_dict["paths"] = self.paths.__dict__
+            cfg_dict["paths"] = self.paths.model_dump()
         if self.models:
-            cfg_dict["models"] = self.models.__dict__
+            cfg_dict["models"] = self.models.model_dump()
         if self.processing:
-            cfg_dict["processing"] = self.processing.__dict__
+            cfg_dict["processing"] = self.processing.model_dump()
         if self.filter:
-            cfg_dict["filter"] = self.filter.__dict__
+            cfg_dict["filter"] = self.filter.model_dump()
         if self.noise:
-            cfg_dict["noise"] = self.noise.__dict__
+            cfg_dict["noise"] = self.noise.model_dump()
         if self.evaluation:
-            cfg_dict["evaluation"] = self.evaluation.__dict__
+            cfg_dict["evaluation"] = self.evaluation.model_dump()
         if self.dataset:
-            cfg_dict["dataset"] = self.dataset.__dict__
+            cfg_dict["dataset"] = self.dataset.model_dump()
         if self.enhancement:
-            cfg_dict["enhancement"] = self.enhancement.__dict__
+            cfg_dict["enhancement"] = self.enhancement.model_dump()
 
         with open(yaml_path, "w", encoding="utf-8") as f:
             yaml.dump(cfg_dict, f, indent=4)

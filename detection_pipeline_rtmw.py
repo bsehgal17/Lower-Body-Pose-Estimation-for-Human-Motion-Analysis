@@ -1,6 +1,7 @@
 import os
 import logging
-from dataclasses import asdict
+
+# asdict no longer needed - using Pydantic models
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from utils.video_io import get_video_files
@@ -69,7 +70,7 @@ def run_detection_pipeline(
         processor.finalize_video_processing(video_data)
 
         # Set detection config
-        detector_config_dict = asdict(pipeline_config.processing)
+        detector_config_dict = pipeline_config.processing.model_dump()
         video_data.detection_config = detector_config_dict
 
         # Create SavedData with detection configuration

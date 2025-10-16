@@ -1,26 +1,26 @@
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, field
+from typing import Dict, Any, List, Optional, Union
+from pydantic import BaseModel, Field, model_validator
 
 
-@dataclass
-class OutlierRemovalConfig:
+class OutlierRemovalConfig(BaseModel):
     enable: bool
-    method: Optional[str] = None  # "iqr" or "zscore"
-    params: Optional[Dict[str, Any]] = field(default_factory=dict)
+    method: Optional[str]  # "iqr" or "zscore"
+    params: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
-@dataclass
-class FilterConfig:
+class FilterConfig(BaseModel):
     name: str
-    params: Optional[dict] = None
-    input_dir: Optional[str] = None
-    enable_interpolation: Optional[bool] = None
-    interpolation_kind: Optional[str] = None
-    enable_filter_plots: Optional[bool] = None
-    joints_to_filter: Optional[List[str]] = None
-    outlier_removal: Optional[OutlierRemovalConfig] = None
+    params: Optional[dict]
+    input_dir: Optional[str]
+    enable_interpolation: Optional[bool]
+    interpolation_kind: Optional[str]
+    enable_filter_plots: Optional[bool]
+    joints_to_filter: Optional[List[str]]
+    outlier_removal: Optional[Union[OutlierRemovalConfig, dict]]
 
-    def __post_init__(self):
+    @model_validator(mode="after")
+    def convert_outlier_removal(self):
         # Convert dict to OutlierRemovalConfig only if provided
         if isinstance(self.outlier_removal, dict):
             self.outlier_removal = OutlierRemovalConfig(**self.outlier_removal)
+        return self

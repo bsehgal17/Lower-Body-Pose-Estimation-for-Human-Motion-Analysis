@@ -1,9 +1,8 @@
-from typing import Dict, Any, List, Tuple, Optional
-from dataclasses import dataclass, field
+from typing import Tuple
+from pydantic import BaseModel
 
 
-@dataclass
-class VideoConfig:
+class VideoConfig(BaseModel):
     """Configuration for video processing."""
 
     extensions: Tuple[str, ...]

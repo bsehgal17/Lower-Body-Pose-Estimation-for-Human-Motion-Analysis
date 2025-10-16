@@ -1,23 +1,23 @@
 import os
 import yaml
 from typing import Optional
-from dataclasses import dataclass, field
+from pydantic import BaseModel, Field
 import logging
 
 from .global_paths import GlobalPathsConfig
 from .video_config import VideoConfig
 
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class GlobalConfig:
+class GlobalConfig(BaseModel):
     """Holds settings shared across all pipelines — input/output paths, video types, etc."""
 
-    paths: GlobalPathsConfig = field(default_factory=GlobalPathsConfig)
-    video: VideoConfig = field(default_factory=VideoConfig)
+    paths: GlobalPathsConfig = Field(default_factory=GlobalPathsConfig)
+    video: VideoConfig = Field(default_factory=VideoConfig)
 
     @classmethod
     def from_yaml(cls, yaml_path: str) -> "GlobalConfig":
@@ -33,8 +33,8 @@ class GlobalConfig:
 
     def to_yaml(self, yaml_path: str):
         config_dict = {
-            "paths": self.paths.__dict__,
-            "video": self.video.__dict__,
+            "paths": self.paths.model_dump(),
+            "video": self.video.model_dump(),
         }
         with open(yaml_path, "w") as f:
             yaml.dump(config_dict, f, indent=4)

@@ -1,82 +1,81 @@
 from typing import Optional, List, Dict, Any
-from dataclasses import dataclass
+from pydantic import BaseModel, model_validator
 
 
-@dataclass
-class CLAHEConfig:
+class CLAHEConfig(BaseModel):
     """Configuration for CLAHE (Contrast Limited Adaptive Histogram Equalization) enhancement."""
 
     clip_limit: float
     tile_grid_size: List[int]
-    color_space: str = "LAB"
+    color_space: str
 
 
-@dataclass
-class FilteredCLAHEConfig:
+class FilteredCLAHEConfig(BaseModel):
     """Configuration for CLAHE enhancement with image filtering."""
 
     clip_limit: float
     tile_grid_size: List[int]
-    color_space: str = "HSV"
-    filters: List[str] = None
-    filter_params: Dict[str, Any] = None
+    color_space: str
+    filters: Optional[List[str]]
+    filter_params: Optional[Dict[str, Any]]
 
-    def __post_init__(self):
+    @model_validator(mode="after")
+    def set_defaults(self):
         if self.filters is None:
             self.filters = ["bilateral"]
         if self.filter_params is None:
             self.filter_params = {}
+        return self
 
 
-@dataclass
-class BrightnessConfig:
+class BrightnessConfig(BaseModel):
     """Configuration for brightness adjustment."""
 
     factor: float
 
 
-@dataclass
-class BlurConfig:
+class BlurConfig(BaseModel):
     """Configuration for Gaussian blur."""
 
     kernel_size: List[int]
-    sigma_x: float = 0
-    sigma_y: float = 0
+    sigma_x: float
+    sigma_y: float
 
 
-@dataclass
-class GammaConfig:
+class GammaConfig(BaseModel):
     """Configuration for gamma correction enhancement."""
 
     gamma: float
-    color_space: str = "BGR"
-    input_dir: Optional[str] = None
-    output_dir: Optional[str] = None
-    file_extensions: List[str] = None
+    color_space: str
+    input_dir: Optional[str]
+    output_dir: Optional[str]
+    file_extensions: Optional[List[str]]
 
-    def __post_init__(self):
+    @model_validator(mode="after")
+    def set_defaults(self):
         if self.file_extensions is None:
             self.file_extensions = [".mp4", ".avi", ".mov", ".mkv"]
+        return self
 
 
-@dataclass
-class FilteredGammaConfig:
+class FilteredGammaConfig(BaseModel):
     """Configuration for gamma correction enhancement with image filtering."""
 
     gamma: float
-    color_space: str = "HSV"
-    filters: List[str] = None
-    filter_params: Dict[str, Any] = None
+    color_space: str
+    filters: Optional[List[str]]
+    filter_params: Optional[Dict[str, Any]]
 
-    def __post_init__(self):
+    @model_validator(mode="after")
+    def set_defaults(self):
         if self.filters is None:
             self.filters = ["bilateral"]
         if self.filter_params is None:
             self.filter_params = {}
+        return self
 
 
-@dataclass
-class EnhancementProcessingConfig:
+class EnhancementProcessingConfig(BaseModel):
     """Configuration for enhancement processing settings."""
 
     batch_size: int = 10
@@ -84,16 +83,15 @@ class EnhancementProcessingConfig:
     generate_report: bool = True
 
 
-@dataclass
-class EnhancementConfig:
+class EnhancementConfig(BaseModel):
     """Main configuration for video enhancement."""
 
     type: str
-    clahe: Optional[CLAHEConfig] = None
-    filtered_clahe: Optional[FilteredCLAHEConfig] = None
-    brightness: Optional[BrightnessConfig] = None
-    blur: Optional[BlurConfig] = None
-    gamma: Optional[GammaConfig] = None
-    filtered_gamma: Optional[FilteredGammaConfig] = None
-    processing: Optional[EnhancementProcessingConfig] = None
-    create_comparison_images: Optional[bool] = None
+    clahe: Optional[CLAHEConfig]
+    filtered_clahe: Optional[FilteredCLAHEConfig]
+    brightness: Optional[BrightnessConfig]
+    blur: Optional[BlurConfig]
+    gamma: Optional[GammaConfig]
+    filtered_gamma: Optional[FilteredGammaConfig]
+    processing: Optional[EnhancementProcessingConfig]
+    create_comparison_images: Optional[bool]

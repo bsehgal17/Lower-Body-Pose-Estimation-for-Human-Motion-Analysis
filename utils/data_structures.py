@@ -1,10 +1,9 @@
-from dataclasses import dataclass, field
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import numpy as np
 
 
-@dataclass
-class Detection:
+class Detection(BaseModel):
     """Single detection data for a frame."""
 
     frame_idx: int
@@ -13,8 +12,7 @@ class Detection:
     label: int
 
 
-@dataclass
-class PoseData:
+class PoseData(BaseModel):
     """Pose estimation data for a single frame."""
 
     frame_idx: int
@@ -24,13 +22,12 @@ class PoseData:
     bbox_scores: List[float]  # Bbox confidence scores from pose estimation
 
 
-@dataclass
-class Person:
+class Person(BaseModel):
     """Data for a single person tracked across multiple frames."""
 
     person_id: int
-    detections: List[Detection] = field(default_factory=list)
-    poses: List[PoseData] = field(default_factory=list)
+    detections: List[Detection] = Field(default_factory=list)
+    poses: List[PoseData] = Field(default_factory=list)
 
     def add_detection(
         self, frame_idx: int, bbox: List[float], score: float, label: int = 0
@@ -58,13 +55,12 @@ class Person:
         self.poses.append(pose)
 
 
-@dataclass
-class VideoData:
+class VideoData(BaseModel):
     """Complete video data with person tracking."""
 
     video_name: str
-    persons: List[Person] = field(default_factory=list)
-    all_detections_per_frame: Dict[int, List[Detection]] = field(default_factory=dict)
+    persons: List[Person] = Field(default_factory=list)
+    all_detections_per_frame: Dict[int, List[Detection]] = Field(default_factory=dict)
     detection_config: Optional[Dict[str, Any]] = None
 
     def add_person(self, person_id: int) -> Person:

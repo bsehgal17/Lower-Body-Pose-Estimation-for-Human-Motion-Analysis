@@ -3,7 +3,8 @@ import logging
 import numpy as np
 from tqdm import tqdm
 import cv2
-from dataclasses import asdict
+
+# asdict no longer needed - using Pydantic models
 from mmpose.apis import inference_topdown, init_model as init_pose_model
 from mmdet.apis import inference_detector, init_detector
 from mmpose.utils import adapt_mmdet_pipeline
@@ -183,7 +184,7 @@ def run_detection_pipeline(
                 )
 
         # Set detection config
-        detector_config_dict = asdict(pipeline_config.processing)
+        detector_config_dict = pipeline_config.processing.model_dump()
         video_data.detection_config = detector_config_dict
 
         # Create SavedData with detection configuration
