@@ -4,28 +4,128 @@ Dataset configuration definitions.
 
 import os
 from typing import Any, List, Optional
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 
 
 class DatasetConfig(BaseModel):
-    """Base configuration for datasets."""
+    """
+    Configuration for dataset analysis and evaluation parameters.
 
-    name: str
-    video_directory: str
-    pck_file_path: str
-    save_folder: str
-    model: str
-    subject_column: str
-    action_column: str
-    camera_column: str
-    pck_overall_score_columns: List[str]
-    pck_per_frame_score_columns: List[str]
-    pck_jointwise_score_columns: Optional[List[str]]
-    sync_data: Optional[Any]
-    analysis_config: Optional[Any]  # Analysis-specific configuration
-    ground_truth_file: Optional[str]  # Path to ground truth coordinates file
-    grouping_columns: Optional[List[str]]  # Columns to use for video grouping
-    video_name_format: str  # Format for creating video names
+    Defines dataset-specific paths, file formats, evaluation metrics,
+    and analysis parameters for pose estimation performance assessment.
+    """
+
+    name: str = Field(
+        ...,
+        description="Human-readable name identifier for the dataset. "
+        "Examples: 'HumanEva-I', 'MPI-INF-3DHP', 'COCO', 'MoVi'. "
+        "Used in reports and output file naming.",
+    )
+
+    video_directory: str = Field(
+        ...,
+        description="Root directory path containing all video files for this dataset. "
+        "Should contain subdirectories organized by subject/action/camera "
+        "or flat structure depending on dataset organization.",
+    )
+
+    pck_file_path: str = Field(
+        ...,
+        description="Path to CSV/Excel file containing PCK (Percentage of Correct Keypoints) "
+        "evaluation results. Must contain columns specified in pck_*_columns fields. "
+        "This is the main evaluation data source for analysis.",
+    )
+
+    save_folder: str = Field(
+        ...,
+        description="Output directory where analysis results, plots, and reports will be saved. "
+        "Directory structure will be created automatically if it doesn't exist.",
+    )
+
+    model: str = Field(
+        ...,
+        description="Pose estimation model identifier used to generate the PCK results. "
+        "Examples: 'RTMPose', 'HRNet', 'PoseNet', 'MediaPipe'. "
+        "Used for labeling and organizing results by model type.",
+    )
+
+    subject_column: str = Field(
+        ...,
+        description="Column name in PCK file that identifies different subjects/persons. "
+        "Examples: 'Subject', 'Person_ID', 'subject_id'. "
+        "Used for subject-wise analysis and grouping.",
+    )
+
+    action_column: str = Field(
+        ...,
+        description="Column name in PCK file that identifies different actions/activities. "
+        "Examples: 'Action', 'Activity', 'action_name'. "
+        "Used for action-wise performance analysis.",
+    )
+
+    camera_column: str = Field(
+        ...,
+        description="Column name in PCK file that identifies different camera views. "
+        "Examples: 'Camera', 'View', 'camera_id'. "
+        "Used for camera/viewpoint-specific analysis.",
+    )
+
+    pck_overall_score_columns: List[str] = Field(
+        ...,
+        description="List of column names containing overall PCK scores (0.0-1.0). "
+        "These represent aggregate pose accuracy across all keypoints. "
+        "Examples: ['PCK_0.2', 'PCK_0.5'] for different distance thresholds.",
+    )
+
+    pck_per_frame_score_columns: List[str] = Field(
+        ...,
+        description="List of column names containing per-frame PCK scores. "
+        "These represent pose accuracy for individual video frames. "
+        "Used for temporal analysis and frame-level statistics.",
+    )
+
+    pck_jointwise_score_columns: Optional[List[str]] = Field(
+        default=None,
+        description="List of column names containing joint-specific PCK scores. "
+        "Examples: ['PCK_nose', 'PCK_left_shoulder', 'PCK_right_knee']. "
+        "Used for analyzing which body parts are estimated most accurately.",
+    )
+
+    sync_data: Optional[Any] = Field(
+        default=None,
+        description="Synchronization information for multi-camera datasets. "
+        "Format depends on dataset structure. Used for temporal alignment "
+        "across different camera views or sequences.",
+    )
+
+    analysis_config: Optional[Any] = Field(
+        default=None,
+        description="Analysis-specific configuration parameters. "
+        "May contain binning parameters, score grouping thresholds, "
+        "statistical test settings, or custom analysis options.",
+    )
+
+    ground_truth_file: Optional[str] = Field(
+        default=None,
+        description="Path to ground truth keypoint coordinate file. "
+        "Used for direct coordinate comparison and error analysis "
+        "beyond PCK metrics. Format typically CSV or NPY.",
+    )
+
+    grouping_columns: Optional[List[str]] = Field(
+        default=None,
+        description="List of column names to use for grouping analysis results. "
+        "If None, defaults to [subject_column, action_column, camera_column]. "
+        "Determines how data is aggregated for statistical analysis.",
+    )
+
+    video_name_format: str = Field(
+        default="{subject}",
+        description="Format string for generating video file names from data columns. "
+        "Supports column name substitution and arithmetic: '{subject}', "
+        "'{action}_{camera}', 'C{camera+1}'. Used to match PCK data "
+        "with corresponding video files.",
+    )
 
     @model_validator(mode="after")
     def validate_config(self):

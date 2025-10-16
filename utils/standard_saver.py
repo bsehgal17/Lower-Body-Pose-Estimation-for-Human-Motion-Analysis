@@ -4,7 +4,7 @@ import pickle
 import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Union
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import cv2
 import numpy as np
 from utils.video_format_utils import get_video_format_info
@@ -14,14 +14,54 @@ logger = logging.getLogger(__name__)
 
 
 class SaveConfig(BaseModel):
-    """Configuration for saving data."""
+    """
+    Configuration for data saving operations and output format control.
 
-    output_dir: str
-    relative_subdir: Optional[str]
-    save_json: bool
-    save_pickle: bool
-    save_video_overlay: bool
-    video_input_dir: Optional[str]
+    Defines where and how pose estimation results should be saved,
+    including output directories, file formats, and optional video overlay generation.
+    """
+
+    output_dir: str = Field(
+        ...,
+        description="Base directory path where all output files will be saved. "
+        "Directory will be created if it doesn't exist. "
+        "Use absolute paths for better reliability.",
+    )
+
+    relative_subdir: Optional[str] = Field(
+        default=None,
+        description="Optional subdirectory within output_dir for organizing results. "
+        "Example: 'experiment_1' or 'subject_S1/session_1'. "
+        "Final path becomes: output_dir/relative_subdir/",
+    )
+
+    save_json: bool = Field(
+        ...,
+        description="Whether to save results in JSON format. "
+        "JSON files are human-readable and platform-independent "
+        "but may be larger than pickle files.",
+    )
+
+    save_pickle: bool = Field(
+        ...,
+        description="Whether to save results in Python pickle format. "
+        "Pickle files are compact and preserve exact Python object structure "
+        "but are Python-specific and version-dependent.",
+    )
+
+    save_video_overlay: bool = Field(
+        ...,
+        description="Whether to generate video files with pose keypoints overlaid. "
+        "Creates visualization videos for qualitative assessment. "
+        "Requires corresponding video file to be found.",
+    )
+
+    video_input_dir: Optional[str] = Field(
+        default=None,
+        description="Directory to search for source video files when creating overlays. "
+        "If None, searches in same directory as the input data file. "
+        "Used only when save_video_overlay=True.",
+    )
 
     def get_full_output_dir(self) -> str:
         """Get the complete output directory path."""
@@ -32,22 +72,33 @@ class SaveConfig(BaseModel):
 
 class SavedData(BaseModel):
     """
-    Structured representation of data being saved to JSON/PKL files.
-    This dataclass encapsulates the complete content structure.
+    Structured representation of pose estimation data for serialization.
+
+    Container for complete pose estimation results including video data and
+    additional processing metadata. Detection/pose configuration is stored
+    within the VideoData object to avoid duplication.
     """
 
-    video_data: VideoData
-    detection_config: Optional[Dict[str, Any]]
-    processing_metadata: Optional[Dict[str, Any]]
+    video_data: VideoData = Field(
+        ...,
+        description="Complete video pose estimation data including all tracked persons, "
+        "their detections and poses across frames. Contains the core results "
+        "of the pose estimation pipeline. Detection config is stored here in video_data.detection_config.",
+    )
+
+    processing_metadata: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Additional metadata about the processing pipeline. "
+        "May include timing information, software versions, "
+        "preprocessing steps, or custom processing parameters. "
+        "Does NOT include detection config (that's in video_data.detection_config).",
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         result = self.video_data.to_dict()
 
-        # Add any additional metadata
-        if self.detection_config:
-            result["detection_config"] = self.detection_config
-
+        # Add processing metadata (detection_config is already in video_data)
         if self.processing_metadata:
             result["processing_metadata"] = self.processing_metadata
 
