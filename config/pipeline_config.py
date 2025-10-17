@@ -39,7 +39,8 @@ class PipelineConfig(BaseModel):
     @classmethod
     def from_yaml(cls, yaml_path: str) -> "PipelineConfig":
         if not os.path.exists(yaml_path):
-            raise FileNotFoundError(f"Pipeline config file not found: {yaml_path}")
+            raise FileNotFoundError(
+                f"Pipeline config file not found: {yaml_path}")
         with open(yaml_path, "r", encoding="utf-8") as f:
             raw_config = yaml.safe_load(f)
 
@@ -54,14 +55,16 @@ class PipelineConfig(BaseModel):
             filter=FilterConfig(**raw_config["filter"])
             if "filter" in raw_config
             else None,
-            noise=NoiseConfig(**raw_config["noise"]) if "noise" in raw_config else None,
+            noise=NoiseConfig(
+                **raw_config["noise"]) if "noise" in raw_config else None,
             evaluation=EvaluationConfig(**raw_config["evaluation"])
             if "evaluation" in raw_config
             else None,
             dataset=DatasetConfig(**raw_config["dataset"])
             if "dataset" in raw_config
             else None,
-            enhancement=cls._parse_enhancement_config(raw_config.get("enhancement"))
+            enhancement=cls._parse_enhancement_config(
+                raw_config.get("enhancement"))
             if "enhancement" in raw_config
             else None,
         )
@@ -90,7 +93,8 @@ class PipelineConfig(BaseModel):
 
         filtered_clahe = None
         if "filtered_clahe" in enhancement_data:
-            filtered_clahe = FilteredCLAHEConfig(**enhancement_data["filtered_clahe"])
+            filtered_clahe = FilteredCLAHEConfig(
+                **enhancement_data["filtered_clahe"])
 
         brightness = None
         if "brightness" in enhancement_data:
@@ -106,11 +110,13 @@ class PipelineConfig(BaseModel):
 
         filtered_gamma = None
         if "filtered_gamma" in enhancement_data:
-            filtered_gamma = FilteredGammaConfig(**enhancement_data["filtered_gamma"])
+            filtered_gamma = FilteredGammaConfig(
+                **enhancement_data["filtered_gamma"])
 
         processing = None
         if "processing" in enhancement_data:
-            processing = EnhancementProcessingConfig(**enhancement_data["processing"])
+            processing = EnhancementProcessingConfig(
+                **enhancement_data["processing"])
 
         return EnhancementConfig(
             type=enhancement_data.get("type"),
@@ -121,7 +127,8 @@ class PipelineConfig(BaseModel):
             gamma=gamma,
             filtered_gamma=filtered_gamma,
             processing=processing,
-            create_comparison_images=enhancement_data.get("create_comparison_images"),
+            create_comparison_images=enhancement_data.get(
+                "create_comparison_images"),
         )
 
     def to_yaml(self, yaml_path: str):

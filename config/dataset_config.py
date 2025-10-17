@@ -24,7 +24,7 @@ class DatasetConfig(BaseModel):
         "like NOSE=0, LEFT_EYE=1, etc. for programmatic joint access.",
     )
 
-    sync_data: Optional[Dict[str, Dict[str, list]]] = Field(
+    sync_data: Optional[Dict[str, Dict[str, Dict[str, list]]]] = Field(
         default=None,
         description="Synchronization data for multi-view or multi-sequence datasets. "
         "Structure: {subject_id: {action_name: [frame_indices]}} "

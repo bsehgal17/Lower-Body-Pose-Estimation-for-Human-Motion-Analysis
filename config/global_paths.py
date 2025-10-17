@@ -9,5 +9,5 @@ logger = logging.getLogger(__name__)
 
 
 class GlobalPathsConfig(BaseModel):
-    input_dir: str
-    output_dir: str
+    input_dir: str = None
+    output_dir: str = None

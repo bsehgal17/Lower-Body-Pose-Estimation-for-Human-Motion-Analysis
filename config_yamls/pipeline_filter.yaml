@@ -4,56 +4,56 @@ orchestrator:
 
 pipelines:
 
-  # Gaussian Filter Tests - sigma values from 0.4 to 2.5
-  - name: filter_gaussian_sigma_0.4
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.4.yaml"
+  # # Gaussian Filter Tests - sigma values from 0.4 to 2.5
+  # - name: filter_gaussian_sigma_0.4
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.4.yaml"
 
-  - name: filter_gaussian_sigma_0.5
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.5.yaml"
+  # - name: filter_gaussian_sigma_0.5
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.5.yaml"
 
-  - name: filter_gaussian_sigma_0.6
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.6.yaml"
+  # - name: filter_gaussian_sigma_0.6
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.6.yaml"
 
-  - name: filter_gaussian_sigma_0.7
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.7.yaml"
+  # - name: filter_gaussian_sigma_0.7
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.7.yaml"
 
-  - name: filter_gaussian_sigma_0.8
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.8.yaml"
+  # - name: filter_gaussian_sigma_0.8
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.8.yaml"
 
-  - name: filter_gaussian_sigma_0.9
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.9.yaml"
+  # - name: filter_gaussian_sigma_0.9
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.9.yaml"
 
-  - name: filter_gaussian_sigma_1.0
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.0.yaml"
+  # - name: filter_gaussian_sigma_1.0
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.0.yaml"
 
-  - name: filter_gaussian_sigma_1.5
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.5.yaml"
+  # - name: filter_gaussian_sigma_1.5
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.5.yaml"
 
-  - name: filter_gaussian_sigma_2.0
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.0.yaml"
+  # - name: filter_gaussian_sigma_2.0
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.0.yaml"
 
-  - name: filter_gaussian_sigma_2.5
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.5.yaml"
+  # - name: filter_gaussian_sigma_2.5
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.5.yaml"
 
   # Savitzky-Golay Filter Tests - window lengths 7,9,11 with polyorders 2,3
   - name: filter_savgol_wl7_po2

@@ -151,12 +151,14 @@ class SavedData(BaseModel):
 
                         if "keypoints" in person_data:
                             keypoints = person_data["keypoints"]
-                            keypoints_visible = person_data.get("keypoints_visible", [])
+                            keypoints_visible = person_data.get(
+                                "keypoints_visible", [])
                             bbox = person_data.get("bbox", [])
                             bbox_scores = person_data.get("bbox_scores", [])
 
                             if bbox:
-                                person.add_detection(frame_idx, bbox, 1.0, label=0)
+                                person.add_detection(
+                                    frame_idx, bbox, 1.0, label=0)
 
                             person.add_pose(
                                 frame_idx,
@@ -242,7 +244,8 @@ class StandardDataSaver:
             video_path = self._find_video_file(video_name, original_file_path)
             if video_path:
                 overlay_path = os.path.join(output_dir, f"{base_name}")
-                self._create_video_overlay(video_path, saved_data, overlay_path)
+                self._create_video_overlay(
+                    video_path, saved_data, overlay_path)
                 saved_paths["video"] = overlay_path
 
         return saved_paths
@@ -342,7 +345,8 @@ class StandardDataSaver:
 
         # Update output path to use same extension
         output_path_with_ext = f"{output_path_base}{input_extension}"
-        out = cv2.VideoWriter(output_path_with_ext, fourcc, fps, (width, height))
+        out = cv2.VideoWriter(output_path_with_ext,
+                              fourcc, fps, (width, height))
 
         # Convert data to frame-based structure for easier processing
         frame_keypoints = self._extract_frame_keypoints_from_saved_data(data)
@@ -361,7 +365,8 @@ class StandardDataSaver:
                             if len(joint[i]) >= 2:  # Ensure we have x, y coordinates
                                 x, y = int(joint[i][0]), int(joint[i][1])
                                 if not np.isnan(x) and not np.isnan(y):
-                                    cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+                                    cv2.circle(frame, (x, y), 5,
+                                               (0, 255, 0), -1)
 
             out.write(frame)
             frame_idx += 1
@@ -515,7 +520,8 @@ def load_saved_data(file_path: str) -> SavedData:
             video_name = data.get("video_name", "unknown")
             return SavedData.from_legacy_dict(data, video_name)
         else:
-            raise ValueError(f"Unsupported data type in PKL file: {type(data)}")
+            raise ValueError(
+                f"Unsupported data type in PKL file: {type(data)}")
     else:
         raise ValueError(f"Unsupported file format: {file_path}")
 
