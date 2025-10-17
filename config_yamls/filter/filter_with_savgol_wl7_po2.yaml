@@ -3,7 +3,7 @@ paths:
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 filter:
-  name: "savitzky_golay"
+  name: "savitzky"
   params:
     window_length: 7
     polyorder: 2
