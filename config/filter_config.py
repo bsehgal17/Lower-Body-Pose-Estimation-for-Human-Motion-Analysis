@@ -10,13 +10,13 @@ class OutlierRemovalConfig(BaseModel):
 
 class FilterConfig(BaseModel):
     name: str
-    params: Optional[dict]
-    input_dir: Optional[str]
-    enable_interpolation: Optional[bool]
-    interpolation_kind: Optional[str]
-    enable_filter_plots: Optional[bool]
-    joints_to_filter: Optional[List[str]]
-    outlier_removal: Optional[Union[OutlierRemovalConfig, dict]]
+    params: Optional[dict] = None
+    input_dir: Optional[str] = None
+    enable_interpolation: Optional[bool] = None
+    interpolation_kind: Optional[str] = None
+    enable_filter_plots: Optional[bool] = None
+    joints_to_filter: Optional[List[str]] = None
+    outlier_removal: Optional[Union[OutlierRemovalConfig, dict]] = None
 
     @model_validator(mode="after")
     def convert_outlier_removal(self):
