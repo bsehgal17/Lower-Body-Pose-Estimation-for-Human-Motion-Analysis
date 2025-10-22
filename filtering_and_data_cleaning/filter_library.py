@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.signal import butter, filtfilt, savgol_filter, wiener
+from scipy.signal import butter, sosfiltfilt, savgol_filter, wiener
 from scipy.ndimage import gaussian_filter1d, median_filter
 from pykalman import KalmanFilter
 from scipy.interpolate import UnivariateSpline
@@ -8,48 +8,21 @@ from scipy.interpolate import UnivariateSpline
 class FilterLibrary:
     @staticmethod
     def butterworth(data, cutoff, fs, order):
-        # filtfilt requires minimum data length of 3 * max(len(a), len(b))
-        # For nth order Butterworth, this is typically 3 * (order + 1)
-        min_length = 3 * (order + 1)
-
-        if len(data) < min_length:
-            # For short sequences, return original data or apply simple smoothing
-            if len(data) <= 3:
-                return np.array(data)
-            # Use a lower order filter that can handle the data length
-            max_order = max(1, min(order, (len(data) // 3) - 1))
-            if max_order != order:
-                print(
-                    f"Warning: Reducing Butterworth order from {order} to {max_order} for short sequence (length {len(data)})"
-                )
-            order = max_order
-
-        try:
-            cutoff = float(cutoff)
-            fs = float(fs)
-            order = int(order)
-        except Exception as e:
-            raise ValueError(
-                f"Invalid Butterworth parameters: cutoff={cutoff}, fs={fs}, order={order}"
-            ) from e
-
-        # Ensure cutoff is valid (less than Nyquist frequency)
-        nyquist = 0.5 * fs
-        if cutoff >= nyquist:
-            print(
-                f"Warning: Cutoff frequency {cutoff} Hz >= Nyquist frequency {nyquist} Hz. Using {nyquist * 0.9} Hz instead."
-            )
-            cutoff = nyquist * 0.9
-
-        b, a = butter(order, cutoff / nyquist, btype="low", analog=False)
-        return filtfilt(b, a, data)
+        cutoff = float(cutoff)
+        fs = float(fs)
+        order = int(order)
+        sos = butter(order, cutoff / (0.5 * fs), btype="low", output="sos")
+        if len(data) <= 3 * (2 * order - 1):
+            return np.array(data)
+        return sosfiltfilt(sos, data)
 
     @staticmethod
     def gaussian(data, sigma):
         try:
             sigma = float(sigma)
         except Exception as e:
-            raise ValueError(f"Invalid sigma for Gaussian filter: {sigma}") from e
+            raise ValueError(
+                f"Invalid sigma for Gaussian filter: {sigma}") from e
         return gaussian_filter1d(data, sigma=sigma)
 
     @staticmethod
@@ -80,7 +53,7 @@ class FilterLibrary:
         return np.array(
             [
                 np.mean(
-                    data[max(0, i - half_window) : min(num_frames, i + half_window + 1)]
+                    data[max(0, i - half_window): min(num_frames, i + half_window + 1)]
                 )
                 for i in range(num_frames)
             ]
@@ -260,10 +233,10 @@ class FilterLibrary:
 
         # Optional tapering window to reduce spectral leakage
         if window_type == "hann":
-            taper = np.hanning(len(mask) * 2)[len(mask) :]
+            taper = np.hanning(len(mask) * 2)[len(mask):]
             mask *= taper
         elif window_type == "hamming":
-            taper = np.hamming(len(mask) * 2)[len(mask) :]
+            taper = np.hamming(len(mask) * 2)[len(mask):]
             mask *= taper
 
         # Apply mask
