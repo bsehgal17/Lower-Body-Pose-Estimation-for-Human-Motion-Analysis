@@ -1,6 +1,8 @@
 from pydantic import BaseModel, model_validator
 import logging
 import os
+from typing import Optional
+
 
 # Configure logging
 logging.basicConfig(
@@ -11,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 class PipelinePathsConfig(BaseModel):
     """Pipeline-level paths: dataset name and ground truth file."""
-
+    input_dir: Optional[str] = None
+    output_dir: Optional[str] = None
     dataset: str
     ground_truth_file: str
 

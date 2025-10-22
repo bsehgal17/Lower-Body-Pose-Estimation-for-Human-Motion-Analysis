@@ -4,8 +4,8 @@ orchestrator:
 
 pipelines:
 
-  # Gaussian Filter Tests - sigma values from 0.4 to 2.5 (COMMENTED OUT)
-  # - name: filter_gaussian_sigma_0.4
+  # # Gaussian Filter Tests - sigma values from 0.4 to 2.5 (COMMENTED OUT)
+  # # - name: filter_gaussian_sigma_0.4
   #   steps:
   #     - command: filter
   #       config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.4.yaml"
@@ -139,9 +139,9 @@ pipelines:
         config_file: "config_yamls/filter/filter_butterworth_4th_6hz.yaml"
 
   - name: filter_butterworth_4th_7hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_7hz.yaml"
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_7hz.yaml"
 
   - name: filter_butterworth_4th_8hz
     steps:

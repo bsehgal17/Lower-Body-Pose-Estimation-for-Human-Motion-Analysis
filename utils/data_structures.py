@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 import numpy as np
 
 
@@ -52,7 +52,7 @@ class PoseData(BaseModel):
     information for human pose estimation results in a specific video frame.
     """
 
-    pose_frame_idx: int = Field(
+    frame_idx: int = Field(
         ...,
         ge=0,
         description="Zero-based frame index where pose estimation was performed in the video sequence. "
@@ -60,7 +60,7 @@ class PoseData(BaseModel):
         "This frame index corresponds to when keypoint coordinates were estimated. "
         "May not match detection frame_idx if pose estimation is done on subset of frames.",
     )
-    keypoints: List[List[float]] = Field(
+    keypoints: List[List[Union[float, List[float]]]] = Field(
         ...,
         description="2D keypoint coordinates in pixels. Shape: (num_joints, 2) where each joint "
         "has [x, y] coordinates in image pixel space. Uses zero-based pixel coordinates: "
@@ -68,7 +68,7 @@ class PoseData(BaseModel):
         "Joint order depends on the pose estimation model used (e.g., COCO-17, COCO-133, etc.). "
         "Coordinates are floating-point for sub-pixel accuracy.",
     )
-    keypoints_visible: List[float] = Field(
+    keypoints_visible: List[Union[float, List[float]]] = Field(
         ...,
         description="Visibility/confidence scores for each keypoint, range [0.0, 1.0]. "
         "Higher values indicate higher confidence that the keypoint is visible "
@@ -152,7 +152,7 @@ class Person(BaseModel):
     ):
         """Add pose data for this person in a specific frame."""
         pose = PoseData(
-            pose_frame_idx=frame_idx,
+            frame_idx=frame_idx,
             keypoints=keypoints,
             keypoints_visible=keypoints_visible,
             pose_bbox=bbox,
@@ -261,7 +261,7 @@ class VideoData(BaseModel):
                     ],
                     "poses": [
                         {
-                            "frame_idx": pose.pose_frame_idx,
+                            "frame_idx": pose.frame_idx,
                             "keypoints": pose.keypoints,
                             "keypoints_visible": pose.keypoints_visible,
                             "bbox": pose.pose_bbox,
@@ -280,7 +280,8 @@ class VideoData(BaseModel):
     def from_dict(cls, data: Dict[str, Any]) -> "VideoData":
         """Create VideoData from dictionary."""
         video_data = cls(
-            video_name=data["video_name"], detection_config=data.get("detection_config")
+            video_name=data["video_name"], detection_config=data.get(
+                "detection_config")
         )
 
         # Load persons
@@ -316,7 +317,8 @@ class VideoData(BaseModel):
                 frame_idx = detection.detection_frame_idx
                 if frame_idx not in video_data.all_detections_per_frame:
                     video_data.all_detections_per_frame[frame_idx] = []
-                video_data.all_detections_per_frame[frame_idx].append(detection)
+                video_data.all_detections_per_frame[frame_idx].append(
+                    detection)
 
         # Load legacy all_detections_per_frame if present (for backward compatibility)
         legacy_detections = data.get("all_detections_per_frame", {})

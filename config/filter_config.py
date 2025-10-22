@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, model_validator
 
 class OutlierRemovalConfig(BaseModel):
     enable: bool
-    method: Optional[str]  # "iqr" or "zscore"
+    method: Optional[str] = None
     params: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
