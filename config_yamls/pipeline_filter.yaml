@@ -230,6 +230,17 @@ pipelines:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_6th_8hz.yaml"
 
+  # Savitzky-Golay Filter Tests - window length 15 with polyorders 2,3
+  - name: filter_savgol_wl15_po2
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl15_po2.yaml"
+
+  - name: filter_savgol_wl15_po3
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl15_po3.yaml"
+
   # Evaluation steps for Gaussian filters (COMMENTED OUT)
   # - name: filter_gaussian_sigma_0.4
   #   steps:
@@ -452,6 +463,17 @@ pipelines:
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   - name: filter_butterworth_6th_8hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # Evaluation steps for Savitzky-Golay filters - window length 15 with polyorders 2,3
+  - name: filter_savgol_wl15_po2
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_savgol_wl15_po3
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
