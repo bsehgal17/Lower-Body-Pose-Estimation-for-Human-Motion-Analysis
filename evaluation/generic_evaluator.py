@@ -86,7 +86,8 @@ def run_assessment(
                 continue
 
             pred_pkl_path = os.path.join(root, file)
-            sample = data_loader_func(pred_pkl_path, pipeline_config, global_config)
+            sample = data_loader_func(
+                pred_pkl_path, pipeline_config, global_config)
 
             if not sample:
                 continue
@@ -103,7 +104,8 @@ def run_assessment(
 
             # Skip this sample if gt_keypoints is None or empty (no GT data)
             if gt_keypoints is None or (
-                isinstance(gt_keypoints, (list, np.ndarray)) and len(gt_keypoints) == 0
+                isinstance(gt_keypoints, (list, np.ndarray)
+                           ) and len(gt_keypoints) == 0
             ):
                 logger.warning(
                     f"Skipping sample {sample_info} due to missing GT keypoints."
@@ -111,11 +113,12 @@ def run_assessment(
                 continue
 
             for metric_cfg in pipeline_config.evaluation.metrics:
-                metric_name = metric_cfg["name"]
-                params = metric_cfg.get("params", {})
+                metric_name = metric_cfg.name
+                params = metric_cfg.params or {}
 
                 metric_entry = next(
-                    (m for m in EVALUATION_METRICS if m["name"] == metric_name), None
+                    (m for m in EVALUATION_METRICS if m["name"]
+                     == metric_name), None
                 )
                 if not metric_entry:
                     logger.error(f"Metric '{metric_name}' not found.")
