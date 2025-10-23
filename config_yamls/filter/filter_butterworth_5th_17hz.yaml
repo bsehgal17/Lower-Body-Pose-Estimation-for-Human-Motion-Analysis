@@ -1,0 +1,56 @@
+# filepath: c:\Users\BhavyaSehgal\Downloads\Lower-Body-Pose-Estimation-for-Human-Motion-Analysis\config_yamls\filter\filter_butterworth_5th_17hz.yaml
+paths:
+  dataset: HumanEva
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
+
+
+noise:
+  apply_poisson_noise: true
+  apply_gaussian_noise: true
+  apply_motion_blur: true
+  apply_brightness_reduction: true
+  brightness_factor: 30
+  poisson_scale: 1.0
+  gaussian_std: 2.0
+  motion_blur_kernel_size: 5
+  target_resolution: null  # or [640, 480]
+
+
+filter:
+  name: "butterworth"
+  params:
+    order: 5
+    cutoff: 17.0
+    fs: 60.0  # sampling frequency, adjust as needed
+  outlier_removal:
+      enable: False
+
+
+  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/detect/"
+  output_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/filter_butterworth_5th_17hz/filter/"
+
+
+
+
+evaluation:
+  metrics:
+    - "overall_pck"
+    - "overall_map"
+    - "per_frame_pck"
+    - "jointwise_pck"
+  distance_thresholds: [0.05, 0.1, 0.15, 0.2, 0.25]
+  normalization: "bbox"
+  format: "mpt"
+  is_gt_normalized: False
+
+  # Paths for evaluation
+  pred_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/filter_butterworth_5th_17hz/filter/"
+  pred_file: "all_frames_normalized.csv"
+  output_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/filter_butterworth_5th_17hz/evaluation/"
+  confusion_matrix_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/filter_butterworth_5th_17hz/evaluation/confusion_matrices/"
+
+
+dataset:
+  dataset_name: "HumanEva"
+  video_list: null  # or specify video names as a list, e.g., ["S1", "S2"]
+  frame_range: null  # or specify as [start_frame, end_frame]

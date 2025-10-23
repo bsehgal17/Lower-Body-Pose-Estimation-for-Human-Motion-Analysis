@@ -106,129 +106,208 @@ pipelines:
   #     - command: filter
   #       config_file: "config_yamls/filter/filter_with_savgol_wl60_po3.yaml"
 
-  # Butterworth Filter Tests - Orders 4,5,6 with cutoffs 1-8 Hz
+  # Butterworth Filter Tests - Orders 4,5,6 with cutoffs 1-8 Hz (COMMENTED OUT)
   # Order 4 filters
-  - name: filter_butterworth_4th_1hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_1hz.yaml"
+  # - name: filter_butterworth_4th_1hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_1hz.yaml"
 
-  - name: filter_butterworth_4th_2hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_2hz.yaml"
+  # - name: filter_butterworth_4th_2hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_2hz.yaml"
 
-  - name: filter_butterworth_4th_3hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_3hz.yaml"
+  # - name: filter_butterworth_4th_3hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_3hz.yaml"
 
-  - name: filter_butterworth_4th_4hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_4hz.yaml"
+  # - name: filter_butterworth_4th_4hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_4hz.yaml"
 
-  - name: filter_butterworth_4th_5hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_5hz.yaml"
+  # - name: filter_butterworth_4th_5hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_5hz.yaml"
 
-  - name: filter_butterworth_4th_6hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_6hz.yaml"
+  # - name: filter_butterworth_4th_6hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_6hz.yaml"
 
-  - name: filter_butterworth_4th_7hz
+  # - name: filter_butterworth_4th_7hz
   #   steps:
   #     - command: filter
   #       config_file: "config_yamls/filter/filter_butterworth_4th_7hz.yaml"
 
-  - name: filter_butterworth_4th_8hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_8hz.yaml"
+  # - name: filter_butterworth_4th_8hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_4th_8hz.yaml"
 
   # Order 5 filters
-  - name: filter_butterworth_5th_1hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_1hz.yaml"
+  # - name: filter_butterworth_5th_1hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_5th_1hz.yaml"
 
-  - name: filter_butterworth_5th_2hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_2hz.yaml"
+  # - name: filter_butterworth_5th_2hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_5th_2hz.yaml"
 
-  - name: filter_butterworth_5th_3hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_3hz.yaml"
+  # - name: filter_butterworth_5th_3hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_5th_3hz.yaml"
 
-  - name: filter_butterworth_5th_4hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_4hz.yaml"
+  # - name: filter_butterworth_5th_4hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_5th_4hz.yaml"
 
-  - name: filter_butterworth_5th_5hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_5hz.yaml"
+  # - name: filter_butterworth_5th_5hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_5th_5hz.yaml"
 
-  - name: filter_butterworth_5th_6hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_6hz.yaml"
+  # - name: filter_butterworth_5th_6hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_5th_6hz.yaml"
 
-  - name: filter_butterworth_5th_7hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_7hz.yaml"
+  # - name: filter_butterworth_5th_7hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_5th_7hz.yaml"
 
-  - name: filter_butterworth_5th_8hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_8hz.yaml"
+  # - name: filter_butterworth_5th_8hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_5th_8hz.yaml"
 
   # Order 6 filters
-  - name: filter_butterworth_6th_1hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_6th_1hz.yaml"
+  # - name: filter_butterworth_6th_1hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_6th_1hz.yaml"
 
-  - name: filter_butterworth_6th_2hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_6th_2hz.yaml"
+  # - name: filter_butterworth_6th_2hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_6th_2hz.yaml"
 
-  - name: filter_butterworth_6th_3hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_6th_3hz.yaml"
+  # - name: filter_butterworth_6th_3hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_6th_3hz.yaml"
 
-  - name: filter_butterworth_6th_4hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_6th_4hz.yaml"
+  # - name: filter_butterworth_6th_4hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_6th_4hz.yaml"
 
-  - name: filter_butterworth_6th_5hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_6th_5hz.yaml"
+  # - name: filter_butterworth_6th_5hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_6th_5hz.yaml"
 
-  - name: filter_butterworth_6th_6hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_6th_6hz.yaml"
+  # - name: filter_butterworth_6th_6hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_6th_6hz.yaml"
 
-  - name: filter_butterworth_6th_7hz
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_6th_7hz.yaml"
+  # - name: filter_butterworth_6th_7hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_6th_7hz.yaml"
 
-  - name: filter_butterworth_6th_8hz
+  # - name: filter_butterworth_6th_8hz
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_6th_8hz.yaml"
+
+  # Additional Butterworth filters - orders 4-6 with cutoffs 10,12,15,17,20 Hz
+  # Order 4 filters
+  - name: filter_butterworth_4th_10hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_6th_8hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_4th_10hz.yaml"
+
+  - name: filter_butterworth_4th_12hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_12hz.yaml"
+
+  - name: filter_butterworth_4th_15hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_15hz.yaml"
+
+  - name: filter_butterworth_4th_17hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_17hz.yaml"
+
+  - name: filter_butterworth_4th_20hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_20hz.yaml"
+
+  # Order 5 filters
+  - name: filter_butterworth_5th_10hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_5th_10hz.yaml"
+
+  - name: filter_butterworth_5th_12hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_5th_12hz.yaml"
+
+  - name: filter_butterworth_5th_15hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_5th_15hz.yaml"
+
+  - name: filter_butterworth_5th_17hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_5th_17hz.yaml"
+
+  - name: filter_butterworth_5th_20hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_5th_20hz.yaml"
+
+  # Order 6 filters
+  - name: filter_butterworth_6th_10hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_6th_10hz.yaml"
+
+  - name: filter_butterworth_6th_12hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_6th_12hz.yaml"
+
+  - name: filter_butterworth_6th_15hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_6th_15hz.yaml"
+
+  - name: filter_butterworth_6th_17hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_6th_17hz.yaml"
+
+  - name: filter_butterworth_6th_20hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_6th_20hz.yaml"
 
   # Savitzky-Golay Filter Tests - window length 15 with polyorders 2,3
   - name: filter_savgol_wl15_po2
@@ -343,126 +422,205 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # Evaluation steps for Butterworth filters - Orders 4,5,6 with cutoffs 1-8 Hz
+  # Evaluation steps for Butterworth filters - Orders 4,5,6 with cutoffs 1-8 Hz (COMMENTED OUT)
   # Order 4 evaluations
-  - name: filter_butterworth_4th_1hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_4th_1hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_4th_2hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_4th_2hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_4th_3hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_4th_3hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_4th_4hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_4th_4hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_4th_5hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_4th_5hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_4th_6hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_4th_6hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_4th_7hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_4th_7hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_4th_8hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_4th_8hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # Order 5 evaluations
-  - name: filter_butterworth_5th_1hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_5th_1hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_5th_2hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_5th_2hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_5th_3hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_5th_3hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_5th_4hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_5th_4hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_5th_5hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_5th_5hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_5th_6hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_5th_6hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_5th_7hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_5th_7hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_5th_8hz
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_5th_8hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # Order 6 evaluations
-  - name: filter_butterworth_6th_1hz
+  # - name: filter_butterworth_6th_1hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_6th_2hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_6th_3hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_6th_4hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_6th_5hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_6th_6hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_6th_7hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # - name: filter_butterworth_6th_8hz
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # Evaluation steps for additional Butterworth filters - orders 4-6 with cutoffs 10,12,15,17,20 Hz
+  # Order 4 filter evaluations
+  - name: filter_butterworth_4th_10hz
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_6th_2hz
+  - name: filter_butterworth_4th_12hz
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_6th_3hz
+  - name: filter_butterworth_4th_15hz
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_6th_4hz
+  - name: filter_butterworth_4th_17hz
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_6th_5hz
+  - name: filter_butterworth_4th_20hz
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_6th_6hz
+  # Order 5 filter evaluations
+  - name: filter_butterworth_5th_10hz
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_6th_7hz
+  - name: filter_butterworth_5th_12hz
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_6th_8hz
+  - name: filter_butterworth_5th_15hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_5th_17hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_5th_20hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # Order 6 filter evaluations
+  - name: filter_butterworth_6th_10hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_6th_12hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_6th_15hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_6th_17hz
+    steps:
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_6th_20hz
     steps:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
