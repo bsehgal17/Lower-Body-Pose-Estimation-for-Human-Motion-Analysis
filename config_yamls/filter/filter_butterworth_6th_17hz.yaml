@@ -27,30 +27,51 @@ filter:
 
 
   input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/detect/"
-  output_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/filter_butterworth_6th_17hz/filter/"
+  # outlier_removal:
+  #   enable: False
+  #   method: "iqr"
+  #   params:
+  #     iqr_multiplier: 1.5
+
+  # enable_interpolation: true
+  # interpolation_kind: "linear"
+
+  # enable_filter_plots: true
+
+  # joints_to_filter:
+  #   - LEFT_ANKLE
+  #   - RIGHT_ANKLE
+  #   - LEFT_KNEE
+  #   - RIGHT_KNEE
+  #   - LEFT_HIP
+  #   - RIGHT_HIP
 
 
 
 
 evaluation:
+  # input_dir: C:\Users\BhavyaSehgal\Downloads\bhavya_phd\test_dataset_results\degraded_videos\S3\Walking_1_(C2) # NEW FIELD
   metrics:
-    - "overall_pck"
-    - "overall_map"
-    - "per_frame_pck"
-    - "jointwise_pck"
-  distance_thresholds: [0.05, 0.1, 0.15, 0.2, 0.25]
-  normalization: "bbox"
-  format: "mpt"
-  is_gt_normalized: False
-
-  # Paths for evaluation
-  pred_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/filter_butterworth_6th_17hz/filter/"
-  pred_file: "all_frames_normalized.csv"
-  output_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/filter_butterworth_6th_17hz/evaluation/"
-  confusion_matrix_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/filter_butterworth_6th_17hz/evaluation/confusion_matrices/"
-
+    - name: overall_pck
+      params:
+        threshold: 0.01
+    # - name: jointwise_pck
+    #   params:
+    #     threshold: 0.05
+    # - name: gat_metric
+    #   params: {}
 
 dataset:
-  dataset_name: "HumanEva"
-  video_list: null  # or specify video names as a list, e.g., ["S1", "S2"]
-  frame_range: null  # or specify as [start_frame, end_frame]
+ joint_enum_module: utils.joint_enum.GTJointsHumanEVa
+ keypoint_format: utils.joint_enum.PredJointsDeepLabCut
+ sync_data:
+    data:
+      S1:
+        Walking 1: [667, 667, 667]
+        Jog 1: [49, 50, 51]
+      S2:
+        Walking 1: [547, 547, 546]
+        Jog 1: [493, 491, 502]
+      S3:
+        Walking 1: [524, 524, 524]
+        Jog 1: [464, 462, 462]
