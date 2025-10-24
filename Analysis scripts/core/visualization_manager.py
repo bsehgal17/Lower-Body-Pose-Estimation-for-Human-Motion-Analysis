@@ -71,10 +71,10 @@ class VisualizationManager:
                 )
 
                 # Check if we have PCK columns
-                if hasattr(self.config, "pck_per_frame_score_columns"):
+                if hasattr(self.config, "pck_overall_score_columns"):
                     available_pck_cols = [
                         col
-                        for col in self.config.pck_per_frame_score_columns
+                        for col in self.config.pck_overall_score_columns
                         if col in scatter_df.columns
                     ]
                     print(f"Available PCK columns: {available_pck_cols}")
