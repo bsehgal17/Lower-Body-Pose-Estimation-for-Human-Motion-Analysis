@@ -56,16 +56,16 @@ class DatasetConfig(BaseModel):
         "Used for subject-wise analysis and grouping.",
     )
 
-    action_column: str = Field(
-        ...,
-        description="Column name in PCK file that identifies different actions/activities. "
+    action_column: Optional[str] = Field(
+        default=None,
+        description="(Optional) Column name in PCK file identifying actions/activities. "
         "Examples: 'Action', 'Activity', 'action_name'. "
         "Used for action-wise performance analysis.",
     )
 
-    camera_column: str = Field(
-        ...,
-        description="Column name in PCK file that identifies different camera views. "
+    camera_column: Optional[str] = Field(
+        default=None,
+        description="(Optional) Column name in PCK file identifying camera views. "
         "Examples: 'Camera', 'View', 'camera_id'. "
         "Used for camera/viewpoint-specific analysis.",
     )
@@ -156,7 +156,8 @@ class DatasetConfig(BaseModel):
         errors = []
 
         if not os.path.exists(self.video_directory):
-            errors.append(f"Video directory does not exist: {self.video_directory}")
+            errors.append(
+                f"Video directory does not exist: {self.video_directory}")
 
         if not os.path.exists(self.pck_file_path):
             errors.append(f"PCK file does not exist: {self.pck_file_path}")
@@ -178,7 +179,8 @@ class DatasetConfig(BaseModel):
 
         # Optional validation for ground truth file
         if self.ground_truth_file and not os.path.exists(self.ground_truth_file):
-            errors.append(f"Ground truth file does not exist: {self.ground_truth_file}")
+            errors.append(
+                f"Ground truth file does not exist: {self.ground_truth_file}")
 
         if errors:
             for error in errors:
@@ -303,7 +305,8 @@ class DatasetConfig(BaseModel):
 
         # Find and replace arithmetic expressions
         arithmetic_pattern = r"\{([^}]+[\+\-][^}]+)\}"
-        processed_string = re.sub(arithmetic_pattern, replace_arithmetic, format_string)
+        processed_string = re.sub(
+            arithmetic_pattern, replace_arithmetic, format_string)
 
         # Now handle regular formatting
         try:
@@ -311,5 +314,6 @@ class DatasetConfig(BaseModel):
         except KeyError:
             # If some variables are still missing, do a safer replacement
             for key, value in format_dict.items():
-                processed_string = processed_string.replace(f"{{{key}}}", str(value))
+                processed_string = processed_string.replace(
+                    f"{{{key}}}", str(value))
             return processed_string
