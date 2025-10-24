@@ -131,7 +131,7 @@ Examples:
     parser.add_argument(
         "--dataset",
         "-d",
-        default="movi",
+        # default="movi",
         choices=["movi", "humaneva"],
         help="Dataset to analyze (default: movi)",
     )
@@ -185,7 +185,7 @@ Examples:
         print("No analysis type specified. Running joint analysis by default.")
         print("Use --help to see all options.")
         # success = run_analysis_by_type(args.dataset, "multi")
-        success = run_analysis_by_type("humaneva", "per_video")
+        success = run_analysis_by_type("humaneva", "all")
 
         if not success:
             sys.exit(1)

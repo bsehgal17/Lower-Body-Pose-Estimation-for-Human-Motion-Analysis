@@ -4,6 +4,7 @@ Joint Analysis Pipeline
 Main orchestrator for modular joint analysis pipeline.
 """
 
+from utils.joint_enum import GTJointsHumanEVa, GTJointsMoVi
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Any
@@ -17,7 +18,6 @@ from processors.joint_report_generator import JointReportGenerator
 import sys
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from utils.joint_enum import GTJointsHumanEVa, GTJointsMoVi
 
 
 class JointAnalysisPipeline:
@@ -51,7 +51,7 @@ class JointAnalysisPipeline:
         else:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             self.output_dir = Path(
-                f"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/MoVi/joint analysis/joint_analysis_{dataset_name}_{timestamp}"
+                f"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/{dataset_name}/joint_analysis_{dataset_name}_{timestamp}"
             )
 
         # Initialize components
@@ -199,7 +199,8 @@ class JointAnalysisPipeline:
                 print("ERROR: No analysis results provided")
                 return False
 
-            plot_data = self.analyzer.get_average_data_for_plotting(analysis_results)
+            plot_data = self.analyzer.get_average_data_for_plotting(
+                analysis_results)
             self.visualizer.create_all_visualizations(plot_data)
             self.visualizer.create_summary_plot(plot_data)
 

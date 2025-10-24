@@ -28,9 +28,9 @@ class VideoPathResolver(BaseDataProcessor):
         if not all([subject, action, camera]):
             return None
 
-        video_filename = f"{subject}_{action}_C{camera}.avi"
+        video_filename = f"{action}_(C{camera}).avi"
         video_path = os.path.join(
-            self.config.video_directory, subject, action, video_filename
+            self.config.video_directory, subject, "Image_Data", video_filename
         )
 
         return video_path if os.path.exists(video_path) else None

@@ -193,7 +193,7 @@ class JointAnalyzer:
                         "joints2d_projected.csv",
                     )
                 elif self.dataset_name.lower() == "humaneva":
-                    pass
+                    gt_file = self.ground_truth_directory
                 if not os.path.exists(gt_file):
                     # Try alternative naming
                     gt_file = os.path.join(
@@ -233,8 +233,8 @@ class JointAnalyzer:
                 else:
                     # HumanEva or other formats: traditional CSV with column names
                     gt_data = pd.read_csv(gt_file)
-                    x_col = f"{joint_number}_x"
-                    y_col = f"{joint_number}_y"
+                    x_col = f"x{joint_number}"
+                    y_col = f"y{joint_number}"
 
                     if x_col not in gt_data.columns or y_col not in gt_data.columns:
                         print(
