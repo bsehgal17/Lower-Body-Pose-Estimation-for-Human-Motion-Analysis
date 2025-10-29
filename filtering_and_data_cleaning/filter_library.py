@@ -1,4 +1,6 @@
 import numpy as np
+from filterpy.kalman import UnscentedKalmanFilter as UKF
+from filterpy.kalman import MerweScaledSigmaPoints
 from scipy.signal import butter, sosfiltfilt, savgol_filter, wiener
 from scipy.ndimage import gaussian_filter1d, median_filter
 from pykalman import KalmanFilter
@@ -21,8 +23,7 @@ class FilterLibrary:
         try:
             sigma = float(sigma)
         except Exception as e:
-            raise ValueError(
-                f"Invalid sigma for Gaussian filter: {sigma}") from e
+            raise ValueError(f"Invalid sigma for Gaussian filter: {sigma}") from e
         return gaussian_filter1d(data, sigma=sigma)
 
     @staticmethod
@@ -53,7 +54,7 @@ class FilterLibrary:
         return np.array(
             [
                 np.mean(
-                    data[max(0, i - half_window): min(num_frames, i + half_window + 1)]
+                    data[max(0, i - half_window) : min(num_frames, i + half_window + 1)]
                 )
                 for i in range(num_frames)
             ]
@@ -121,72 +122,95 @@ class FilterLibrary:
         return spline(x)
 
     @staticmethod
-    def extended_kalman(data, process_noise, measurement_noise):
-        """Simplified 1D Extended Kalman Filter."""
+    def extended_kalman(data, process_noise, measurement_noise, dt):
+        """
+        2D Extended Kalman Filter for gait pose estimation (x, y) with velocity.
+        - data: Nx2 array of joint positions (x, y) in pixels
+        - process_noise: scalar (acceleration noise)
+        - measurement_noise: scalar (position measurement noise)
+        - dt: time step in seconds
+        Returns filtered Nx2 array.
+        """
         if len(data) == 0:
-            return np.array([])
-        try:
-            process_noise = float(process_noise)
-            measurement_noise = float(measurement_noise)
-        except Exception as e:
-            raise ValueError(
-                f"Invalid EKF params: process_noise={process_noise}, measurement_noise={measurement_noise}"
-            ) from e
+            return np.empty((0, 2))
 
-        x = np.array([0.0])
-        P = np.array([[1.0]])
-        Q = np.array([[process_noise]])
-        R = np.array([[measurement_noise]])
-        H = np.array([[1.0]])
-        F = np.array([[1.0]])
+        # State vector: [x, y, vx, vy]
+        x = np.array([data[0, 0], data[0, 1], 0.0, 0.0])
+        P = np.diag([25**2, 25**2, 5**2, 5**2])  # initial covariance
+
+        # State transition matrix
+        F = np.array([[1, 0, dt, 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0, 1]])
+
+        # Measurement matrix
+        H = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+
+        # Process noise Q (based on constant acceleration model)
+        q = process_noise
+        Q_block = np.array([[dt**4 / 4, dt**3 / 2], [dt**3 / 2, dt**2]]) * q**2
+        Q = np.block([[Q_block, np.zeros((2, 2))], [np.zeros((2, 2)), Q_block]])
+
+        # Measurement noise
+        R = np.eye(2) * measurement_noise**2
+
         results = []
-
         for z in data:
+            # Predict
             x = F @ x
             P = F @ P @ F.T + Q
+
+            # Update
             y = z - H @ x
             S = H @ P @ H.T + R
             K = P @ H.T @ np.linalg.inv(S)
             x = x + K @ y
             P = (np.eye(len(P)) - K @ H) @ P
-            results.append(x[0])
+
+            results.append(x[:2].copy())
 
         return np.array(results)
 
     @staticmethod
-    def unscented_kalman(data, process_noise, measurement_noise):
-        """Basic UKF implementation for 1D."""
-        from filterpy.kalman import UnscentedKalmanFilter as UKF
-        from filterpy.kalman import MerweScaledSigmaPoints
-
+    def unscented_kalman(data, process_noise, measurement_noise, dt):
+        """
+        2D Unscented Kalman Filter for gait pose estimation (x, y) with velocity.
+        - data: Nx2 array of joint positions (x, y) in pixels
+        - process_noise: scalar (acceleration noise)
+        - measurement_noise: scalar (position measurement noise)
+        - dt: time step in seconds
+        Returns filtered Nx2 array.
+        """
         if len(data) == 0:
-            return np.array([])
-        try:
-            process_noise = float(process_noise)
-            measurement_noise = float(measurement_noise)
-        except Exception as e:
-            raise ValueError(
-                f"Invalid UKF params: process_noise={process_noise}, measurement_noise={measurement_noise}"
-            ) from e
+            return np.empty((0, 2))
 
+        # UKF fx and hx functions for constant velocity
         def fx(x, dt):
-            return x
+            # x = [x, y, vx, vy]
+            F = np.array([[1, 0, dt, 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0, 1]])
+            return F @ x
 
         def hx(x):
-            return x
+            # only measure positions
+            return x[:2]
 
-        points = MerweScaledSigmaPoints(n=1, alpha=0.1, beta=2.0, kappa=0)
-        ukf = UKF(dim_x=1, dim_z=1, dt=1.0, fx=fx, hx=hx, points=points)
-        ukf.x = np.array([0.0])
-        ukf.P *= 1.0
-        ukf.Q *= process_noise
-        ukf.R *= measurement_noise
+        points = MerweScaledSigmaPoints(n=4, alpha=1e-3, beta=2, kappa=0)
+        ukf = UKF(dim_x=4, dim_z=2, dt=dt, fx=fx, hx=hx, points=points)
+
+        # Initialize state with first measurement
+        ukf.x = np.array([data[0, 0], data[0, 1], 0.0, 0.0])
+        ukf.P = np.diag([25**2, 25**2, 5**2, 5**2])
+
+        # Process & measurement noise
+        q = process_noise
+        Q_block = np.array([[dt**4 / 4, dt**3 / 2], [dt**3 / 2, dt**2]]) * q**2
+        ukf.Q = np.block([[Q_block, np.zeros((2, 2))], [np.zeros((2, 2)), Q_block]])
+        ukf.R = np.eye(2) * measurement_noise**2
 
         results = []
         for z in data:
             ukf.predict()
             ukf.update(z)
-            results.append(ukf.x[0])
+            results.append(ukf.x[:2].copy())
+
         return np.array(results)
 
     @staticmethod
@@ -233,10 +257,10 @@ class FilterLibrary:
 
         # Optional tapering window to reduce spectral leakage
         if window_type == "hann":
-            taper = np.hanning(len(mask) * 2)[len(mask):]
+            taper = np.hanning(len(mask) * 2)[len(mask) :]
             mask *= taper
         elif window_type == "hamming":
-            taper = np.hamming(len(mask) * 2)[len(mask):]
+            taper = np.hamming(len(mask) * 2)[len(mask) :]
             mask *= taper
 
         # Apply mask
