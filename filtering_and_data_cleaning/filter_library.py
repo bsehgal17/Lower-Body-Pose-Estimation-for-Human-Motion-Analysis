@@ -90,20 +90,71 @@ class FilterLibrary:
         return wiener(data, mysize=window_size)
 
     @staticmethod
-    def kalman(data, process_noise, measurement_noise):
+    def kalman(data, process_noise, measurement_noise, dt):
+        """
+        Apply 2D constant velocity Kalman Filter on gait joint data.
+
+        Parameters:
+        - data: n x 2 array of [x, y] positions
+        - process_noise: expected acceleration variance (pixels^2/s^4)
+        - measurement_noise: detector noise variance (pixels^2)
+        - dt: time step between frames (s)
+
+        Returns:
+        - filtered positions: n x 2 array [x, y]
+        """
         if len(data) == 0:
             return np.array([])
+
         try:
             process_noise = float(process_noise)
             measurement_noise = float(measurement_noise)
+            dt = float(dt)
         except Exception as e:
             raise ValueError(
-                f"Invalid Kalman filter params: process_noise={process_noise}, measurement_noise={measurement_noise}"
+                f"Invalid Kalman filter params: process_noise={process_noise}, measurement_noise={measurement_noise}, dt={dt}"
             ) from e
 
-        kf = FilterLibrary._init_kalman(process_noise, measurement_noise)
-        filtered, _ = kf.filter(data)
-        return filtered[:, 0]
+        # State transition: [x, y, vx, vy]
+        F = np.array([[1, 0, dt, 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0, 1]])
+
+        # Measurement: only positions
+        H = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+
+        # Process noise Q
+        Q = process_noise * np.array(
+            [
+                [dt**4 / 4, 0, dt**3 / 2, 0],
+                [0, dt**4 / 4, 0, dt**3 / 2],
+                [dt**3 / 2, 0, dt**2, 0],
+                [0, dt**3 / 2, 0, dt**2],
+            ]
+        )
+
+        # Measurement noise R
+        R = np.array([[measurement_noise, 0], [0, measurement_noise]])
+
+        # Initial state: first measurement, zero velocity
+        x0 = np.array([data[0, 0], data[0, 1], 0.0, 0.0])
+
+        # Initial covariance
+        P0 = np.diag([25**2, 25**2, 5**2, 5**2])
+
+        # Initialize Kalman Filter
+        kf = KalmanFilter(
+            transition_matrices=F,
+            observation_matrices=H,
+            initial_state_mean=x0,
+            initial_state_covariance=P0,
+            transition_covariance=Q,
+            observation_covariance=R,
+        )
+
+        # Apply filter
+        filtered_state_means, _ = kf.filter(data)
+
+        # Return only positions [x, y]
+        return filtered_state_means[:, :2]
 
     @staticmethod
     def gvcspl(data, smoothing_factor=None):
@@ -212,19 +263,6 @@ class FilterLibrary:
             results.append(ukf.x[:2].copy())
 
         return np.array(results)
-
-    @staticmethod
-    def _init_kalman(process_noise, measurement_noise):
-        return KalmanFilter(
-            transition_matrices=np.array([[1, 1], [0, 1]]),
-            observation_matrices=np.array([[1, 0]]),
-            initial_state_mean=[0, 0],
-            initial_state_covariance=np.eye(2),
-            transition_covariance=float(process_noise) * np.eye(2),
-            observation_covariance=float(measurement_noise),
-        )
-
-    import numpy as np
 
     def fdf_filter(signal, cutoff, fs, order, window_type=None):
         """
