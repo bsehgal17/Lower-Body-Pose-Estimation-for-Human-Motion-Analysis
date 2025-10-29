@@ -25,12 +25,8 @@ def run_analysis_by_type(dataset_name: str, analysis_type: str) -> bool:
     """
     orchestrator = AnalysisOrchestrator(dataset_name)
 
-    if analysis_type == "joint":
-        return orchestrator.run_joint_analysis()
-    elif analysis_type == "standard":
+    if analysis_type == "standard":
         return orchestrator.run_standard_analysis()
-    elif analysis_type == "multi":
-        return orchestrator.run_multi_analysis()
     elif analysis_type == "per_video":
         # Run per-video joint brightness analysis
         return orchestrator.run_per_video_analysis()
@@ -78,15 +74,10 @@ def interactive_mode(dataset_name: str):
                 analysis_idx = int(choice) - 1
                 analysis_type = available_analyses[analysis_idx]
 
-                print(
-                    f"\nRunning {analysis_type.replace('_', ' ').title()}...")
+                print(f"\nRunning {analysis_type.replace('_', ' ').title()}...")
 
-                if analysis_type == "joint_analysis":
-                    success = orchestrator.run_joint_analysis()
-                elif analysis_type == "standard_analysis":
+                if analysis_type == "standard_analysis":
                     success = orchestrator.run_standard_analysis()
-                elif analysis_type == "multi_analysis":
-                    success = orchestrator.run_multi_analysis()
                 elif analysis_type == "per_video_analysis":
                     success = orchestrator.run_per_video_analysis()
 
@@ -114,14 +105,12 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Analysis Types:
-  joint      - Joint-wise pose estimation analysis
   standard   - Standard single analysis pipeline  
-  multi      - Multi-analysis pipeline with scenarios
-  per_video  - Per-video joint brightness analysis (NEW)
+  per_video  - Per-video joint brightness analysis
   all        - Complete analysis suite (runs all)
 
 Examples:
-  python main.py --dataset movi --type joint
+  python main.py --dataset movi --type standard
   python main.py --dataset movi --type per_video
   python main.py --dataset humaneva --interactive
   python main.py --dataset movi --type all
@@ -139,7 +128,7 @@ Examples:
     parser.add_argument(
         "--type",
         "-t",
-        choices=["joint", "standard", "multi", "per_video", "all"],
+        choices=["standard", "per_video", "all"],
         help="Type of analysis to run",
     )
 
@@ -181,11 +170,10 @@ Examples:
                 sys.exit(1)
             return
 
-        # Default: run joint analysis
-        print("No analysis type specified. Running joint analysis by default.")
+        # Default: run per-video analysis
+        print("No analysis type specified. Running per-video analysis by default.")
         print("Use --help to see all options.")
-        # success = run_analysis_by_type(args.dataset, "multi")
-        success = run_analysis_by_type("movi", "all")
+        success = run_analysis_by_type("movi", "per_video")
 
         if not success:
             sys.exit(1)
