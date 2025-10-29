@@ -161,7 +161,7 @@ class PerVideoJointAnalysisRunner:
                 visualizer = PerVideoJointBrightnessVisualizer(
                     output_dir=str(self.output_dir),
                     save_plots=True,
-                    create_individual_plots=False,  # Focus on combined plot
+                    create_individual_plots=True,  # Enable individual plots for each video
                 )
 
                 visualizer.create_all_visualizations(analysis_results)
@@ -258,10 +258,8 @@ class PerVideoJointAnalysisRunner:
                     brightness_averages[video_name] = avg_brightness
 
         if brightness_averages:
-            brightest_video = max(brightness_averages,
-                                  key=brightness_averages.get)
-            darkest_video = min(brightness_averages,
-                                key=brightness_averages.get)
+            brightest_video = max(brightness_averages, key=brightness_averages.get)
+            darkest_video = min(brightness_averages, key=brightness_averages.get)
             print(
                 f"    Brightest video: {brightest_video} ({brightness_averages[brightest_video]:.2f})"
             )
