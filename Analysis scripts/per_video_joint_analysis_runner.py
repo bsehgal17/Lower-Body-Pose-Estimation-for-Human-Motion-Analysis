@@ -66,13 +66,13 @@ class PerVideoJointAnalysisRunner:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             self.output_dir = Path(
                 f"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/"
-                f"{dataset_name.upper()}/per_video_joint_analysis/per_video_analysis_{timestamp}"
+                f"{dataset_name.upper()}/joint_level_analysis/joint_level_analysis_{timestamp}"
             )
 
         if self.save_results:
             self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        print("Per-Video Joint Analysis Runner")
+        print("Joint-Level Analysis Runner")
         print(f"Dataset: {self.dataset_name}")
         print(f"Joints: {', '.join(self.joint_names)}")
         print(f"PCK Thresholds: {self.pck_thresholds}")

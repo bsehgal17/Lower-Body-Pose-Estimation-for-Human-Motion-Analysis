@@ -56,7 +56,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         Args:
             analysis_results: Results from PerVideoJointBrightnessAnalyzer
         """
-        print("Creating per-video joint brightness visualizations...")
+        print("Creating joint-level joint brightness visualizations...")
 
         if not analysis_results:
             print("❌ No analysis results to visualize")
@@ -98,7 +98,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         if self.create_individual_plots:
             self.create_combined_scatter_plot(analysis_results)
 
-        print("✅ Per-video visualization completed")
+        print("✅ Joint-level visualization completed")
 
     def create_pck_brightness_plot(self, analysis_results: dict) -> None:
         print("Creating combined average PCK vs brightness plot per video...")
@@ -186,7 +186,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             and self.output_dir
         ):
             filename = os.path.join(
-                self.output_dir, "combined_avg_pck_brightness_per_video.png"
+                self.output_dir, "combined_avg_pck_brightness_joint_level.png"
             )
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print(f"✅ Saved: {filename}")
@@ -201,7 +201,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         Each plot shows PCK vs brightness where brightness is taken around joint from ground truth coordinates.
         """
         print(
-            "Creating per-video scatter plots (PCK vs brightness from GT joint locations)..."
+            "Creating joint-level scatter plots (PCK vs brightness from GT joint locations)..."
         )
 
         for video_name, video_results in analysis_results.items():
@@ -391,7 +391,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             plt.show()
             plt.close()
 
-        print("✅ Per-video scatter plots completed")
+        print("✅ Joint-level scatter plots completed")
 
     def create_combined_scatter_plot(self, analysis_results: Dict[str, Any]) -> None:
         """Create a combined scatter plot showing PCK vs brightness for all videos and joints together.
