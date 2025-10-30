@@ -8,6 +8,7 @@ from orchestrators.analysis_orchestrator import AnalysisOrchestrator
 import argparse
 import sys
 from pathlib import Path
+sys.argv = ["main.py", "--dataset", "humaneva", "--type", "joint_level"]
 
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
@@ -74,7 +75,8 @@ def interactive_mode(dataset_name: str):
                 analysis_idx = int(choice) - 1
                 analysis_type = available_analyses[analysis_idx]
 
-                print(f"\nRunning {analysis_type.replace('_', ' ').title()}...")
+                print(
+                    f"\nRunning {analysis_type.replace('_', ' ').title()}...")
 
                 if analysis_type == "standard_analysis":
                     success = orchestrator.run_standard_analysis()
@@ -185,7 +187,7 @@ Examples:
             sys.exit(1)
         print("No analysis type specified. Running per-video analysis by default.")
         print("Use --help to see all options.")
-        success = run_analysis_by_type(args.dataset, "per_video")
+        success = run_analysis_by_type(args.dataset, "joint_level")
 
         if not success:
             sys.exit(1)
