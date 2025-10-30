@@ -268,14 +268,14 @@ class PerVideoJointAnalysisRunner:
             )
 
 
-def run_per_video_analysis(
+def run_joint_level_analysis(
     dataset_name: str = "movi",
     joint_names: list = None,
     output_dir: str = None,
     save_results: bool = True,
     sampling_radius: int = 3,
 ) -> Dict[str, Any]:
-    """Run per-video joint brightness analysis.
+    """Run joint-level brightness analysis.
 
     Args:
         dataset_name: Name of dataset ('movi' or 'humaneva')
@@ -303,7 +303,7 @@ if __name__ == "__main__":
     import pandas as pd
 
     # Run analysis for MoVi dataset
-    results = run_per_video_analysis(
+    results = run_joint_level_analysis(
         dataset_name="movi",
         joint_names=None,  # Use default joints
         save_results=True,

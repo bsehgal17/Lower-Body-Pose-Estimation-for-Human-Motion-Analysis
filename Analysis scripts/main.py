@@ -78,8 +78,8 @@ def interactive_mode(dataset_name: str):
 
                 if analysis_type == "standard_analysis":
                     success = orchestrator.run_standard_analysis()
-                elif analysis_type == "per_video_analysis":
-                    success = orchestrator.run_per_video_analysis()
+                elif analysis_type == "joint_level_analysis":
+                    success = orchestrator.run_joint_level_analysis()
 
                 if success:
                     print(
@@ -105,13 +105,13 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Analysis Types:
-  standard   - Standard single analysis pipeline  
-  per_video  - Per-video joint brightness analysis
-  all        - Complete analysis suite (runs all)
+  standard     - Standard single analysis pipeline  
+  joint_level  - Joint-level brightness analysis
+  all          - Complete analysis suite (runs all)
 
 Examples:
   python main.py --dataset movi --type standard
-  python main.py --dataset movi --type per_video
+  python main.py --dataset movi --type joint_level
   python main.py --dataset humaneva --interactive
   python main.py --dataset movi --type all
         """,
@@ -128,7 +128,7 @@ Examples:
     parser.add_argument(
         "--type",
         "-t",
-        choices=["standard", "per_video", "all"],
+        choices=["standard", "joint_level", "all"],
         help="Type of analysis to run",
     )
 
@@ -183,9 +183,9 @@ Examples:
         if not args.dataset:
             print("ERROR: --dataset is required. Use --help to see all options.")
             sys.exit(1)
-        print("No analysis type specified. Running per-video analysis by default.")
+        print("No analysis type specified. Running joint-level analysis by default.")
         print("Use --help to see all options.")
-        success = run_analysis_by_type(args.dataset, "per_video")
+        success = run_analysis_by_type(args.dataset, "joint_level")
 
         if not success:
             sys.exit(1)

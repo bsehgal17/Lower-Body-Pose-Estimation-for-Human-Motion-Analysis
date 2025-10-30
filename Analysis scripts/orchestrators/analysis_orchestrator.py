@@ -14,7 +14,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from config import load_dataset_analysis_config
 from utils.config_extractor import get_analysis_settings
 from runners.single_analysis_runner import run_single_analysis
-from per_video_joint_analysis_runner import run_per_video_analysis
+from per_video_joint_analysis_runner import run_joint_level_analysis
 
 
 class AnalysisOrchestrator:
@@ -69,7 +69,7 @@ class AnalysisOrchestrator:
         output_dir: Optional[str] = None,
         sampling_radius: int = 3,
     ) -> bool:
-        """Run per-video joint brightness analysis pipeline.
+        """Run joint-level brightness analysis pipeline.
 
         Args:
             custom_joints: Custom list of joints (uses default if None)
@@ -79,7 +79,7 @@ class AnalysisOrchestrator:
         Returns:
             bool: True if analysis completed successfully
         """
-        print("=== PER-VIDEO JOINT BRIGHTNESS ANALYSIS ===")
+        print("=== JOINT-LEVEL BRIGHTNESS ANALYSIS ===")
 
         # Use default joints if not provided
         if custom_joints is None:
@@ -95,7 +95,7 @@ class AnalysisOrchestrator:
         else:
             joints_to_analyze = custom_joints
 
-        results = run_per_video_analysis(
+        results = run_joint_level_analysis(
             dataset_name=self.dataset_name,
             joint_names=joints_to_analyze,
             output_dir=output_dir,
@@ -118,7 +118,7 @@ class AnalysisOrchestrator:
 
         results = {
             "standard_analysis": False,
-            "per_video_analysis": False,
+            "joint_level_analysis": False,
         }
 
         # Run standard analysis
@@ -127,11 +127,11 @@ class AnalysisOrchestrator:
         except Exception as e:
             print(f"Standard analysis failed: {e}")
 
-        # Run per-video analysis
+        # Run joint-level analysis
         try:
-            results["per_video_analysis"] = self.run_per_video_analysis()
+            results["joint_level_analysis"] = self.run_joint_level_analysis()
         except Exception as e:
-            print(f"Per-video analysis failed: {e}")
+            print(f"Joint-level analysis failed: {e}")
 
         # Print summary
         self._print_analysis_summary(results)
@@ -165,6 +165,6 @@ class AnalysisOrchestrator:
         Returns:
             list: List of available analysis types
         """
-        analyses = ["standard_analysis", "per_video_analysis"]
+        analyses = ["standard_analysis", "joint_level_analysis"]
 
         return analyses
