@@ -11,7 +11,6 @@ class AnalyzerFactory:
     _analyzers = {
         "anova": "analyzers.anova_analyzer.ANOVAAnalyzer",
         "pck_brightness": "analyzers.pck_brightness_analyzer.PCKBrightnessAnalyzer",
-        "joint_brightness": "analyzers.joint_brightness_analyzer.JointBrightnessAnalyzer",
     }
 
     @classmethod
@@ -38,14 +37,6 @@ class AnalyzerFactory:
             score_groups = kwargs.get("score_groups", None)
             bin_size = kwargs.get("bin_size", 2)  # Default bin size
             return analyzer_class(config, score_groups=score_groups, bin_size=bin_size)
-
-        # Special handling for joint brightness analyzer
-        elif analyzer_type == "joint_brightness":
-            joint_names = kwargs.get("joint_names", None)
-            sampling_radius = kwargs.get("sampling_radius", 3)
-            return analyzer_class(
-                config, joint_names=joint_names, sampling_radius=sampling_radius
-            )
 
         return analyzer_class(config)
 
