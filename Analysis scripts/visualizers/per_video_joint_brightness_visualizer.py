@@ -364,10 +364,9 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 )
                 ax.set_ylim(-0.05, 1.05)
 
-            # Create comprehensive title with video information
-            title_text = (
-                f"PCK vs Joint Brightness Analysis\n{video_metadata['display_title']}"
-            )
+            # Create comprehensive title with video information and thresholds
+            threshold_list = ", ".join([str(t) for t in unique_thresholds])
+            title_text = f"PCK vs Joint Brightness Analysis (Thresholds: {threshold_list})\n{video_metadata['display_title']}"
             plt.suptitle(title_text, fontsize=16, fontweight="bold", y=0.98)
 
             # Add video metadata as text annotation
@@ -403,8 +402,11 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             # Save the plot
             if self.save_plots and self.output_dir:
                 clean_video_name = self._clean_video_name_for_filename(video_name)
+                # Include threshold information in filename
+                threshold_str = "_".join([f"thr{t}" for t in unique_thresholds])
                 filename = os.path.join(
-                    self.output_dir, f"individual_pck_brightness_{clean_video_name}.png"
+                    self.output_dir,
+                    f"individual_pck_brightness_{clean_video_name}_{threshold_str}.png",
                 )
                 plt.savefig(filename, dpi=300, bbox_inches="tight")
                 print(f"   Saved: {filename}")
@@ -607,8 +609,10 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
         # Save the combined plot
         if self.save_plots and self.output_dir:
+            # Include threshold information in filename
+            threshold_str = "_".join([f"thr{t}" for t in unique_thresholds])
             filename = os.path.join(
-                self.output_dir, "combined_pck_brightness_scatter.png"
+                self.output_dir, f"combined_pck_brightness_scatter_{threshold_str}.png"
             )
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print(f"   Saved combined plot: {filename}")
