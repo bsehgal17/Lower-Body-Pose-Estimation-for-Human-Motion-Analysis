@@ -3,7 +3,7 @@ paths:
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
 
 filter:
-  name: "unscented_kalman"
+  name: "ukf"
   params:
     process_noise: 50      # σₐ = 50 pixels/s² for walking (smooth motion)
     measurement_noise: 10  # σₘ = 10 pixels for medium accuracy detector

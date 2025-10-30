@@ -200,58 +200,58 @@ pipelines:
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # Extended Kalman Filter configurations
-  - name: filter_extended_kalman_walking_smooth_high_acc
+  # EKF (Extended Kalman Filter) configurations
+  - name: filter_ekf_walking_smooth_high_acc
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_extended_kalman_walking_smooth_high_acc.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_extended_kalman_fast_gait_medium_acc
+  - name: filter_ekf_fast_gait_medium_acc
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_extended_kalman_fast_gait_medium_acc.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_extended_kalman_smooth_motion_low_acc
+  - name: filter_ekf_smooth_motion_low_acc
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_extended_kalman_smooth_motion_low_acc.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_extended_kalman_walking_medium_acc
+  - name: filter_ekf_walking_medium_acc
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_extended_kalman_walking_medium_acc.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # Unscented Kalman Filter configurations
-  - name: filter_unscented_kalman_walking_smooth_high_acc
+  # UKF (Unscented Kalman Filter) configurations
+  - name: filter_ukf_walking_smooth_high_acc
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_unscented_kalman_walking_smooth_high_acc.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_unscented_kalman_fast_gait_medium_acc
+  - name: filter_ukf_fast_gait_medium_acc
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_unscented_kalman_fast_gait_medium_acc.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_unscented_kalman_smooth_motion_low_acc
+  - name: filter_ukf_smooth_motion_low_acc
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_unscented_kalman_smooth_motion_low_acc.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_unscented_kalman_walking_medium_acc
+  - name: filter_ukf_walking_medium_acc
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_unscented_kalman_walking_medium_acc.yaml"
