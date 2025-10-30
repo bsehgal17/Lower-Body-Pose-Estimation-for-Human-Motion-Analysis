@@ -80,7 +80,7 @@ class StatisticalAnalyzer:
 
     def _print_anova_summary(self, results: Dict[str, Any]):
         """Print ANOVA analysis summary."""
-        print("\n📊 ANOVA Analysis Summary:")
+        print("\nANOVA Analysis Summary:")
         print("-" * 40)
 
         if "p_values" in results:

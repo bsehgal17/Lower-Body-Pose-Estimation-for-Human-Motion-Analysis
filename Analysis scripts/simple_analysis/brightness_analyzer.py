@@ -77,7 +77,7 @@ class BrightnessAnalyzer:
 
     def _print_summary(self, results: Dict[str, Any]):
         """Print analysis summary."""
-        print("\n📊 Brightness Analysis Summary:")
+        print("\nBrightness Analysis Summary:")
         print("-" * 50)
 
         for pck_column, analysis in results.items():
@@ -137,7 +137,7 @@ class BrightnessAnalyzer:
             "raw_brightness_values": analysis["raw_data"][pck_score],
         }
 
-        print(f"\n🎯 Analysis for PCK Score {pck_score} ({pck_column}):")
+        print(f"\nAnalysis for PCK Score {pck_score} ({pck_column}):")
         print("-" * 50)
         print(f"Frame count: {specific_data['frame_count']}")
         print(f"Brightness stats: {specific_data['brightness_stats']}")

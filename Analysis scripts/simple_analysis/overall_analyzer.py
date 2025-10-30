@@ -66,7 +66,7 @@ class OverallAnalyzer:
 
     def _print_overall_summary(self, processed_data: Dict[str, Any]):
         """Print overall analysis summary."""
-        print("\n📊 Overall Analysis Summary:")
+        print("\nOverall Analysis Summary:")
         print("-" * 40)
 
         for metric_name, metric_data in processed_data.items():
@@ -235,7 +235,7 @@ class OverallAnalyzer:
         if not processed_data:
             return
 
-        print("\n📊 Group Comparison:")
+        print("\nGroup Comparison:")
         print("-" * 50)
 
         grouping_cols = self.config.get_grouping_columns()

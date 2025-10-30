@@ -311,7 +311,7 @@ if __name__ == "__main__":
     )
 
     if results:
-        print(f"\n🎉 Successfully analyzed {len(results)} videos!")
+        print(f"\nSuccessfully analyzed {len(results)} videos!")
         print("\nExample video results:")
         for i, (video_name, video_data) in enumerate(results.items()):
             if i >= 3:  # Show only first 3 videos

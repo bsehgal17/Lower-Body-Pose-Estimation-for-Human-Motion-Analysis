@@ -9,7 +9,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import Dict, Any
 import os
+import warnings
 from core.base_classes import BaseVisualizer
+
+# Suppress font glyph warnings from matplotlib
+warnings.filterwarnings("ignore", message="Glyph .* missing from font")
+warnings.filterwarnings("ignore", message=".*missing from font.*")
 
 
 class PerVideoJointBrightnessVisualizer(BaseVisualizer):
@@ -98,7 +103,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         if self.create_individual_plots:
             self.create_combined_scatter_plot(analysis_results)
 
-        print("✅ Joint-level visualization completed")
+        print("Joint-level visualization completed")
 
     def create_pck_brightness_plot(self, analysis_results: dict) -> None:
         print("Creating combined average PCK vs brightness plot per video...")
@@ -128,7 +133,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             return
 
         df = pd.DataFrame(plot_data)
-        fig, ax = plt.subplots(figsize=(12, 8), constrained_layout=True)
+        fig, ax = plt.subplots(figsize=(16, 12), constrained_layout=True)
 
         # Unique videos
         videos = df["video"].unique()
@@ -189,7 +194,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 self.output_dir, "combined_avg_pck_brightness_joint_level.png"
             )
             plt.savefig(filename, dpi=300, bbox_inches="tight")
-            print(f"✅ Saved: {filename}")
+            print(f"Saved: {filename}")
 
         plt.show()
         plt.close()
@@ -249,11 +254,11 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             n_thresholds = len(unique_thresholds)
 
             if n_thresholds == 1:
-                fig, ax = plt.subplots(figsize=(14, 10))
+                fig, ax = plt.subplots(figsize=(18, 14))
                 axes = [ax]
             else:
                 fig, axes = plt.subplots(
-                    1, n_thresholds, figsize=(7 * n_thresholds, 10)
+                    1, n_thresholds, figsize=(10 * n_thresholds, 14)
                 )
                 if n_thresholds == 1:
                     axes = [axes]
@@ -279,7 +284,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                             label=joint,
                             color=joint_colors[joint],
                             alpha=0.7,
-                            s=80,
+                            s=120,
                             edgecolors="black",
                             linewidth=1,
                         )
@@ -386,12 +391,12 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                     self.output_dir, f"individual_pck_brightness_{clean_video_name}.png"
                 )
                 plt.savefig(filename, dpi=300, bbox_inches="tight")
-                print(f"   ✅ Saved: {filename}")
+                print(f"   Saved: {filename}")
 
             plt.show()
             plt.close()
 
-        print("✅ Joint-level scatter plots completed")
+        print("Joint-level scatter plots completed")
 
     def create_combined_scatter_plot(self, analysis_results: Dict[str, Any]) -> None:
         """Create a combined scatter plot showing PCK vs brightness for all videos and joints together.
@@ -476,10 +481,10 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         n_thresholds = len(unique_thresholds)
 
         if n_thresholds == 1:
-            fig, ax = plt.subplots(figsize=(14, 10))
+            fig, ax = plt.subplots(figsize=(18, 14))
             axes = [ax]
         else:
-            fig, axes = plt.subplots(1, n_thresholds, figsize=(7 * n_thresholds, 10))
+            fig, axes = plt.subplots(1, n_thresholds, figsize=(10 * n_thresholds, 14))
             if n_thresholds == 1:
                 axes = [axes]
 
@@ -503,10 +508,10 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                         joint_data["pck"],
                         label=joint,
                         color=joint_colors[joint],
-                        alpha=0.5,
-                        s=15,
+                        alpha=0.6,
+                        s=80,
                         edgecolors="black",
-                        linewidth=0.3,
+                        linewidth=0.5,
                     )
 
             # Calculate and display overall correlation for this threshold
@@ -577,14 +582,14 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 self.output_dir, "combined_pck_brightness_scatter.png"
             )
             plt.savefig(filename, dpi=300, bbox_inches="tight")
-            print(f"   ✅ Saved combined plot: {filename}")
+            print(f"   Saved combined plot: {filename}")
         else:
             print("   ⚠️  Plot saving disabled or no output directory specified")
 
         # Force display of the plot
         try:
             plt.show(block=False)  # Non-blocking show
-            print("   ✅ Plot displayed successfully")
+            print("   Plot displayed successfully")
         except Exception as e:
             print(f"   ⚠️  Could not display plot: {e}")
 
@@ -592,7 +597,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         plt.pause(2)
         plt.close()
 
-        print("✅ Combined scatter plot completed")
+        print("Combined scatter plot completed")
 
     def save_results_to_csv(self, analysis_results: Dict[str, Any]) -> None:
         """Save analysis results to CSV files for further analysis."""
@@ -666,7 +671,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         else:
             print("❌ No detailed PCK results found.")
 
-        print("✅ CSV export completed")
+        print("CSV export completed")
 
     def _extract_video_metadata(
         self, video_name: str, video_results: Dict[str, Any]
@@ -725,22 +730,22 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
     def _format_video_metadata(self, metadata: Dict[str, Any]) -> str:
         """Format video metadata for display as text annotation."""
         lines = [
-            f"📹 Video: {metadata['video_name']}",
-            f"🎞️ Total Frames: {metadata['total_frames']} | Synced: {metadata['synced_frames']} | Offset: {metadata['sync_offset']}",
-            f"🎯 Joints Analyzed: {metadata['joints_analyzed']} ({', '.join(metadata['joint_names'])})",
+            f"Video: {metadata['video_name']}",
+            f"Frames: {metadata['total_frames']} | Synced: {metadata['synced_frames']} | Offset: {metadata['sync_offset']}",
+            f"Joints: {metadata['joints_analyzed']} ({', '.join(metadata['joint_names'])})",
         ]
 
         # Add brightness info
         if metadata["avg_brightness_all_joints"] != "N/A":
             lines.append(
-                f"💡 Avg Brightness: {metadata['avg_brightness_all_joints']:.1f} "
+                f"Avg Brightness: {metadata['avg_brightness_all_joints']:.1f} "
                 f"(Range: {metadata['brightness_range'][0]:.1f}-{metadata['brightness_range'][1]:.1f})"
             )
 
         # Add PCK info
         if metadata["avg_pck_all_metrics"] != "N/A":
             lines.append(
-                f"📊 Avg PCK: {metadata['avg_pck_all_metrics']:.3f} "
+                f"Avg PCK: {metadata['avg_pck_all_metrics']:.3f} "
                 f"(Range: {metadata['pck_range'][0]:.3f}-{metadata['pck_range'][1]:.3f})"
             )
 
