@@ -151,7 +151,10 @@ Examples:
     try:
         # List available analyses
         if args.list_available:
-            orchestrator = AnalysisOrchestrator("movi")
+            if not args.dataset:
+                print("ERROR: --dataset is required when using --list-available")
+                sys.exit(1)
+            orchestrator = AnalysisOrchestrator(args.dataset)
             available = orchestrator.get_available_analyses()
             print(f"\nAvailable analyses for {args.dataset}:")
             for analysis in available:
@@ -160,20 +163,29 @@ Examples:
 
         # Interactive mode
         if args.interactive:
+            if not args.dataset:
+                print("ERROR: --dataset is required when using --interactive")
+                sys.exit(1)
             interactive_mode(args.dataset)
             return
 
         # Direct analysis type
         if args.type:
-            success = run_analysis_by_type("movi", args.type)
+            if not args.dataset:
+                print("ERROR: --dataset is required when using --type")
+                sys.exit(1)
+            success = run_analysis_by_type(args.dataset, args.type)
             if not success:
                 sys.exit(1)
             return
 
         # Default: run per-video analysis
+        if not args.dataset:
+            print("ERROR: --dataset is required. Use --help to see all options.")
+            sys.exit(1)
         print("No analysis type specified. Running per-video analysis by default.")
         print("Use --help to see all options.")
-        success = run_analysis_by_type("movi", "per_video")
+        success = run_analysis_by_type(args.dataset, "per_video")
 
         if not success:
             sys.exit(1)
