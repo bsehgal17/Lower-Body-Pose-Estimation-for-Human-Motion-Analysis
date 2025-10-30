@@ -63,7 +63,7 @@ class AnalysisOrchestrator:
             analysis_config=self.analysis_config,
         )
 
-    def run_per_video_analysis(
+    def run_joint_level_analysis(
         self,
         custom_joints: Optional[list] = None,
         output_dir: Optional[str] = None,

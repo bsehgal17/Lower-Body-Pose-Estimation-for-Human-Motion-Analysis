@@ -27,9 +27,9 @@ def run_analysis_by_type(dataset_name: str, analysis_type: str) -> bool:
 
     if analysis_type == "standard":
         return orchestrator.run_standard_analysis()
-    elif analysis_type == "per_video":
-        # Run per-video joint brightness analysis
-        return orchestrator.run_per_video_analysis()
+    elif analysis_type == "joint_level":
+        # Run joint level analysis
+        return orchestrator.run_joint_level_analysis()
     elif analysis_type == "all":
         results = orchestrator.run_complete_analysis_suite()
         return any(results.values())
