@@ -460,6 +460,13 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 ]:
                     continue
 
+                # Skip if pck_results is not a dictionary (e.g., if it's a simple value)
+                if not isinstance(pck_results, dict):
+                    print(
+                        f"DEBUG: Skipping {pck_column} for {video_name} - type: {type(pck_results)}, value: {pck_results}"
+                    )
+                    continue
+
                 joint_name = pck_results.get("joint_name", "unknown")
                 threshold = pck_results.get("threshold", "unknown")
 
