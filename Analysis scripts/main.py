@@ -9,6 +9,15 @@ import argparse
 import sys
 from pathlib import Path
 
+# =============================================
+# CONFIGURATION SECTION - EDIT HERE
+# =============================================
+# Set your desired analysis parameters here for quick execution
+DATASET_NAME = "humaneva"  # Options: "movi", "humaneva"
+ANALYSIS_TYPE = "joint_level"  # Options: "standard", "joint_level", "all"
+USE_CONFIG = True  # Set to True to use above config, False to use command line args
+# =============================================
+
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
 
@@ -110,7 +119,8 @@ Analysis Types:
   all          - Complete analysis suite (runs all)
 
 Examples:
-  python main.py --dataset movi --type standard
+  python main.py                                        # Uses config section settings
+  python main.py --dataset movi --type standard        # Override config with command line
   python main.py --dataset movi --type joint_level
   python main.py --dataset humaneva --interactive
   python main.py --dataset movi --type all
@@ -120,9 +130,8 @@ Examples:
     parser.add_argument(
         "--dataset",
         "-d",
-        # default="movi",
         choices=["movi", "humaneva"],
-        help="Dataset to analyze (default: movi)",
+        help="Dataset to analyze",
     )
 
     parser.add_argument(
@@ -149,6 +158,23 @@ Examples:
     args = parser.parse_args()
 
     try:
+        # Check if we should use configuration section
+        if USE_CONFIG and not (
+            args.dataset or args.type or args.interactive or args.list_available
+        ):
+            print("Using configuration section settings:")
+            print(f"  Dataset: {DATASET_NAME}")
+            print(f"  Analysis Type: {ANALYSIS_TYPE}")
+            print(
+                "  (Edit the configuration section at the top of this file to change these)"
+            )
+            print()
+
+            success = run_analysis_by_type(DATASET_NAME, ANALYSIS_TYPE)
+            if not success:
+                sys.exit(1)
+            return
+
         # List available analyses
         if args.list_available:
             if not args.dataset:
@@ -169,26 +195,17 @@ Examples:
             interactive_mode(args.dataset)
             return
 
-        # Direct analysis type
-        if args.type:
-            if not args.dataset:
-                print("ERROR: --dataset is required when using --type")
-                sys.exit(1)
+        # Direct analysis type using command line arguments
+        if args.type and args.dataset:
             success = run_analysis_by_type(args.dataset, args.type)
             if not success:
                 sys.exit(1)
             return
 
-        # Default: run joint-level analysis
-        if not args.dataset:
-            print("ERROR: --dataset is required. Use --help to see all options.")
-            sys.exit(1)
-        print("No analysis type specified. Running joint-level analysis by default.")
+        # If no complete set of arguments provided, show help
+        print("ERROR: Please provide complete arguments or enable USE_CONFIG.")
         print("Use --help to see all options.")
-        success = run_analysis_by_type(args.dataset, "joint_level")
-
-        if not success:
-            sys.exit(1)
+        sys.exit(1)
 
     except Exception as e:
         print(f"Error during analysis: {e}")
