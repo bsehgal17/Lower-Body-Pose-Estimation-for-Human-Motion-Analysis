@@ -15,6 +15,8 @@ from core.base_classes import BaseVisualizer
 # Suppress font glyph warnings from matplotlib
 warnings.filterwarnings("ignore", message="Glyph .* missing from font")
 warnings.filterwarnings("ignore", message=".*missing from font.*")
+# Suppress numpy divide by zero warnings during correlation calculations
+warnings.filterwarnings("ignore", message="invalid value encountered in divide")
 
 
 class PerVideoJointBrightnessVisualizer(BaseVisualizer):
@@ -133,7 +135,9 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             return
 
         df = pd.DataFrame(plot_data)
-        fig, ax = plt.subplots(figsize=(16, 12), constrained_layout=True)
+        fig, ax = plt.subplots(
+            figsize=(16, 12)
+        )  # Remove constrained_layout to use subplots_adjust
 
         # Unique videos
         videos = df["video"].unique()
@@ -297,9 +301,15 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
                 # Calculate correlation for this threshold
                 if len(threshold_data) > 1:
-                    correlation = np.corrcoef(
-                        threshold_data["brightness"], threshold_data["pck"]
-                    )[0, 1]
+                    try:
+                        # Suppress numpy warnings temporarily
+                        with np.errstate(divide="ignore", invalid="ignore"):
+                            correlation = np.corrcoef(
+                                threshold_data["brightness"], threshold_data["pck"]
+                            )[0, 1]
+                    except (RuntimeWarning, ValueError):
+                        correlation = np.nan
+
                     if not np.isnan(correlation):
                         ax.text(
                             0.05,
@@ -522,9 +532,15 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
             # Calculate and display overall correlation for this threshold
             if len(threshold_data) > 1:
-                correlation = np.corrcoef(
-                    threshold_data["brightness"], threshold_data["pck"]
-                )[0, 1]
+                try:
+                    # Suppress numpy warnings temporarily
+                    with np.errstate(divide="ignore", invalid="ignore"):
+                        correlation = np.corrcoef(
+                            threshold_data["brightness"], threshold_data["pck"]
+                        )[0, 1]
+                except (RuntimeWarning, ValueError):
+                    correlation = np.nan
+
                 if not np.isnan(correlation):
                     ax.text(
                         0.05,
