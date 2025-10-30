@@ -160,7 +160,9 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             z = np.polyfit(df["avg_brightness"], df["avg_pck"], 1)
             p = np.poly1d(z)
             x_trend = np.linspace(
-                df["avg_brightness"].min(), df["avg_brightness"].max(), 100
+                0,
+                df["avg_brightness"].max(),
+                100,  # Start trend line from 0
             )
             ax.plot(
                 x_trend, p(x_trend), "r--", alpha=0.7, linewidth=2, label="Trend line"
@@ -172,6 +174,10 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             "Average PCK vs Brightness Per Video", fontsize=14, fontweight="bold"
         )
         ax.grid(True, alpha=0.3)
+
+        # Set axis limits to start x-axis from 0
+        ax.set_xlim(0, df["avg_brightness"].max() * 1.05)
+        ax.set_ylim(-0.05, 1.05)
 
         # Legend outside, smaller font, multiple columns
         num_cols = min(len(videos), 2)  # max 4 columns
@@ -343,7 +349,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
                 # Set reasonable axis limits
                 ax.set_xlim(
-                    threshold_data["brightness"].min() * 0.95,
+                    0,  # Start x-axis from 0 to show all joint points
                     threshold_data["brightness"].max() * 1.05,
                 )
                 ax.set_ylim(-0.05, 1.05)
@@ -562,7 +568,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
             # Set reasonable axis limits
             ax.set_xlim(
-                threshold_data["brightness"].min() * 0.95,
+                0,  # Start x-axis from 0 to show all joint points
                 threshold_data["brightness"].max() * 1.05,
             )
             ax.set_ylim(-0.05, 1.05)
