@@ -4,90 +4,7 @@ orchestrator:
 
 pipelines:
 
-  # - name: filter_butterworth_2nd_20hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_2nd_20hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_4th_10hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_4th_10hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_5th_10hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_5th_10hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_6th_10hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_6th_10hz.yaml"
-  #     - command: evaluation
-  # #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_8th_8hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_8th_8hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_8th_9hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_8th_9hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_8th_10hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_8th_10hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_9th_8hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_9th_8hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_9th_9hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_9th_9hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_9th_10hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_9th_10hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_10th_8hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_10th_8hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # - name: filter_butterworth_10th_9hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_10th_9hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
+  # Sample butterworth filter configuration
   # - name: filter_butterworth_10th_10hz
   #   steps:
   #     - command: filter
@@ -95,229 +12,195 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_11th_8hz
+  # High-order butterworth filters (16th-20th order, 8-9 Hz)
+  - name: filter_butterworth_16th_8hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_16th_8hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_16th_9hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_16th_9hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_17th_8hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_17th_8hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_17th_9hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_17th_9hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_18th_8hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_18th_8hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_18th_9hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_18th_9hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_19th_8hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_19th_8hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_19th_9hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_19th_9hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_20th_8hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_20th_8hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_20th_9hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_20th_9hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # # EKF (Extended Kalman Filter) configurations
+  # - name: filter_ekf_walking_smooth_high_acc
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_11th_8hz.yaml"
+  #       config_file: "config_yamls/filter/filter_extended_kalman_walking_smooth_high_acc.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_11th_9hz
+  # - name: filter_ekf_fast_gait_medium_acc
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_11th_9hz.yaml"
+  #       config_file: "config_yamls/filter/filter_extended_kalman_fast_gait_medium_acc.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_11th_10hz
+  # - name: filter_ekf_smooth_motion_low_acc
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_11th_10hz.yaml"
+  #       config_file: "config_yamls/filter/filter_extended_kalman_smooth_motion_low_acc.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_12th_8hz
+  # - name: filter_ekf_walking_medium_acc
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_12th_8hz.yaml"
+  #       config_file: "config_yamls/filter/filter_extended_kalman_walking_medium_acc.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_12th_9hz
+  # # UKF (Unscented Kalman Filter) configurations
+  # - name: filter_ukf_walking_smooth_high_acc
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_12th_9hz.yaml"
+  #       config_file: "config_yamls/filter/filter_unscented_kalman_walking_smooth_high_acc.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_12th_10hz
+  # - name: filter_ukf_fast_gait_medium_acc
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_12th_10hz.yaml"
+  #       config_file: "config_yamls/filter/filter_unscented_kalman_fast_gait_medium_acc.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_13th_8hz
+  # - name: filter_ukf_smooth_motion_low_acc
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_13th_8hz.yaml"
+  #       config_file: "config_yamls/filter/filter_unscented_kalman_smooth_motion_low_acc.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_13th_9hz
+  # - name: filter_ukf_walking_medium_acc
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_13th_9hz.yaml"
+  #       config_file: "config_yamls/filter/filter_unscented_kalman_walking_medium_acc.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_13th_10hz
+  # # Standard Kalman Filter configurations with expanded parameter ranges
+  # - name: filter_kalman_smooth_walking_high_acc_low
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_13th_10hz.yaml"
+  #       config_file: "config_yamls/filter/filter_kalman_smooth_walking_high_acc_low.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_14th_8hz
+  # - name: filter_kalman_smooth_walking_high_acc_mid
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_14th_8hz.yaml"
+  #       config_file: "config_yamls/filter/filter_kalman_smooth_walking_high_acc_mid.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_14th_9hz
+  # - name: filter_kalman_smooth_walking_high_acc_high
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_14th_9hz.yaml"
+  #       config_file: "config_yamls/filter/filter_kalman_smooth_walking_high_acc_high.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_14th_10hz
+  # - name: filter_kalman_normal_gait_medium_acc_low
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_14th_10hz.yaml"
+  #       config_file: "config_yamls/filter/filter_kalman_normal_gait_medium_acc_low.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_15th_8hz
+  # - name: filter_kalman_normal_gait_medium_acc_mid
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_15th_8hz.yaml"
+  #       config_file: "config_yamls/filter/filter_kalman_normal_gait_medium_acc_mid.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_15th_9hz
+  # - name: filter_kalman_normal_gait_medium_acc_high
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_15th_9hz.yaml"
+  #       config_file: "config_yamls/filter/filter_kalman_normal_gait_medium_acc_high.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # - name: filter_butterworth_15th_10hz
+  # - name: filter_kalman_fast_gait_low_acc_low
   #   steps:
   #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_15th_10hz.yaml"
+  #       config_file: "config_yamls/filter/filter_kalman_fast_gait_low_acc_low.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # EKF (Extended Kalman Filter) configurations
-  - name: filter_ekf_walking_smooth_high_acc
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_extended_kalman_walking_smooth_high_acc.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_kalman_fast_gait_low_acc_mid
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_kalman_fast_gait_low_acc_mid.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_ekf_fast_gait_medium_acc
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_extended_kalman_fast_gait_medium_acc.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_ekf_smooth_motion_low_acc
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_extended_kalman_smooth_motion_low_acc.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_ekf_walking_medium_acc
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_extended_kalman_walking_medium_acc.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # UKF (Unscented Kalman Filter) configurations
-  - name: filter_ukf_walking_smooth_high_acc
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_unscented_kalman_walking_smooth_high_acc.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_ukf_fast_gait_medium_acc
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_unscented_kalman_fast_gait_medium_acc.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_ukf_smooth_motion_low_acc
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_unscented_kalman_smooth_motion_low_acc.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_ukf_walking_medium_acc
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_unscented_kalman_walking_medium_acc.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  # Standard Kalman Filter configurations with expanded parameter ranges
-  - name: filter_kalman_smooth_walking_high_acc_low
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_kalman_smooth_walking_high_acc_low.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_kalman_smooth_walking_high_acc_mid
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_kalman_smooth_walking_high_acc_mid.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_kalman_smooth_walking_high_acc_high
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_kalman_smooth_walking_high_acc_high.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_kalman_normal_gait_medium_acc_low
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_kalman_normal_gait_medium_acc_low.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_kalman_normal_gait_medium_acc_mid
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_kalman_normal_gait_medium_acc_mid.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_kalman_normal_gait_medium_acc_high
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_kalman_normal_gait_medium_acc_high.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_kalman_fast_gait_low_acc_low
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_kalman_fast_gait_low_acc_low.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_kalman_fast_gait_low_acc_mid
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_kalman_fast_gait_low_acc_mid.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
-
-  - name: filter_kalman_fast_gait_low_acc_high
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_kalman_fast_gait_low_acc_high.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_kalman_fast_gait_low_acc_high
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_kalman_fast_gait_low_acc_high.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
