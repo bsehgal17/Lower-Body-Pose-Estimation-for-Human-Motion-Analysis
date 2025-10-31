@@ -83,7 +83,7 @@ class AnalysisOrchestrator:
 
         # Use default joints if not provided
         if custom_joints is None:
-            # Default lower body joints
+            # Default joints including both lower and upper body
             joints_to_analyze = [
                 "LEFT_HIP",
                 "RIGHT_HIP",
@@ -91,6 +91,12 @@ class AnalysisOrchestrator:
                 "RIGHT_KNEE",
                 "LEFT_ANKLE",
                 "RIGHT_ANKLE",
+                "LEFT_SHOULDER",
+                "RIGHT_SHOULDER",
+                "LEFT_ELBOW",
+                "RIGHT_ELBOW",
+                "LEFT_WRIST",
+                "RIGHT_WRIST",
             ]
         else:
             joints_to_analyze = custom_joints

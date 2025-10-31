@@ -80,7 +80,7 @@ class PerVideoJointAnalysisRunner:
             print(f"Output: {self.output_dir}")
 
     def _get_default_joints(self) -> list:
-        """Get default lower body joints (matching MoVi config format)."""
+        """Get default joints including both lower and upper body joints."""
         return [
             "LEFT_HIP",
             "RIGHT_HIP",
@@ -88,6 +88,12 @@ class PerVideoJointAnalysisRunner:
             "RIGHT_KNEE",
             "LEFT_ANKLE",
             "RIGHT_ANKLE",
+            "LEFT_SHOULDER",
+            "RIGHT_SHOULDER",
+            "LEFT_ELBOW",
+            "RIGHT_ELBOW",
+            "LEFT_WRIST",
+            "RIGHT_WRIST",
         ]
 
     def run_analysis(self) -> Dict[str, Any]:

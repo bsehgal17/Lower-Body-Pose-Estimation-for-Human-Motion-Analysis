@@ -121,6 +121,12 @@ analysis:
       - "RIGHT_KNEE"
       - "LEFT_ANKLE"
       - "RIGHT_ANKLE"
+      - "LEFT_SHOULDER"
+      - "RIGHT_SHOULDER"
+      - "LEFT_ELBOW"
+      - "RIGHT_ELBOW"
+      - "LEFT_WRIST"
+      - "RIGHT_WRIST"
     
     # Additional joints that can be analyzed if available
     extended_joints:
@@ -130,6 +136,12 @@ analysis:
       - "RIGHT_KNEE"
       - "LEFT_ANKLE"
       - "RIGHT_ANKLE"
+      - "LEFT_SHOULDER"
+      - "RIGHT_SHOULDER"
+      - "LEFT_ELBOW"
+      - "RIGHT_ELBOW"
+      - "LEFT_WRIST"
+      - "RIGHT_WRIST"
       - "LEFT_TOE"
       - "RIGHT_TOE"
     
