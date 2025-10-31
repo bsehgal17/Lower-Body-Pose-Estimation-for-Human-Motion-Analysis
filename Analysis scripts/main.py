@@ -14,7 +14,7 @@ from pathlib import Path
 # =============================================
 # Set your desired analysis parameters here for quick execution
 DATASET_NAME = "movi"  # Options: "movi", "humaneva"
-ANALYSIS_TYPE = "all"  # Options: "standard", "joint_level", "all"
+ANALYSIS_TYPE = "joint_level"  # Options: "standard", "joint_level", "all"
 USE_CONFIG = True  # Set to True to use above config, False to use command line args
 # =============================================
 
