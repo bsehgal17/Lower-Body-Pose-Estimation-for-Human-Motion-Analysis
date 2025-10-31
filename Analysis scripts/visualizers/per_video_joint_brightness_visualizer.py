@@ -133,6 +133,16 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             return
 
         df = pd.DataFrame(plot_data)
+
+        # Debug: Print data ranges
+        print(f"   Data ready for plotting: {len(df)} videos")
+        print(
+            f"   PCK score range: {df['avg_pck'].min():.2f} - {df['avg_pck'].max():.2f}"
+        )
+        print(
+            f"   Brightness range: {df['avg_brightness'].min():.2f} - {df['avg_brightness'].max():.2f}"
+        )
+
         fig, ax = plt.subplots(
             figsize=(16, 12)
         )  # Remove constrained_layout to use subplots_adjust
@@ -177,9 +187,17 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         )
         ax.grid(True, alpha=0.3)
 
-        # Set axis limits to start x-axis from 0
+        # Set axis limits dynamically based on data
         ax.set_xlim(0, df["avg_brightness"].max() * 1.05)
-        ax.set_ylim(-0.05, 1.05)
+
+        # Dynamic Y-axis limits based on actual PCK score range
+        pck_min = df["avg_pck"].min()
+        pck_max = df["avg_pck"].max()
+        pck_range = pck_max - pck_min
+        ax.set_ylim(
+            max(0, pck_min - 0.05 * pck_range),  # Don't go below 0
+            pck_max + 0.05 * pck_range,
+        )
 
         # Legend outside, smaller font, multiple columns
         num_cols = min(len(videos), 2)  # max 4 columns
