@@ -5,6 +5,7 @@ from scipy.signal import butter, sosfiltfilt, savgol_filter, wiener
 from scipy.ndimage import gaussian_filter1d, median_filter
 from pykalman import KalmanFilter
 from scipy.interpolate import UnivariateSpline
+from filterpy.kalman import UnscentedKalmanFilter, MerweScaledSigmaPoints
 
 
 class FilterLibrary:
@@ -23,7 +24,8 @@ class FilterLibrary:
         try:
             sigma = float(sigma)
         except Exception as e:
-            raise ValueError(f"Invalid sigma for Gaussian filter: {sigma}") from e
+            raise ValueError(
+                f"Invalid sigma for Gaussian filter: {sigma}") from e
         return gaussian_filter1d(data, sigma=sigma)
 
     @staticmethod
@@ -54,7 +56,8 @@ class FilterLibrary:
         return np.array(
             [
                 np.mean(
-                    data[max(0, i - half_window) : min(num_frames, i + half_window + 1)]
+                    data[max(0, i - half_window)
+                             : min(num_frames, i + half_window + 1)]
                 )
                 for i in range(num_frames)
             ]
@@ -91,70 +94,36 @@ class FilterLibrary:
 
     @staticmethod
     def kalman(data, process_noise, measurement_noise, dt):
-        """
-        Apply 2D constant velocity Kalman Filter on gait joint data.
-
-        Parameters:
-        - data: n x 2 array of [x, y] positions
-        - process_noise: expected acceleration variance (pixels^2/s^4)
-        - measurement_noise: detector noise variance (pixels^2)
-        - dt: time step between frames (s)
-
-        Returns:
-        - filtered positions: n x 2 array [x, y]
-        """
+        """1D Basic Kalman Filter with position & velocity."""
         if len(data) == 0:
             return np.array([])
 
-        try:
-            process_noise = float(process_noise)
-            measurement_noise = float(measurement_noise)
-            dt = float(dt)
-        except Exception as e:
-            raise ValueError(
-                f"Invalid Kalman filter params: process_noise={process_noise}, measurement_noise={measurement_noise}, dt={dt}"
-            ) from e
+        process_noise = float(process_noise)
+        measurement_noise = float(measurement_noise)
+        dt = float(dt)
 
-        # State transition: [x, y, vx, vy]
-        F = np.array([[1, 0, dt, 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0, 1]])
+        # Matrices
+        A = np.array([[1, dt], [0, 1]])
+        H = np.array([[1, 0]])
+        Q = process_noise * np.eye(2)
+        R = np.array([[measurement_noise]])
+        x = np.zeros((2, 1))
+        P = np.eye(2)
 
-        # Measurement: only positions
-        H = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+        results = []
+        for z in data:
+            # Prediction
+            x_pred = A @ x
+            P_pred = A @ P @ A.T + Q
 
-        # Process noise Q
-        Q = process_noise * np.array(
-            [
-                [dt**4 / 4, 0, dt**3 / 2, 0],
-                [0, dt**4 / 4, 0, dt**3 / 2],
-                [dt**3 / 2, 0, dt**2, 0],
-                [0, dt**3 / 2, 0, dt**2],
-            ]
-        )
+            # Update
+            K = P_pred @ H.T @ np.linalg.inv(H @ P_pred @ H.T + R)
+            x = x_pred + K @ (z - H @ x_pred)
+            P = (np.eye(2) - K @ H) @ P_pred
 
-        # Measurement noise R
-        R = np.array([[measurement_noise, 0], [0, measurement_noise]])
+            results.append(x[0, 0])
 
-        # Initial state: first measurement, zero velocity
-        x0 = np.array([data[0, 0], data[0, 1], 0.0, 0.0])
-
-        # Initial covariance
-        P0 = np.diag([25**2, 25**2, 5**2, 5**2])
-
-        # Initialize Kalman Filter
-        kf = KalmanFilter(
-            transition_matrices=F,
-            observation_matrices=H,
-            initial_state_mean=x0,
-            initial_state_covariance=P0,
-            transition_covariance=Q,
-            observation_covariance=R,
-        )
-
-        # Apply filter
-        filtered_state_means, _ = kf.filter(data)
-
-        # Return only positions [x, y]
-        return filtered_state_means[:, :2]
+        return np.array(results)
 
     @staticmethod
     def gvcspl(data, smoothing_factor=None):
@@ -174,93 +143,74 @@ class FilterLibrary:
 
     @staticmethod
     def extended_kalman(data, process_noise, measurement_noise, dt):
-        """
-        2D Extended Kalman Filter for gait pose estimation (x, y) with velocity.
-        - data: Nx2 array of joint positions (x, y) in pixels
-        - process_noise: scalar (acceleration noise)
-        - measurement_noise: scalar (position measurement noise)
-        - dt: time step in seconds
-        Returns filtered Nx2 array.
-        """
+        """1D Extended Kalman Filter (nonlinear update)."""
         if len(data) == 0:
-            return np.empty((0, 2))
+            return np.array([])
 
-        # State vector: [x, y, vx, vy]
-        x = np.array([data[0, 0], data[0, 1], 0.0, 0.0])
-        P = np.diag([25**2, 25**2, 5**2, 5**2])  # initial covariance
+        process_noise = float(process_noise)
+        measurement_noise = float(measurement_noise)
+        dt = float(dt)
 
-        # State transition matrix
-        F = np.array([[1, 0, dt, 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0, 1]])
+        # Nonlinear functions
+        def f(x):
+            return np.array([[x[0, 0] + x[1, 0]**2 * dt], [x[1, 0]]])
 
-        # Measurement matrix
-        H = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+        def F_jacobian(x):
+            return np.array([[1, 2 * x[1, 0] * dt], [0, 1]])
 
-        # Process noise Q (based on constant acceleration model)
-        q = process_noise
-        Q_block = np.array([[dt**4 / 4, dt**3 / 2], [dt**3 / 2, dt**2]]) * q**2
-        Q = np.block([[Q_block, np.zeros((2, 2))], [np.zeros((2, 2)), Q_block]])
-
-        # Measurement noise
-        R = np.eye(2) * measurement_noise**2
+        H = np.array([[1, 0]])
+        Q = process_noise * np.eye(2)
+        R = np.array([[measurement_noise]])
+        x = np.zeros((2, 1))
+        P = np.eye(2)
 
         results = []
         for z in data:
-            # Predict
-            x = F @ x
-            P = F @ P @ F.T + Q
+            # Prediction
+            F = F_jacobian(x)
+            x_pred = f(x)
+            P_pred = F @ P @ F.T + Q
 
             # Update
-            y = z - H @ x
-            S = H @ P @ H.T + R
-            K = P @ H.T @ np.linalg.inv(S)
-            x = x + K @ y
-            P = (np.eye(len(P)) - K @ H) @ P
+            K = P_pred @ H.T @ np.linalg.inv(H @ P_pred @ H.T + R)
+            x = x_pred + K @ (z - H @ x_pred)
+            P = (np.eye(2) - K @ H) @ P_pred
 
-            results.append(x[:2].copy())
+            results.append(x[0, 0])
 
         return np.array(results)
 
     @staticmethod
     def unscented_kalman(data, process_noise, measurement_noise, dt):
-        """
-        2D Unscented Kalman Filter for gait pose estimation (x, y) with velocity.
-        - data: Nx2 array of joint positions (x, y) in pixels
-        - process_noise: scalar (acceleration noise)
-        - measurement_noise: scalar (position measurement noise)
-        - dt: time step in seconds
-        Returns filtered Nx2 array.
-        """
-        if len(data) == 0:
-            return np.empty((0, 2))
+        """1D Unscented Kalman Filter (UKF) using sigma points."""
+        from filterpy.kalman import UnscentedKalmanFilter as UKF
+        from filterpy.kalman import MerweScaledSigmaPoints
 
-        # UKF fx and hx functions for constant velocity
+        if len(data) == 0:
+            return np.array([])
+
+        process_noise = float(process_noise)
+        measurement_noise = float(measurement_noise)
+        dt = float(dt)
+
         def fx(x, dt):
-            # x = [x, y, vx, vy]
-            F = np.array([[1, 0, dt, 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0, 1]])
-            return F @ x
+            return np.array([x[0] + x[1]*dt, x[1]])
 
         def hx(x):
-            # only measure positions
-            return x[:2]
+            return np.array([x[0]])
 
-        points = MerweScaledSigmaPoints(n=4, alpha=1e-3, beta=2, kappa=0)
-        ukf = UKF(dim_x=4, dim_z=2, dt=dt, fx=fx, hx=hx, points=points)
-
-        # Initialize state with first measurement
-        ukf.x = np.array([data[0, 0], data[0, 1], 0.0, 0.0])
-        ukf.P = np.diag([25**2, 25**2, 5**2, 5**2])
-
-        # Process & measurement noise
-        q = process_noise
-        Q_block = np.array([[dt**4 / 4, dt**3 / 2], [dt**3 / 2, dt**2]]) * q**2
-        ukf.Q = np.block([[Q_block, np.zeros((2, 2))], [np.zeros((2, 2)), Q_block]])
-        ukf.R = np.eye(2) * measurement_noise**2
+        points = MerweScaledSigmaPoints(2, alpha=0.1, beta=2.0, kappa=0)
+        ukf = UKF(dim_x=2, dim_z=1, dt=dt, fx=fx, hx=hx, points=points)
+        ukf.x = np.zeros(2)
+        ukf.P *= 1
+        ukf.Q = process_noise * np.eye(2)
+        ukf.R = np.array([[measurement_noise]])
 
         results = []
         for z in data:
             ukf.predict()
             ukf.update(z)
-            results.append(ukf.x[:2].copy())
+            results.append(ukf.x[0])
 
         return np.array(results)
 
@@ -295,10 +245,10 @@ class FilterLibrary:
 
         # Optional tapering window to reduce spectral leakage
         if window_type == "hann":
-            taper = np.hanning(len(mask) * 2)[len(mask) :]
+            taper = np.hanning(len(mask) * 2)[len(mask):]
             mask *= taper
         elif window_type == "hamming":
-            taper = np.hamming(len(mask) * 2)[len(mask) :]
+            taper = np.hamming(len(mask) * 2)[len(mask):]
             mask *= taper
 
         # Apply mask

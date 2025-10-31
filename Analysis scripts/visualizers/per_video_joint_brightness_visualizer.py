@@ -16,7 +16,8 @@ from core.base_classes import BaseVisualizer
 warnings.filterwarnings("ignore", message="Glyph .* missing from font")
 warnings.filterwarnings("ignore", message=".*missing from font.*")
 # Suppress numpy divide by zero warnings during correlation calculations
-warnings.filterwarnings("ignore", message="invalid value encountered in divide")
+warnings.filterwarnings(
+    "ignore", message="invalid value encountered in divide")
 
 
 class PerVideoJointBrightnessVisualizer(BaseVisualizer):
@@ -70,7 +71,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             return
 
         # Debug: Print analysis results structure
-        print(f"   Debug: Received analysis results for {len(analysis_results)} videos")
+        print(
+            f"   Debug: Received analysis results for {len(analysis_results)} videos")
         for i, (video_name, video_data) in enumerate(analysis_results.items()):
             if i < 2:  # Show first 2 videos
                 print(f"   Video '{video_name}' structure:")
@@ -79,7 +81,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                         has_pck_scores = "pck_scores" in value
                         has_brightness = "brightness_values" in value
                         pck_len = (
-                            len(value.get("pck_scores", [])) if has_pck_scores else 0
+                            len(value.get("pck_scores", [])
+                                ) if has_pck_scores else 0
                         )
                         brightness_len = (
                             len(value.get("brightness_values", []))
@@ -223,14 +226,16 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             print(f"   Creating scatter plot for video: {video_name}")
 
             # Extract video metadata for display
-            video_metadata = self._extract_video_metadata(video_name, video_results)
+            video_metadata = self._extract_video_metadata(
+                video_name, video_results)
 
             # Get PCK scores and brightness values for this video
             pck_scores = video_results.get("pck_scores", {})
             avg_brightness = video_results.get("avg_brightness", {})
 
             if not pck_scores or not avg_brightness:
-                print(f"   ❌ No PCK scores or brightness data found for {video_name}")
+                print(
+                    f"   ❌ No PCK scores or brightness data found for {video_name}")
                 continue
 
             # Prepare data for plotting - using average values per joint
@@ -253,7 +258,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                     )
 
             if not plot_data:
-                print(f"   ❌ No matching PCK/brightness data found for {video_name}")
+                print(
+                    f"   ❌ No matching PCK/brightness data found for {video_name}")
                 continue
 
             # Create the scatter plot for this video
@@ -355,7 +361,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                     fontweight="bold",
                 )
                 ax.grid(True, alpha=0.3)
-                ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=10)
+                ax.legend(bbox_to_anchor=(1.05, 1),
+                          loc="upper left", fontsize=10)
 
                 # Set reasonable axis limits
                 ax.set_xlim(
@@ -401,9 +408,11 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
             # Save the plot
             if self.save_plots and self.output_dir:
-                clean_video_name = self._clean_video_name_for_filename(video_name)
+                clean_video_name = self._clean_video_name_for_filename(
+                    video_name)
                 # Include threshold information in filename
-                threshold_str = "_".join([f"thr{t}" for t in unique_thresholds])
+                threshold_str = "_".join(
+                    [f"thr{t}" for t in unique_thresholds])
                 filename = os.path.join(
                     self.output_dir,
                     f"individual_pck_brightness_{clean_video_name}_{threshold_str}.png",
@@ -411,7 +420,7 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 plt.savefig(filename, dpi=300, bbox_inches="tight")
                 print(f"   Saved: {filename}")
 
-            plt.show()
+            # plt.show()
             plt.close()
 
         print("Joint-level scatter plots completed")
@@ -427,11 +436,13 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         plt.ioff()  # Turn off interactive mode initially
 
         # Debug: Print structure of analysis results
-        print(f"   Debug: Analysis results contains {len(analysis_results)} videos")
+        print(
+            f"   Debug: Analysis results contains {len(analysis_results)} videos")
         for vid_name, vid_data in list(analysis_results.items())[
             :1
         ]:  # Show first video structure
-            print(f"   Debug: Video '{vid_name}' has keys: {list(vid_data.keys())}")
+            print(
+                f"   Debug: Video '{vid_name}' has keys: {list(vid_data.keys())}")
             for key, value in vid_data.items():
                 if key not in [
                     "video_name",
@@ -509,7 +520,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             fig, ax = plt.subplots(figsize=(18, 14))
             axes = [ax]
         else:
-            fig, axes = plt.subplots(1, n_thresholds, figsize=(10 * n_thresholds, 14))
+            fig, axes = plt.subplots(
+                1, n_thresholds, figsize=(10 * n_thresholds, 14))
             if n_thresholds == 1:
                 axes = [axes]
 
@@ -565,7 +577,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
             # Add trend line
             if len(threshold_data) > 10:  # Only if we have enough points
-                z = np.polyfit(threshold_data["brightness"], threshold_data["pck"], 1)
+                z = np.polyfit(
+                    threshold_data["brightness"], threshold_data["pck"], 1)
                 p = np.poly1d(z)
                 x_trend = np.linspace(
                     threshold_data["brightness"].min(),
@@ -654,8 +667,10 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
             # Add brightness metrics for each joint
             for joint_name, stats in brightness_summary.items():
-                video_summary[f"{joint_name}_mean_brightness"] = stats.get("mean", 0.0)
-                video_summary[f"{joint_name}_std_brightness"] = stats.get("std", 0.0)
+                video_summary[f"{joint_name}_mean_brightness"] = stats.get(
+                    "mean", 0.0)
+                video_summary[f"{joint_name}_std_brightness"] = stats.get(
+                    "std", 0.0)
                 video_summary[f"{joint_name}_valid_frames"] = stats.get(
                     "valid_frames", 0
                 )
@@ -663,7 +678,8 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             video_summaries.append(video_summary)
 
         video_df = pd.DataFrame(video_summaries)
-        video_csv_path = os.path.join(self.output_dir, "video_brightness_summary.csv")
+        video_csv_path = os.path.join(
+            self.output_dir, "video_brightness_summary.csv")
         video_df.to_csv(video_csv_path, index=False)
         print(f"   Saved video summary: {video_csv_path}")
 
@@ -738,9 +754,11 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
         }
 
         # Calculate average brightness across all joints
-        avg_brightness_values = list(video_results.get("avg_brightness", {}).values())
+        avg_brightness_values = list(
+            video_results.get("avg_brightness", {}).values())
         if avg_brightness_values:
-            metadata["avg_brightness_all_joints"] = np.mean(avg_brightness_values)
+            metadata["avg_brightness_all_joints"] = np.mean(
+                avg_brightness_values)
             metadata["brightness_range"] = (
                 min(avg_brightness_values),
                 max(avg_brightness_values),

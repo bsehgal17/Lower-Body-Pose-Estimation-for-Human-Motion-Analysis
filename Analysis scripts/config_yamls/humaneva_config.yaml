@@ -5,7 +5,7 @@ dataset:
   
 paths:
   video_directory: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanEva"
-  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/evaluation/2025-09-26_16-54-25/detect/detect_metrics.xlsx"
+  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanEva/detect_RTMW/evaluation/2025-10-30_20-36-34/detect/detect_metrics.xlsx"
   save_folder: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/EDA_results/HumanEva/High_threshold"
   ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/validate_combined_chunk0.csv"
 

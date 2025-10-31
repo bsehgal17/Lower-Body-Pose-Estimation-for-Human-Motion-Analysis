@@ -4,10 +4,10 @@ orchestrator:
 
 pipelines:
 
-  - name: detect_DWPose
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  # - name: detect_DWPose
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
 
   - name: detect_RTMW
     steps:
@@ -20,128 +20,128 @@ pipelines:
         config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
 
 
-  - name: detect_HRNet
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  # - name: detect_HRNet
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
 
-  - name: detect_HRNet_dark
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  # - name: detect_HRNet_dark
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
 
-  - name: detect_RTMPose_L
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  # - name: detect_RTMPose_L
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
 
-  - name: detect_DWPose
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+  # - name: detect_DWPose
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
 
-  - name: detect_HRNet
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+  # - name: detect_HRNet
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
 
-  - name: detect_HRNet_dark
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+  # - name: detect_HRNet_dark
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
 
-  - name: detect_RTMPose_L
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+  # - name: detect_RTMPose_L
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
 
-  - name: Mediapipe
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config_mediapipe_nojoints.yaml"
+  # - name: Mediapipe
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_mediapipe_nojoints.yaml"
 
-  - name: Mediapipe
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test_mediapipe_nojoints.yaml"
+  # - name: Mediapipe
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test_mediapipe_nojoints.yaml"
         
-  - name: detect_RTMW
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detector/rtmw_detector.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: detect_RTMW
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: detect_RTMW
-    steps:
-    #   - command: detect
-    #     config_file: "config_yamls/detector/detect_and_filter.yaml"
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test.yaml"
+  # - name: detect_RTMW
+  #   steps:
+  #   #   - command: detect
+  #   #     config_file: "config_yamls/detector/detect_and_filter.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
 
-  - name: detect_DWPose
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detector/DWPose_detector_humaneva.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
+  # - name: detect_DWPose
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/DWPose_detector_humaneva.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml" 
 
-  - name: detect_HRNet
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detector/HRNet_detector_humaneva_normal.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: detect_HRNet
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/HRNet_detector_humaneva_normal.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: detect_HRNet_dark
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detector/HRNet_detector_humaneva.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: detect_HRNet_dark
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/HRNet_detector_humaneva.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: detect_RTMPose_L
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detector/RTMPose_l_detector_humaneva.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: detect_RTMPose_L
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/RTMPose_l_detector_humaneva.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
 
-  - name: detect_DWPose
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detector/DWPose_detector_movi.yaml"
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test.yaml" 
+  # - name: detect_DWPose
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/DWPose_detector_movi.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test.yaml" 
 
-  - name: detect_HRNet
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detector/HRNet_detector_humaneva_normal.yaml"
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test.yaml"
+  # - name: detect_HRNet
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/HRNet_detector_humaneva_normal.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
 
-  - name: detect_HRNet_dark
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detector/HRNet_detector_humaneva.yaml"
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test.yaml"
+  # - name: detect_HRNet_dark
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/HRNet_detector_humaneva.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
 
-  - name: detect_RTMPose_L
-    steps:
-      # - command: detect
-      #   config_file: "config_yamls/detector/RTMPose_l_detector_humaneva.yaml"
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test.yaml"
+  # - name: detect_RTMPose_L
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/RTMPose_l_detector_humaneva.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
         
-  - name: Mediapipe
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config_mediapipe.yaml"
+  # - name: Mediapipe
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_mediapipe.yaml"
 
-  - name: Mediapipe
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test_mediapipe.yaml"
+  # - name: Mediapipe
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test_mediapipe.yaml"
