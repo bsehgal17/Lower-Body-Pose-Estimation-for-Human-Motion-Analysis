@@ -13,8 +13,8 @@ from pathlib import Path
 # CONFIGURATION SECTION - EDIT HERE
 # =============================================
 # Set your desired analysis parameters here for quick execution
-DATASET_NAME = "humaneva"  # Options: "movi", "humaneva"
-ANALYSIS_TYPE = "joint_level"  # Options: "standard", "joint_level", "all"
+DATASET_NAME = "movi"  # Options: "movi", "humaneva"
+ANALYSIS_TYPE = "all"  # Options: "standard", "joint_level", "all"
 USE_CONFIG = True  # Set to True to use above config, False to use command line args
 # =============================================
 
@@ -83,7 +83,8 @@ def interactive_mode(dataset_name: str):
                 analysis_idx = int(choice) - 1
                 analysis_type = available_analyses[analysis_idx]
 
-                print(f"\nRunning {analysis_type.replace('_', ' ').title()}...")
+                print(
+                    f"\nRunning {analysis_type.replace('_', ' ').title()}...")
 
                 if analysis_type == "standard_analysis":
                     success = orchestrator.run_standard_analysis()

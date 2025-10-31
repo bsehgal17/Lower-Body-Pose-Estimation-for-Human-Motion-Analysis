@@ -5,7 +5,7 @@ dataset:
 
 paths:
   video_directory: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/all_cropped_videos/"
-  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-09-26_16-54-42/detect/detect_metrics.xlsx"
+  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-10-30_20-36-56/detect/detect_metrics.xlsx"
   save_folder: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/EDA_results/MoVi/High_threshold"
   ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/MoVi_groundtruth/"
 
@@ -20,12 +20,12 @@ columns:
 
 pck_scores:
   overall:
-    - "overall_overall_pck_0.01"
-    - "overall_overall_pck_0.05"
+    - "overall_overall_pck_0.10"
+    - "overall_overall_pck_0.50"
   
   per_frame:
-    - "pck_per_frame_pck_0.01"
-    - "pck_per_frame_pck_0.05"
+    - "pck_per_frame_pck_0.10"
+    - "pck_per_frame_pck_0.50"
   
   jointwise:
     - "LEFT_HIP_jointwise_pck_0.10"

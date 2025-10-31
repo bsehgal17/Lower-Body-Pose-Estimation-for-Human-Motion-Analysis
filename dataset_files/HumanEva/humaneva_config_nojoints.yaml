@@ -58,22 +58,22 @@ evaluation:
   metrics:
     - name: overall_pck
       params:
-        threshold: 0.01
+        threshold: 0.1
     - name: overall_pck
       params:
-        threshold: 0.05
+        threshold: 0.5
     - name: per_frame_pck
       params:
-        threshold: 0.01
+        threshold: 0.1
     - name: per_frame_pck
       params:
-        threshold: 0.05
+        threshold: 0.5
     - name: jointwise_pck
       params:
-        threshold: 0.01
+        threshold: 0.1
     - name: jointwise_pck
       params:
-        threshold: 0.05
+        threshold: 0.5
 
 dataset:
   joint_enum_module: utils.joint_enum.GTJointsHumanEVa
