@@ -323,16 +323,16 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                     except (RuntimeWarning, ValueError):
                         correlation = np.nan
 
-                    if not np.isnan(correlation):
-                        ax.text(
-                            0.05, 0.95,
-                            f"Correlation: r = {correlation:.3f}",
-                            transform=ax.transAxes,
-                            fontsize=12,
-                            fontweight="bold",
-                            bbox=dict(boxstyle="round,pad=0.4",
-                                      facecolor="lightblue", alpha=0.8),
-                        )
+                    # if not np.isnan(correlation):
+                    #     ax.text(
+                    #         0.05, 0.95,
+                    #         f"Correlation: r = {correlation:.3f}",
+                    #         transform=ax.transAxes,
+                    #         fontsize=12,
+                    #         fontweight="bold",
+                    #         bbox=dict(boxstyle="round,pad=0.4",
+                    #                   facecolor="lightblue", alpha=0.8),
+                    #     )
 
                 # Add trend line
                 if len(threshold_data) > 2:
