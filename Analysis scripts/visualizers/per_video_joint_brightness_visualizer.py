@@ -222,12 +222,9 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
     def create_per_video_scatter_plots(self, analysis_results: Dict[str, Any]) -> None:
         """Create individual scatter plots for each video showing PCK vs brightness for all joints.
 
-        This creates separate scatter plots for each video with video information prominently displayed.
-        Each plot shows PCK vs brightness where brightness is taken around joint from ground truth coordinates.
+        Each point is labeled with its joint name, and dataset info is included in the plot title.
         """
-        print(
-            "Creating joint-level scatter plots (PCK vs brightness from GT joint locations)..."
-        )
+        print("Creating joint-level scatter plots (PCK vs brightness from GT joint locations)...")
 
         for video_name, video_results in analysis_results.items():
             print(f"   Creating scatter plot for video: {video_name}")
@@ -235,6 +232,9 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
             # Extract video metadata for display
             video_metadata = self._extract_video_metadata(
                 video_name, video_results)
+
+            # Get dataset name if available
+            dataset_name = video_metadata.get("dataset", "Unknown Dataset")
 
             # Get PCK scores and brightness values for this video
             pck_scores = video_results.get("pck_scores", {})
@@ -245,46 +245,37 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                     f"   ❌ No PCK scores or brightness data found for {video_name}")
                 continue
 
-            # Prepare data for plotting - using average values per joint
+            # Prepare data for plotting
             plot_data = []
             for pck_column, pck_value in pck_scores.items():
-                # Parse joint name and threshold from column name
                 joint_name, threshold = self._parse_pck_column_name(pck_column)
 
-                # Get corresponding brightness value
                 if joint_name in avg_brightness:
                     brightness_value = avg_brightness[joint_name]
-                    plot_data.append(
-                        {
-                            "joint": joint_name,
-                            "threshold": threshold,
-                            "pck": pck_value,
-                            "brightness": brightness_value,
-                            "pck_column": pck_column,
-                        }
-                    )
+                    plot_data.append({
+                        "joint": joint_name,
+                        "threshold": threshold,
+                        "pck": pck_value,
+                        "brightness": brightness_value,
+                        "pck_column": pck_column,
+                    })
 
             if not plot_data:
                 print(
                     f"   ❌ No matching PCK/brightness data found for {video_name}")
                 continue
 
-            # Create the scatter plot for this video
             df = pd.DataFrame(plot_data)
 
             # Group by threshold for subplots
             unique_thresholds = sorted(df["threshold"].unique())
             n_thresholds = len(unique_thresholds)
 
+            fig, axes = plt.subplots(
+                1, n_thresholds, figsize=(10 * n_thresholds, 14)
+            )
             if n_thresholds == 1:
-                fig, ax = plt.subplots(figsize=(18, 14))
-                axes = [ax]
-            else:
-                fig, axes = plt.subplots(
-                    1, n_thresholds, figsize=(10 * n_thresholds, 14)
-                )
-                if n_thresholds == 1:
-                    axes = [axes]
+                axes = [axes]
 
             # Color palette for joints
             unique_joints = df["joint"].unique()
@@ -296,15 +287,15 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 ax = axes[idx]
                 threshold_data = df[df["threshold"] == threshold]
 
-                # Plot each joint with its unique color
+                # Plot each joint with label directly on the point
                 for joint in unique_joints:
                     joint_data = threshold_data[threshold_data["joint"] == joint]
-
                     if len(joint_data) > 0:
+                        x = joint_data["brightness"].values
+                        y = joint_data["pck"].values
+
                         ax.scatter(
-                            joint_data["brightness"],
-                            joint_data["pck"],
-                            label=joint,
+                            x, y,
                             color=joint_colors[joint],
                             alpha=0.7,
                             s=120,
@@ -312,10 +303,19 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                             linewidth=1,
                         )
 
-                # Calculate correlation for this threshold
+                        # Add text label for each point
+                        for xi, yi in zip(x, y):
+                            ax.text(
+                                xi, yi, joint,
+                                fontsize=10,
+                                ha='center', va='bottom',
+                                fontweight='bold',
+                                color=joint_colors[joint],
+                            )
+
+                # Calculate correlation
                 if len(threshold_data) > 1:
                     try:
-                        # Suppress numpy warnings temporarily
                         with np.errstate(divide="ignore", invalid="ignore"):
                             correlation = np.corrcoef(
                                 threshold_data["brightness"], threshold_data["pck"]
@@ -325,92 +325,58 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
 
                     if not np.isnan(correlation):
                         ax.text(
-                            0.05,
-                            0.95,
+                            0.05, 0.95,
                             f"Correlation: r = {correlation:.3f}",
                             transform=ax.transAxes,
                             fontsize=12,
                             fontweight="bold",
-                            bbox=dict(
-                                boxstyle="round,pad=0.4",
-                                facecolor="lightblue",
-                                alpha=0.8,
-                            ),
+                            bbox=dict(boxstyle="round,pad=0.4",
+                                      facecolor="lightblue", alpha=0.8),
                         )
 
-                # Add trend line if we have enough data points
+                # Add trend line
                 if len(threshold_data) > 2:
                     z = np.polyfit(
-                        threshold_data["brightness"], threshold_data["pck"], 1
-                    )
+                        threshold_data["brightness"], threshold_data["pck"], 1)
                     p = np.poly1d(z)
                     x_trend = np.linspace(
                         threshold_data["brightness"].min(),
-                        threshold_data["brightness"].max(),
-                        100,
+                        threshold_data["brightness"].max(), 100
                     )
-                    ax.plot(
-                        x_trend,
-                        p(x_trend),
-                        "r--",
-                        alpha=0.8,
-                        linewidth=2,
-                        label="Trend line",
-                    )
+                    ax.plot(x_trend, p(x_trend), "r--", alpha=0.8,
+                            linewidth=2, label="Trend line")
 
                 ax.set_xlabel(
-                    "Average Brightness (from GT Joint Location)", fontsize=12
-                )
+                    "Average Brightness (from GT Joint Location)", fontsize=12)
                 ax.set_ylabel("PCK Score", fontsize=12)
                 ax.set_title(
-                    f"PCK vs Brightness - Threshold {threshold}",
-                    fontsize=14,
-                    fontweight="bold",
-                )
+                    f"PCK vs Brightness - Threshold {threshold}", fontsize=14, fontweight="bold")
                 ax.grid(True, alpha=0.3)
-                ax.legend(bbox_to_anchor=(1.05, 1),
-                          loc="upper left", fontsize=10)
 
-            # Create comprehensive title with video information and thresholds
+            # Updated title with dataset name
             threshold_list = ", ".join([str(t) for t in unique_thresholds])
-            title_text = f"PCK vs Joint Brightness Analysis (Thresholds: {threshold_list})\n{video_metadata['display_title']}"
+            title_text = (
+                f"{dataset_name}: PCK vs Joint Brightness Analysis (Thresholds: {threshold_list})\n"
+                f"{video_metadata['display_title']}"
+            )
             plt.suptitle(title_text, fontsize=16, fontweight="bold", y=0.98)
 
-            # Add video metadata as text annotation
             metadata_text = self._format_video_metadata(video_metadata)
-
-            # Place metadata on the figure (adjust position based on subplot layout)
-            if n_thresholds == 1:
-                fig.text(
-                    0.02,
-                    0.02,
-                    metadata_text,
-                    fontsize=10,
-                    bbox=dict(
-                        boxstyle="round,pad=0.5", facecolor="lightyellow", alpha=0.8
-                    ),
-                    verticalalignment="bottom",
-                )
-            else:
-                fig.text(
-                    0.02,
-                    0.02,
-                    metadata_text,
-                    fontsize=9,
-                    bbox=dict(
-                        boxstyle="round,pad=0.5", facecolor="lightyellow", alpha=0.8
-                    ),
-                    verticalalignment="bottom",
-                )
+            fig.text(
+                0.02, 0.02, metadata_text,
+                fontsize=10,
+                bbox=dict(boxstyle="round,pad=0.5",
+                          facecolor="lightyellow", alpha=0.8),
+                verticalalignment="bottom",
+            )
 
             plt.tight_layout()
-            plt.subplots_adjust(bottom=0.15)  # Make room for metadata
+            plt.subplots_adjust(bottom=0.15)
 
             # Save the plot
             if self.save_plots and self.output_dir:
                 clean_video_name = self._clean_video_name_for_filename(
                     video_name)
-                # Include threshold information in filename
                 threshold_str = "_".join(
                     [f"thr{t}" for t in unique_thresholds])
                 filename = os.path.join(
@@ -420,7 +386,6 @@ class PerVideoJointBrightnessVisualizer(BaseVisualizer):
                 plt.savefig(filename, dpi=300, bbox_inches="tight")
                 print(f"   Saved: {filename}")
 
-            # plt.show()
             plt.close()
 
         print("Joint-level scatter plots completed")
