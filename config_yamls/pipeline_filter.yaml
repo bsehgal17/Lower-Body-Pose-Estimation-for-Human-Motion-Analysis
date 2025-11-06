@@ -4,7 +4,7 @@ orchestrator:
 
 pipelines:
 
-  # Sample butterworth filter configuration
+  # Sample butterworth filter configuration (reference only)
   # - name: filter_butterworth_10th_10hz
   #   steps:
   #     - command: filter
@@ -12,78 +12,100 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # High-order butterworth filters (16th-20th order, 8-9 Hz)
-  - name: filter_butterworth_16th_8hz
+  # Order 18 butterworth filters (1-7 Hz cutoff frequencies)
+  - name: filter_butterworth_18th_1hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_16th_8hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_1hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_16th_9hz
+  - name: filter_butterworth_18th_2hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_16th_9hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_2hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_17th_8hz
+  - name: filter_butterworth_18th_3hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_17th_8hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_3hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_17th_9hz
+  - name: filter_butterworth_18th_4hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_17th_9hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_4hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_18th_8hz
+  - name: filter_butterworth_18th_5hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_8hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_5hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_18th_9hz
+  - name: filter_butterworth_18th_6hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_9hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_6hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_19th_8hz
+  - name: filter_butterworth_18th_7hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_19th_8hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_7hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_19th_9hz
+  # Order 18 butterworth filters (10-15 Hz cutoff frequencies)
+  - name: filter_butterworth_18th_10hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_19th_9hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_10hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_20th_8hz
+  - name: filter_butterworth_18th_11hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_20th_8hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_11hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  - name: filter_butterworth_20th_9hz
+  - name: filter_butterworth_18th_12hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_20th_9hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_18th_12hz.yaml"
       - command: evaluation
         config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # # EKF (Extended Kalman Filter) configurations
+  - name: filter_butterworth_18th_13hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_18th_13hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_18th_14hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_18th_14hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_18th_15hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_18th_15hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # EKF (Extended Kalman Filter) configurations
   # - name: filter_ekf_walking_smooth_high_acc
   #   steps:
   #     - command: filter

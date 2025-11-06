@@ -1,4 +1,4 @@
-# filepath: c:\Users\BhavyaSehgal\Downloads\Lower-Body-Pose-Estimation-for-Human-Motion-Analysis\config_yamls\filter\filter_butterworth_16th_9hz.yaml
+# filepath: c:\Users\BhavyaSehgal\Downloads\Lower-Body-Pose-Estimation-for-Human-Motion-Analysis\config_yamls\filter\filter_butterworth_18th_2hz.yaml
 paths:
   dataset: HumanEva
   ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
@@ -19,8 +19,8 @@ noise:
 filter:
   name: "butterworth"
   params:
-    order: 16
-    cutoff: 9.0
+    order: 18
+    cutoff: 2.0
     fs: 60.0  # sampling frequency, adjust as needed
   outlier_removal:
       enable: False
