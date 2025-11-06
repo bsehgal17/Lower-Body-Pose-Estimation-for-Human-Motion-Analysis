@@ -21,12 +21,12 @@ columns:
 
 pck_scores:
   overall:
-    - "overall_overall_pck_0.01"
-    - "overall_overall_pck_0.05"
+    - "overall_overall_pck_0.10"
+    - "overall_overall_pck_0.50"
   
   per_frame:
-    - "pck_per_frame_pck_0.01"
-    - "pck_per_frame_pck_0.05"
+    - "pck_per_frame_pck_0.10"
+    - "pck_per_frame_pck_0.50"
   
   jointwise:
     - "LEFT_HIP_jointwise_pck_0.10"

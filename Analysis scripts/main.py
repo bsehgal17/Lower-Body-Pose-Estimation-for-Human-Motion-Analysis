@@ -13,8 +13,8 @@ from pathlib import Path
 # CONFIGURATION SECTION - EDIT HERE
 # =============================================
 # Set your desired analysis parameters here for quick execution
-DATASET_NAME = "movi"  # Options: "movi", "humaneva"
-ANALYSIS_TYPE = "all"  # Options: "standard", "joint_level", "all"
+DATASET_NAME = "humaneva"  # Options: "movi", "humaneva"
+ANALYSIS_TYPE = "standard"  # Options: "standard", "joint_level", "all"
 USE_CONFIG = True  # Set to True to use above config, False to use command line args
 # =============================================
 

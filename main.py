@@ -9,7 +9,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def run_pipeline(pipelines_yaml_path: str = "config_yamls/pipelines_detection.yaml"):
+def run_pipeline(pipelines_yaml_path: str = "config_yamls/pipeline_filter.yaml"):
     with open(pipelines_yaml_path, "r") as f:
         config = yaml.safe_load(f)
 
