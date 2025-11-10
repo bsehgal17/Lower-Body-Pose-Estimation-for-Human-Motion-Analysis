@@ -5,7 +5,7 @@ dataset:
 
 paths:
   video_directory: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/all_cropped_videos/"
-  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-11-06_21-30-17/detect/detect_metrics.xlsx"
+  pck_file_path: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/MoVi/detect_RTMW/evaluation/2025-11-06_22-21-25/detect/detect_metrics.xlsx"
   save_folder: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/analysis_results/EDA_results/MoVi/High_threshold"
   ground_truth_file: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/MoVi/MoVi_groundtruth/"
 
