@@ -128,6 +128,7 @@ class FrameProcessor:
                     detection_item["keypoints_visible"],
                     detection_item["pose_bboxes"][0],  # Use first bbox
                     detection_item["bbox_scores"],
+                    self.config.models.detector,  # Add the missing pose_model parameter
                 )
 
         # Clear buffer
