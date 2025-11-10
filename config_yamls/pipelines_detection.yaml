@@ -9,15 +9,28 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
 
-  - name: detect_RTMW
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  # - name: detect_RTMW
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: detect_RTMW
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
 
   - name: detect_RTMW
     steps:
       - command: evaluation
-        config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
+        config_file: "dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
+
+  # HumanSC3D Lower Body Detection + Evaluation Pipeline
+  - name: HumanSC3D_LowerBody_RTMW
+    steps:
+      - command: detect
+        config_file: "config_yamls/detector/rtmw_detector_humansc3d.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanSC3D/humansc3d_lowerbody_detect_eval.yaml"
 
 
   # - name: detect_HRNet
@@ -64,6 +77,11 @@ pipelines:
   #   steps:
   #     - command: evaluation
   #       config_file: "dataset_files/MoVi/MoVi_test_mediapipe_nojoints.yaml"
+
+  # - name: Mediapipe
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanSC3D/humansc3d_config_mediapipe_nojoints.yaml"
         
   # - name: detect_RTMW
   #   steps:
@@ -78,6 +96,13 @@ pipelines:
   #   #     config_file: "config_yamls/detector/detect_and_filter.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
+
+  # - name: detect_RTMW
+  #   steps:
+  #   #   - command: detect
+  #   #     config_file: "config_yamls/detector/detect_and_filter.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanSC3D/humansc3d_config.yaml"
 
   # - name: detect_DWPose
   #   steps:
@@ -135,6 +160,34 @@ pipelines:
   #     #   config_file: "config_yamls/detector/RTMPose_l_detector_humaneva.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
+
+  # - name: detect_DWPose
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/DWPose_detector_humansc3d.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanSC3D/humansc3d_config.yaml" 
+
+  # - name: detect_HRNet
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/HRNet_detector_humansc3d.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanSC3D/humansc3d_config.yaml"
+
+  # - name: detect_HRNet_dark
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/HRNet_detector_humansc3d.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanSC3D/humansc3d_config.yaml"
+
+  # - name: detect_RTMPose_L
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/RTMPose_l_detector_humansc3d.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanSC3D/humansc3d_config.yaml"
         
   # - name: Mediapipe
   #   steps:
@@ -145,3 +198,8 @@ pipelines:
   #   steps:
   #     - command: evaluation
   #       config_file: "dataset_files/MoVi/MoVi_test_mediapipe.yaml"
+
+  # - name: Mediapipe
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanSC3D/humansc3d_config_mediapipe.yaml"

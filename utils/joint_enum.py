@@ -1,6 +1,53 @@
 from enum import Enum
 
 
+class GTJointsHumanSC3D(Enum):
+    """
+    HumanSC3D dataset uses 25 joints format.
+    Based on the limb connections in convert_3D_to_2D.py:
+
+    Limbs: [10,9], [9,8], [8,11], [8,14], [11,12], [14,15], [12,13], [15,16],
+           [8,7], [7,0], [0,1], [0,4], [1,2], [4,5], [2,3], [5,6],
+           [13,21], [13,22], [16,23], [16,24], [3,17], [3,18], [6,19], [6,20]
+    """
+
+    HEAD = 7
+    NECK = 8
+    PELVIS = 0
+
+    # Arms/Upper body
+    LEFT_SHOULDER = 11
+    RIGHT_SHOULDER = 14
+    LEFT_ELBOW = 12
+    RIGHT_ELBOW = 15
+    LEFT_WRIST = 13
+    RIGHT_WRIST = 16
+
+    # Legs/Lower body
+    LEFT_HIP = 1
+    RIGHT_HIP = 4
+    LEFT_KNEE = 2
+    RIGHT_KNEE = 5
+    LEFT_ANKLE = 3
+    RIGHT_ANKLE = 6
+
+    # Additional joints
+    SPINE = 9
+    SPINE_TOP = 10
+
+    # Hand extremities
+    LEFT_HAND_TIP = 21
+    LEFT_HAND_THUMB = 22
+    RIGHT_HAND_TIP = 23
+    RIGHT_HAND_THUMB = 24
+
+    # Foot extremities
+    LEFT_FOOT_TIP = 17
+    LEFT_FOOT_THUMB = 18
+    RIGHT_FOOT_TIP = 19
+    RIGHT_FOOT_THUMB = 20
+
+
 class GTJointsHumanEVa(Enum):
     PELVIS = 0
     SHOULDER_CENTER = (1, 2)
@@ -37,7 +84,7 @@ class GTJointsMoVi(Enum):
     RIGHT_ANKLE = 8
     # LEFT_HEEL = 44
     # RIGHT_HEEL = 45
-    LEFT_TOE = 10    # 2nd metatarsal
+    LEFT_TOE = 10  # 2nd metatarsal
     RIGHT_TOE = 11
 
 
