@@ -115,9 +115,9 @@ def draw_pose(frame, points_2d):
 # ---------- Main pipeline ----------
 
 if __name__ == "__main__":
-    dataset_name = "fit3d"
+    dataset_name = "humansc3d"
     data_root = r"C:/Users/BhavyaSehgal/Downloads"
-    train_folder = "fit3d_train"
+    train_folder = "humansc3d_train"
     subset = "train"
 
     subjects_path = os.path.join(data_root, dataset_name, train_folder, subset)
