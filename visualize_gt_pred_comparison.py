@@ -253,7 +253,7 @@ class KeypointVisualizer:
         if not cap.isOpened():
             raise ValueError(f"Could not open video: {video_path}")
 
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        total_frames = int(cap.get(7))  # CAP_PROP_FRAME_COUNT = 7
 
         print(f"Total frames: {total_frames}")
         print(f"GT keypoints available for {len(gt_keypoints)} frames")
@@ -262,7 +262,7 @@ class KeypointVisualizer:
 
         # Load all frames into memory for faster navigation
         frames = []
-        cap.set(cv2.CAP_PROP_POS_FRAME, 0)
+        cap.set(1, 0)  # CAP_PROP_POS_FRAME = 1
         while True:
             ret, frame = cap.read()
             if not ret:
