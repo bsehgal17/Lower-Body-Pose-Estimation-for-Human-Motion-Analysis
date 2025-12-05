@@ -117,16 +117,27 @@ class PredictionLoader:
 
     def _rescale_predictions(self, pred_keypoints, pred_bboxes, original_video_path):
         orig_w, orig_h = get_video_resolution(original_video_path)
-        pred_video_path = os.path.join(
-            os.path.dirname(self.pred_pkl_path),
-            f"{os.path.splitext(os.path.basename(self.pred_pkl_path))[0]}.avi",
-        )
 
-        if not os.path.exists(pred_video_path):
-            logger.warning(f"Prediction video not found: {pred_video_path}")
+        # base name without extension
+        base = os.path.splitext(os.path.basename(self.pred_pkl_path))[0]
+        pred_dir = os.path.dirname(self.pred_pkl_path)
+
+        # first try .avi, then .mp4
+        pred_video_path_avi = os.path.join(pred_dir, f"{base}.avi")
+        pred_video_path_mp4 = os.path.join(pred_dir, f"{base}.mp4")
+
+        if os.path.exists(pred_video_path_avi):
+            pred_video_path = pred_video_path_avi
+        elif os.path.exists(pred_video_path_mp4):
+            pred_video_path = pred_video_path_mp4
+        else:
+            logger.warning(
+                f"No prediction video found: tried {pred_video_path_avi} and {pred_video_path_mp4}"
+            )
             return pred_keypoints, pred_bboxes
 
         test_w, test_h = get_video_resolution(pred_video_path)
+
         if (test_w, test_h) == (orig_w, orig_h):
             return pred_keypoints, pred_bboxes
 
