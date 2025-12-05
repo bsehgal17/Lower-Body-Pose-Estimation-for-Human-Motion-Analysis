@@ -148,20 +148,26 @@ class KeypointVisualizer:
             # Arms
             (GTJointsHumanSC3D.NECK.value, GTJointsHumanSC3D.LEFT_SHOULDER.value),
             (GTJointsHumanSC3D.NECK.value, GTJointsHumanSC3D.RIGHT_SHOULDER.value),
-            (GTJointsHumanSC3D.LEFT_SHOULDER.value, GTJointsHumanSC3D.LEFT_ELBOW.value),
+            (GTJointsHumanSC3D.LEFT_SHOULDER.value,
+             GTJointsHumanSC3D.LEFT_ELBOW.value),
             (
                 GTJointsHumanSC3D.RIGHT_SHOULDER.value,
                 GTJointsHumanSC3D.RIGHT_ELBOW.value,
             ),
-            (GTJointsHumanSC3D.LEFT_ELBOW.value, GTJointsHumanSC3D.LEFT_WRIST.value),
-            (GTJointsHumanSC3D.RIGHT_ELBOW.value, GTJointsHumanSC3D.RIGHT_WRIST.value),
+            (GTJointsHumanSC3D.LEFT_ELBOW.value,
+             GTJointsHumanSC3D.LEFT_WRIST.value),
+            (GTJointsHumanSC3D.RIGHT_ELBOW.value,
+             GTJointsHumanSC3D.RIGHT_WRIST.value),
             # Legs
             (GTJointsHumanSC3D.PELVIS.value, GTJointsHumanSC3D.LEFT_HIP.value),
             (GTJointsHumanSC3D.PELVIS.value, GTJointsHumanSC3D.RIGHT_HIP.value),
             (GTJointsHumanSC3D.LEFT_HIP.value, GTJointsHumanSC3D.LEFT_KNEE.value),
-            (GTJointsHumanSC3D.RIGHT_HIP.value, GTJointsHumanSC3D.RIGHT_KNEE.value),
-            (GTJointsHumanSC3D.LEFT_KNEE.value, GTJointsHumanSC3D.LEFT_ANKLE.value),
-            (GTJointsHumanSC3D.RIGHT_KNEE.value, GTJointsHumanSC3D.RIGHT_ANKLE.value),
+            (GTJointsHumanSC3D.RIGHT_HIP.value,
+             GTJointsHumanSC3D.RIGHT_KNEE.value),
+            (GTJointsHumanSC3D.LEFT_KNEE.value,
+             GTJointsHumanSC3D.LEFT_ANKLE.value),
+            (GTJointsHumanSC3D.RIGHT_KNEE.value,
+             GTJointsHumanSC3D.RIGHT_ANKLE.value),
         ]
 
         # Define skeleton connections using DeepLabCut indices
@@ -196,9 +202,11 @@ class KeypointVisualizer:
                 PredJointsDeepLabCut.RIGHT_SHOULDER.value,
                 PredJointsDeepLabCut.RIGHT_HIP.value,
             ),
-            (PredJointsDeepLabCut.LEFT_HIP.value, PredJointsDeepLabCut.RIGHT_HIP.value),
+            (PredJointsDeepLabCut.LEFT_HIP.value,
+             PredJointsDeepLabCut.RIGHT_HIP.value),
             # Legs
-            (PredJointsDeepLabCut.LEFT_HIP.value, PredJointsDeepLabCut.LEFT_KNEE.value),
+            (PredJointsDeepLabCut.LEFT_HIP.value,
+             PredJointsDeepLabCut.LEFT_KNEE.value),
             (
                 PredJointsDeepLabCut.RIGHT_HIP.value,
                 PredJointsDeepLabCut.RIGHT_KNEE.value,
@@ -341,7 +349,8 @@ class KeypointVisualizer:
                 # Only draw if both points are valid
                 if not any(np.isnan([x1, y1, x2, y2])):
                     cv2.line(
-                        frame, (int(x1), int(y1)), (int(x2), int(y2)), color, thickness
+                        frame, (int(x1), int(y1)), (int(x2),
+                                                    int(y2)), color, thickness
                     )
         return frame
 
@@ -424,7 +433,8 @@ class KeypointVisualizer:
 
         # Ensure keypoints are in (n_joints, 2) format
         if keypoints.ndim != 2 or keypoints.shape[1] != 2:
-            print(f"Warning: Keypoints have unexpected shape {keypoints.shape}")
+            print(
+                f"Warning: Keypoints have unexpected shape {keypoints.shape}")
             return
 
         valid_points = ~(np.isnan(keypoints[:, 0]) | np.isnan(keypoints[:, 1]))
@@ -559,7 +569,8 @@ class KeypointVisualizer:
                 else:
                     # Draw original keypoints if common extraction fails
                     if gt_frame is not None:
-                        self.draw_keypoints_matplotlib(ax, gt_frame, "green", "GT")
+                        self.draw_keypoints_matplotlib(
+                            ax, gt_frame, "green", "GT")
                         if draw_skeleton:
                             self.draw_skeleton_matplotlib(
                                 ax, gt_frame, "green", self.gt_skeleton_connections
@@ -603,7 +614,8 @@ class KeypointVisualizer:
                     current_frame = frame_num
                     update_frame()
                 else:
-                    print(f"Frame number must be between 0 and {len(frames) - 1}")
+                    print(
+                        f"Frame number must be between 0 and {len(frames) - 1}")
             except ValueError:
                 print("Invalid frame number")
 
@@ -640,7 +652,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Visualize GT and predicted keypoints on video"
     )
-    parser.add_argument("--video", "-v", required=True, help="Path to input video file")
+    parser.add_argument("--video", "-v", required=True,
+                        help="Path to input video file")
     parser.add_argument(
         "--gt_json", "-g", required=True, help="Path to ground truth JSON file"
     )
@@ -698,9 +711,9 @@ if __name__ == "__main__":
     # Direct execution with hardcoded paths - modify these for your files
 
     # MODIFY THESE PATHS FOR YOUR DATA
-    video_path = r"C:\path\to\your\video.mp4"
-    gt_json_path = r"C:\path\to\your\gt.json"
-    pred_json_path = r"C:\path\to\your\pred.json"
+    video_path = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanSC3D/humansc3d_train/train/s01/videos/50591643/001.mp4"
+    gt_json_path = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanSC3D/humansc3d_train/train/s01/processed_outputs/2d_points/001_50591643_2d.json"
+    pred_json_path = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanSC3D/detect_RTMW/detect/2025-11-10_13-14-25/humansc3d_train/train/s01/videos/50591643/001/001.json"
 
     # You can also use command line arguments by uncommenting the next line:
     # exit(main())
