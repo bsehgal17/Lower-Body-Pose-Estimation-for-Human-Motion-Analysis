@@ -57,7 +57,13 @@ def humansc3d_data_loader(
 
         # Construct the video path to derive GT path
         original_video_path = os.path.join(
-            original_video_base, "humansc3d_train", "train", subject, "videos", camera, f"{action}.mp4"
+            original_video_base,
+            "humansc3d_train",
+            "train",
+            subject,
+            "videos",
+            camera,
+            f"{action}.mp4",
         )
 
         # Get ground truth path using the metadata helper
@@ -75,8 +81,7 @@ def humansc3d_data_loader(
 
         # Cache GT data as pickle for faster loading
         gt_pkl_name = f"{subject}_{action}_{camera}_gt.pkl"
-        gt_pkl_folder = os.path.join(
-            os.path.dirname(gt_json_path), "pickle_files")
+        gt_pkl_folder = os.path.join(os.path.dirname(gt_json_path), "pickle_files")
         os.makedirs(gt_pkl_folder, exist_ok=True)
         gt_pkl_path = os.path.join(gt_pkl_folder, gt_pkl_name)
 
@@ -87,42 +92,73 @@ def humansc3d_data_loader(
                 with open(gt_pkl_path, "wb") as f:
                     pickle.dump({"keypoints": keypoints}, f)
             else:
-                logger.warning(
-                    f"Could not load GT keypoints from {gt_json_path}")
+                logger.warning(f"Could not load GT keypoints from {gt_json_path}")
                 return None
 
         with open(gt_pkl_path, "rb") as f:
             gt_data = pickle.load(f)
-        gt_keypoints = gt_data["keypoints"]
+        gt_keypoints_raw = gt_data["keypoints"]
 
         # If GT keypoints are None or empty, skip this sample
-        if gt_keypoints is None or (
-            isinstance(gt_keypoints, (list, np.ndarray)
-                       ) and len(gt_keypoints) == 0
+        if gt_keypoints_raw is None or (
+            isinstance(gt_keypoints_raw, (list, np.ndarray))
+            and len(gt_keypoints_raw) == 0
         ):
             logger.warning(
                 f"Skipping {pred_pkl_path} due to missing or empty GT keypoints."
             )
             return None
 
+        # Ensure GT keypoints are in the correct format: list of numpy arrays (n_joints, 2) per frame
+        if isinstance(gt_keypoints_raw, np.ndarray):
+            # Convert numpy array to list of per-frame arrays
+            gt_keypoints = [frame for frame in gt_keypoints_raw]
+        else:
+            # Already a list, but ensure each frame is a numpy array
+            gt_keypoints = []
+            for frame in gt_keypoints_raw:
+                if isinstance(frame, np.ndarray):
+                    gt_keypoints.append(frame)
+                else:
+                    # Convert list to numpy array with shape (n_joints, 2)
+                    frame_array = np.array(frame).reshape(-1, 2)
+                    gt_keypoints.append(frame_array)
+
         # --- Prediction Loading and Preprocessing ---
         pred_loader = PredictionLoader(
             pred_pkl_path,
             pipeline_config,
         )
-        pred_keypoints, pred_bboxes, pred_scores = pred_loader.get_filtered_predictions(
-            subject, action, int(camera), original_video_path
+        pred_keypoints_raw, pred_bboxes, pred_scores = (
+            pred_loader.get_filtered_predictions(
+                subject, action, int(camera), original_video_path
+            )
         )
 
-        # If pred_keypoints is None or empty, also skip (optional, for robustness)
-        if pred_keypoints is None or (
-            isinstance(pred_keypoints, (list, np.ndarray)
-                       ) and len(pred_keypoints) == 0
+        # If pred_keypoints are None or empty, also skip (optional, for robustness)
+        if pred_keypoints_raw is None or (
+            isinstance(pred_keypoints_raw, (list, np.ndarray))
+            and len(pred_keypoints_raw) == 0
         ):
             logger.warning(
                 f"Skipping {pred_pkl_path} due to missing or empty predicted keypoints."
             )
             return None
+
+        # Ensure pred keypoints are in the correct format: list of numpy arrays (n_joints, 2) per frame
+        pred_keypoints = []
+        for frame_data in pred_keypoints_raw:
+            if frame_data is None:
+                continue
+            if isinstance(frame_data, np.ndarray):
+                # Already in correct format
+                pred_keypoints.append(frame_data)
+            else:
+                # Convert to numpy array with proper shape
+                frame_array = np.array(frame_data)
+                if frame_array.ndim == 1:
+                    frame_array = frame_array.reshape(-1, 2)
+                pred_keypoints.append(frame_array)
 
         min_len = min(len(gt_keypoints), len(pred_keypoints))
 
@@ -136,6 +172,7 @@ def humansc3d_data_loader(
             "camera": camera,
         }
 
+        # Both gt_keypoints and pred_keypoints are now lists of numpy arrays
         # Return all the separate lists in the expected order
         return (
             gt_keypoints[:min_len],
@@ -171,10 +208,8 @@ def run_humansc3d_assessment(
         min_bbox_confidence (float or None): Minimum bounding box confidence threshold for filtering
         min_keypoint_confidence (float or None): Minimum keypoint confidence threshold for filtering
     """
-    gt_enum_class = import_class_from_string(
-        pipeline_config.dataset.joint_enum_module)
-    pred_enum_class = import_class_from_string(
-        pipeline_config.dataset.keypoint_format)
+    gt_enum_class = import_class_from_string(pipeline_config.dataset.joint_enum_module)
+    pred_enum_class = import_class_from_string(pipeline_config.dataset.keypoint_format)
 
     pred_root = (
         pipeline_config.evaluation.input_dir or pipeline_config.detect.output_dir
