@@ -196,11 +196,60 @@ class KeypointVisualizer:
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
+    def normalize_keypoints_format(self, keypoints_list: List) -> List[np.ndarray]:
+        """Normalize keypoints to consistent format: list of numpy arrays (n_joints, 2) per frame."""
+        normalized = []
+
+        for frame_data in keypoints_list:
+            if frame_data is None:
+                normalized.append(None)
+                continue
+
+            if isinstance(frame_data, np.ndarray):
+                # Handle different numpy array formats
+                if frame_data.ndim == 1:
+                    # Flat array, reshape to (n_joints, 2)
+                    frame_array = frame_data.reshape(-1, 2)
+                elif frame_data.ndim == 2:
+                    # Already in (n_joints, 2) format
+                    frame_array = frame_data
+                elif frame_data.ndim == 3 and frame_data.shape[0] == 1:
+                    # Shape (1, n_joints, 2), squeeze first dimension
+                    frame_array = frame_data.squeeze(0)
+                else:
+                    # Other formats, try to get first frame if batch
+                    frame_array = (
+                        frame_data[0] if frame_data.shape[0] > 0 else frame_data
+                    )
+            else:
+                # Convert list to numpy array
+                frame_array = np.array(frame_data)
+                if frame_array.ndim == 1:
+                    frame_array = frame_array.reshape(-1, 2)
+                elif frame_array.ndim == 3 and frame_array.shape[0] == 1:
+                    frame_array = frame_array.squeeze(0)
+
+            # Ensure final shape is (n_joints, 2)
+            if frame_array.ndim != 2 or frame_array.shape[1] != 2:
+                print(
+                    f"Warning: Could not normalize keypoints shape {frame_array.shape}, skipping frame"
+                )
+                normalized.append(None)
+            else:
+                normalized.append(frame_array)
+
+        return normalized
+
     def draw_keypoints_matplotlib(
         self, ax, keypoints: np.ndarray, color: str, label: str, marker_size: int = 50
     ):
         """Draw keypoints on matplotlib axis."""
         if keypoints is None or len(keypoints) == 0:
+            return
+
+        # Ensure keypoints are in (n_joints, 2) format
+        if keypoints.ndim != 2 or keypoints.shape[1] != 2:
+            print(f"Warning: Keypoints have unexpected shape {keypoints.shape}")
             return
 
         valid_points = ~(np.isnan(keypoints[:, 0]) | np.isnan(keypoints[:, 1]))
@@ -248,6 +297,11 @@ class KeypointVisualizer:
         draw_skeleton: bool = True,
     ):
         """Show interactive frame-by-frame comparison using matplotlib."""
+        # Normalize keypoint formats to ensure consistency
+        print("Normalizing keypoint formats...")
+        gt_keypoints = self.normalize_keypoints_format(gt_keypoints)
+        pred_keypoints = self.normalize_keypoints_format(pred_keypoints)
+
         cap = cv2.VideoCapture(video_path)
 
         if not cap.isOpened():
