@@ -5,7 +5,7 @@ import numpy as np
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from dataset_files.HumanSC3D.humansc3d_metadata import (
-    get_humansc3d_metadata_from_video,
+    get_humansc3d_metadata_from_json,
     get_humansc3d_gt_path,
 )
 from dataset_files.HumanSC3D.humansc3d_gt_loader import HumanSC3DGroundTruthLoader
@@ -37,7 +37,7 @@ def humansc3d_data_loader(
     """
     try:
         json_path = pred_pkl_path.replace(".pkl", ".json")
-        metadata = get_humansc3d_metadata_from_video(json_path)
+        metadata = get_humansc3d_metadata_from_json(json_path)
         if not metadata:
             logger.warning(
                 f"Could not parse metadata from {os.path.basename(json_path)}"
@@ -57,7 +57,7 @@ def humansc3d_data_loader(
 
         # Construct the video path to derive GT path
         original_video_path = os.path.join(
-            original_video_base, subject, "videos", camera, f"{action}.mp4"
+            original_video_base, "humansc3d_train", "train", subject, "videos", camera, f"{action}.mp4"
         )
 
         # Get ground truth path using the metadata helper
@@ -75,7 +75,8 @@ def humansc3d_data_loader(
 
         # Cache GT data as pickle for faster loading
         gt_pkl_name = f"{subject}_{action}_{camera}_gt.pkl"
-        gt_pkl_folder = os.path.join(os.path.dirname(gt_json_path), "pickle_files")
+        gt_pkl_folder = os.path.join(
+            os.path.dirname(gt_json_path), "pickle_files")
         os.makedirs(gt_pkl_folder, exist_ok=True)
         gt_pkl_path = os.path.join(gt_pkl_folder, gt_pkl_name)
 
@@ -86,7 +87,8 @@ def humansc3d_data_loader(
                 with open(gt_pkl_path, "wb") as f:
                     pickle.dump({"keypoints": keypoints}, f)
             else:
-                logger.warning(f"Could not load GT keypoints from {gt_json_path}")
+                logger.warning(
+                    f"Could not load GT keypoints from {gt_json_path}")
                 return None
 
         with open(gt_pkl_path, "rb") as f:
@@ -95,7 +97,8 @@ def humansc3d_data_loader(
 
         # If GT keypoints are None or empty, skip this sample
         if gt_keypoints is None or (
-            isinstance(gt_keypoints, (list, np.ndarray)) and len(gt_keypoints) == 0
+            isinstance(gt_keypoints, (list, np.ndarray)
+                       ) and len(gt_keypoints) == 0
         ):
             logger.warning(
                 f"Skipping {pred_pkl_path} due to missing or empty GT keypoints."
@@ -113,7 +116,8 @@ def humansc3d_data_loader(
 
         # If pred_keypoints is None or empty, also skip (optional, for robustness)
         if pred_keypoints is None or (
-            isinstance(pred_keypoints, (list, np.ndarray)) and len(pred_keypoints) == 0
+            isinstance(pred_keypoints, (list, np.ndarray)
+                       ) and len(pred_keypoints) == 0
         ):
             logger.warning(
                 f"Skipping {pred_pkl_path} due to missing or empty predicted keypoints."
@@ -167,8 +171,10 @@ def run_humansc3d_assessment(
         min_bbox_confidence (float or None): Minimum bounding box confidence threshold for filtering
         min_keypoint_confidence (float or None): Minimum keypoint confidence threshold for filtering
     """
-    gt_enum_class = import_class_from_string(pipeline_config.dataset.joint_enum_module)
-    pred_enum_class = import_class_from_string(pipeline_config.dataset.keypoint_format)
+    gt_enum_class = import_class_from_string(
+        pipeline_config.dataset.joint_enum_module)
+    pred_enum_class = import_class_from_string(
+        pipeline_config.dataset.keypoint_format)
 
     pred_root = (
         pipeline_config.evaluation.input_dir or pipeline_config.detect.output_dir

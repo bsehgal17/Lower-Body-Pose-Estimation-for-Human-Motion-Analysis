@@ -194,7 +194,5 @@ class PredictionLoader:
         pred_keypoints, pred_bboxes = self._rescale_predictions(
             pred_keypoints, pred_bboxes, original_video_path
         )
-        pred_keypoints, pred_bboxes, pred_scores = self._apply_synchronization(
-            pred_keypoints, pred_bboxes, pred_scores, subject, action, camera_idx
-        )
+
         return pred_keypoints, pred_bboxes, pred_scores
