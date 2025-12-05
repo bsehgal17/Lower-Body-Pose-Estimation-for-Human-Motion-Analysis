@@ -1,7 +1,8 @@
 from config.pipeline_config import PipelineConfig
 from config.global_config import GlobalConfig
 from dataset_files.HumanEva.humaneva_evaluation import run_humaneva_assessment
-from dataset_files.MoVi.movi_evaluation import run_movi_assessment  # ← Add this import
+from dataset_files.MoVi.movi_evaluation import run_movi_assessment
+from dataset_files.HumanSC3D.humansc3d_evaluation import run_humansc3d_assessment
 
 
 def run_pose_assessment_pipeline(
@@ -37,6 +38,15 @@ def run_pose_assessment_pipeline(
     elif dataset == "MoVi":
         return run_movi_assessment(
             pipeline_config, global_config, output_dir, input_dir
+        )
+    elif dataset == "HumanSC3D":
+        return run_humansc3d_assessment(
+            pipeline_config,
+            global_config,
+            output_dir,
+            input_dir,
+            min_bbox_confidence=min_bbox_confidence,
+            min_keypoint_confidence=min_keypoint_confidence,
         )
     else:
         raise NotImplementedError(f"Assessment not implemented for dataset '{dataset}'")
