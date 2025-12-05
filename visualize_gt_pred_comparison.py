@@ -14,6 +14,59 @@ from matplotlib.widgets import Button
 import argparse
 import os
 from typing import Dict, List, Optional, Tuple
+from enum import Enum
+
+
+class GTJointsHumanSC3D(Enum):
+    """HumanSC3D dataset uses 25 joints format."""
+
+    PELVIS = 0
+    LEFT_HIP = 1
+    LEFT_KNEE = 2
+    LEFT_ANKLE = 3
+    RIGHT_HIP = 4
+    RIGHT_KNEE = 5
+    RIGHT_ANKLE = 6
+    HEAD = 7
+    NECK = 8
+    SPINE = 9
+    SPINE_TOP = 10
+    LEFT_SHOULDER = 11
+    LEFT_ELBOW = 12
+    LEFT_WRIST = 13
+    RIGHT_SHOULDER = 14
+    RIGHT_ELBOW = 15
+    RIGHT_WRIST = 16
+    LEFT_FOOT_TIP = 17
+    LEFT_FOOT_THUMB = 18
+    RIGHT_FOOT_TIP = 19
+    RIGHT_FOOT_THUMB = 20
+    LEFT_HAND_TIP = 21
+    LEFT_HAND_THUMB = 22
+    RIGHT_HAND_TIP = 23
+    RIGHT_HAND_THUMB = 24
+
+
+class PredJointsDeepLabCut(Enum):
+    """DeepLabCut/COCO format joints."""
+
+    NOSE = 0
+    LEFT_EYE = 1
+    RIGHT_EYE = 2
+    LEFT_EAR = 3
+    RIGHT_EAR = 4
+    LEFT_SHOULDER = 5
+    RIGHT_SHOULDER = 6
+    LEFT_ELBOW = 7
+    RIGHT_ELBOW = 8
+    LEFT_WRIST = 9
+    RIGHT_WRIST = 10
+    LEFT_HIP = 11
+    RIGHT_HIP = 12
+    LEFT_KNEE = 13
+    RIGHT_KNEE = 14
+    LEFT_ANKLE = 15
+    RIGHT_ANKLE = 16
 
 
 class KeypointVisualizer:
@@ -34,31 +87,147 @@ class KeypointVisualizer:
         self.pred_color = pred_color
         self.confidence_threshold = confidence_threshold
 
-        # Define skeleton connections for drawing lines between keypoints
-        # This is a general skeleton - adjust based on your specific joint format
-        self.skeleton_connections = [
-            # Head/neck connections
-            (0, 1),
-            (1, 2),
-            (2, 3),
-            (3, 4),  # head chain
-            # Torso connections
-            (1, 5),
-            (1, 6),  # shoulders
-            (5, 7),
-            (6, 8),  # arms
-            (7, 9),
-            (8, 10),  # forearms
-            # Lower body
-            (1, 11),
-            (1, 12),  # hips
-            (11, 13),
-            (12, 14),  # thighs
-            (13, 15),
-            (14, 16),  # calves
-            (15, 17),
-            (16, 18),  # feet
+        # Define common joints mapping between GT (HumanSC3D) and Pred (DeepLabCut)
+        self.common_joints = {
+            "LEFT_SHOULDER": (
+                GTJointsHumanSC3D.LEFT_SHOULDER.value,
+                PredJointsDeepLabCut.LEFT_SHOULDER.value,
+            ),
+            "RIGHT_SHOULDER": (
+                GTJointsHumanSC3D.RIGHT_SHOULDER.value,
+                PredJointsDeepLabCut.RIGHT_SHOULDER.value,
+            ),
+            "LEFT_ELBOW": (
+                GTJointsHumanSC3D.LEFT_ELBOW.value,
+                PredJointsDeepLabCut.LEFT_ELBOW.value,
+            ),
+            "RIGHT_ELBOW": (
+                GTJointsHumanSC3D.RIGHT_ELBOW.value,
+                PredJointsDeepLabCut.RIGHT_ELBOW.value,
+            ),
+            "LEFT_WRIST": (
+                GTJointsHumanSC3D.LEFT_WRIST.value,
+                PredJointsDeepLabCut.LEFT_WRIST.value,
+            ),
+            "RIGHT_WRIST": (
+                GTJointsHumanSC3D.RIGHT_WRIST.value,
+                PredJointsDeepLabCut.RIGHT_WRIST.value,
+            ),
+            "LEFT_HIP": (
+                GTJointsHumanSC3D.LEFT_HIP.value,
+                PredJointsDeepLabCut.LEFT_HIP.value,
+            ),
+            "RIGHT_HIP": (
+                GTJointsHumanSC3D.RIGHT_HIP.value,
+                PredJointsDeepLabCut.RIGHT_HIP.value,
+            ),
+            "LEFT_KNEE": (
+                GTJointsHumanSC3D.LEFT_KNEE.value,
+                PredJointsDeepLabCut.LEFT_KNEE.value,
+            ),
+            "RIGHT_KNEE": (
+                GTJointsHumanSC3D.RIGHT_KNEE.value,
+                PredJointsDeepLabCut.RIGHT_KNEE.value,
+            ),
+            "LEFT_ANKLE": (
+                GTJointsHumanSC3D.LEFT_ANKLE.value,
+                PredJointsDeepLabCut.LEFT_ANKLE.value,
+            ),
+            "RIGHT_ANKLE": (
+                GTJointsHumanSC3D.RIGHT_ANKLE.value,
+                PredJointsDeepLabCut.RIGHT_ANKLE.value,
+            ),
+        }
+
+        # Define skeleton connections using HumanSC3D indices
+        self.gt_skeleton_connections = [
+            # Torso
+            (GTJointsHumanSC3D.PELVIS.value, GTJointsHumanSC3D.SPINE.value),
+            (GTJointsHumanSC3D.SPINE.value, GTJointsHumanSC3D.NECK.value),
+            (GTJointsHumanSC3D.NECK.value, GTJointsHumanSC3D.HEAD.value),
+            # Arms
+            (GTJointsHumanSC3D.NECK.value, GTJointsHumanSC3D.LEFT_SHOULDER.value),
+            (GTJointsHumanSC3D.NECK.value, GTJointsHumanSC3D.RIGHT_SHOULDER.value),
+            (GTJointsHumanSC3D.LEFT_SHOULDER.value, GTJointsHumanSC3D.LEFT_ELBOW.value),
+            (
+                GTJointsHumanSC3D.RIGHT_SHOULDER.value,
+                GTJointsHumanSC3D.RIGHT_ELBOW.value,
+            ),
+            (GTJointsHumanSC3D.LEFT_ELBOW.value, GTJointsHumanSC3D.LEFT_WRIST.value),
+            (GTJointsHumanSC3D.RIGHT_ELBOW.value, GTJointsHumanSC3D.RIGHT_WRIST.value),
+            # Legs
+            (GTJointsHumanSC3D.PELVIS.value, GTJointsHumanSC3D.LEFT_HIP.value),
+            (GTJointsHumanSC3D.PELVIS.value, GTJointsHumanSC3D.RIGHT_HIP.value),
+            (GTJointsHumanSC3D.LEFT_HIP.value, GTJointsHumanSC3D.LEFT_KNEE.value),
+            (GTJointsHumanSC3D.RIGHT_HIP.value, GTJointsHumanSC3D.RIGHT_KNEE.value),
+            (GTJointsHumanSC3D.LEFT_KNEE.value, GTJointsHumanSC3D.LEFT_ANKLE.value),
+            (GTJointsHumanSC3D.RIGHT_KNEE.value, GTJointsHumanSC3D.RIGHT_ANKLE.value),
         ]
+
+        # Define skeleton connections using DeepLabCut indices
+        self.pred_skeleton_connections = [
+            # Arms
+            (
+                PredJointsDeepLabCut.LEFT_SHOULDER.value,
+                PredJointsDeepLabCut.LEFT_ELBOW.value,
+            ),
+            (
+                PredJointsDeepLabCut.RIGHT_SHOULDER.value,
+                PredJointsDeepLabCut.RIGHT_ELBOW.value,
+            ),
+            (
+                PredJointsDeepLabCut.LEFT_ELBOW.value,
+                PredJointsDeepLabCut.LEFT_WRIST.value,
+            ),
+            (
+                PredJointsDeepLabCut.RIGHT_ELBOW.value,
+                PredJointsDeepLabCut.RIGHT_WRIST.value,
+            ),
+            # Torso
+            (
+                PredJointsDeepLabCut.LEFT_SHOULDER.value,
+                PredJointsDeepLabCut.RIGHT_SHOULDER.value,
+            ),
+            (
+                PredJointsDeepLabCut.LEFT_SHOULDER.value,
+                PredJointsDeepLabCut.LEFT_HIP.value,
+            ),
+            (
+                PredJointsDeepLabCut.RIGHT_SHOULDER.value,
+                PredJointsDeepLabCut.RIGHT_HIP.value,
+            ),
+            (PredJointsDeepLabCut.LEFT_HIP.value, PredJointsDeepLabCut.RIGHT_HIP.value),
+            # Legs
+            (PredJointsDeepLabCut.LEFT_HIP.value, PredJointsDeepLabCut.LEFT_KNEE.value),
+            (
+                PredJointsDeepLabCut.RIGHT_HIP.value,
+                PredJointsDeepLabCut.RIGHT_KNEE.value,
+            ),
+            (
+                PredJointsDeepLabCut.LEFT_KNEE.value,
+                PredJointsDeepLabCut.LEFT_ANKLE.value,
+            ),
+            (
+                PredJointsDeepLabCut.RIGHT_KNEE.value,
+                PredJointsDeepLabCut.RIGHT_ANKLE.value,
+            ),
+        ]
+
+    def extract_common_joints(
+        self, gt_keypoints: np.ndarray, pred_keypoints: np.ndarray
+    ):
+        """Extract only the common joints between GT and prediction formats."""
+        gt_common = []
+        pred_common = []
+        joint_names = []
+
+        for joint_name, (gt_idx, pred_idx) in self.common_joints.items():
+            if gt_idx < len(gt_keypoints) and pred_idx < len(pred_keypoints):
+                gt_common.append(gt_keypoints[gt_idx])
+                pred_common.append(pred_keypoints[pred_idx])
+                joint_names.append(joint_name)
+
+        return np.array(gt_common), np.array(pred_common), joint_names
 
     def load_gt_keypoints(self, gt_json_path: str) -> List[np.ndarray]:
         """Load ground truth keypoints from JSON file."""
@@ -241,7 +410,13 @@ class KeypointVisualizer:
         return normalized
 
     def draw_keypoints_matplotlib(
-        self, ax, keypoints: np.ndarray, color: str, label: str, marker_size: int = 50
+        self,
+        ax,
+        keypoints: np.ndarray,
+        color: str,
+        label: str,
+        joint_names: List[str] = None,
+        marker_size: int = 50,
     ):
         """Draw keypoints on matplotlib axis."""
         if keypoints is None or len(keypoints) == 0:
@@ -265,19 +440,29 @@ class KeypointVisualizer:
                 alpha=0.8,
             )
 
-            # Add joint numbers
+            # Add joint labels
             for i, (x, y) in enumerate(keypoints):
                 if not (np.isnan(x) or np.isnan(y)):
-                    ax.text(x + 5, y - 5, str(i), fontsize=8, color=color)
+                    joint_label = (
+                        joint_names[i]
+                        if joint_names and i < len(joint_names)
+                        else str(i)
+                    )
+                    ax.text(x + 5, y - 5, joint_label, fontsize=6, color=color)
 
     def draw_skeleton_matplotlib(
-        self, ax, keypoints: np.ndarray, color: str, linewidth: int = 2
+        self,
+        ax,
+        keypoints: np.ndarray,
+        color: str,
+        skeleton_connections: List[Tuple[int, int]],
+        linewidth: int = 2,
     ):
         """Draw skeleton connections on matplotlib axis."""
         if keypoints is None or len(keypoints) == 0:
             return
 
-        for connection in self.skeleton_connections:
+        for connection in skeleton_connections:
             joint1_idx, joint2_idx = connection
             if joint1_idx < len(keypoints) and joint2_idx < len(keypoints):
                 x1, y1 = keypoints[joint1_idx]
@@ -341,31 +526,53 @@ class KeypointVisualizer:
                 ax.imshow(frames[current_frame])
                 ax.set_title(f"Frame {current_frame}/{len(frames) - 1}")
 
-                # Draw GT keypoints (green)
-                if (
-                    current_frame < len(gt_keypoints)
-                    and gt_keypoints[current_frame] is not None
-                ):
-                    self.draw_keypoints_matplotlib(
-                        ax, gt_keypoints[current_frame], "green", "GT"
+                # Extract common joints if both GT and pred are available
+                gt_frame = (
+                    gt_keypoints[current_frame]
+                    if current_frame < len(gt_keypoints)
+                    else None
+                )
+                pred_frame = (
+                    pred_keypoints[current_frame]
+                    if current_frame < len(pred_keypoints)
+                    else None
+                )
+
+                if gt_frame is not None and pred_frame is not None:
+                    # Extract only common joints for comparison
+                    gt_common, pred_common, joint_names = self.extract_common_joints(
+                        gt_frame, pred_frame
                     )
-                    if draw_skeleton:
-                        self.draw_skeleton_matplotlib(
-                            ax, gt_keypoints[current_frame], "green"
+
+                    # Draw GT common joints (green)
+                    if len(gt_common) > 0:
+                        self.draw_keypoints_matplotlib(
+                            ax, gt_common, "green", "GT", joint_names
                         )
 
-                # Draw predicted keypoints (red)
-                if (
-                    current_frame < len(pred_keypoints)
-                    and pred_keypoints[current_frame] is not None
-                ):
-                    self.draw_keypoints_matplotlib(
-                        ax, pred_keypoints[current_frame], "red", "Predicted"
-                    )
-                    if draw_skeleton:
-                        self.draw_skeleton_matplotlib(
-                            ax, pred_keypoints[current_frame], "red"
+                    # Draw predicted common joints (red)
+                    if len(pred_common) > 0:
+                        self.draw_keypoints_matplotlib(
+                            ax, pred_common, "red", "Predicted", joint_names
                         )
+
+                else:
+                    # Draw original keypoints if common extraction fails
+                    if gt_frame is not None:
+                        self.draw_keypoints_matplotlib(ax, gt_frame, "green", "GT")
+                        if draw_skeleton:
+                            self.draw_skeleton_matplotlib(
+                                ax, gt_frame, "green", self.gt_skeleton_connections
+                            )
+
+                    if pred_frame is not None:
+                        self.draw_keypoints_matplotlib(
+                            ax, pred_frame, "red", "Predicted"
+                        )
+                        if draw_skeleton:
+                            self.draw_skeleton_matplotlib(
+                                ax, pred_frame, "red", self.pred_skeleton_connections
+                            )
 
                 ax.legend(loc="upper right")
                 ax.set_xlim(0, frames[current_frame].shape[1])
