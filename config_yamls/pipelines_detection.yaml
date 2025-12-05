@@ -4,12 +4,132 @@ orchestrator:
 
 pipelines:
 
+  # - name: KinD
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: BPDHE
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: EnlightenGAN
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: MCLAHE
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: Sigmoid
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: HVI_CDI
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: ESIHE
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: HE
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: zero_dce
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: BPDFHE
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: CLALHE
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: DarkEnhancement
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: Gamma
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: GLCAE
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: LogTransform
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: CLAHE
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # - name: detect_RTMW
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+
   # - name: detect_DWPose
   #   steps:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
 
-  # - name: detect_RTMW
+  # - name: spatial testing
   #   steps:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config_nojoints.yaml"
@@ -19,18 +139,18 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/MoVi/MoVi_test_nojoints.yaml"
 
-  - name: detect_RTMW
-    steps:
-      - command: evaluation
-        config_file: "dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
+  # - name: detect_RTMW
+  #   steps:
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
 
   # HumanSC3D Lower Body Detection + Evaluation Pipeline
-  - name: HumanSC3D_LowerBody_RTMW
-    steps:
-      - command: detect
-        config_file: "config_yamls/detector/rtmw_detector_humansc3d.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanSC3D/humansc3d_lowerbody_detect_eval.yaml"
+  # - name: HumanSC3D_LowerBody_RTMW
+  #   steps:
+  #     # - command: detect
+  #     #   config_file: "config_yamls/detector/rtmw_detector_humansc3d.yaml"
+  #     - command: evaluation
+        # config_file: "dataset_files/HumanSC3D/humansc3d_lowerbody_detect_eval.yaml"
 
 
   # - name: detect_HRNet
@@ -83,10 +203,10 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanSC3D/humansc3d_config_mediapipe_nojoints.yaml"
         
-  # - name: detect_RTMW
+  # - name: spatial_testing
   #   steps:
-  #     # - command: detect
-  #     #   config_file: "config_yamls/detector/rtmw_detector.yaml"
+  #     - command: detect
+  #       config_file: "config_yamls/detector/rtmw_detector.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
@@ -97,12 +217,12 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/MoVi/MoVi_test.yaml"
 
-  # - name: detect_RTMW
-  #   steps:
-  #   #   - command: detect
-  #   #     config_file: "config_yamls/detector/detect_and_filter.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanSC3D/humansc3d_config.yaml"
+  - name: detect_RTMW
+    steps:
+      # - command: detect
+      #   config_file: "config_yamls/detector/detect_and_filter.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanSC3D/humansc3d_config.yaml"
 
   # - name: detect_DWPose
   #   steps:
