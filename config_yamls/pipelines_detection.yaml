@@ -222,7 +222,7 @@ pipelines:
       # - command: detect
       #   config_file: "config_yamls/detector/detect_and_filter.yaml"
       - command: evaluation
-        config_file: "dataset_files/HumanSC3D/humansc3d_config.yaml"
+        config_file: "dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
 
   # - name: detect_DWPose
   #   steps:

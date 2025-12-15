@@ -5,12 +5,12 @@ orchestrator:
 pipelines:
 
   # Sample butterworth filter configuration (reference only)
-  # - name: filter_butterworth_10th_10hz
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_10th_10hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: filter_butterworth_10th_10hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_10th_10hz.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # Order 18 butterworth filters (1-7 Hz cutoff frequencies)
   - name: filter_butterworth_18th_1hz
