@@ -1,0 +1,11 @@
+filter:
+  type: butterworth
+  order: 15
+  cutoff: 12
+  fs: 60
+noise:
+  type: none
+evaluation:
+  metrics: [pck, mAP]
+dataset:
+  name: HumanSC3D

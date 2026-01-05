@@ -4,12 +4,12 @@ orchestrator:
 
 pipelines:
   # Butterworth Filter - Example configuration
-  - name: filter_butterworth_example
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_5hz.yaml"
-      - command: evaluation
-        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  # - name: filter_butterworth_example
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_18th_5hz.yaml"
+  #     - command: evaluation
+  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
   # Butterworth Filters for HumanSC3D (orders 1-18, cutoff 1,5,7,10,12,15,18 Hz)
 
