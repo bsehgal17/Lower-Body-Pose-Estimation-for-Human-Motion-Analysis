@@ -16,8 +16,8 @@ noise:
 filter:
   name: "butterworth"
   params:
-    order: 4
-    cutoff: 15.0
+    order: 18
+    cutoff: 18.0
     fs: 60.0
   outlier_removal:
       enable: False

@@ -1,7 +1,7 @@
 # filepath: c:\Users\BhavyaSehgal\Downloads\Lower-Body-Pose-Estimation-for-Human-Motion-Analysis\config_yamls\filter\filter_butterworth_18th_7hz.yaml
 paths:
-  dataset: HumanEva
-  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/ground_truth/combined_chunk0_data.csv
+  dataset: HumanSC3D
+  ground_truth_file: C:/Users/BhavyaSehgal/Downloads/humansc3d/humansc3d_train/train
 
 
 noise:
