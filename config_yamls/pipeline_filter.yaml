@@ -341,3 +341,139 @@ pipelines:
   #       config_file: "config_yamls/filter/filter_kalman_smooth_walking_high_acc_mid.yaml"
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  # Gaussian Filters for HumanEva
+  - name: filter_gaussian_sigma_0.4_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.4.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_gaussian_sigma_0.5_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.5.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_gaussian_sigma_0.6_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.6.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_gaussian_sigma_0.7_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.7.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_gaussian_sigma_0.8_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.8.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_gaussian_sigma_0.9_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.9.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_gaussian_sigma_1.0_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.0.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_gaussian_sigma_1.5_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.5.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_gaussian_sigma_2.0_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.0.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_gaussian_sigma_2.5_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.5.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+
+  # Savitzky-Golay Filters for HumanEva
+  - name: filter_savgol_wl7_po2_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl7_po2.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl7_po3_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl7_po3.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl9_po2_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl9_po2.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl9_po3_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl9_po3.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl11_po2_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl11_po2.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl11_po3_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl11_po3.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl15_po2_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl15_po2.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl15_po3_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl15_po3.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl30_po2_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl30_po2.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl30_po3_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl30_po3.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl60_po2_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl60_po2.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  - name: filter_savgol_wl60_po3_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_with_savgol_wl60_po3.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
