@@ -11,37 +11,19 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # Butterworth Filters for HumanSC3D (orders 1-18, cutoff 1,5,7,10,12,15,18 Hz)
+  # Butterworth Filters for HumanSC3D (orders 1,5,10,15,18, cutoff 5,10,15,18 Hz)
 
   # 1st order
-  # - name: filter_butterworth_1st_1hz_humansc3d
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_1st_1hz.yaml"
-  #     - command: evaluation
-  #       config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_1st_5hz_humansc3d
     steps:
-      # - command: filter
-      #   config_file: "config_yamls/filter/filter_butterworth_1st_5hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_1st_7hz_humansc3d
-    steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_1st_7hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_1st_5hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_1st_10hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_1st_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_1st_12hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_1st_12hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_1st_15hz_humansc3d
@@ -57,78 +39,18 @@ pipelines:
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
 
-    # 4th order
-  - name: filter_butterworth_4th_1hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_1hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_4th_5hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_5hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_4th_7hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_7hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_4th_10hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_4th_12hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_12hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_4th_15hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_15hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_4th_18hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_4th_18hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
+
   # 5th order
-  - name: filter_butterworth_5th_1hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_1hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_5th_5hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_5th_5hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_5th_7hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_7hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_5th_10hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_5th_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_5th_12hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_12hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_5th_15hz_humansc3d
@@ -144,34 +66,16 @@ pipelines:
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   # 7th order
-  - name: filter_butterworth_7th_1hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_7th_1hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_7th_5hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_7th_5hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_7th_7hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_7th_7hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_7th_10hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_7th_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_7th_12hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_7th_12hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_7th_15hz_humansc3d
@@ -187,34 +91,15 @@ pipelines:
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   # 10th order
-  - name: filter_butterworth_10th_1hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_10th_1hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_10th_5hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_10th_5hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_10th_7hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_10th_7hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_10th_10hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_10th_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_10th_12hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_10th_12hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_10th_15hz_humansc3d
@@ -230,34 +115,16 @@ pipelines:
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   # 15th order
-  - name: filter_butterworth_15th_1hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_15th_1hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_15th_5hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_15th_5hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_15th_7hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_15th_7hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_15th_10hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_15th_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_15th_12hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_15th_12hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_15th_15hz_humansc3d
@@ -273,34 +140,16 @@ pipelines:
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   # 18th order
-  - name: filter_butterworth_18th_1hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_1hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_18th_5hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_18th_5hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_18th_7hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_7hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_18th_10hz_humansc3d
     steps:
       - command: filter
         config_file: "config_yamls/filter/filter_butterworth_18th_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_18th_12hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_12hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_18th_15hz_humansc3d
@@ -342,138 +191,4 @@ pipelines:
   #     - command: evaluation
   #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # Gaussian Filters for HumanEva
-  - name: filter_gaussian_sigma_0.4_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.4.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_gaussian_sigma_0.5_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.5.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_gaussian_sigma_0.6_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.6.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_gaussian_sigma_0.7_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.7.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_gaussian_sigma_0.8_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.8.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_gaussian_sigma_0.9_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_0.9.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_gaussian_sigma_1.0_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.0.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_gaussian_sigma_1.5_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_1.5.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_gaussian_sigma_2.0_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.0.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_gaussian_sigma_2.5_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_gaussian_sigma_2.5.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-
-  # Savitzky-Golay Filters for HumanEva
-  - name: filter_savgol_wl7_po2_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl7_po2.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl7_po3_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl7_po3.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl9_po2_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl9_po2.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl9_po3_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl9_po3.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl11_po2_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl11_po2.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl11_po3_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl11_po3.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl15_po2_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl15_po2.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl15_po3_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl15_po3.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl30_po2_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl30_po2.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl30_po3_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl30_po3.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl60_po2_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl60_po2.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
-  - name: filter_savgol_wl60_po3_humaneva
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_with_savgol_wl60_po3.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanEva/humaneva_config_nojoints.yaml"
+  
