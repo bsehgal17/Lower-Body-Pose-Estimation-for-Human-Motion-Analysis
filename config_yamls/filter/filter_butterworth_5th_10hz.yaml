@@ -19,7 +19,7 @@ filter:
     fs: 60.0
   outlier_removal:
       enable: False
-  input_dir: "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanSC3D/detect_RTMW/detect/"
+  input_dir: "/storageh100/Projects/Gaitly/bsehgal/pipeline_results/HumanSC3D/detect_RTMW/detect/"
 
 evaluation:
   metrics:
