@@ -1,5 +1,5 @@
 paths:
-  input_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/
+  input_dir: /storageh100/Projects/Gaitly/bsehgal/
   output_dir: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/
 
 video:

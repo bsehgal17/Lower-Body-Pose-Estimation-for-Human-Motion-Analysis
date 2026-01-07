@@ -25,12 +25,15 @@ class KeypointFilterProcessor:
         self.filter_name = filter_name
         self.filter_kwargs = filter_kwargs
         self.input_dir = self.config.filter.input_dir
-        self.pred_enum = import_class_from_string(config.dataset.keypoint_format)
+        self.pred_enum = import_class_from_string(
+            config.dataset.keypoint_format)
         self.custom_output_dir = None  # Will be set later
 
-        self.enable_outlier_removal = getattr(config.filter.outlier_removal, "enable")
+        self.enable_outlier_removal = getattr(
+            config.filter.outlier_removal, "enable")
         self.outlier_method = getattr(config.filter.outlier_removal, "method")
-        self.outlier_params = getattr(config.filter.outlier_removal, "params", {})
+        self.outlier_params = getattr(
+            config.filter.outlier_removal, "params", {})
 
         self.enable_interp = getattr(config.filter, "enable_interpolation")
         self.interpolation_kind = getattr(config.filter, "interpolation_kind")
@@ -52,7 +55,8 @@ class KeypointFilterProcessor:
                     )
                 return joint_indices
             except Exception as e:
-                logger.warning(f"Error parsing joints_to_filter from config: {e}")
+                logger.warning(
+                    f"Error parsing joints_to_filter from config: {e}")
                 return []
             return []
 
@@ -83,7 +87,8 @@ class KeypointFilterProcessor:
                 logger.warning(f"No persons found in {json_path}")
                 return
 
-            self.original_detection_config = pred_data.get("detection_config", {})
+            self.original_detection_config = pred_data.get(
+                "detection_config", {})
 
             # Process each person independently to maintain proper structure
             filtered_variants = self._apply_filter_to_persons(
@@ -98,10 +103,11 @@ class KeypointFilterProcessor:
                 anchor_index = next(
                     i
                     for i, part in enumerate(json_path_obj.parts)
-                    if part.startswith("S") or part.startswith("s")
+                    if part.startswith("S") or part.startswith("s0")
                 )
                 # Construct relative path from anchor up to parent of .json file
-                relative_subdir = str(Path(*json_path_obj.parts[anchor_index:-1]))
+                relative_subdir = str(
+                    Path(*json_path_obj.parts[anchor_index:-1]))
             except StopIteration:
                 logger.warning(
                     f"Could not find anchor starting with 'S' or 's' in path: {json_path}"
@@ -112,7 +118,8 @@ class KeypointFilterProcessor:
             for suffix, filtered_persons, filter_params in filtered_variants:
                 # Ensure output directory is set
                 if not self.custom_output_dir:
-                    logger.error("Output directory not set. Cannot save results.")
+                    logger.error(
+                        "Output directory not set. Cannot save results.")
                     return
 
                 # Prepare output directory structure
@@ -145,7 +152,8 @@ class KeypointFilterProcessor:
                     },
                 )
 
-                logger.info(f"Filter variant '{suffix}' saved. Files: {saved_paths}")
+                logger.info(
+                    f"Filter variant '{suffix}' saved. Files: {saved_paths}")
 
         except Exception as e:
             logger.error(f"Failed to process {json_path}: {e}")
@@ -156,7 +164,8 @@ class KeypointFilterProcessor:
                 try:
                     return list(eval(val.strip()))
                 except Exception as e:
-                    logger.warning(f"Could not parse range expression '{val}': {e}")
+                    logger.warning(
+                        f"Could not parse range expression '{val}': {e}")
                     return [val]
             elif isinstance(val, list):
                 return val
@@ -217,7 +226,8 @@ class KeypointFilterProcessor:
                     f"No joints_to_filter specified — applying filter to all {total_joints} joints."
                 )
             except Exception:
-                logger.warning("Unable to determine total joints, skipping filtering.")
+                logger.warning(
+                    "Unable to determine total joints, skipping filtering.")
                 return poses
         else:
             joints_to_filter = self.joints_to_filter
@@ -296,7 +306,8 @@ class KeypointFilterProcessor:
                 if joint_id == self.pred_enum.LEFT_ANKLE.value and getattr(
                     self.config.filter, "enable_filter_plots", False
                 ):
-                    label_suffix = "_".join(f"{k}{v}" for k, v in param_set.items())
+                    label_suffix = "_".join(
+                        f"{k}{v}" for k, v in param_set.items())
                     plot_dir = os.path.join(
                         root, "plots", f"{self.filter_name}_{label_suffix}"
                     )
@@ -447,13 +458,15 @@ class KeypointFilterProcessor:
                                 x_series,
                                 x_filt,
                                 title=f"X - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(plot_dir, f"x_{joint_id}.png"),
+                                save_path=os.path.join(
+                                    plot_dir, f"x_{joint_id}.png"),
                             )
                             plot_filtering_effect(
                                 y_series,
                                 y_filt,
                                 title=f"Y - Joint {joint_id} ({self.filter_name})",
-                                save_path=os.path.join(plot_dir, f"y_{joint_id}.png"),
+                                save_path=os.path.join(
+                                    plot_dir, f"y_{joint_id}.png"),
                             )
 
                     except Exception as e:

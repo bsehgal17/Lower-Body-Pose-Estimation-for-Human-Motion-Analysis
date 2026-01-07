@@ -14,16 +14,16 @@ pipelines:
   # Butterworth Filters for HumanSC3D (orders 1-18, cutoff 1,5,7,10,12,15,18 Hz)
 
   # 1st order
-  - name: filter_butterworth_1st_1hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_1st_1hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
+  # - name: filter_butterworth_1st_1hz_humansc3d
+  #   steps:
+  #     - command: filter
+  #       config_file: "config_yamls/filter/filter_butterworth_1st_1hz.yaml"
+  #     - command: evaluation
+  #       config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_1st_5hz_humansc3d
     steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_1st_5hz.yaml"
+      # - command: filter
+      #   config_file: "config_yamls/filter/filter_butterworth_1st_5hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
   - name: filter_butterworth_1st_7hz_humansc3d

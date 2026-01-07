@@ -1,6 +1,6 @@
 paths:
   dataset: HumanSC3D
-  ground_truth_file: C:/Users/BhavyaSehgal/Downloads/humansc3d/humansc3d_train/train
+  ground_truth_file: /storage/Projects/Gaitly/bsehgal/lower_body_pose_est/HumanSC3D_test/humansc3d_train/train/
 
 models:
   detector: RTMW
