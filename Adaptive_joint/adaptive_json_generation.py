@@ -306,11 +306,11 @@ class AdaptiveJSONGenerator:
         Returns:
             True if the path matches the video
         """
-        subject, camera, motion = self.parse_video_name(video_name)
+        subject, camera, motion, view = self.parse_video_name(video_name)
         path_parts = [p.lower() for p in json_path.parts]
 
         logger.debug(
-            f"Matching: subject='{subject}', camera='{camera}', motion='{motion}'"
+            f"Matching: subject='{subject}', camera='{camera}', motion='{motion}', view='{view}'"
         )
         logger.debug(f"Path parts: {path_parts}")
 
@@ -321,6 +321,21 @@ class AdaptiveJSONGenerator:
                 logger.debug(f"✗ Subject '{subject}' not found in path")
                 return False
             logger.debug(f"✓ Subject '{subject}' found in path")
+
+        # Must have camera (C1, C2, etc.) in path if camera is specified in video name
+        if camera:
+            camera_lower = camera.lower()
+            found_camera = False
+            for part in path_parts:
+                if camera_lower in part.lower():
+                    logger.debug(f"✓ Camera '{camera}' found in path part: {part}")
+                    found_camera = True
+                    break
+            if not found_camera:
+                logger.debug(f"✗ Camera '{camera}' not found in path")
+                return False
+        else:
+            logger.debug("⚠ No camera extracted from video name")
 
         # If we have motion type in video name, it MUST match in path
         if motion:
@@ -339,38 +354,50 @@ class AdaptiveJSONGenerator:
 
                 # Strategy 1: Exact normalized match
                 if motion_normalized in part_normalized:
-                    logger.debug(f"✓ Motion '{motion}' matched in path part: {part}")
-                    found_motion = True
-                    break
+                    # If view is specified, check it's also in this path part
+                    if view:
+                        nums = re.findall(r"\d+(?:\.\d+)?", part)
+                        nums_norm = [str(int(float(n))) for n in nums]
+                        if str(view) in nums_norm:
+                            logger.debug(
+                                f"✓ Motion '{motion}' and view '{view}' matched in path part: {part}"
+                            )
+                            found_motion = True
+                            break
+                        else:
+                            continue
+                    else:
+                        logger.debug(
+                            f"✓ Motion '{motion}' matched in path part: {part}"
+                        )
+                        found_motion = True
+                        break
 
                 # Strategy 2: Try just the base motion (remove trailing numbers)
                 motion_base = re.sub(r"[_\s]*\d+$", "", motion_lower)
                 motion_base_normalized = motion_base.replace("_", "").replace("-", "")
                 if motion_base_normalized and motion_base_normalized in part_normalized:
-                    logger.debug(
-                        f"✓ Motion base '{motion_base}' matched in path part: {part}"
-                    )
-                    found_motion = True
-                    break
+                    if view:
+                        nums = re.findall(r"\d+(?:\.\d+)?", part)
+                        nums_norm = [str(int(float(n))) for n in nums]
+                        if str(view) in nums_norm:
+                            logger.debug(
+                                f"✓ Motion base '{motion_base}' and view '{view}' matched in path part: {part}"
+                            )
+                            found_motion = True
+                            break
+                        else:
+                            continue
+                    else:
+                        logger.debug(
+                            f"✓ Motion base '{motion_base}' matched in path part: {part}"
+                        )
+                        found_motion = True
+                        break
 
             if not found_motion:
                 logger.debug(f"✗ Motion '{motion}' not found in path - rejecting match")
                 return False
-
-        # Must have camera (C1, C2, etc.) in path if camera is specified in video name
-        if camera:
-            camera_lower = camera.lower()
-            found_camera = False
-            for part in path_parts:
-                if camera_lower in part.lower():
-                    logger.debug(f"✓ Camera '{camera}' found in path part: {part}")
-                    found_camera = True
-                    break
-            if not found_camera:
-                logger.debug(f"✗ Camera '{camera}' not found in path")
-                return False
-        else:
-            logger.debug("⚠ No camera extracted from video name")
 
         return True
 
