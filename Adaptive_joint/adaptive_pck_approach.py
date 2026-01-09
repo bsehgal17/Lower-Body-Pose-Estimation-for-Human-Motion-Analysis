@@ -303,6 +303,11 @@ class PCKAggregator:
             best_freqs = sorted(
                 group[group["Average PCK (%)"] == max_pck]["Frequency"].unique()
             )
+
+            # If max PCK is 0, only use the first frequency (avoid unnecessary permutations)
+            if max_pck == 0:
+                best_freqs = best_freqs[:1]
+
             best_freq_options[(video, joint)] = best_freqs
 
             logger.info(
@@ -314,51 +319,68 @@ class PCKAggregator:
         videos = sorted(df["Video"].unique())
         permutation_count = 0
 
-        with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-            for video in videos:
-                # Get all joints for this video
-                video_joints = sorted(
-                    [
-                        joint
-                        for joint in df[df["Video"] == video]["Joint"].unique()
-                        if (video, joint) in best_freq_options
-                    ]
-                )
+        # Dictionary to store all permutations organized by permutation number
+        # {perm_num: [(video, perm_data), (video, perm_data), ...]}
+        permutations_by_num = {}
 
-                if not video_joints:
-                    continue
-
-                # Get frequency options for each joint (only those with highest PCK)
-                freq_options = [
-                    best_freq_options[(video, joint)] for joint in video_joints
+        for video in videos:
+            # Get all joints for this video
+            video_joints = sorted(
+                [
+                    joint
+                    for joint in df[df["Video"] == video]["Joint"].unique()
+                    if (video, joint) in best_freq_options
                 ]
+            )
 
-                logger.info(f"\nVideo: {video}")
-                logger.info(f"  Joints: {video_joints}")
-                for joint, options in zip(video_joints, freq_options):
-                    logger.info(f"    {joint}: Freq options = {options}")
+            if not video_joints:
+                continue
 
-                # Generate all permutations
-                total_perms = 1
-                for opt_list in freq_options:
-                    total_perms *= len(opt_list)
+            # Get frequency options for each joint (only those with highest PCK)
+            freq_options = [best_freq_options[(video, joint)] for joint in video_joints]
 
-                logger.info(f"  Total permutations for {video}: {total_perms}")
+            logger.info(f"\nVideo: {video}")
+            logger.info(f"  Joints: {video_joints}")
+            for joint, options in zip(video_joints, freq_options):
+                logger.info(f"    {joint}: Freq options = {options}")
 
-                for freq_combo in product(*freq_options):
-                    permutation_count += 1
-                    perm_data = {
-                        joint: freq for joint, freq in zip(video_joints, freq_combo)
-                    }
+            # Generate all permutations
+            total_perms = 1
+            for opt_list in freq_options:
+                total_perms *= len(opt_list)
 
-                    # Create dataframe with video as index
-                    perm_df = pd.DataFrame([perm_data], index=[video])
+            logger.info(f"  Total permutations for {video}: {total_perms}")
 
-                    # Create sheet name
-                    sheet_name = f"Perm_{permutation_count}_{video}"[:31]
-                    perm_df.to_excel(writer, sheet_name=sheet_name)
-                    logger.debug(f"  Perm_{permutation_count}: {perm_data}")
+            # Generate all permutations for this video
+            for freq_combo in product(*freq_options):
+                permutation_count += 1
+                perm_data = {
+                    joint: freq for joint, freq in zip(video_joints, freq_combo)
+                }
 
+                # Store in permutations_by_num
+                if permutation_count not in permutations_by_num:
+                    permutations_by_num[permutation_count] = []
+
+                permutations_by_num[permutation_count].append((video, perm_data))
+                logger.debug(f"  Perm_{permutation_count} ({video}): {perm_data}")
+
+        # Write all permutations to Excel
+        with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
+            for perm_num in sorted(permutations_by_num.keys()):
+                perm_entries = permutations_by_num[perm_num]
+
+                # Create dataframe with all videos for this permutation
+                perm_data_list = [
+                    {**{"Video": video}, **perm_data}
+                    for video, perm_data in perm_entries
+                ]
+                perm_df = pd.DataFrame(perm_data_list)
+
+                # Create sheet name
+                sheet_name = f"Best_Freq_{perm_num}"
+                perm_df.to_excel(writer, sheet_name=sheet_name, index=False)
+                logger.info(f"Created sheet {sheet_name} with {len(perm_df)} videos")
             # Format worksheets
             workbook = writer.book
             for sheet_name in workbook.sheetnames:
@@ -379,7 +401,8 @@ class PCKAggregator:
         print("\n" + "=" * 80)
         print(f"Generated {permutation_count} total permutations!")
         print(f"Saved to: {output_path}")
-        print("Each sheet = unique frequency combination for a video")
+        print(f"Sheet format: Best_Freq_1, Best_Freq_2, ... (each with all videos)")
+        print("Each sheet = unique frequency combination across all videos")
         print("Only frequencies with HIGHEST PCK are used in permutations")
         print("=" * 80)
 
