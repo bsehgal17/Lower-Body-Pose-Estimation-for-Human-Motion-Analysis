@@ -161,6 +161,71 @@ class AdaptiveJSONGenerator:
             logger.error(f"Error building filter folder map: {e}")
             return False
 
+    def parse_video_name(self, video_name: str) -> Tuple[Optional[str], Optional[str]]:
+        """
+        Parse video name to extract subject and box components.
+
+        Examples:
+            "S1_Box_1_1.0" -> ("S1", "Box_1")
+            "S2_Box_2_1.5" -> ("S2", "Box_2")
+            "Box_1_(C1)" -> (None, "Box_1")
+
+        Returns:
+            Tuple of (subject, box_name) or (None, None) if cannot parse
+        """
+        video_lower = video_name.lower()
+
+        # Try to extract subject (S1, S2, s01, s02, etc.)
+        subject_match = re.search(r"(s\d+)", video_lower)
+        subject = subject_match.group(1).upper() if subject_match else None
+
+        # Try to extract box/video name (Box_1, Box_2, etc.)
+        box_match = re.search(r"(box_?\d+)", video_lower)
+        box_name = box_match.group(1).replace("_", "_") if box_match else None
+
+        return subject, box_name
+
+    def path_matches_video(self, json_path: Path, video_name: str) -> bool:
+        """
+        Check if a JSON file path matches the given video name.
+
+        Path structure: .../S1/Image_Data/Box_1_(C1)/Box_1_(C1).json
+        Video name: "S1_Box_1_1.0"
+
+        Args:
+            json_path: Path object of the JSON file
+            video_name: Video name from Excel (e.g., "S1_Box_1_1.0")
+
+        Returns:
+            True if the path matches the video
+        """
+        subject, box_name = self.parse_video_name(video_name)
+        path_str = str(json_path).lower()
+        path_parts = [p.lower() for p in json_path.parts]
+
+        # Must have subject folder in path
+        if subject:
+            subject_lower = subject.lower()
+            if subject_lower not in path_parts:
+                logger.debug(f"Subject '{subject}' not found in path: {json_path}")
+                return False
+
+        # Must have box name somewhere in path
+        if box_name:
+            box_normalized = box_name.lower().replace("_", "").replace("-", "")
+            for part in path_parts:
+                part_normalized = (
+                    part.replace("_", "")
+                    .replace("-", "")
+                    .replace("(", "")
+                    .replace(")", "")
+                )
+                if box_normalized in part_normalized:
+                    logger.debug(f"Matched box '{box_name}' in path part: {part}")
+                    return True
+
+        return False
+
     def find_filtered_json_files(
         self, video_name: str, frequency: float
     ) -> Optional[List[Path]]:
@@ -204,26 +269,13 @@ class AdaptiveJSONGenerator:
                     if not param_dir.is_dir():
                         continue
 
+                    logger.debug(f"Searching in param directory: {param_dir.name}")
+
                     # Now search recursively for JSON files matching the video name
                     for json_file in param_dir.rglob("*.json"):
-                        # Check if video name matches filename or any parent directory
-                        file_stem = json_file.stem.lower()
-                        video_name_lower = video_name.lower()
-
-                        # Extract core name (remove special characters for comparison)
-                        file_core = re.sub(r"[_()\-\s]", "", file_stem)
-                        video_core = re.sub(r"[_()\-\s]", "", video_name_lower)
-
-                        # Check multiple matching strategies
-                        if (
-                            video_name_lower in file_stem
-                            or file_stem == video_name_lower
-                            or file_core == video_core
-                            or json_file.parent.name.lower() == video_name_lower
-                            or json_file.parent.name.lower() in video_name_lower
-                        ):
+                        if self.path_matches_video(json_file, video_name):
                             matching_files.append(json_file)
-                            logger.debug(f"Found filtered file: {json_file}")
+                            logger.info(f"✓ Found matching file: {json_file}")
                             break  # Found the file for this video, move to next timestamp
 
                 # If we found the file, no need to search other timestamps
@@ -232,6 +284,9 @@ class AdaptiveJSONGenerator:
 
         except Exception as e:
             logger.warning(f"Error searching filter directories: {e}")
+            import traceback
+
+            traceback.print_exc()
             return None
 
         if not matching_files:
