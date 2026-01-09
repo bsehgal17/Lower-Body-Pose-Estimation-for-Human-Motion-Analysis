@@ -50,14 +50,16 @@ class PCKAggregator:
 
     def find_evaluation_files(self) -> List[Tuple[Path, float]]:
         """
-        Find all evaluation Excel files recursively.
+        Find all evaluation Excel files recursively in all subfolders.
         Returns list of (file_path, frequency) tuples
         """
         files = []
+
+        # Recursively find all Excel files at any depth
         excel_files = list(self.root_path.glob("**/*.xlsx")) + list(
             self.root_path.glob("**/*.xls")
         )
-        logger.info(f"Found {len(excel_files)} Excel files total")
+        logger.info(f"Found {len(excel_files)} Excel files total across all folders")
 
         for excel_file in excel_files:
             path_str = str(excel_file)
@@ -65,11 +67,15 @@ class PCKAggregator:
 
             if frequency is not None:
                 files.append((excel_file, frequency))
-                logger.debug(f"Found: {excel_file.name} (freq={frequency})")
+                logger.info(
+                    f"Found: {excel_file.relative_to(self.root_path)} (freq={frequency}Hz)"
+                )
             else:
-                logger.warning(f"Could not extract frequency from: {excel_file}")
+                logger.warning(
+                    f"Could not extract frequency from: {excel_file.relative_to(self.root_path)}"
+                )
 
-        logger.info(f"Found {len(files)} Excel files with valid frequency")
+        logger.info(f"Total files with valid frequency: {len(files)}")
         return files
 
     def process_excel_file(self, excel_path: Path, frequency: float) -> List[Dict]:
@@ -157,7 +163,8 @@ class PCKAggregator:
     def save_excel(self, output_path: str):
         """
         Create Excel file with:
-        1. Separate sheets for each (frequency, video) pair
+        1. Separate sheets for each frequency
+           - Rows: Video names
            - Columns: Joint names
            - Values: Avg PCK across all thresholds
         2. Summary sheet: Best frequency for each (video, joint) combination
@@ -169,32 +176,28 @@ class PCKAggregator:
             return
 
         with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-            # 1. Create sheets for each (frequency, video) combination
-            freq_video_pairs = (
-                df.groupby(["Frequency", "Video"])
-                .size()
-                .reset_index(name="count")[["Frequency", "Video"]]
+            # 1. Create sheets for each frequency
+            frequencies = sorted(df["Frequency"].unique())
+            logger.info(
+                f"Creating sheets for {len(frequencies)} frequencies: {frequencies}"
             )
 
-            for _, row in freq_video_pairs.iterrows():
-                frequency = row["Frequency"]
-                video = row["Video"]
-
-                # Filter data for this frequency and video
-                subset = df[(df["Frequency"] == frequency) & (df["Video"] == video)]
+            for frequency in frequencies:
+                # Filter data for this frequency (all videos and joints)
+                freq_data = df[df["Frequency"] == frequency]
 
                 # Create pivot: rows=video, columns=joints, values=avg_pck
-                pivot = subset.pivot_table(
+                pivot = freq_data.pivot_table(
                     index="Video",
                     columns="Joint",
                     values="Average PCK (%)",
                     aggfunc="first",
                 )
 
-                # Create sheet name with frequency and video
-                sheet_name = f"F{frequency}_{video}"[:31]  # Excel sheet name limit
+                # Create sheet name with frequency
+                sheet_name = f"Freq_{frequency}Hz"
                 pivot.to_excel(writer, sheet_name=sheet_name)
-                logger.debug(f"Created sheet: {sheet_name}")
+                logger.info(f"Created sheet: {sheet_name} with {len(pivot)} videos")
 
             # 2. Create summary sheet: best frequency for each (video, joint)
             summary_data = []
@@ -235,7 +238,9 @@ class PCKAggregator:
         print("\n" + "=" * 80)
         print("Excel file generated successfully!")
         print("Sheets created:")
-        print(f"  - Individual sheets: Freq<frequency>_<video>")
+        print(
+            f"  - Per-frequency sheets: Freq_<frequency>Hz (rows: Videos, cols: Joints)"
+        )
         print(f"  - Summary sheet: Best Frequency")
         print("=" * 80)
 
