@@ -94,9 +94,7 @@ class EvaluationExcelAggregator:
 
             if frequency is not None:
                 files.append((excel_file, frequency))
-                logger.debug(
-                    f"Found Excel file: {excel_file.name} (freq={frequency})"
-                )
+                logger.debug(f"Found Excel file: {excel_file.name} (freq={frequency})")
             else:
                 logger.warning(
                     f"Could not extract frequency from path: {excel_file.parent.name}"
