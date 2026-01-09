@@ -212,7 +212,7 @@ class AdaptiveJSONGenerator:
 
         Path structure: .../S1/Image_Data/Walking_1_(C1)/Walking_1_(C1).json
                        .../S1/Image_Data/Box_1_(C1)/Box_1_(C1).json
-        Video name: "S1_Walking_C1_1" or "S1_Walking_1_C1_1" or "S1_Box_1_C1_1.0"
+        Video name: "S1_Walking_C1_1" or "S1_Walking_1_C1_1" or "S1_Box_1_C1_1.0" or "S1_Gestures_1_3.0"
 
         Args:
             json_path: Path object of the JSON file
@@ -237,27 +237,11 @@ class AdaptiveJSONGenerator:
                 return False
             logger.debug(f"✓ Subject '{subject}' found in path")
 
-        # Must have camera (C1, C2, etc.) in path
-        if camera:
-            camera_lower = camera.lower()
-            found_camera = False
-            for part in path_parts:
-                if camera_lower in part.lower():
-                    logger.debug(f"✓ Camera '{camera}' found in path part: {part}")
-                    found_camera = True
-                    break
-            if not found_camera:
-                logger.debug(f"✗ Camera '{camera}' not found in path")
-                return False
-        else:
-            logger.debug("⚠ No camera extracted from video name")
-
-        # If we have motion type, try to match it flexibly
+        # If we have motion type in video name, it MUST match in path
         if motion:
             motion_lower = motion.lower()
             motion_normalized = motion_lower.replace("_", "").replace("-", "")
 
-            # Try multiple matching strategies
             found_motion = False
             for part in path_parts:
                 part_normalized = (
@@ -285,10 +269,23 @@ class AdaptiveJSONGenerator:
                     break
 
             if not found_motion:
-                logger.debug(f"⚠ Motion '{motion}' not found in path")
-                # Don't fail if motion doesn't match - subject+camera might be enough
+                logger.debug(f"✗ Motion '{motion}' not found in path - rejecting match")
+                return False
+
+        # Must have camera (C1, C2, etc.) in path if camera is specified in video name
+        if camera:
+            camera_lower = camera.lower()
+            found_camera = False
+            for part in path_parts:
+                if camera_lower in part.lower():
+                    logger.debug(f"✓ Camera '{camera}' found in path part: {part}")
+                    found_camera = True
+                    break
+            if not found_camera:
+                logger.debug(f"✗ Camera '{camera}' not found in path")
+                return False
         else:
-            logger.debug("⚠ No motion extracted from video name")
+            logger.debug("⚠ No camera extracted from video name")
 
         return True
 
