@@ -3,16 +3,13 @@ Script to aggregate PCK evaluation results from Excel files.
 
 Reads evaluation Excel files from folder structure, extracts:
 - Joint names and thresholds from column names (e.g., LEFT_HIP_jointwise_pck_0.02)
-- Frequency from folder structure
+- Frequency from folder path (e.g., cutoff5.0)
 - Averages PCK values across all rows
 
-Path structure:
-/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/HumanSC3D/
-  filter_butterworth_1st_5hz_humansc3d/
-    filter/
-      2026-01-07_11-01-51/
-        butterworth_order1_cutoff5.0_fs60.0/  <- Extract frequency from here
-          evaluation_results.xlsx
+Usage:
+1. Set ROOT_PATH to a folder containing Excel evaluation files
+2. Frequency will be extracted from folder path (looks for cutoff<value>)
+3. Script recursively searches for *.xlsx and *.xls files in all subfolders
 """
 
 import re
@@ -76,48 +73,36 @@ class EvaluationExcelAggregator:
 
     def find_evaluation_files(self) -> List[Tuple[Path, float]]:
         """
-        Find all evaluation Excel files in folder structure.
+        Find all evaluation Excel files recursively in folder structure.
+        Extracts frequency from the folder path.
 
         Returns:
             List of (file_path, frequency) tuples
         """
         files = []
 
-        # Traverse the filter structure
-        filter_dirs = list(self.root_path.glob("filter_*"))
-        logger.info(f"Found {len(filter_dirs)} filter directories")
+        # Recursively find all Excel files in the root path and subfolders
+        excel_files = list(self.root_path.glob("**/*.xlsx")) + list(
+            self.root_path.glob("**/*.xls")
+        )
+        logger.info(f"Found {len(excel_files)} Excel files total")
 
-        for filter_dir in filter_dirs:
-            filter_path = filter_dir / "filter"
+        for excel_file in excel_files:
+            # Extract frequency from the full path
+            path_str = str(excel_file)
+            frequency = self.extract_frequency_from_path(path_str)
 
-            if not filter_path.exists():
-                continue
+            if frequency is not None:
+                files.append((excel_file, frequency))
+                logger.debug(
+                    f"Found Excel file: {excel_file.name} (freq={frequency})"
+                )
+            else:
+                logger.warning(
+                    f"Could not extract frequency from path: {excel_file.parent.name}"
+                )
 
-            # Look for timestamp directories
-            for timestamp_dir in filter_path.iterdir():
-                if not timestamp_dir.is_dir():
-                    continue
-
-                # Look for filter parameter directories
-                for param_dir in timestamp_dir.iterdir():
-                    if not param_dir.is_dir():
-                        continue
-
-                    frequency = self.extract_frequency_from_path(param_dir.name)
-
-                    # Find all Excel files in this directory
-                    excel_files = list(param_dir.glob("*.xlsx")) + list(
-                        param_dir.glob("*.xls")
-                    )
-
-                    for excel_file in excel_files:
-                        if frequency is not None:
-                            files.append((excel_file, frequency))
-                            logger.debug(
-                                f"Found Excel file: {excel_file.name} (freq={frequency})"
-                            )
-
-        logger.info(f"Found {len(files)} evaluation Excel files")
+        logger.info(f"Found {len(files)} evaluation Excel files with frequency")
         return files
 
     def process_excel_file(self, excel_path: Path, frequency: float) -> List[Dict]:
