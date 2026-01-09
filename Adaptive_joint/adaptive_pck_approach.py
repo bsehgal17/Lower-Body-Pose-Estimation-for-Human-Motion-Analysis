@@ -12,6 +12,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 import logging
+from itertools import product
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -270,6 +271,90 @@ class PCKAggregator:
         print(f"  - Summary sheet: Best Frequency")
         print("=" * 80)
 
+    def save_permutations_excel(self, output_path: str):
+        """
+        Generate all permutations of best frequencies when multiple frequencies
+        have the same highest PCK value.
+        Creates separate sheets for each permutation combination.
+        """
+        df = self.process_files()
+
+        if df.empty:
+            logger.error("No results to save!")
+            return
+
+        # For each (video, joint), find all frequencies with the highest PCK
+        best_freq_options = {}  # {(video, joint): [freq1, freq2, ...]}
+
+        for (video, joint), group in df.groupby(["Video", "Joint"]):
+            max_pck = group["Average PCK (%)"].max()
+            best_freqs = sorted(
+                group[group["Average PCK (%)"] == max_pck]["Frequency"].unique()
+            )
+            best_freq_options[(video, joint)] = best_freqs
+            logger.debug(f"{video}/{joint}: PCK={max_pck}, Freqs={best_freqs}")
+
+        # Group by video and generate permutations
+        videos = sorted(df["Video"].unique())
+        permutation_count = 0
+
+        with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
+            for video in videos:
+                # Get all joints for this video
+                video_joints = sorted(
+                    [
+                        joint
+                        for joint in df[df["Video"] == video]["Joint"].unique()
+                        if (video, joint) in best_freq_options
+                    ]
+                )
+
+                if not video_joints:
+                    continue
+
+                # Get frequency options for each joint
+                freq_options = [
+                    best_freq_options[(video, joint)] for joint in video_joints
+                ]
+
+                # Generate all permutations
+                for freq_combo in product(*freq_options):
+                    permutation_count += 1
+                    perm_data = {
+                        joint: freq for joint, freq in zip(video_joints, freq_combo)
+                    }
+
+                    # Create dataframe with video as index
+                    perm_df = pd.DataFrame([perm_data], index=[video])
+
+                    # Create sheet name
+                    sheet_name = f"Perm_{permutation_count}_{video}"[:31]
+                    perm_df.to_excel(writer, sheet_name=sheet_name)
+                    logger.info(f"Permutation {permutation_count}: {perm_data}")
+
+            # Format worksheets
+            workbook = writer.book
+            for sheet_name in workbook.sheetnames:
+                worksheet = writer.sheets[sheet_name]
+                for column in worksheet.columns:
+                    max_length = 0
+                    column_letter = column[0].column_letter
+                    for cell in column:
+                        try:
+                            if len(str(cell.value)) > max_length:
+                                max_length = len(str(cell.value))
+                        except:
+                            pass
+                    adjusted_width = min(max_length + 2, 50)
+                    worksheet.column_dimensions[column_letter].width = adjusted_width
+
+        logger.info(f"Permutations saved to {output_path}")
+        print("\n" + "=" * 80)
+        print(f"Generated {permutation_count} permutations!")
+        print(f"Saved to: {output_path}")
+        print("Each sheet represents a unique frequency combination")
+        print("=" * 80)
+
 
 def main():
     """Main execution function - configure parameters below."""
@@ -285,6 +370,9 @@ def main():
     # Output Excel file path for aggregated results
     OUTPUT_PATH = "pck_summary.xlsx"
 
+    # Output Excel file path for permutations
+    PERMUTATIONS_PATH = "pck_best_frequency_permutations.xlsx"
+
     # ============================================================================
 
     print("\n" + "=" * 80)
@@ -293,6 +381,7 @@ def main():
     print(f"\nConfiguration:")
     print(f"  Root Path: {ROOT_PATH}")
     print(f"  Output Path: {OUTPUT_PATH}")
+    print(f"  Permutations Path: {PERMUTATIONS_PATH}")
     print("-" * 80 + "\n")
 
     if not Path(ROOT_PATH).exists():
@@ -302,7 +391,10 @@ def main():
     try:
         aggregator = PCKAggregator(ROOT_PATH)
         aggregator.save_excel(OUTPUT_PATH)
-        print(f"\n✓ Successfully generated report: {OUTPUT_PATH}")
+        aggregator.save_permutations_excel(PERMUTATIONS_PATH)
+        print(f"\n✓ Successfully generated reports:")
+        print(f"   - {OUTPUT_PATH}")
+        print(f"   - {PERMUTATIONS_PATH}")
     except Exception as e:
         print(f"\n✗ Error during processing: {e}")
         logger.exception("Detailed error:")
