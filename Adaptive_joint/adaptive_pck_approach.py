@@ -82,12 +82,12 @@ class PCKAggregator:
         """
         Process Excel file:
         - Read all sheets
-        - Group columns by joint name
-        - Average PCK across all thresholds for each joint
+        - For each row (video), create unique ID from subject/action/camera
+        - For each row, group columns by joint name
+        - Average PCK across all thresholds for each joint per row
         - Return list of dicts: {video, frequency, joint, avg_pck}
         """
         results = []
-        video_name = self.get_video_name(excel_path)
 
         try:
             xl_file = pd.ExcelFile(excel_path)
@@ -99,9 +99,13 @@ class PCKAggregator:
                 ignore_index=True,
             )
 
+            # Identify metadata columns (non-PCK columns like subject, action, camera)
+            metadata_cols = [
+                col for col in all_data.columns if not self.parse_joint_name(col)
+            ]
+
             # Group columns by joint name
             joint_columns = {}  # {joint_name: [col1, col2, ...]}
-
             for col in all_data.columns:
                 joint_name = self.parse_joint_name(col)
                 if joint_name:
@@ -113,30 +117,51 @@ class PCKAggregator:
                 logger.warning(f"No PCK columns found in {excel_path.name}")
                 return results
 
-            # For each joint, average across all threshold columns
-            for joint_name, columns in joint_columns.items():
-                # Convert all columns to numeric
-                numeric_arrays = []
-                for col in columns:
-                    values = pd.to_numeric(all_data[col], errors="coerce")
-                    numeric_arrays.append(values)
+            # Process each row
+            for idx, row in all_data.iterrows():
+                # Create unique video ID from metadata columns
+                video_parts = []
+                for col in metadata_cols:
+                    val = row[col]
+                    # Skip NaN values and numeric totals
+                    if pd.notna(val) and val != "":
+                        video_parts.append(str(val))
 
-                # Stack and compute mean across all thresholds and all rows
-                combined_df = pd.concat(numeric_arrays, axis=1)
-                avg_pck = combined_df.values.flatten()
-                avg_pck = avg_pck[~pd.isna(avg_pck)].mean()
+                if not video_parts:
+                    # Use row index if no metadata
+                    video_id = f"Row_{idx}"
+                else:
+                    video_id = "_".join(video_parts)
 
-                results.append(
-                    {
-                        "Video": video_name,
-                        "Frequency": frequency,
-                        "Joint": joint_name,
-                        "Average PCK (%)": round(avg_pck, 2),
-                    }
-                )
+                # For each joint, average across all threshold columns for this row
+                for joint_name, columns in joint_columns.items():
+                    # Get values for all threshold columns of this joint in this row
+                    values = []
+                    for col in columns:
+                        try:
+                            val = pd.to_numeric(row[col], errors="coerce")
+                            if pd.notna(val):
+                                values.append(val)
+                        except:
+                            pass
+
+                    # Average across thresholds for this joint-video combo
+                    if values:
+                        avg_pck = sum(values) / len(values)
+                        results.append(
+                            {
+                                "Video": video_id,
+                                "Frequency": frequency,
+                                "Joint": joint_name,
+                                "Average PCK (%)": round(avg_pck, 2),
+                            }
+                        )
 
         except Exception as e:
             logger.error(f"Error reading {excel_path}: {e}")
+            import traceback
+
+            logger.error(traceback.format_exc())
 
         return results
 
@@ -254,7 +279,7 @@ def main():
     # ============================================================================
 
     # Root path containing filtered folders with Excel evaluation files
-    ROOT_PATH = r"C:\path\to\filtered_folders"
+    ROOT_PATH = r"/storageh100/Projects/Gaitly/bsehgal/pipeline_results/HumanEva/Butterworth_filter/"
 
     # Output Excel file path for aggregated results
     OUTPUT_PATH = "pck_summary.xlsx"
