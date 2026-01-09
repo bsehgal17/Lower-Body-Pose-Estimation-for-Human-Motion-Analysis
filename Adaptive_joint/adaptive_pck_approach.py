@@ -127,11 +127,12 @@ class PCKAggregator:
                     if pd.notna(val) and val != "":
                         video_parts.append(str(val))
 
+                # Skip rows without video metadata
                 if not video_parts:
-                    # Use row index if no metadata
-                    video_id = f"Row_{idx}"
-                else:
-                    video_id = "_".join(video_parts)
+                    logger.debug(f"Skipping row {idx} - no video metadata found")
+                    continue
+
+                video_id = "_".join(video_parts)
 
                 # For each joint, average across all threshold columns for this row
                 for joint_name, columns in joint_columns.items():
