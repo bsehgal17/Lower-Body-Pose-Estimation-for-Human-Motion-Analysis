@@ -60,7 +60,8 @@ class PCKAggregator:
         excel_files = list(self.root_path.glob("**/*.xlsx")) + list(
             self.root_path.glob("**/*.xls")
         )
-        logger.info(f"Found {len(excel_files)} Excel files total across all folders")
+        logger.info(
+            f"Found {len(excel_files)} Excel files total across all folders")
 
         for excel_file in excel_files:
             path_str = str(excel_file)
@@ -130,7 +131,8 @@ class PCKAggregator:
 
                 # Skip rows without video metadata
                 if not video_parts:
-                    logger.debug(f"Skipping row {idx} - no video metadata found")
+                    logger.debug(
+                        f"Skipping row {idx} - no video metadata found")
                     continue
 
                 video_id = "_".join(video_parts)
@@ -224,7 +226,8 @@ class PCKAggregator:
                 # Create sheet name with frequency
                 sheet_name = f"Freq_{frequency}Hz"
                 pivot.to_excel(writer, sheet_name=sheet_name)
-                logger.info(f"Created sheet: {sheet_name} with {len(pivot)} videos")
+                logger.info(
+                    f"Created sheet: {sheet_name} with {len(pivot)} videos")
 
             # 2. Create summary sheet: best frequency for each (video, joint)
             summary_data = []
@@ -289,7 +292,8 @@ class PCKAggregator:
         for (video, joint), group in df.groupby(["Video", "Joint"]):
             max_pck = group["Average PCK (%)"].max()
             best_freqs = sorted(
-                group[group["Average PCK (%)"] == max_pck]["Frequency"].unique()
+                group[group["Average PCK (%)"] ==
+                      max_pck]["Frequency"].unique()
             )
             best_freq_options[(video, joint)] = best_freqs
             logger.debug(f"{video}/{joint}: PCK={max_pck}, Freqs={best_freqs}")
@@ -330,7 +334,8 @@ class PCKAggregator:
                     # Create sheet name
                     sheet_name = f"Perm_{permutation_count}_{video}"[:31]
                     perm_df.to_excel(writer, sheet_name=sheet_name)
-                    logger.info(f"Permutation {permutation_count}: {perm_data}")
+                    logger.info(
+                        f"Permutation {permutation_count}: {perm_data}")
 
             # Format worksheets
             workbook = writer.book
@@ -368,10 +373,10 @@ def main():
     ROOT_PATH = r"/storageh100/Projects/Gaitly/bsehgal/pipeline_results/HumanEva/Butterworth_filter/"
 
     # Output Excel file path for aggregated results
-    OUTPUT_PATH = "pck_summary.xlsx"
+    OUTPUT_PATH = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/pck_summary.xlsx"
 
     # Output Excel file path for permutations
-    PERMUTATIONS_PATH = "pck_best_frequency_permutations.xlsx"
+    PERMUTATIONS_PATH = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/pck_best_frequency_permutations.xlsx"
 
     # ============================================================================
 
