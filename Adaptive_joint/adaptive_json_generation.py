@@ -206,6 +206,91 @@ class AdaptiveJSONGenerator:
 
         return subject, camera, motion
 
+    def parse_video_name(
+        self, video_name: str
+    ) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
+        """
+        Parse video name to extract subject, camera, motion and view components.
+
+        The function handles names like:
+            S1_Jog_1_2.0  -> ("S1", "C2", "Jog", "1")
+            S1_Walking_C1 -> ("S1", "C1", "Walking", None)
+            S1_Box_1_C1_1 -> ("S1", "C1", "Box", "1")
+
+        Rules:
+        - Subject: token matching s\d+
+        - Camera: token matching c\d+ OR the last numeric token (e.g., 2.0 -> C2)
+        - View: the numeric token before the camera when two numeric tokens exist
+        - Motion: remaining non-numeric tokens between subject and view/camera
+
+        Returns:
+            (subject, camera, motion, view)
+        """
+        video_lower = video_name.lower()
+
+        # Tokenize by underscore or whitespace
+        tokens = re.split(r"[_\s]+", video_lower)
+
+        subject = None
+        camera = None
+        motion = None
+        view = None
+
+        # Find subject index
+        subj_idx = None
+        for i, t in enumerate(tokens):
+            if re.match(r"^s\d+$", t):
+                subject = t.upper()
+                subj_idx = i
+                break
+
+        # Collect numeric and non-numeric tokens after subject
+        post_tokens = tokens[subj_idx + 1 :] if subj_idx is not None else tokens
+
+        numeric_tokens = []
+        non_numeric_tokens = []
+        camera_token_idx = None
+
+        for i, t in enumerate(post_tokens):
+            if re.match(r"^c\d+$", t):
+                # explicit camera token
+                camera = t.upper()
+                camera_token_idx = i
+            elif re.match(r"^\d+(?:\.\d+)?$", t):
+                numeric_tokens.append((i, t))
+            else:
+                non_numeric_tokens.append((i, t))
+
+        # If explicit camera not found but numeric tokens exist, assume last numeric is camera
+        if camera is None and numeric_tokens:
+            cam_idx, cam_token = numeric_tokens[-1]
+            # normalize camera (drop .0)
+            cam_num = str(int(float(cam_token)))
+            camera = f"C{cam_num}"
+            camera_token_idx = cam_idx
+
+        # If we have at least two numeric tokens, the first is view (before camera)
+        if len(numeric_tokens) >= 2:
+            view_idx, view_token = numeric_tokens[0]
+            view = str(int(float(view_token)))
+        elif len(numeric_tokens) == 1 and camera_token_idx is None:
+            # single numeric token and no camera extracted: treat as camera
+            view = None
+
+        # Build motion from non-numeric tokens that occur before camera/view indices
+        motion_parts = []
+        for idx, tok in non_numeric_tokens:
+            # choose token positions that are before camera_token_idx if present
+            if camera_token_idx is not None and idx >= camera_token_idx:
+                continue
+            motion_parts.append(tok)
+
+        if motion_parts:
+            # Join and title-case
+            motion = "_".join(motion_parts).title()
+
+        return subject, camera, motion, view
+
     def path_matches_video(self, json_path: Path, video_name: str) -> bool:
         """
         Check if a JSON file path matches the given video name.
@@ -375,29 +460,6 @@ class AdaptiveJSONGenerator:
         except Exception as e:
             logger.error(f"Error loading JSON from {json_path}: {e}")
             return None
-
-    def extract_joint_data_from_poses(
-        self, poses: List[Dict], joint_idx: int
-    ) -> List[List[float]]:
-        """
-        Extract specific joint coordinates from poses list.
-
-        Args:
-            poses: List of pose dictionaries with keypoints
-            joint_idx: Index of the joint to extract
-
-        Returns:
-            List of [x, y] coordinates for the joint across all frames
-        """
-        joint_coords = []
-        for pose in poses:
-            keypoints = pose.get("keypoints", [])
-            if joint_idx < len(keypoints):
-                joint_coords.append(keypoints[joint_idx])
-            else:
-                logger.warning(f"Joint index {joint_idx} out of range")
-                joint_coords.append([0, 0])
-        return joint_coords
 
     def generate_adaptive_json(
         self,
