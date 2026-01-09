@@ -28,8 +28,8 @@ class PCKAggregator:
         logger.info(f"Initialized PCKAggregator with root: {self.root_path}")
 
     def extract_frequency_from_path(self, path: str) -> Optional[float]:
-        """Extract filter frequency from folder name. E.g., cutoff5.0 -> 5.0"""
-        match = re.search(r"cutoff(\d+\.?\d*)", path)
+        """Extract filter frequency from folder name. E.g., filter_butterworth_18th_14hz -> 14"""
+        match = re.search(r"(\d+)hz", path, re.IGNORECASE)
         if match:
             return float(match.group(1))
         return None
