@@ -274,8 +274,19 @@ class PCKAggregator:
     def save_permutations_excel(self, output_path: str):
         """
         Generate all permutations of best frequencies when multiple frequencies
-        have the same highest PCK value.
-        Creates separate sheets for each permutation combination.
+        have the SAME HIGHEST PCK value.
+
+        For each (video, joint):
+        - Find the maximum PCK value
+        - Identify ALL frequencies that achieve that maximum
+        - Only those frequencies are used in permutation generation
+
+        Example: If LEFT_ANKLE has PCK=92 for freq 1,2,3 (all highest),
+        and LEFT_KNEE has PCK=85 for freq 1 only (highest),
+        permutations will use [freq1, freq2, freq3] for LEFT_ANKLE
+        and [freq1] for LEFT_KNEE.
+
+        Creates separate sheets for each unique permutation combination.
         """
         df = self.process_files()
 
@@ -283,16 +294,21 @@ class PCKAggregator:
             logger.error("No results to save!")
             return
 
-        # For each (video, joint), find all frequencies with the highest PCK
+        # For each (video, joint), find ALL frequencies with the HIGHEST PCK
         best_freq_options = {}  # {(video, joint): [freq1, freq2, ...]}
 
         for (video, joint), group in df.groupby(["Video", "Joint"]):
             max_pck = group["Average PCK (%)"].max()
+            # Only get frequencies where PCK equals the maximum
             best_freqs = sorted(
                 group[group["Average PCK (%)"] == max_pck]["Frequency"].unique()
             )
             best_freq_options[(video, joint)] = best_freqs
-            logger.debug(f"{video}/{joint}: PCK={max_pck}, Freqs={best_freqs}")
+
+            logger.info(
+                f"{video}/{joint}: Max PCK={max_pck}%, "
+                f"Frequencies with max PCK={best_freqs}"
+            )
 
         # Group by video and generate permutations
         videos = sorted(df["Video"].unique())
@@ -312,12 +328,23 @@ class PCKAggregator:
                 if not video_joints:
                     continue
 
-                # Get frequency options for each joint
+                # Get frequency options for each joint (only those with highest PCK)
                 freq_options = [
                     best_freq_options[(video, joint)] for joint in video_joints
                 ]
 
+                logger.info(f"\nVideo: {video}")
+                logger.info(f"  Joints: {video_joints}")
+                for joint, options in zip(video_joints, freq_options):
+                    logger.info(f"    {joint}: Freq options = {options}")
+
                 # Generate all permutations
+                total_perms = 1
+                for opt_list in freq_options:
+                    total_perms *= len(opt_list)
+
+                logger.info(f"  Total permutations for {video}: {total_perms}")
+
                 for freq_combo in product(*freq_options):
                     permutation_count += 1
                     perm_data = {
@@ -330,7 +357,7 @@ class PCKAggregator:
                     # Create sheet name
                     sheet_name = f"Perm_{permutation_count}_{video}"[:31]
                     perm_df.to_excel(writer, sheet_name=sheet_name)
-                    logger.info(f"Permutation {permutation_count}: {perm_data}")
+                    logger.debug(f"  Perm_{permutation_count}: {perm_data}")
 
             # Format worksheets
             workbook = writer.book
@@ -350,9 +377,10 @@ class PCKAggregator:
 
         logger.info(f"Permutations saved to {output_path}")
         print("\n" + "=" * 80)
-        print(f"Generated {permutation_count} permutations!")
+        print(f"Generated {permutation_count} total permutations!")
         print(f"Saved to: {output_path}")
-        print("Each sheet represents a unique frequency combination")
+        print("Each sheet = unique frequency combination for a video")
+        print("Only frequencies with HIGHEST PCK are used in permutations")
         print("=" * 80)
 
 
