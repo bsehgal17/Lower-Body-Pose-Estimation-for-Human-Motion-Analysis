@@ -140,8 +140,7 @@ class AdaptiveJSONGenerator:
         """
         try:
             if not self.filter_base_path.exists():
-                logger.error(
-                    f"Filter base path not found: {self.filter_base_path}")
+                logger.error(f"Filter base path not found: {self.filter_base_path}")
                 return False
 
             # Find all frequency folders
@@ -150,11 +149,9 @@ class AdaptiveJSONGenerator:
                     freq = self.extract_frequency_from_path(item.name)
                     if freq is not None:
                         self.filter_folder_map[freq] = item
-                        logger.debug(
-                            f"Found frequency {freq}Hz folder: {item.name}")
+                        logger.debug(f"Found frequency {freq}Hz folder: {item.name}")
 
-            logger.info(
-                f"Built map for {len(self.filter_folder_map)} frequencies")
+            logger.info(f"Built map for {len(self.filter_folder_map)} frequencies")
             logger.info(
                 f"Available frequencies: {sorted(self.filter_folder_map.keys())}Hz"
             )
@@ -164,70 +161,136 @@ class AdaptiveJSONGenerator:
             logger.error(f"Error building filter folder map: {e}")
             return False
 
-    def parse_video_name(self, video_name: str) -> Tuple[Optional[str], Optional[str]]:
+    def parse_video_name(
+        self, video_name: str
+    ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         """
-        Parse video name to extract subject and box components.
+        Parse video name to extract subject, camera, and motion components.
+        The trailing number (view/sequence ID) is optional and ignored as it's not part of the folder structure.
 
         Examples:
-            "S1_Box_1_1.0" -> ("S1", "Box_1")
-            "S2_Box_2_1.5" -> ("S2", "Box_2")
-            "Box_1_(C1)" -> (None, "Box_1")
+            "S1_Walking_C1_1" -> ("S1", "C1", "Walking_1")
+            "S1_Walking_C1_1.5" -> ("S1", "C1", "Walking_1") - view number ignored
+            "S1_Walking_C1" -> ("S1", "C1", "Walking") - no view number
+            "S1_Gesture_C2_1.5" -> ("S1", "C2", "Gesture_1")
+            "S1_Box_1_C1_1.0" -> ("S1", "C1", "Box_1")
+            "S1_C1_1" -> ("S1", "C1", None) - just subject+camera
+            "S1_C1_1.5" -> ("S1", "C1", None) - view number ignored
+            "S1_C1" -> ("S1", "C1", None) - no view number
 
         Returns:
-            Tuple of (subject, box_name) or (None, None) if cannot parse
+            Tuple of (subject, camera, motion) where motion can be None
         """
         video_lower = video_name.lower()
 
-        # Try to extract subject (S1, S2, s01, s02, etc.)
+        # Extract subject (S1, S2, s01, s02, etc.)
         subject_match = re.search(r"(s\d+)", video_lower)
         subject = subject_match.group(1).upper() if subject_match else None
 
-        # Try to extract box/video name (Box_1, Box_2, etc.)
-        box_match = re.search(r"(box_?\d+)", video_lower)
-        box_name = box_match.group(1).replace("_", "_") if box_match else None
+        # Extract camera (C1, C2, c1, c2, etc.)
+        camera_match = re.search(r"(c\d+)", video_lower)
+        camera = camera_match.group(1).upper() if camera_match else None
 
-        return subject, box_name
+        # Extract motion type (Walking, Gesture, Box, etc.)
+        # Remove subject and camera to isolate motion
+        # The pattern extracts words with numbers between subject and camera
+        # Remove trailing view number if present (optional)
+        temp = re.sub(r"s\d+[_\s]*", "", video_lower)  # Remove subject
+        temp = re.sub(
+            r"[_\s]*c\d+(?:[_\s]*\d+(?:\.\d+)?)?$", "", temp
+        )  # Remove camera and optional view/sequence
+
+        motion = None
+        if temp and temp.strip() not in ["", "."]:
+            motion = temp.strip("_ ").title()
+
+        return subject, camera, motion
 
     def path_matches_video(self, json_path: Path, video_name: str) -> bool:
         """
         Check if a JSON file path matches the given video name.
 
-        Path structure: .../S1/Image_Data/Box_1_(C1)/Box_1_(C1).json
-        Video name: "S1_Box_1_1.0"
+        Path structure: .../S1/Image_Data/Walking_1_(C1)/Walking_1_(C1).json
+                       .../S1/Image_Data/Box_1_(C1)/Box_1_(C1).json
+        Video name: "S1_Walking_C1_1" or "S1_Walking_1_C1_1" or "S1_Box_1_C1_1.0"
 
         Args:
             json_path: Path object of the JSON file
-            video_name: Video name from Excel (e.g., "S1_Box_1_1.0")
+            video_name: Video name from Excel (e.g., "S1_Walking_C1_1")
 
         Returns:
             True if the path matches the video
         """
-        subject, box_name = self.parse_video_name(video_name)
-        path_str = str(json_path).lower()
+        subject, camera, motion = self.parse_video_name(video_name)
         path_parts = [p.lower() for p in json_path.parts]
+
+        logger.debug(
+            f"Matching: subject='{subject}', camera='{camera}', motion='{motion}'"
+        )
+        logger.debug(f"Path parts: {path_parts}")
 
         # Must have subject folder in path
         if subject:
             subject_lower = subject.lower()
             if subject_lower not in path_parts:
-                logger.debug(f"Subject '{subject}' not found in path: {json_path}")
+                logger.debug(f"✗ Subject '{subject}' not found in path")
                 return False
+            logger.debug(f"✓ Subject '{subject}' found in path")
 
-        # Must have box name somewhere in path
-        if box_name:
-            box_normalized = box_name.lower().replace("_", "").replace("-", "")
+        # Must have camera (C1, C2, etc.) in path
+        if camera:
+            camera_lower = camera.lower()
+            found_camera = False
+            for part in path_parts:
+                if camera_lower in part.lower():
+                    logger.debug(f"✓ Camera '{camera}' found in path part: {part}")
+                    found_camera = True
+                    break
+            if not found_camera:
+                logger.debug(f"✗ Camera '{camera}' not found in path")
+                return False
+        else:
+            logger.debug("⚠ No camera extracted from video name")
+
+        # If we have motion type, try to match it flexibly
+        if motion:
+            motion_lower = motion.lower()
+            motion_normalized = motion_lower.replace("_", "").replace("-", "")
+
+            # Try multiple matching strategies
+            found_motion = False
             for part in path_parts:
                 part_normalized = (
-                    part.replace("_", "")
+                    part.lower()
+                    .replace("_", "")
                     .replace("-", "")
                     .replace("(", "")
                     .replace(")", "")
                 )
-                if box_normalized in part_normalized:
-                    logger.debug(f"Matched box '{box_name}' in path part: {part}")
-                    return True
 
-        return False
+                # Strategy 1: Exact normalized match
+                if motion_normalized in part_normalized:
+                    logger.debug(f"✓ Motion '{motion}' matched in path part: {part}")
+                    found_motion = True
+                    break
+
+                # Strategy 2: Try just the base motion (remove trailing numbers)
+                motion_base = re.sub(r"[_\s]*\d+$", "", motion_lower)
+                motion_base_normalized = motion_base.replace("_", "").replace("-", "")
+                if motion_base_normalized and motion_base_normalized in part_normalized:
+                    logger.debug(
+                        f"✓ Motion base '{motion_base}' matched in path part: {part}"
+                    )
+                    found_motion = True
+                    break
+
+            if not found_motion:
+                logger.debug(f"⚠ Motion '{motion}' not found in path")
+                # Don't fail if motion doesn't match - subject+camera might be enough
+        else:
+            logger.debug("⚠ No motion extracted from video name")
+
+        return True
 
     def find_filtered_json_files(
         self, video_name: str, frequency: float
@@ -246,8 +309,7 @@ class AdaptiveJSONGenerator:
             List of JSON file paths matching the video name, or None
         """
         if frequency not in self.filter_folder_map:
-            logger.warning(
-                f"No filter folder found for frequency {frequency}Hz")
+            logger.warning(f"No filter folder found for frequency {frequency}Hz")
             return None
 
         freq_folder = self.filter_folder_map[frequency]
@@ -266,8 +328,7 @@ class AdaptiveJSONGenerator:
                 if not timestamp_dir.is_dir():
                     continue
 
-                logger.debug(
-                    f"Searching in timestamp directory: {timestamp_dir.name}")
+                logger.debug(f"Searching in timestamp directory: {timestamp_dir.name}")
 
                 # Search through all filter parameter folders
                 for param_dir in timestamp_dir.iterdir():
@@ -298,8 +359,7 @@ class AdaptiveJSONGenerator:
             logger.warning(
                 f"No filtered JSON files found for '{video_name}' at {frequency}Hz in {filter_subdir}"
             )
-            logger.debug(
-                f"Searched pattern in directories under: {filter_subdir}")
+            logger.debug(f"Searched pattern in directories under: {filter_subdir}")
             return None
 
         return matching_files
@@ -482,8 +542,7 @@ class AdaptiveJSONGenerator:
             return False
 
         joint_frequencies = self.joint_freq_map[video_name]
-        logger.info(
-            f"Found {len(joint_frequencies)} joints with best frequencies")
+        logger.info(f"Found {len(joint_frequencies)} joints with best frequencies")
         for jname, freq in joint_frequencies.items():
             logger.info(f"  {jname}: {freq}Hz")
 
@@ -581,8 +640,7 @@ class AdaptiveJSONGenerator:
                 # Build relative path from subject folder onwards
                 relative_parts = parts[subject_idx:]
                 # Replace the filename with video_name.json
-                relative_parts = list(
-                    relative_parts[:-1]) + [f"{video_name}.json"]
+                relative_parts = list(relative_parts[:-1]) + [f"{video_name}.json"]
                 output_path = self.output_base_path / Path(*relative_parts)
             else:
                 # Fallback: use parent structure if subject not found
