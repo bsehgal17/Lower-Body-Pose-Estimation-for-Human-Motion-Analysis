@@ -637,10 +637,8 @@ class AdaptiveJSONGenerator:
                     break
 
             if freq_folder_idx >= 0:
-                # Extract path from frequency folder onwards
+                # Extract path from frequency folder onwards (preserving original filename)
                 relative_parts = parts[freq_folder_idx:]
-                # Replace the filename with video_name.json
-                relative_parts = list(relative_parts[:-1]) + [f"{video_name}.json"]
                 output_path = self.output_base_path / Path(*relative_parts)
             else:
                 # Fallback: find subject and use from there
@@ -652,7 +650,6 @@ class AdaptiveJSONGenerator:
 
                 if subject_idx >= 0:
                     relative_parts = parts[subject_idx:]
-                    relative_parts = list(relative_parts[:-1]) + [f"{video_name}.json"]
                     output_path = self.output_base_path / Path(*relative_parts)
                 else:
                     output_path = self.output_base_path / f"{video_name}.json"
