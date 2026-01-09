@@ -140,7 +140,8 @@ class AdaptiveJSONGenerator:
         """
         try:
             if not self.filter_base_path.exists():
-                logger.error(f"Filter base path not found: {self.filter_base_path}")
+                logger.error(
+                    f"Filter base path not found: {self.filter_base_path}")
                 return False
 
             # Find all frequency folders
@@ -149,9 +150,11 @@ class AdaptiveJSONGenerator:
                     freq = self.extract_frequency_from_path(item.name)
                     if freq is not None:
                         self.filter_folder_map[freq] = item
-                        logger.debug(f"Found frequency {freq}Hz folder: {item.name}")
+                        logger.debug(
+                            f"Found frequency {freq}Hz folder: {item.name}")
 
-            logger.info(f"Built map for {len(self.filter_folder_map)} frequencies")
+            logger.info(
+                f"Built map for {len(self.filter_folder_map)} frequencies")
             logger.info(
                 f"Available frequencies: {sorted(self.filter_folder_map.keys())}Hz"
             )
@@ -178,7 +181,8 @@ class AdaptiveJSONGenerator:
             List of JSON file paths matching the video name, or None
         """
         if frequency not in self.filter_folder_map:
-            logger.warning(f"No filter folder found for frequency {frequency}Hz")
+            logger.warning(
+                f"No filter folder found for frequency {frequency}Hz")
             return None
 
         freq_folder = self.filter_folder_map[frequency]
@@ -197,7 +201,8 @@ class AdaptiveJSONGenerator:
                 if not timestamp_dir.is_dir():
                     continue
 
-                logger.debug(f"Searching in timestamp directory: {timestamp_dir.name}")
+                logger.debug(
+                    f"Searching in timestamp directory: {timestamp_dir.name}")
 
                 # Search through all filter parameter folders
                 for param_dir in timestamp_dir.iterdir():
@@ -238,7 +243,8 @@ class AdaptiveJSONGenerator:
             logger.warning(
                 f"No filtered JSON files found for '{video_name}' at {frequency}Hz in {filter_subdir}"
             )
-            logger.debug(f"Searched pattern in directories under: {filter_subdir}")
+            logger.debug(
+                f"Searched pattern in directories under: {filter_subdir}")
             return None
 
         return matching_files
@@ -421,7 +427,8 @@ class AdaptiveJSONGenerator:
             return False
 
         joint_frequencies = self.joint_freq_map[video_name]
-        logger.info(f"Found {len(joint_frequencies)} joints with best frequencies")
+        logger.info(
+            f"Found {len(joint_frequencies)} joints with best frequencies")
         for jname, freq in joint_frequencies.items():
             logger.info(f"  {jname}: {freq}Hz")
 
@@ -519,7 +526,8 @@ class AdaptiveJSONGenerator:
                 # Build relative path from subject folder onwards
                 relative_parts = parts[subject_idx:]
                 # Replace the filename with video_name.json
-                relative_parts = list(relative_parts[:-1]) + [f"{video_name}.json"]
+                relative_parts = list(
+                    relative_parts[:-1]) + [f"{video_name}.json"]
                 output_path = self.output_base_path / Path(*relative_parts)
             else:
                 # Fallback: use parent structure if subject not found
@@ -581,10 +589,11 @@ def main():
     """Main execution function."""
     # Configuration - Edit these paths
     EXCEL_PATH = (
-        r"C:\path\to\best_frequencies.xlsx"  # Excel file with Best Frequency sheet
+        # Excel file with Best Frequency sheet
+        r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/pck_summary.xlsx"
     )
     FILTER_BASE_PATH = r"/storageh100/Projects/Gaitly/bsehgal/pipeline_results/HumanEva/Butterworth_filter/"
-    OUTPUT_BASE_PATH = "adaptive_filtering"
+    OUTPUT_BASE_PATH = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/adaptive_filtering"
 
     # ========================================================================
 
