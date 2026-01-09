@@ -622,33 +622,40 @@ class AdaptiveJSONGenerator:
             base_video_data, joint_filtered_data, video_name
         )
 
-        # Create output directory maintaining the subject/video structure
-        # Example: S1/Image_Data/Box_1_(C1)/Box_1_(C1).json
+        # Create output directory maintaining the full relative structure
+        # From: /filter_base_path/filter_butterworth_18th_5hz/filter/2025-12-16_03-19-26/butterworth_order18_cutoff5.0_fs60.0/S1/Image_Data/Jog_1_(C2)/Jog_1_(C2).json
+        # To:   /output_base_path/filter_butterworth_18th_5hz/filter/2025-12-16_03-19-26/butterworth_order18_cutoff5.0_fs60.0/S1/Image_Data/Jog_1_(C2)/Jog_1_(C2).json
         if base_json_path:
-            # Extract the subject folder and video folders from the path
-            # From: .../S1/Image_Data/Box_1_(C1)/Box_1_(C1).json
+            # Find the frequency folder (e.g., filter_butterworth_18th_5hz) in the path
             parts = base_json_path.parts
+            freq_folder_idx = -1
 
-            # Find subject folder (starts with 'S' followed by number)
-            subject_idx = -1
             for i, part in enumerate(parts):
-                if re.match(r"^S\d+$", part, re.IGNORECASE):
-                    subject_idx = i
+                # Match frequency folder pattern: filter_butterworth_*_Xhz
+                if re.match(r"^filter_.*_\d+hz$", part, re.IGNORECASE):
+                    freq_folder_idx = i
                     break
 
-            if subject_idx >= 0:
-                # Build relative path from subject folder onwards
-                relative_parts = parts[subject_idx:]
+            if freq_folder_idx >= 0:
+                # Extract path from frequency folder onwards
+                relative_parts = parts[freq_folder_idx:]
                 # Replace the filename with video_name.json
                 relative_parts = list(relative_parts[:-1]) + [f"{video_name}.json"]
                 output_path = self.output_base_path / Path(*relative_parts)
             else:
-                # Fallback: use parent structure if subject not found
-                output_path = (
-                    self.output_base_path
-                    / base_json_path.parent.name
-                    / f"{video_name}.json"
-                )
+                # Fallback: find subject and use from there
+                subject_idx = -1
+                for i, part in enumerate(parts):
+                    if re.match(r"^S\d+$", part, re.IGNORECASE):
+                        subject_idx = i
+                        break
+
+                if subject_idx >= 0:
+                    relative_parts = parts[subject_idx:]
+                    relative_parts = list(relative_parts[:-1]) + [f"{video_name}.json"]
+                    output_path = self.output_base_path / Path(*relative_parts)
+                else:
+                    output_path = self.output_base_path / f"{video_name}.json"
         else:
             output_path = self.output_base_path / f"{video_name}.json"
 
