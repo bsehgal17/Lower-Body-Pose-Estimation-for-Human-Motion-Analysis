@@ -371,13 +371,16 @@ class TemporalStabilityCalculator:
         self, output_excel: Optional[str] = None
     ) -> Tuple[Dict, Dict, Dict]:
         """
-        Run the complete temporal stability analysis pipeline.
+        Run the complete temporal stability analysis pipeline with Step 5 implemented.
+
+        Step 5: If multiple frequencies give the same max PCK,
+        select the frequency with the smallest temporal jitter automatically.
 
         Args:
             output_excel: Optional path to save detailed Excel report
 
         Returns:
-            Tuple of (results_dict, statistics_dict, best_frequencies_dict)
+            Tuple of (results_dict, statistics_dict, selected_frequencies_dict)
         """
         logger.info("=" * 70)
         logger.info("Starting Temporal Stability Analysis Pipeline")
@@ -391,7 +394,7 @@ class TemporalStabilityCalculator:
 
         # Step 2: Build joint index mapping from enum
         joint_indices = {}
-        for joint_name, target_freq in best_freq_dict.items():
+        for joint_name in best_freq_dict.keys():
             joint_idx = self.get_joint_index_from_enum(self.joint_enum, joint_name)
             if joint_idx is not None:
                 joint_indices[joint_name] = joint_idx
@@ -409,43 +412,70 @@ class TemporalStabilityCalculator:
             logger.error("No video JSON files found organized by frequency")
             return {}, {}, best_freq_dict
 
-        # Step 4: Process files at best frequencies
+        # Step 4-5: Process files at candidate frequencies and pick smallest jitter
         results = {}  # {joint_name: {video_file: jitter}}
-        for joint_name, best_freq in best_freq_dict.items():
-            results[joint_name] = {}
+        stats = {}  # {joint_name: stats_dict}
+        final_best_freq_dict = {}  # selected frequency per joint
 
-            if best_freq not in freq_to_files:
-                logger.warning(
-                    f"No JSON files found for best frequency {best_freq}Hz of {joint_name}"
-                )
-                continue
+        for joint_name, candidate_freqs in best_freq_dict.items():
+            # If candidate_freqs is a single float, make it a list
+            if not isinstance(candidate_freqs, (list, tuple)):
+                candidate_freqs = [candidate_freqs]
 
-            logger.info(f"\nProcessing {joint_name} at {best_freq}Hz")
-            json_files = freq_to_files[best_freq]
+            jitter_per_freq = {}  # frequency -> mean jitter across videos
 
-            for json_path in json_files:
-                logger.info(f"  Processing: {json_path.name}")
+            for freq in candidate_freqs:
+                if freq not in freq_to_files:
+                    logger.warning(
+                        f"No JSON files found for frequency {freq}Hz of {joint_name}"
+                    )
+                    continue
 
-                jitter_dict = self.process_single_video_json(
-                    json_path, {joint_name: joint_indices[joint_name]}
-                )
+                logger.info(f"\nProcessing {joint_name} at {freq}Hz")
+                json_files = freq_to_files[freq]
+                joint_idx = self.get_joint_index_from_enum(self.joint_enum, joint_name)
+                if joint_idx is None:
+                    logger.warning(f"Could not map joint {joint_name} from enum")
+                    continue
 
-                if joint_name in jitter_dict:
-                    results[joint_name][json_path.stem] = jitter_dict[joint_name]
+                jitter_values = []
+                results.setdefault(joint_name, {})
 
-        # Step 5: Compute statistics per joint
-        stats = {}
-        for joint_name, video_jitters in results.items():
-            if video_jitters:
-                jitter_values = list(video_jitters.values())
+                for json_path in json_files:
+                    jitter_dict = self.process_single_video_json(
+                        json_path, {joint_name: joint_idx}
+                    )
+                    if joint_name in jitter_dict:
+                        jitter = jitter_dict[joint_name]
+                        jitter_values.append(jitter)
+                        results[joint_name][json_path.stem] = jitter
+
+                if jitter_values:
+                    mean_jitter = np.mean(jitter_values)
+                    jitter_per_freq[freq] = mean_jitter
+
+            if jitter_per_freq:
+                # Step 5: pick frequency with smallest jitter
+                selected_freq = min(jitter_per_freq, key=jitter_per_freq.get)
+                final_best_freq_dict[joint_name] = selected_freq
+
+                # compute stats for selected frequency only
+                selected_jitters = [
+                    results[joint_name][p.stem]
+                    for p in freq_to_files[selected_freq]
+                    if p.stem in results[joint_name]
+                ]
                 stats[joint_name] = {
-                    "mean_jitter": np.mean(jitter_values),
-                    "std_jitter": np.std(jitter_values),
-                    "min_jitter": np.min(jitter_values),
-                    "max_jitter": np.max(jitter_values),
-                    "num_videos": len(jitter_values),
-                    "frequency": best_freq_dict[joint_name],
+                    "mean_jitter": np.mean(selected_jitters),
+                    "std_jitter": np.std(selected_jitters),
+                    "min_jitter": np.min(selected_jitters),
+                    "max_jitter": np.max(selected_jitters),
+                    "num_videos": len(selected_jitters),
+                    "frequency": selected_freq,
                 }
+            else:
+                logger.warning(f"No valid jitter computed for joint {joint_name}")
+                final_best_freq_dict[joint_name] = candidate_freqs[0]  # fallback
 
         # Step 6: Generate Excel report
         logger.info("\nGenerating Excel report...")
@@ -458,7 +488,7 @@ class TemporalStabilityCalculator:
         logger.info("Pipeline completed successfully!")
         logger.info("=" * 70)
 
-        return results, stats, best_freq_dict
+        return results, stats, final_best_freq_dict
 
     def save_detailed_excel_report(self, results: Dict, stats: Dict, output_file: str):
         """
