@@ -81,7 +81,7 @@ class AdaptiveJSONGenerator:
                 return False
 
             # Read the "Best Frequency" sheet
-            df = pd.read_excel(self.excel_path, sheet_name="Best Frequency")
+            df = pd.read_excel(self.excel_path, sheet_name="Best_Frequency")
             logger.info(f"Loaded Excel file with {len(df)} rows")
             logger.info(f"Columns: {df.columns.tolist()}")
 
@@ -140,7 +140,8 @@ class AdaptiveJSONGenerator:
         """
         try:
             if not self.filter_base_path.exists():
-                logger.error(f"Filter base path not found: {self.filter_base_path}")
+                logger.error(
+                    f"Filter base path not found: {self.filter_base_path}")
                 return False
 
             # Find all frequency folders
@@ -149,9 +150,11 @@ class AdaptiveJSONGenerator:
                     freq = self.extract_frequency_from_path(item.name)
                     if freq is not None:
                         self.filter_folder_map[freq] = item
-                        logger.debug(f"Found frequency {freq}Hz folder: {item.name}")
+                        logger.debug(
+                            f"Found frequency {freq}Hz folder: {item.name}")
 
-            logger.info(f"Built map for {len(self.filter_folder_map)} frequencies")
+            logger.info(
+                f"Built map for {len(self.filter_folder_map)} frequencies")
             logger.info(
                 f"Available frequencies: {sorted(self.filter_folder_map.keys())}Hz"
             )
@@ -245,7 +248,7 @@ class AdaptiveJSONGenerator:
                 break
 
         # Collect numeric and non-numeric tokens after subject
-        post_tokens = tokens[subj_idx + 1 :] if subj_idx is not None else tokens
+        post_tokens = tokens[subj_idx + 1:] if subj_idx is not None else tokens
 
         numeric_tokens = []
         non_numeric_tokens = []
@@ -328,7 +331,8 @@ class AdaptiveJSONGenerator:
             found_camera = False
             for part in path_parts:
                 if camera_lower in part.lower():
-                    logger.debug(f"✓ Camera '{camera}' found in path part: {part}")
+                    logger.debug(
+                        f"✓ Camera '{camera}' found in path part: {part}")
                     found_camera = True
                     break
             if not found_camera:
@@ -375,7 +379,8 @@ class AdaptiveJSONGenerator:
 
                 # Strategy 2: Try just the base motion (remove trailing numbers)
                 motion_base = re.sub(r"[_\s]*\d+$", "", motion_lower)
-                motion_base_normalized = motion_base.replace("_", "").replace("-", "")
+                motion_base_normalized = motion_base.replace(
+                    "_", "").replace("-", "")
                 if motion_base_normalized and motion_base_normalized in part_normalized:
                     if view:
                         nums = re.findall(r"\d+(?:\.\d+)?", part)
@@ -396,7 +401,8 @@ class AdaptiveJSONGenerator:
                         break
 
             if not found_motion:
-                logger.debug(f"✗ Motion '{motion}' not found in path - rejecting match")
+                logger.debug(
+                    f"✗ Motion '{motion}' not found in path - rejecting match")
                 return False
 
         return True
@@ -418,7 +424,8 @@ class AdaptiveJSONGenerator:
             List of JSON file paths matching the video name, or None
         """
         if frequency not in self.filter_folder_map:
-            logger.warning(f"No filter folder found for frequency {frequency}Hz")
+            logger.warning(
+                f"No filter folder found for frequency {frequency}Hz")
             return None
 
         freq_folder = self.filter_folder_map[frequency]
@@ -437,14 +444,16 @@ class AdaptiveJSONGenerator:
                 if not timestamp_dir.is_dir():
                     continue
 
-                logger.debug(f"Searching in timestamp directory: {timestamp_dir.name}")
+                logger.debug(
+                    f"Searching in timestamp directory: {timestamp_dir.name}")
 
                 # Search through all filter parameter folders
                 for param_dir in timestamp_dir.iterdir():
                     if not param_dir.is_dir():
                         continue
 
-                    logger.debug(f"Searching in param directory: {param_dir.name}")
+                    logger.debug(
+                        f"Searching in param directory: {param_dir.name}")
 
                     # Now search recursively for JSON files matching the video name
                     for json_file in param_dir.rglob("*.json"):
@@ -468,7 +477,8 @@ class AdaptiveJSONGenerator:
             logger.warning(
                 f"No filtered JSON files found for '{video_name}' at {frequency}Hz in {filter_subdir}"
             )
-            logger.debug(f"Searched pattern in directories under: {filter_subdir}")
+            logger.debug(
+                f"Searched pattern in directories under: {filter_subdir}")
             return None
 
         return matching_files
@@ -532,9 +542,9 @@ class AdaptiveJSONGenerator:
                                         if fpose.get("frame_idx", -1) == frame_idx:
                                             fkpts = fpose.get("keypoints", [])
                                             if joint_idx < len(
-                                                fkpts
-                                            ) and joint_idx < len(keypoints):
-                                                keypoints[joint_idx] = fkpts[joint_idx]
+                                                fkpts[0]
+                                            ) and joint_idx < len(keypoints[0]):
+                                                keypoints[0][joint_idx] = fkpts[0][joint_idx]
                                             break
 
                         pose["keypoints"] = keypoints
@@ -628,7 +638,8 @@ class AdaptiveJSONGenerator:
             return False
 
         joint_frequencies = self.joint_freq_map[video_name]
-        logger.info(f"Found {len(joint_frequencies)} joints with best frequencies")
+        logger.info(
+            f"Found {len(joint_frequencies)} joints with best frequencies")
         for jname, freq in joint_frequencies.items():
             logger.info(f"  {jname}: {freq}Hz")
 
@@ -708,37 +719,23 @@ class AdaptiveJSONGenerator:
             base_video_data, joint_filtered_data, video_name
         )
 
-        # Create output directory maintaining the full relative structure
-        # From: /filter_base_path/filter_butterworth_18th_5hz/filter/2025-12-16_03-19-26/butterworth_order18_cutoff5.0_fs60.0/S1/Image_Data/Jog_1_(C2)/Jog_1_(C2).json
-        # To:   /output_base_path/filter_butterworth_18th_5hz/filter/2025-12-16_03-19-26/butterworth_order18_cutoff5.0_fs60.0/S1/Image_Data/Jog_1_(C2)/Jog_1_(C2).json
         if base_json_path:
-            # Find the frequency folder (e.g., filter_butterworth_18th_5hz) in the path
             parts = base_json_path.parts
-            freq_folder_idx = -1
 
+            # Find subject folder (S1, S2, ...)
+            subject_idx = -1
             for i, part in enumerate(parts):
-                # Match frequency folder pattern: filter_butterworth_*_Xhz
-                if re.match(r"^filter_.*_\d+hz$", part, re.IGNORECASE):
-                    freq_folder_idx = i
+                if re.match(r"^S\d+$", part, re.IGNORECASE):
+                    subject_idx = i
                     break
 
-            if freq_folder_idx >= 0:
-                # Extract path from frequency folder onwards (preserving original filename)
-                relative_parts = parts[freq_folder_idx:]
+            if subject_idx >= 0:
+                # Keep everything from subject onwards
+                relative_parts = parts[subject_idx:]
                 output_path = self.output_base_path / Path(*relative_parts)
             else:
-                # Fallback: find subject and use from there
-                subject_idx = -1
-                for i, part in enumerate(parts):
-                    if re.match(r"^S\d+$", part, re.IGNORECASE):
-                        subject_idx = i
-                        break
-
-                if subject_idx >= 0:
-                    relative_parts = parts[subject_idx:]
-                    output_path = self.output_base_path / Path(*relative_parts)
-                else:
-                    output_path = self.output_base_path / f"{video_name}.json"
+                # Fallback if subject not found
+                output_path = self.output_base_path / f"{video_name}.json"
         else:
             output_path = self.output_base_path / f"{video_name}.json"
 
@@ -793,7 +790,7 @@ def main():
     # Configuration - Edit these paths
     EXCEL_PATH = (
         # Excel file with Best Frequency sheet
-        r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/pck_summary.xlsx"
+        r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/temporal_stability_report.xlsx"
     )
     FILTER_BASE_PATH = r"/storageh100/Projects/Gaitly/bsehgal/pipeline_results/HumanEva/Butterworth_filter/"
     OUTPUT_BASE_PATH = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/adaptive_filtering"
