@@ -264,59 +264,48 @@ class TemporalStabilityCalculator:
             raise
 
     @staticmethod
-    def extract_joint_xy_trajectory_normalized(
-        pose_data: Dict, joint_index: int
-    ) -> np.ndarray:
+    def extract_joint_x_trajectory(pose_data: Dict, joint_index: int) -> np.ndarray:
         """
-        Extract normalized (x, y) trajectory for a joint.
-        Normalization enforces x–y isotropy using per-video spatial extent.
-        """
+        Extract X-coordinate trajectory for a specific joint.
 
+        Args:
+            pose_data: Loaded pose data dictionary
+            joint_index: Index of the joint to extract
+
+        Returns:
+            Array of X-coordinates for the joint over frames
+        """
         trajectory = []
 
-        # Handle pose formats
+        # Handle different pose data formats
         if "frames" in pose_data:
             frames = pose_data["frames"]
         elif "keypoints" in pose_data:
             frames = pose_data["keypoints"]
         else:
-            return np.empty((0, 2))
+            logger.debug(f"Unexpected format, keys: {pose_data.keys()}")
+            return np.array([])
 
+        if not frames:
+            return np.array([])
+
+        # Extract X-coordinate for each frame
         for frame in frames:
-            kp = frame["keypoints"] if isinstance(frame, dict) else frame
+            if isinstance(frame, dict) and "keypoints" in frame:
+                kp = frame["keypoints"]
+            else:
+                kp = frame
+
             if isinstance(kp, list) and len(kp) > joint_index:
-                point = kp[joint_index]
-                if isinstance(point, (list, tuple)) and len(point) >= 2:
-                    x, y = float(point[0]), float(point[1])
-                    if not (np.isnan(x) or np.isnan(y)):
-                        trajectory.append([x, y])
+                keypoint = kp[joint_index]
+                # Extract x coordinate (first element)
+                if isinstance(keypoint, (list, tuple)) and len(keypoint) >= 1:
+                    x = float(keypoint[0])
+                    # Skip invalid coordinates
+                    if not np.isnan(x):
+                        trajectory.append(x)
 
-        traj = np.asarray(trajectory)
-        if traj.shape[0] < 2:
-            return traj
-
-        # --- Isotropy enforcement via normalization ---
-        min_xy = traj.min(axis=0)
-        max_xy = traj.max(axis=0)
-        scale = max_xy - min_xy
-        scale[scale == 0] = 1.0  # avoid divide-by-zero
-
-        traj_norm = (traj - min_xy) / scale
-        return traj_norm
-
-    @staticmethod
-    def compute_temporal_instability_euclidean(trajectory_xy: np.ndarray) -> float:
-        """
-        Compute temporal trajectory instability using Euclidean frame-to-frame displacement.
-        """
-
-        if trajectory_xy.shape[0] < 2:
-            return 0.0
-
-        diffs = np.diff(trajectory_xy, axis=0)
-        distances = np.linalg.norm(diffs, axis=1)
-
-        return float(np.mean(distances))
+        return np.array(trajectory)
 
     @staticmethod
     def compute_temporal_jitter_x(x_trajectory: np.ndarray) -> float:
@@ -364,13 +353,11 @@ class TemporalStabilityCalculator:
             jitter_per_joint = {}
 
             for joint_name, joint_idx in joint_indices.items():
-                traj_xy = self.extract_joint_xy_trajectory_normalized(
-                    pose_data, joint_idx
-                )
+                x_trajectory = self.extract_joint_x_trajectory(pose_data, joint_idx)
 
-                if traj_xy.shape[0] > 1:
-                    instability = self.compute_temporal_instability_euclidean(traj_xy)
-                    jitter_per_joint[joint_name] = instability
+                if len(x_trajectory) > 1:
+                    jitter = self.compute_temporal_jitter_x(x_trajectory)
+                    jitter_per_joint[joint_name] = jitter
                 else:
                     jitter_per_joint[joint_name] = 0.0
 
@@ -547,9 +534,7 @@ class TemporalStabilityCalculator:
 
         # Sheet 2: Detailed Results per Video
         ws_detailed = wb.create_sheet("Detailed_Results", 1)
-        ws_detailed.append(
-            ["Joint", "Video_File", "Temporal_Instability", "Frequency_Hz"]
-        )
+        ws_detailed.append(["Joint", "Video_File", "Jitter_X", "Frequency_Hz"])
 
         for joint_name in sorted(results.keys()):
             freq = stats[joint_name]["frequency"] if joint_name in stats else "N/A"
