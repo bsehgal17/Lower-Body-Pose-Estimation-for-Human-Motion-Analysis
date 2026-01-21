@@ -16,8 +16,8 @@ json_files = [
 labels = ["Raw", "Uniform Butterworth", "Adaptive"]
 colors = ["tab:blue", "tab:orange", "tab:green"]
 
-joint_index = 11
-output_svg = "joint11_x_comparison.svg"
+joint_index = 15
+output_svg = "joint15_x_comparison.svg"
 # ---------------------
 
 
