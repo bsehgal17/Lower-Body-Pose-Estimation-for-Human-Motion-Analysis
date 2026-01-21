@@ -373,7 +373,7 @@ class TSICalculator:
 
 def main():
     raw_poses_path = r"/storageh100/Projects/Gaitly/bsehgal/pipeline_results/HumanEva/detect_RTMW"
-    filtered_poses_path = r"/storageh100/Projects/Gaitly/bsehgal/pipeline_results/HumanEva/Butterworth_filter/filter_butterworth_18th_9hz"
+    filtered_poses_path = r"/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/adaptive_filtering/"
 
     calculator = TSICalculator(raw_poses_path, filtered_poses_path)
     tsi_matrix, tsi_stats, video_names, tsi_per_video_joint, tsi_per_video_mean = calculator.process_all_videos()
@@ -381,7 +381,7 @@ def main():
     calculator.print_summary(tsi_stats, df_report)
     calculator.save_to_excel(
         tsi_matrix, tsi_stats, video_names, tsi_per_video_joint, tsi_per_video_mean,
-        "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/TSI_Results.xlsx"
+        "/storage/Projects/Gaitly/bsehgal/lower_body_pose_est/pipeline_results/Adaptive_filt/TSI_Results_adaptive.xlsx"
     )
 
 
