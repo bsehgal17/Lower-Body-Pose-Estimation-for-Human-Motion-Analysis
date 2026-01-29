@@ -3,192 +3,144 @@ orchestrator:
   default_device: "cuda:0"
 
 pipelines:
-  # Butterworth Filter - Example configuration
-  # - name: filter_butterworth_example
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_butterworth_18th_5hz.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+    # 4th order Butterworth – HumanEva (1–10 Hz)
+  - name: filter_butterworth_4th_1hz_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_1hz_humaneva.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # Butterworth Filters for HumanSC3D (orders 1,5,10,15,18, cutoff 5,10,15,18 Hz)
+  - name: filter_butterworth_4th_2hz_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_2hz_humaneva.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # 1st order
-  - name: filter_butterworth_1st_5hz_humansc3d
+  - name: filter_butterworth_4th_3hz_humaneva
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_1st_5hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_4th_3hz_humaneva.yaml"
       - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_1st_10hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_1st_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_1st_15hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_1st_15hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_1st_18hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_1st_18hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
+  - name: filter_butterworth_4th_4hz_humaneva
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_4hz_humaneva.yaml"
+      - command: evaluation
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
 
-  # 5th order
-  - name: filter_butterworth_5th_5hz_humansc3d
+  - name: filter_butterworth_4th_5hz_humaneva
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_5hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_4th_5hz_humaneva.yaml"
       - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_5th_10hz_humansc3d
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_4th_6hz_humaneva
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_10hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_4th_6hz_humaneva.yaml"
       - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_5th_15hz_humansc3d
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_4th_7hz_humaneva
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_15hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_4th_7hz_humaneva.yaml"
       - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_5th_18hz_humansc3d
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_4th_8hz_humaneva
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_5th_18hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_4th_8hz_humaneva.yaml"
       - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  # 7th order
-  - name: filter_butterworth_7th_5hz_humansc3d
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_4th_9hz_humaneva
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_7th_5hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_4th_9hz_humaneva.yaml"
       - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_7th_10hz_humansc3d
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+  - name: filter_butterworth_4th_10hz_humaneva
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_7th_10hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_4th_10hz_humaneva.yaml"
       - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_7th_15hz_humansc3d
+        config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+
+    # 4th order Butterworth – HumanSC3D (1–10 Hz)
+  - name: filter_butterworth_4th_1hz
     steps:
       - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_7th_15hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_7th_18hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_7th_18hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  # 10th order
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_10th_5hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_10th_10hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_10th_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_10th_15hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_10th_15hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_10th_18hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_10th_18hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  # 15th order
-  - name: filter_butterworth_15th_5hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_15th_5hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_15th_10hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_15th_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_15th_15hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_15th_15hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_15th_18hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_15th_18hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  # 18th order
-  - name: filter_butterworth_18th_5hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_5hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_18th_10hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_10hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_18th_15hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_15hz.yaml"
-      - command: evaluation
-        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
-  - name: filter_butterworth_18th_18hz_humansc3d
-    steps:
-      - command: filter
-        config_file: "config_yamls/filter/filter_butterworth_18th_18hz.yaml"
+        config_file: "config_yamls/filter/filter_butterworth_4th_1hz.yaml"
       - command: evaluation
         config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
 
-  
+  - name: filter_butterworth_4th_2hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_2hz.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
 
-  # Extended Kalman Filter - Example configuration
-  # - name: filter_ekf_example
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_extended_kalman_walking_smooth_high_acc.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: filter_butterworth_4th_3hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_3hz.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
 
-  # Unscented Kalman Filter - Example configuration
-  # - name: filter_ukf_example
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_unscented_kalman_walking_smooth_high_acc.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: filter_butterworth_4th_4hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_4hz.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
 
-  # Standard Kalman Filter - Example configuration
-  # - name: filter_kalman_example
-  #   steps:
-  #     - command: filter
-  #       config_file: "config_yamls/filter/filter_kalman_smooth_walking_high_acc_mid.yaml"
-  #     - command: evaluation
-  #       config_file: "dataset_files/HumanEva/humaneva_config.yaml"
+  - name: filter_butterworth_4th_5hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_5hz.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
 
-  
+  - name: filter_butterworth_4th_6hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_6hz.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
+
+  - name: filter_butterworth_4th_7hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_7hz.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
+
+  - name: filter_butterworth_4th_8hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_8hz.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
+
+  - name: filter_butterworth_4th_9hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_9hz.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"
+
+  - name: filter_butterworth_4th_10hz
+    steps:
+      - command: filter
+        config_file: "config_yamls/filter/filter_butterworth_4th_10hz.yaml"
+      - command: evaluation
+        config_file: "/storage/Projects/Gaitly/bsehgal/Lower-Body-Pose-Estimation-for-Human-Motion-Analysis/dataset_files/HumanSC3D/humansc3d_config_nojoints.yaml"

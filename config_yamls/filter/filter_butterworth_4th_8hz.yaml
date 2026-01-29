@@ -1,0 +1,45 @@
+paths:
+  dataset: HumanSC3D
+  ground_truth_file: C:/Users/BhavyaSehgal/Downloads/humansc3d/humansc3d_train/train
+
+noise:
+  apply_poisson_noise: true
+  apply_gaussian_noise: true
+  apply_motion_blur: true
+  apply_brightness_reduction: true
+  brightness_factor: 30
+  poisson_scale: 1.0
+  gaussian_std: 2.0
+  motion_blur_kernel_size: 5
+  target_resolution: null
+
+filter:
+  name: "butterworth"
+  params:
+    order: 4
+    cutoff: 8.0
+    fs: 60.0
+  outlier_removal:
+      enable: False
+  input_dir: "/storageh100/Projects/Gaitly/bsehgal/pipeline_results/HumanSC3D/detect_RTMW/detect/"
+
+evaluation:
+  metrics:
+    - name: overall_pck
+      params:
+        threshold: 0.01
+
+dataset:
+ joint_enum_module: utils.joint_enum.GTJointsHumanEVa
+ keypoint_format: utils.joint_enum.PredJointsDeepLabCut
+ sync_data:
+    data:
+      S1:
+        Walking 1: [667, 667, 667]
+        Jog 1: [49, 50, 51]
+      S2:
+        Walking 1: [547, 547, 546]
+        Jog 1: [493, 491, 502]
+      S3:
+        Walking 1: [524, 524, 524]
+        Jog 1: [464, 462, 462]
